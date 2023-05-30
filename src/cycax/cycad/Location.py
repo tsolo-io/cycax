@@ -40,10 +40,10 @@ class Location:
         y = self.move_y(self.y + y)
         z = self.move_z(self.z + z)
 
-    def swapXY(self, rot: float, max: float):
+    def swapXY(self, rot: float, max_y: float):
         """This method will rotate while holding the top where it currenly is."""
         while rot != 0:
-            self.y, self.x = self.x, max - self.y
+            self.y, self.x = self.x, max_y - self.y
             rot = rot - 1
         if self.side == LEFT:
             self.side = BACK
@@ -54,10 +54,10 @@ class Location:
         elif self.side == BACK:
             self.side = RIGHT
 
-    def swapXZ(self, rot: float, max: float):
+    def swapXZ(self, rot: float, max_x: float):
         """This method will rotate while holding the front where it currenly is."""
         while rot != 0:
-            self.x, self.z = self.z, max - self.x
+            self.x, self.z = self.z, max_x - self.x
             rot = rot - 1
         if self.side == LEFT:
             self.side = BOTTOM
@@ -68,10 +68,10 @@ class Location:
         elif self.side == BOTTOM:
             self.side = RIGHT
 
-    def swapYZ(self, rot: float, max: float):
+    def swapYZ(self, rot: float, max_z: float):
         """This method will rotate while holding the left where it currenly is."""
         while rot != 0:
-            self.y, self.z = max - self.z, self.y
+            self.y, self.z = max_z - self.z, self.y
             rot = rot - 1
         if self.side == TOP:
             self.side = BACK
