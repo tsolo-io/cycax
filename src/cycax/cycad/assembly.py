@@ -19,8 +19,8 @@ class Assembly:
         """Save the assembly to a JSON file."""
         logging.info(f"Saving assembly {self.name}")
         try:
-            msg = "Not implemented"
-            raise NotImplementedError("Assembly Save")
+            msg = "Assembly Save"
+            raise NotImplementedError(msg)
         except Exception as error:
             logging.exception(error)
 
@@ -31,6 +31,7 @@ class Assembly:
         driver = driver.lower().strip()
         logging.info(f"Rendering assembly {self.name} using driver={driver}")
         try:
-            raise NotImplementedError("Assembly Render")
+            msg = "Assembly Render"
+            raise NotImplementedError(msg)
         except Exception as error:
             logging.exception(error)
