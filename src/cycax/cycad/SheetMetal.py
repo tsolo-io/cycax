@@ -1,12 +1,10 @@
-from Part import Part
+from CycadPart import CycadPart
 
 
-class Sheet_Metal(Part):
+class SheetMetal(CycadPart):
     """Class stores the data of the Bottom of a box."""
 
-    def __init__(
-        self, part_no: str, x_size: float, y_size: float, z_size: float, colour="grey"
-    ):
+    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour="grey"):
         super().__init__(
             x=0,
             y=0,

@@ -1,12 +1,11 @@
-from Location import Location
-from Holes import Holes
-from Rectange_Cut_Out import Rectangle_Cut_Out
+import Features
+from Features import Holes, RectangleCutOut
 
 
 class Slot:
     hole_left: Holes
     hole_right: Holes
-    rectangle: Rectangle_Cut_Out
+    rectangle: RectangleCutOut
     depth: float = 2
 
     def __init__(
@@ -23,20 +22,12 @@ class Slot:
         """This method will be used to define a slot with all ist parameters. To get a verticle slot enter the details in exactly the same manner to the horizontle slot and the specify that Horrizontal to False."""
         if Horizontal:
             self.hole_left = Holes(side=side, x=x, y=y, z=z, big=y_size, depth=z_size)
-            self.hole_right = Holes(
-                side=side, x=x + x_size, y=y, z=z, big=y_size, depth=z_size
-            )
-            self.rectangle = Rectangle_Cut_Out(
-                side=side, width=x_size, x=x, y=y, z=z, height=y_size, depth=z_size
-            )
+            self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, big=y_size, depth=z_size)
+            self.rectangle = RectangleCutOut(side=side, width=x_size, x=x, y=y, z=z, height=y_size, depth=z_size)
         else:
             self.hole_left = Holes(side=side, x=x, y=y, z=z, big=y_size, depth=z_size)
-            self.hole_right = Holes(
-                side=side, x=x, y=y + y_size, z=z, big=y_size, depth=z_size
-            )
-            self.rectangle = Rectangle_Cut_Out(
-                side=side, width=y_size, x=x, y=y, z=z, height=x_size, depth=z_size
-            )
+            self.hole_right = Holes(side=side, x=x, y=y + y_size, z=z, big=y_size, depth=z_size)
+            self.rectangle = RectangleCutOut(side=side, width=y_size, x=x, y=y, z=z, height=x_size, depth=z_size)
 
     def export(self):
         """This will be used to create a dict of the slot."""
@@ -48,6 +39,6 @@ class Slot:
 
     def move(self, x: float = 0, y: float = 0, z: float = 0):
         """This class will move a hole given a new location for it The location refers to its top left hand corner."""
-        self.hole_left.at(x, y, z)
-        self.hole_right.at(x, y, z)
-        self.rectangle.at(x, y, z)
+        self.hole_left.move(x, y, z)
+        self.hole_right.move(x, y, z)
+        self.rectangle.move(x, y, z)
