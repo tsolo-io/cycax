@@ -1,4 +1,4 @@
-from Location import Location
+from cycax.cycad.location import Location
 
 
 class Holes(Location):
@@ -39,7 +39,8 @@ class RectangleCutOut(Location):
         depth: float = 2,
         center: bool = False,
     ):
-        """This method will initialize a hole that is not round. The location refers to its top left hand corner."""
+        """This method will initialize a hole that is not round.
+        The location refers to its top left hand corner."""
         Location.__init__(self, x, y, z, side)
         self.x_size = width
         self.y_size = height
@@ -47,8 +48,8 @@ class RectangleCutOut(Location):
         self.center = center
 
     def export(self):
-        """This method converts a RectangleCutOut to a json dictionary"""
-        if self.side == "FRONT" or self.side == "LEFT" or self.side == "BOTTOM":
+        """This method converts a RectangleCutOut to a JSON object"""
+        if self.side in ["FRONT", "LEFT", "BOTTOM"]:
             self.side = None
         dict_cube = {
             "name": "cube",
@@ -57,9 +58,10 @@ class RectangleCutOut(Location):
             "x": str(self.x),
             "y": str(self.y),
             "z": str(self.z),
-            "X_width": str(self.x_size),
-            "Y_length": str(self.y_size),
-            "Z_depth": str(self.z_size),
+            # TODO: Discuss. Typically length is x, width is y, and height/depth is z.
+            "x_width": str(self.x_size),
+            "y_length": str(self.y_size),
+            "z_depth": str(self.z_size),
             "center": self.center,
         }
         return dict_cube
@@ -80,29 +82,22 @@ class RectangleCutOut(Location):
         Location.swap_yz(self)
 
 
-from Location import Location
-
-
 class NutCutOut(Location):
     """Class for holding the data for nuts."""
 
     nuts = {
         "type": 3,
-        "Diameter": 6.01,
-        "Height": 2.4,
-        "type": 6,
-        "Diameter": 11.05,
-        "Height": 5.2,
+        "diameter": 6.01,
+        "height": 2.4,
     }
 
     def __init__(self, side: str, x: float, y: float, z: float, type: float, depth: float):
-        """THis method will create a nut."""
         Location.__init__(self, x, y, z, side)
         self.type = type
         self.depth = depth
 
     def export(self):
-        """This method will create a dictionary of the nut."""
+        """Create a dictionary with the definition of a nut."""
         dict_nut = {
             "name": "nut",
             "type": "cut",

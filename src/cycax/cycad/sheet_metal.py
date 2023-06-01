@@ -1,10 +1,12 @@
-from CycadPart import CycadPart
+from typing import Dict
+
+from cycax.cycad.cycad_part import CycadPart
 
 
 class SheetMetal(CycadPart):
     """Class stores the data of the Bottom of a box."""
 
-    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour="grey"):
+    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour: str = "grey"):
         super().__init__(
             x=0,
             y=0,
@@ -17,7 +19,8 @@ class SheetMetal(CycadPart):
         )
         self.colour = colour
 
-    def export(self):
+    def export(self) -> dict:
+        """Create a definition of the part."""
         dict_metal = {
             "name": "cube",
             "type": "add",
@@ -25,12 +28,12 @@ class SheetMetal(CycadPart):
             "x": self.x,
             "y": self.y,
             "z": self.z,
-            "X_width": self.x_size,
-            "Y_length": self.y_size,
-            "Z_depth": self.z_size,
+            # TODO: Consider x_size rather than x_width. etc.
+            "x_width": self.x_size,
+            "y_length": self.y_size,
+            "z_depth": self.z_size,
             "center": False,
         }
-        """This will eport the sheet_metal creating a dict of it."""
 
         dict_part = []
 

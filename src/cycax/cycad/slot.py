@@ -1,5 +1,4 @@
-import Features
-from Features import Holes, RectangleCutOut
+from cycax.cycad.features import Holes, RectangleCutOut
 
 
 class Slot:
@@ -17,10 +16,12 @@ class Slot:
         x: float,
         y: float,
         z: float,
-        Horizontal: bool = True,
+        horizontal: bool = True,
     ):
-        """This method will be used to define a slot with all ist parameters. To get a verticle slot enter the details in exactly the same manner to the horizontle slot and the specify that Horrizontal to False."""
-        if Horizontal:
+        """This method will be used to define a slot with all ist parameters.
+        To get a verticle slot enter the details in exactly the same manner to
+        the horizontle slot and the specify that Horrizontal to False."""
+        if horizontal:
             self.hole_left = Holes(side=side, x=x, y=y, z=z, big=y_size, depth=z_size)
             self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, big=y_size, depth=z_size)
             self.rectangle = RectangleCutOut(side=side, width=x_size, x=x, y=y, z=z, height=y_size, depth=z_size)
@@ -38,7 +39,8 @@ class Slot:
         return dict_hole_left, dict_hole_right, dict_rectangle
 
     def move(self, x: float = 0, y: float = 0, z: float = 0):
-        """This class will move a hole given a new location for it The location refers to its top left hand corner."""
+        """Move to a new location,
+        the location refers to its top left hand corner."""
         self.hole_left.move(x, y, z)
         self.hole_right.move(x, y, z)
         self.rectangle.move(x, y, z)
