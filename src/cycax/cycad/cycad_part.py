@@ -1,10 +1,11 @@
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
-from cycax.cycad.location import TOP, Location
+from cycax.cycad.location import TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK, Location
 from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
     """This will be the class that specifies certain details with regards to the CycadPart."""
+
     def __init__(
         self,
         x: float,
@@ -16,7 +17,6 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
     ):
-        
         """
         This method will initialize a CycadPart at the desired location.
 
@@ -27,9 +27,9 @@ class CycadPart(Location):
             x_size : The size of x.
             y_size : The size of y.
             z_size : The siez of z.
-            part_no : The unique name that will be given to a type of parts. 
-        
-        """  
+            part_no : The unique name that will be given to a type of parts.
+
+        """
         super().__init__(x, y, z, side)
         self.part_no = part_no
         self.x_size = x_size
@@ -90,7 +90,7 @@ class CycadPart(Location):
         inner=True,
     ):
         """This method will insert a slot into a CycadPart.
-        
+
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
@@ -120,9 +120,9 @@ class CycadPart(Location):
             self.features.append(temp_slot)
             self.move_holes.append(temp_slot)
 
-    def make_nut(self, side: str, x: float, y: float, type: float, depth: float, sink=0):
+    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink=0):
         """This method will insert a nut into a CycadPart.
-        
+
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
@@ -134,7 +134,7 @@ class CycadPart(Location):
 
         location_output = self.side_location_calculator(side=side, x=x, y=y, sink=sink)
         temp_nut = NutCutOut(
-            side=side, x=location_output[0], y=location_output[1], z=location_output[2], type=type, depth=depth
+            side=side, x=location_output[0], y=location_output[1], z=location_output[2], nut_type=nut_type, depth=depth
         )
         self.features.append(temp_nut)
 
@@ -150,7 +150,7 @@ class CycadPart(Location):
         center=False,
     ):
         """This method will cut a block out of the CycadPart.
-        
+
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
@@ -168,7 +168,7 @@ class CycadPart(Location):
             x=location_output[0],
             y=location_output[1],
             z=location_output[2],
-            x_size=x_size, 
+            x_size=x_size,
             y_size=y_size,
             z_size=z_size,
             center=center,
@@ -189,13 +189,13 @@ class CycadPart(Location):
 
     def move(self, x=0, y=0, z=0):
         """This method will be used for moving the part.
-        
+
         Args:
             x: the amount the object should be moved along the x axis.
             y: the amount the object should be moved along the y axis.
             z: the amound the object should be moved along the z axis
-            
-            
+
+
         """
 
         x_size = self.x_max - self.x_min
@@ -219,11 +219,11 @@ class CycadPart(Location):
 
     def insert_hole(self, hole):
         """This method will be used for inserting the hole into an object.
-        
+
         Args:
             hole: hole to be inserted.
 
-            
+
         """
 
         if self.moves[0] != 0:
@@ -244,44 +244,43 @@ class CycadPart(Location):
         self.move_holes.append(hole)
 
     def side_location_calculator(self, side: str, x: float, y: float, sink=0):
-        
         """
         Calculate given the side of and object and the relative x and y location on that side where the definite location is.
             Args:
                 x: x location
                 y: y location
                 side: side of object
-            
-            Raises: 
+
+            Raises:
                 ValueError: if the side is not one of the available and expected sides.
-                
+
             Returns:
                 tupel: tupel containing floats of the x, y and z values.
 
-            
+
         """
 
-        if side == super.TOP:
+        if side == TOP:
             temp_x = x
             temp_y = y
             temp_z = self.z_max - sink  # Where is self.z_max defined??
-        elif side == super.BOTTOM:
+        elif side == BOTTOM:
             temp_x = x
             temp_y = y
             temp_z = self.z_min + sink
-        elif side == super.LEFT:
+        elif side == LEFT:
             temp_x = self.x_min + sink
             temp_y = x
             temp_z = y
-        elif side == super.RIGHT:
+        elif side == RIGHT:
             temp_x = self.x_max - sink
             temp_y = x
             temp_z = y
-        elif side == super.FRONT:
+        elif side == FRONT:
             temp_x = x
             temp_y = self.y_min + sink
             temp_z = y
-        elif side == super.BACK:
+        elif side == BACK:
             temp_x = x
             temp_y = self.y_max - sink
             temp_z = y

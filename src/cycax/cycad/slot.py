@@ -6,7 +6,7 @@ class Slot:
 
     To get a verticle slot enter the details in exactly the same manner to
     the horizontle slot and then specify that horrizontal to False.
-    
+
     """
 
     hole_left: Holes
@@ -25,7 +25,6 @@ class Slot:
         z: float,
         horizontal: bool = True,
     ):
-        
         """
         This method will initialize a slot in the desired location.
 
@@ -37,11 +36,11 @@ class Slot:
             x_size : The location of x_size of slot.
             y_size : The location of y_size of slot.
             z_size : The location of z_size of slot.
-            horizontat: This can be overridden it you need a verticle slot. 
-        
-        
-        """ 
-        
+            horizontat: This can be overridden it you need a verticle slot.
+
+
+        """
+
         if horizontal:
             self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
             self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, diameter=y_size, depth=z_size)
@@ -54,10 +53,10 @@ class Slot:
     def export(self):
         """
         This will create a dictionary of the slot that can be used for the json.
-        
+
         Returns:
             tpl: this will return a tupple of dictionaries. This needs to be changed to releasing dictionarties.
-            
+
         """
         dict_hole_left = self.hole_left.export()
         dict_hole_right = self.hole_right.export()
@@ -73,7 +72,7 @@ class Slot:
             y: move this y this many units along the y axis.
             z: move this z this many units along the z axis.
         """
-            
+
         self.hole_left.move(x, y, z)
         self.hole_right.move(x, y, z)
         self.rectangle.move(x, y, z)

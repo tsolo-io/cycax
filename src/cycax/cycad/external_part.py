@@ -12,11 +12,11 @@ class ExternalPart(CycadPart):
         These external STLs can be editted in similar ways to ones created in the program.
 
         Args:
-            part_no : The unique name that will be given to a type of parts. 
+            part_no : The unique name that will be given to a type of parts.
             colour: This will specify the colour of the object and can be overwritten from purple.
-        
+
         """
-        super().__init__(0, 0, 0, None, part_no, 0, 0, 0) #initialized to location (0,0,0)
+        super().__init__(0, 0, 0, None, part_no, 0, 0, 0)  # initialized to location (0,0,0)
         self.calculate()
         self.colour = colour
 

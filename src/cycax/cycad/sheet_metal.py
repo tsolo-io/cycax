@@ -12,7 +12,7 @@ class SheetMetal(CycadPart):
             x_size : The size of x.
             y_size : The size of y.
             z_size : The siez of z.
-            part_no : The unique name that will be given to a type of parts. 
+            part_no : The unique name that will be given to a type of parts.
             colour: This will specify the colour of the object and can be overwritten from grey.
         """
         super().__init__(
@@ -24,7 +24,7 @@ class SheetMetal(CycadPart):
             x_size=x_size,
             y_size=y_size,
             z_size=z_size,
-        ) #initialized to location (0,0,0)
+        )  # initialized to location (0,0,0)
         self.colour = colour
 
     def export(self):
