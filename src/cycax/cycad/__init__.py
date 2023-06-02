@@ -1,2 +1,1 @@
-from .assembly import Assembly
-from .parts import Part3dPrint, PartSheet
+from cycax.cycad.cycad_part import CycadPart  # noqa: F401
