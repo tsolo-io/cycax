@@ -7,15 +7,16 @@ from cycax.cycad.cycad_part import CycadPart
 
 
 class ExternalPart(CycadPart):
+    """This class allows for external parts to be added into the object.
+    These external STLs can be editted in similar ways to ones created in the program.
+
+    Args:
+        part_no : The unique name that will be given to a type of parts.
+        colour: This will specify the colour of the object and can be overwritten from purple.
+
+    """
     def __init__(self, part_no: str, colour="purple"):
-        """This class allows for external parts to be added into the object.
-        These external STLs can be editted in similar ways to ones created in the program.
 
-        Args:
-            part_no : The unique name that will be given to a type of parts.
-            colour: This will specify the colour of the object and can be overwritten from purple.
-
-        """
         super().__init__(0, 0, 0, None, part_no, 0, 0, 0)  # initialized to location (0,0,0)
         self.calculate()
         self.colour = colour
@@ -50,7 +51,7 @@ class ExternalPart(CycadPart):
         self.z_max = self.z_size
         self.z_min = 0
 
-    def export(self):
+    def export(self)-> dict:
         """
         This method will take the values stored within the part and export it to a dict so that it can be decoded.
 

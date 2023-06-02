@@ -6,6 +6,18 @@ class Slot:
 
     To get a verticle slot enter the details in exactly the same manner to
     the horizontle slot and then specify that horrizontal to False.
+    
+    This class will initialize a slot in the desired location.
+
+    Args:
+        x : The location of x along the x axis.
+        y : The location of y along the y axis.
+        z : The location of z along the z axis.
+        side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        x_size : The location of x_size of slot.
+        y_size : The location of y_size of slot.
+        z_size : The location of z_size of slot.
+        horizontal: This can be overridden it you need a verticle slot.
 
     """
 
@@ -25,21 +37,7 @@ class Slot:
         z: float,
         horizontal: bool = True,
     ):
-        """
-        This method will initialize a slot in the desired location.
 
-        Args:
-            x : The location of x along the x axis.
-            y : The location of y along the y axis.
-            z : The location of z along the z axis.
-            side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-            x_size : The location of x_size of slot.
-            y_size : The location of y_size of slot.
-            z_size : The location of z_size of slot.
-            horizontat: This can be overridden it you need a verticle slot.
-
-
-        """
 
         if horizontal:
             self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
@@ -50,7 +48,7 @@ class Slot:
             self.hole_right = Holes(side=side, x=x, y=y + y_size, z=z, diameter=y_size, depth=z_size)
             self.rectangle = RectangleCutOut(side=side, width=y_size, x=x, y=y, z=z, height=x_size, depth=z_size)
 
-    def export(self):
+    def export(self)-> tuple:
         """
         This will create a dictionary of the slot that can be used for the json.
 

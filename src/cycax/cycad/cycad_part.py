@@ -4,7 +4,19 @@ from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
-    """This will be the class that specifies certain details with regards to the CycadPart."""
+    """This will be the class that specifies certain details with regards to the CycadPart.
+    This class will initialize a CycadPart at the desired location.
+
+    Args:
+        x : The location of x along the x axis.
+        y : The location of y along the y axis.
+        z : The location of z along the z axis.
+        x_size : The size of x.
+        y_size : The size of y.
+        z_size : The siez of z.
+        part_no : The unique name that will be given to a type of parts.
+
+    """
 
     def __init__(
         self,
@@ -17,19 +29,7 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
     ):
-        """
-        This method will initialize a CycadPart at the desired location.
 
-        Args:
-            x : The location of x along the x axis.
-            y : The location of y along the y axis.
-            z : The location of z along the z axis.
-            x_size : The size of x.
-            y_size : The size of y.
-            z_size : The siez of z.
-            part_no : The unique name that will be given to a type of parts.
-
-        """
         super().__init__(x, y, z, side)
         self.part_no = part_no
         self.x_size = x_size
@@ -111,7 +111,7 @@ class CycadPart(Location):
             x=location_output[0],
             y=location_output[1],
             z=location_output[2],
-            Horizontal=horizontal,
+            horizontal=horizontal,
         )
         # This will add it to the relevnt array
         if inner:
@@ -120,14 +120,14 @@ class CycadPart(Location):
             self.features.append(temp_slot)
             self.move_holes.append(temp_slot)
 
-    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink=0):
+    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float =0.0):
         """This method will insert a nut into a CycadPart.
 
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
             side: The side of the part the hole will be made in.
-            type: This is the type of nut specified as a float. This method will be updated in version 2.
+            nut_type: This is the type of nut specified as a float. This method will be updated in version 2.
             depth: This is how deep the nut cut out must be.
             sink: This can be specified if you would like an embedded nut. One that is not a vissible cut from the outside but rather deeper in the 3D print.
         """
@@ -146,7 +146,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
-        sink=0,
+        sink: float =0.0,
         center=False,
     ):
         """This method will cut a block out of the CycadPart.
@@ -243,19 +243,20 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
 
-    def side_location_calculator(self, side: str, x: float, y: float, sink=0):
+    def side_location_calculator(self, side: str, x: float, y: float, sink: float =0.0)-> tuple:
+        
         """
         Calculate given the side of and object and the relative x and y location on that side where the definite location is.
-            Args:
-                x: x location
-                y: y location
-                side: side of object
+        Args:
+            x: x location
+            y: y location
+            side: side of object
 
-            Raises:
-                ValueError: if the side is not one of the available and expected sides.
+        Raises:
+            ValueError: if the side is not one of the available and expected sides.
 
-            Returns:
-                tupel: tupel containing floats of the x, y and z values.
+        Returns:
+            tupel: tupel containing floats of the x, y and z values.
 
 
         """

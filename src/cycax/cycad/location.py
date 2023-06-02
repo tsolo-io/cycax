@@ -8,30 +8,24 @@ BACK = "BACK"
 
 
 class Location:
-    """This class will define the loation of an object in 3D space."""
+    """This class will define the loation of an object in 3D space.
+    This class will initialize a location along the x, y, z axis.
+        
+    Args:
+        x : The location of x along the x axis.
+        y : The location of y along the y axis.
+        z : The location of z along the z axis.
+        side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+    """
 
     def __init__(self, x: float, y: float, z: float, side: str):
-        """
-        This method will initialize a location along the x, y, z axis.
 
-        Args:
-            x : The location of x along the x axis.
-            y : The location of y along the y axis.
-            z : The location of z along the z axis.
-            side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-        """
         self.x = x
         self.y = y
         self.z = z
         self.side = side
 
-    def __repr__(self):
-        """
-        Returns a location in a string format to be used for debugging.
-
-        Returns:
-            str: this method will return a string which will specify the current location of an object.
-        """
+    def __repr__(self)->str:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 
     def move(self, x: float = 0, y: float = 0, z: float = 0):
