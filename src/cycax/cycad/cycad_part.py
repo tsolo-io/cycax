@@ -213,7 +213,7 @@ class CycadPart(Location):
             temp_y = self.y_max - sink
             temp_z = y
         else:
-            msg = f"Side {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+            msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
             raise ValueError(msg)
 
         return temp_x, temp_y, temp_z
