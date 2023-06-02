@@ -1,7 +1,5 @@
+from Features import Holes, NutCutOut, RectangleCutOut
 from Location import Location
-from Features import Holes
-from Features import RectangleCutOut
-from Features import NutCutOut
 from Slot import Slot
 
 

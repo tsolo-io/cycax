@@ -1,10 +1,9 @@
-import stl
-from stl import mesh
-
-
 import os
 import sys
+
+import stl
 from CycadPart import CycadPart
+from stl import mesh
 
 
 class ExternalPart(CycadPart):
@@ -18,7 +17,7 @@ class ExternalPart(CycadPart):
         """This function will be used to find the bounding box of the stl that is being imported. It makes use of the python stl function."""
         STLname = "./parts_stl/" + self.part_no + ".stl"
         if not os.path.exists(STLname):
-            sys.exit('ERROR: file %s was not found!' % STLname)
+            sys.exit("ERROR: file %s was not found!" % STLname)
         stl_object = mesh.Mesh.from_file(STLname)
         for point in stl_object.points:
             self.x_max = max(point[stl.Dimension.X], self.x_max)
