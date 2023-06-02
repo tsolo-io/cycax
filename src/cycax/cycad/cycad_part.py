@@ -1,8 +1,23 @@
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
-from cycax.cycad.location import TOP, Location
+from cycax.cycad.location import TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK, Location
 from cycax.cycad.slot import Slot
 
+
 class CycadPart(Location):
+    """This will be the class that specifies certain details with regards to the CycadPart.
+    This class will initialize a CycadPart at the desired location.
+
+    Args:
+        x : The location of x along the x axis.
+        y : The location of y along the y axis.
+        z : The location of z along the z axis.
+        x_size : The size of x.
+        y_size : The size of y.
+        z_size : The siez of z.
+        part_no : The unique name that will be given to a type of parts.
+
+    """
+
     def __init__(
         self,
         x: float,
@@ -14,6 +29,7 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
     ):
+
         super().__init__(x, y, z, side)
         self.part_no = part_no
         self.x_size = x_size
@@ -32,9 +48,6 @@ class CycadPart(Location):
         self.moves = [0, 0, 0]
         self.rotate = [0, 0, 0]
         self.final_location = False
-        
-
-        
 
     def make_hole(
         self,
@@ -55,8 +68,10 @@ class CycadPart(Location):
             depth: The depth of the hole. If Null the hole is through the part.
             inner: If this is an internal or an external hole.
         """
-        location_output=self.side_location_calculator(side=side, x=x, y=y)
-        temp_hole = Holes(side=side, x=location_output[0], y=location_output[1], z=location_output[2], big=diameter, depth=depth)
+        location_output = self.side_location_calculator(side=side, x=x, y=y)
+        temp_hole = Holes(
+            side=side, x=location_output[0], y=location_output[1], z=location_output[2], diameter=diameter, depth=depth
+        )
         if inner:
             self.features.append(temp_hole)
         else:
@@ -74,21 +89,30 @@ class CycadPart(Location):
         horizontal: bool = True,
         inner=True,
     ):
-        """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
-        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max) it would be more affective as the guessing wouldn't need to occur. These if statements wouldn't and is would work even when not a square.
-        It would however require more lines of code to be written on the user end."""
-        
-        location_output=self.side_location_calculator(side=side, x=x, y=y)
+        """This method will insert a slot into a CycadPart.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            side: The side of the part the hole will be made in.
+            x_size : The size of x of slot.
+            y_size : The size of y of slot.
+            z_size : The siez of z of slot.
+            horizontal : This can be overridden if it is preferred to have a verticle slot.
+            inner: If this is an internal or an external hole.
+        """
+
+        location_output = self.side_location_calculator(side=side, x=x, y=y)
         temp_slot = Slot(
-                side=side,
-                x_size=x_size,
-                y_size=y_size,
-                z_size=z_size,
-                x=location_output[0],
-                y=location_output[1],
-                z=location_output[2],
-                Horizontal=horizontal,
-            )
+            side=side,
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            x=location_output[0],
+            y=location_output[1],
+            z=location_output[2],
+            horizontal=horizontal,
+        )
         # This will add it to the relevnt array
         if inner:
             self.features.append(temp_slot)
@@ -96,13 +120,22 @@ class CycadPart(Location):
             self.features.append(temp_slot)
             self.move_holes.append(temp_slot)
 
-    def make_nut(
-        self, side: str, x: float, y: float, type: float, depth: float, sink: float
-    ):
-        """This method will be used for making a nut cut out."""
+    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float =0.0):
+        """This method will insert a nut into a CycadPart.
 
-        location_output=self.side_location_calculator(side=side, x=x, y=y, sink=sink)
-        temp_nut=NutCutOut(side=side, x=location_output[0], y=location_output[1], z=location_output[2], type=type, depth=depth)
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            side: The side of the part the hole will be made in.
+            nut_type: This is the type of nut specified as a float. This method will be updated in version 2.
+            depth: This is how deep the nut cut out must be.
+            sink: This can be specified if you would like an embedded nut. One that is not a vissible cut from the outside but rather deeper in the 3D print.
+        """
+
+        location_output = self.side_location_calculator(side=side, x=x, y=y, sink=sink)
+        temp_nut = NutCutOut(
+            side=side, x=location_output[0], y=location_output[1], z=location_output[2], nut_type=nut_type, depth=depth
+        )
         self.features.append(temp_nut)
 
     def make_rectangle(
@@ -110,16 +143,36 @@ class CycadPart(Location):
         side: str,
         x: float,
         y: float,
-        height: float,
-        width: float,
-        depth: float,
-        sink=0,
+        x_size: float,
+        y_size: float,
+        z_size: float,
+        sink: float =0.0,
         center=False,
     ):
-        """This will cut a block out of the object."""
+        """This method will cut a block out of the CycadPart.
 
-        location_output=self.side_location_calculator(side=side, x=x, y=y, sink=sink)
-        temp_rect=RectangleCutOut(side=side, width=width, x = location_output[0], y = location_output[1], z=location_output[2], height=height, depth=depth, center=center)
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            side: The side of the part the hole will be made in.
+            x_size : The size of x of rectangle.
+            y_size : The size of y of rectangle.
+            z_size : The size of z of rectangle.
+            sink : This can be changed if you would like an embedded cut out.
+            center : This can be overridden if you would like to have the location of the cut out specified from its center.
+        """
+
+        location_output = self.side_location_calculator(side=side, x=x, y=y, sink=sink)
+        temp_rect = RectangleCutOut(
+            side=side,
+            x=location_output[0],
+            y=location_output[1],
+            z=location_output[2],
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            center=center,
+        )
         self.features.append(temp_rect)
 
     def make_bounding_box(self):
@@ -135,7 +188,15 @@ class CycadPart(Location):
         }
 
     def move(self, x=0, y=0, z=0):
-        """This method will be used for moving the part."""
+        """This method will be used for moving the part.
+
+        Args:
+            x: the amount the object should be moved along the x axis.
+            y: the amount the object should be moved along the y axis.
+            z: the amound the object should be moved along the z axis
+
+
+        """
 
         x_size = self.x_max - self.x_min
         y_size = self.y_max - self.y_min
@@ -157,7 +218,13 @@ class CycadPart(Location):
         self.make_bounding_box()
 
     def insert_hole(self, hole):
-        """This method will be used for inserting the hole into an object."""
+        """This method will be used for inserting the hole into an object.
+
+        Args:
+            hole: hole to be inserted.
+
+
+        """
 
         if self.moves[0] != 0:
             hole.move(x=-self.moves[0])
@@ -175,5 +242,51 @@ class CycadPart(Location):
 
         self.features.append(hole)
         self.move_holes.append(hole)
-        
 
+    def side_location_calculator(self, side: str, x: float, y: float, sink: float =0.0)-> tuple:
+        
+        """
+        Calculate given the side of and object and the relative x and y location on that side where the definite location is.
+        Args:
+            x: x location
+            y: y location
+            side: side of object
+
+        Raises:
+            ValueError: if the side is not one of the available and expected sides.
+
+        Returns:
+            tupel: tupel containing floats of the x, y and z values.
+
+
+        """
+
+        if side == TOP:
+            temp_x = x
+            temp_y = y
+            temp_z = self.z_max - sink  # Where is self.z_max defined??
+        elif side == BOTTOM:
+            temp_x = x
+            temp_y = y
+            temp_z = self.z_min + sink
+        elif side == LEFT:
+            temp_x = self.x_min + sink
+            temp_y = x
+            temp_z = y
+        elif side == RIGHT:
+            temp_x = self.x_max - sink
+            temp_y = x
+            temp_z = y
+        elif side == FRONT:
+            temp_x = x
+            temp_y = self.y_min + sink
+            temp_z = y
+        elif side == BACK:
+            temp_x = x
+            temp_y = self.y_max - sink
+            temp_z = y
+        else:
+            msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+            raise ValueError(msg)
+
+        return temp_x, temp_y, temp_z

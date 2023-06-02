@@ -1,3 +1,4 @@
+# global location variables
 LEFT = "LEFT"
 RIGHT = "RIGHT"
 TOP = "TOP"
@@ -7,20 +8,24 @@ BACK = "BACK"
 
 
 class Location:
-    """This class will define the loation of an object in 3D space."""
+    """This class will define the loation of an object in 3D space.
+    This class will initialize a location along the x, y, z axis.
+        
+    Args:
+        x : The location of x along the x axis.
+        y : The location of y along the y axis.
+        z : The location of z along the z axis.
+        side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+    """
 
     def __init__(self, x: float, y: float, z: float, side: str):
+
         self.x = x
         self.y = y
         self.z = z
         self.side = side
 
-    def __repr__(self):
-        return f"x={self.x} y={self.y} z={self.z} side={self.side}"
-
-    def get_location(self):
-        """Returns a location in a string format to be used for debugging."""
-        # TODO: Remove. Rather use __repr__ or __str__ methods.
+    def __repr__(self)->str:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 
     def move(self, x: float = 0, y: float = 0, z: float = 0):
@@ -36,82 +41,58 @@ class Location:
         self.z = self.z + z
 
     def at(self, x: float = 0, y: float = 0, z: float = 0):
-        """This class will move a location to the exact location provided."""
+        """This class will move a location to the exact location provided.
+
+        Args:
+            x: Move to this exact location on the X-axis.
+            y: Move to this exact location on the Y-axis.
+            z: Move to this exact location on the Z-axis.
+        """
         self.x = x
         self.y = y
         self.z = z
 
     def swap_xy(self, rot: float, max_y: float):
-        """Rotate while holding the top where it currenly is."""
+        """Rotate while holding the top where it currenly is.
+
+        Args:
+            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            max_y: This is the maximium value of the object on the y axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+
+        """
         while rot != 0:
             self.y, self.x = self.x, max_y - self.y
             rot = rot - 1
-        if self.side == LEFT:
-            self.side = BACK
-        elif self.side == RIGHT:
-            self.side = FRONT
-        elif self.side == FRONT:
-            self.side = LEFT
-        elif self.side == BACK:
-            self.side = RIGHT
+        self.side = {LEFT: BACK, BACK: RIGHT, RIGHT: FRONT, FRONT: LEFT, TOP: TOP, BOTTOM: BOTTOM}.get(
+            self.side
+        )  # This will compute which side of the object the feature now inserts into.
 
     def swap_xz(self, rot: float, max_x: float):
-        """Rotate while holding the front where it currenly is."""
+        """Rotate while holding the front where it currenly is.
+
+        Args:
+            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            max_x: This is the maximium value of the object on the x axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+
+        """
         while rot != 0:
             self.x, self.z = self.z, max_x - self.x
             rot = rot - 1
-        if self.side == LEFT:
-            self.side = BOTTOM
-        elif self.side == RIGHT:
-            self.side = TOP
-        elif self.side == TOP:
-            self.side = LEFT
-        elif self.side == BOTTOM:
-            self.side = RIGHT
+        self.side = {LEFT: BOTTOM, BOTTOM: RIGHT, RIGHT: TOP, TOP: LEFT, FRONT: FRONT, BACK: BACK}.get(
+            self.side
+        )  # This will compute which side of the object the feature now inserts into.
 
     def swap_yz(self, rot: float, max_z: float):
-        """Rotate while holding the left where it currenly is."""
+        """Rotate while holding the left where it currenly is.
+
+        Args:
+            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            max_z: This is the maximium value of the object on the z axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+
+        """
         while rot != 0:
             self.y, self.z = max_z - self.z, self.y
             rot = rot - 1
-        if self.side == TOP:
-            self.side = BACK
-        elif self.side == BOTTOM:
-            self.side = FRONT
-        elif self.side == BACK:
-            self.side = BOTTOM
-        elif self.side == FRONT:
-            self.side = TOP
-
-    def side_location_calculator(self, side: str, x: float, y: float, sink=0) -> tuple[float, float, float]:
-        """Calculate given the side of and object and the relative x and y location on that side where the definite location is."""
-
-        if side == TOP:
-            temp_x = x
-            temp_y = y
-            temp_z = self.z_max - sink  # Where is self.z_max defined??
-        elif side == BOTTOM:
-            temp_x = x
-            temp_y = y
-            temp_z = self.z_min + sink
-        elif side == LEFT:
-            temp_x = self.x_min + sink
-            temp_y = x
-            temp_z = y
-        elif side == RIGHT:
-            temp_x = self.x_max - sink
-            temp_y = x
-            temp_z = y
-        elif side == FRONT:
-            temp_x = x
-            temp_y = self.y_min + sink
-            temp_z = y
-        elif side == BACK:
-            temp_x = x
-            temp_y = self.y_max - sink
-            temp_z = y
-        else:
-            msg = f"Side {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-            raise ValueError(msg)
-
-        return temp_x, temp_y, temp_z
+        self.side = {TOP: BACK, BACK: BOTTOM, BOTTOM: FRONT, FRONT: TOP, LEFT: LEFT, RIGHT: RIGHT}.get(
+            self.side
+        )  # This will compute which side of the object the feature now inserts into.
