@@ -8,7 +8,7 @@ class Holes(Location):
     def __init__(self, side: str, x: float, y: float, z: float, diameter: float, depth: float):
         
         """
-        This method will initialize a whole at the desired location.
+        This method will initialize a hole at the desired location.
 
         Args:
             x : The location of x along the x axis.
