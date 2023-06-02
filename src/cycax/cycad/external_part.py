@@ -1,25 +1,28 @@
-import stl
-from stl import mesh
-
-
 import os
 import sys
-from CycadPart import CycadPart
+
+import stl  # TODO: Add to pyprojects
+
+from cycax.cycad.cycad_part import CycadPart
 
 
 class ExternalPart(CycadPart):
+    """This class allows for external parts to be added into the object.
+    These external STLs can be editted in similar ways to ones created in the program.
+    """
+
     def __init__(self, part_no: str, colour="purple"):
-        """This class allows for external parts to be added into the object. These external stls can be editted in similar ways to ones created in the program."""
         super().__init__(0, 0, 0, None, part_no, 0, 0, 0)
         self.calculate()
         self.colour = colour
 
     def calculate(self):
-        """This function will be used to find the bounding box of the stl that is being imported. It makes use of the python stl function."""
+        """This function will be used to find the bounding box of the STL that is being imported.
+        It makes use of the python stl function."""
         STLname = "./parts_stl/" + self.part_no + ".stl"
         if not os.path.exists(STLname):
-            sys.exit('ERROR: file %s was not found!' % STLname)
-        stl_object = mesh.Mesh.from_file(STLname)
+            sys.exit("ERROR: file %s was not found!" % STLname)
+        stl_object = stl.mesh.Mesh.from_file(STLname)
         for point in stl_object.points:
             self.x_max = max(point[stl.Dimension.X], self.x_max)
             self.x_min = min(point[stl.Dimension.X], self.x_min)
@@ -42,7 +45,7 @@ class ExternalPart(CycadPart):
         self.z_min = 0
 
     def export(self):
-        """This creates a dictionary for the external part so that is can be exported into a json and decoded."""
+        """This creates a dictionary for the external part so that it can be exported into JSON and decoded."""
         dict_external = {
             "name": "external",
             "type": "add",

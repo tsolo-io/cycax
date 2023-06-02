@@ -1,21 +1,19 @@
-from Location import Location
-from Features import Holes
-from Features import RectangleCutOut
-from Features import NutCutOut
-from Slot import Slot
+from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
+from cycax.cycad.location import TOP, Location
+from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
     def __init__(
         self,
-        x: float,
-        y: float,
-        z: float,
-        side: str,
         part_no: str,
         x_size: float,
         y_size: float,
         z_size: float,
+        x: float = 0,
+        y: float = 0,
+        z: float = 0,
+        side: str = TOP,
     ):
         super().__init__(x, y, z, side)
         self.part_no = part_no
@@ -46,8 +44,19 @@ class CycadPart(Location):
         inner: bool = True,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
-        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max) it would be more affective as the guessing wouldn't need to occur. These if statements wouldn't and is would work even when not a square.
-        It would however require more lines of code to be written on the user end."""
+        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+        it would be more affective as the guessing wouldn't need to occur.
+        These if statements wouldn't and is would work even when not a square.
+        It would however require more lines of code to be written on the user end.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            side: The side of the part the hole will be made in.
+            diameter: The diameter of the hole.
+            depth: The depth of the hole. If Null the hole is through the part.
+            inner: If this is an internal or an external hole.
+        """
 
         location_output = self.side_location_calculator(side=side, x=x, y=y)
         temp_hole = Holes(
@@ -71,7 +80,9 @@ class CycadPart(Location):
         inner=True,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
-        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max) it would be more affective as the guessing wouldn't need to occur. These if statements wouldn't and is would work even when not a square.
+        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+        it would be more affective as the guessing wouldn't need to occur.
+        These if statements wouldn't and is would work even when not a square.
         It would however require more lines of code to be written on the user end."""
 
         location_output = self.side_location_calculator(side=side, x=x, y=y)
@@ -93,7 +104,8 @@ class CycadPart(Location):
             self.move_holes.append(temp_slot)
 
     def make_nut(self, side: str, x: float, y: float, type: float, depth: float, sink: float):
-        """This class will be used for cutting nut cut outs into an odject. It still requires some developement to improve accuracy."""
+        """This class will be used for cutting nut cut outs into an odject. It still requires
+        some developement to improve accuracy."""
 
         location_output = self.side_location_calculator(side=side, x=x, y=y, sink=sink)
         temp_nut = NutCutOut(
@@ -139,25 +151,25 @@ class CycadPart(Location):
             "BACK": self.y_max,
         }
 
-    def move(self, X=0, Y=0, Z=0):
+    def move(self, x=0, y=0, z=0):
         """This method will be used for moving the part."""
 
         x_size = self.x_max - self.x_min
         y_size = self.y_max - self.y_min
         z_size = self.z_max - self.z_min
 
-        if X != 0:
-            self.x_min = X
-            self.x_max = X + x_size
-            self.moves[0] = X
-        if Y != 0:
-            self.y_min = Y
-            self.y_max = Y + y_size
-            self.moves[1] = Y
-        if Z != 0:
-            self.z_min = Z
-            self.z_max = Z + z_size
-            self.moves[2] = Z
+        if x != 0:
+            self.x_min = x
+            self.x_max = x + x_size
+            self.moves[0] = x
+        if y != 0:
+            self.y_min = y
+            self.y_max = y + y_size
+            self.moves[1] = y
+        if z != 0:
+            self.z_min = z
+            self.z_max = z + z_size
+            self.moves[2] = z
 
         self.make_bounding_box()
 
