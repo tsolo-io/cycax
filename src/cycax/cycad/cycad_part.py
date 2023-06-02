@@ -176,4 +176,37 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
         
+    def side_location_calculator(self, side: str, x: float, y: float, sink=0) -> tuple[float, float, float]:
+        """Calculate given the side of and object and the relative x and y location on that side where the definite location is."""
+
+        if side == super.TOP:
+            temp_x = x
+            temp_y = y
+            temp_z = self.z_max - sink  # Where is self.z_max defined??
+        elif side == super.BOTTOM:
+            temp_x = x
+            temp_y = y
+            temp_z = self.z_min + sink
+        elif side == super.LEFT:
+            temp_x = self.x_min + sink
+            temp_y = x
+            temp_z = y
+        elif side == super.RIGHT:
+            temp_x = self.x_max - sink
+            temp_y = x
+            temp_z = y
+        elif side == super.FRONT:
+            temp_x = x
+            temp_y = self.y_min + sink
+            temp_z = y
+        elif side == super.BACK:
+            temp_x = x
+            temp_y = self.y_max - sink
+            temp_z = y
+        else:
+            msg = f"Side {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+            raise ValueError(msg)
+
+        return temp_x, temp_y, temp_z
+        
 

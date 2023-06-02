@@ -83,35 +83,4 @@ class Location:
         elif self.side == FRONT:
             self.side = TOP
 
-    def side_location_calculator(self, side: str, x: float, y: float, sink=0) -> tuple[float, float, float]:
-        """Calculate given the side of and object and the relative x and y location on that side where the definite location is."""
 
-        if side == TOP:
-            temp_x = x
-            temp_y = y
-            temp_z = self.z_max - sink  # Where is self.z_max defined??
-        elif side == BOTTOM:
-            temp_x = x
-            temp_y = y
-            temp_z = self.z_min + sink
-        elif side == LEFT:
-            temp_x = self.x_min + sink
-            temp_y = x
-            temp_z = y
-        elif side == RIGHT:
-            temp_x = self.x_max - sink
-            temp_y = x
-            temp_z = y
-        elif side == FRONT:
-            temp_x = x
-            temp_y = self.y_min + sink
-            temp_z = y
-        elif side == BACK:
-            temp_x = x
-            temp_y = self.y_max - sink
-            temp_z = y
-        else:
-            msg = f"Side {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-            raise ValueError(msg)
-
-        return temp_x, temp_y, temp_z
