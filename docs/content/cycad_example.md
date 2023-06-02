@@ -1,5 +1,6 @@
+# CyCAD example
 
-Basic Example of installing cycax and using cycad
+Basic Example of installing CyCAx and using CyCAD
 -------------------------------------------------
 
 We will assume you are working from $HOME/src. And that git, python>=3.10, and python hatch is installed.

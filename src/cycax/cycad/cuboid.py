@@ -1,4 +1,4 @@
-from CycadPart import CycadPart
+from cycax.cycad.cycad_part import CycadPart
 
 
 class Cuboid(CycadPart):
@@ -23,9 +23,10 @@ class Cuboid(CycadPart):
             "x": self.x,
             "y": self.y,
             "z": self.z,
-            "X_width": self.x_size,
-            "Y_length": self.y_size,
-            "Z_depth": self.z_size,
+            # TODO: Update. Maybe just ?_size and not width,length, or depth.
+            "x_width": self.x_size,
+            "y_length": self.y_size,
+            "z_depth": self.z_size,
             "center": False,
         }
         dict_part = []
