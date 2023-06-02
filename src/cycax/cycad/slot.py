@@ -2,6 +2,10 @@ from cycax.cycad.features import Holes, RectangleCutOut
 
 
 class Slot:
+    """A slot with parameters.
+
+    To get a verticle slot enter the details in exactly the same manner to
+    the horizontle slot and then specify that horrizontal to False."""
     hole_left: Holes
     hole_right: Holes
     rectangle: RectangleCutOut
@@ -18,9 +22,6 @@ class Slot:
         z: float,
         horizontal: bool = True,
     ):
-        """This method will be used to define a slot with all ist parameters.
-        To get a verticle slot enter the details in exactly the same manner to
-        the horizontle slot and the specify that Horrizontal to False."""
         if horizontal:
             self.hole_left = Holes(side=side, x=x, y=y, z=z, big=y_size, depth=z_size)
             self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, big=y_size, depth=z_size)

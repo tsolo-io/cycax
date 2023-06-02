@@ -7,10 +7,9 @@ BACK = "BACK"
 
 
 class Location:
-    """This class will define the loation of an object in 3D space"""
+    """This class will define the loation of an object in 3D space."""
 
     def __init__(self, x: float, y: float, z: float, side: str):
-        """This class will initialize a location"""
         self.x = x
         self.y = y
         self.z = z
@@ -20,7 +19,7 @@ class Location:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 
     def get_location(self):
-        """Returns a location in a string format to be used for debugging"""
+        """Returns a location in a string format to be used for debugging."""
         # TODO: Remove. Rather use __repr__ or __str__ methods.
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 

@@ -1,19 +1,19 @@
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
-from cycax.cycad.location import Location
+from cycax.cycad.location import TOP, Location
 from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
     def __init__(
         self,
-        x: float,
-        y: float,
-        z: float,
-        side: str,
         part_no: str,
         x_size: float,
         y_size: float,
         z_size: float,
+        x: float = 0,
+        y: float = 0,
+        z: float = 0,
+        side: str = TOP,
     ):
         super().__init__(x, y, z, side)
         self.part_no = part_no

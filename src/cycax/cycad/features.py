@@ -5,7 +5,6 @@ class Holes(Location):
     """This class will store data on holes."""
 
     def __init__(self, side: str, x: float, y: float, z: float, big: float, depth: float):
-        """This method createsa hole."""
         Location.__init__(self, x, y, z, side)
         self.diameter = big
         self.depth = depth
@@ -26,7 +25,11 @@ class Holes(Location):
 
 
 class RectangleCutOut(Location):
-    """This class can be used for cutting a hole that is not square but rather of the definied parameters."""
+    """This class can be used for cutting a hole that is not round but rather of the definied parameters.
+
+    This class is a hole that is not round.
+    The location refers to its top left hand corner.
+    """
 
     def __init__(
         self,
@@ -39,8 +42,6 @@ class RectangleCutOut(Location):
         depth: float = 2,
         center: bool = False,
     ):
-        """This method will initialize a hole that is not round.
-        The location refers to its top left hand corner."""
         Location.__init__(self, x, y, z, side)
         self.x_size = width
         self.y_size = height
