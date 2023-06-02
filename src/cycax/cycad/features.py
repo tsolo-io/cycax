@@ -1,16 +1,38 @@
 from cycax.cycad.location import Location
 
 
-class Holes(Location):
-    """This class will store data on holes."""
 
-    def __init__(self, side: str, x: float, y: float, z: float, big: float, depth: float):
+class Holes(Location):
+    """This class will store data on holes. A whole will be a cylinider cut into an odject."""
+
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, depth: float):
+        
+        """
+        This method will initialize a whole at the desired location.
+
+        Args:
+            x : The location of x along the x axis.
+            y : The location of y along the y axis.
+            z : The location of z along the z axis.
+            side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+            diameter : Diameter of the hole.
+            depth : depth of the hole. 
+        
+        
+        """        
+        
         Location.__init__(self, x, y, z, side)
-        self.diameter = big
+        self.diameter = diameter
         self.depth = depth
 
     def export(self):
-        """This will create a dictionary of the hole."""
+        """
+        This will create a dictionary of the hole that can be used for the json.
+        
+        Returns:
+            dict: this will return a dictionary.
+            
+        """
         dict_hole = {
             "name": "hole",
             "type": "cut",
@@ -28,7 +50,7 @@ class RectangleCutOut(Location):
     """This class can be used for cutting a hole that is not round but rather of the definied parameters.
 
     This class is a hole that is not round.
-    The location refers to its top left hand corner.
+    The location refers to its bottom left hand corner.
     """
 
     def __init__(
@@ -42,6 +64,21 @@ class RectangleCutOut(Location):
         depth: float = 2,
         center: bool = False,
     ):
+        
+        """
+        This method will initialize a Rectangle Cut Out at the desired location.
+
+        Args:
+            x : The location of x along the x axis.
+            y : The location of y along the y axis.
+            z : The location of z along the z axis.
+            side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+            width : width of the rectangle.
+            depth : depth of the rectangle. 
+            height : height of the rectangle.
+            center : This can be over ridden to instead specify the rectangle's location from its center. 
+        
+        """   
         Location.__init__(self, x, y, z, side)
         self.x_size = width
         self.y_size = height
@@ -49,7 +86,13 @@ class RectangleCutOut(Location):
         self.center = center
 
     def export(self):
-        """This method converts a RectangleCutOut to a JSON object"""
+        """
+        This will create a dictionary of the rectangle cut out that can be used for the json.
+        
+        Returns:
+            dict: this will return a dictionary.
+            
+        """
         if self.side in ["FRONT", "LEFT", "BOTTOM"]:
             self.side = None
         dict_cube = {
@@ -68,23 +111,27 @@ class RectangleCutOut(Location):
         return dict_cube
 
     def swap_xy(self):
-        """This will rotate slot while holding top where it is."""
+        """
+        This will rotate slot while holding top where it is. It overides the method present in the location super.
+        """
         self.x_size, self.y_size = self.y_size, self.x_size
         Location.swap_xy(self)
 
     def swap_xz(self):
-        """This will rotate slot while holding front where it is."""
+        """This will rotate slot while holding front where it is. It overides the method present in the location super.
+        """
         self.x_size, self.z_size = self.z_size, self.x_size
         Location.swap_xz(self)
 
     def swap_yz(self):
-        """This will rotate slot while holding left where it is."""
+        """This will rotate slot while holding left where it is. It overides the method present in the location super.
+        """
         self.y_size, self.z_size = self.z_size, self.y_size
         Location.swap_yz(self)
 
 
 class NutCutOut(Location):
-    """Class for holding the data for nuts."""
+    """Class for holding the data for nut cut outs. The nut cut outs will allow ust to hold nuts in 3D printed plastic. There will be more nut information added in version 2."""
 
     nuts = {
         "type": 3,
@@ -93,12 +140,31 @@ class NutCutOut(Location):
     }
 
     def __init__(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float):
+        """
+        This method will initialize a Nut Cut Out at the desired location.
+
+        Args:
+            x : The location of x along the x axis.
+            y : The location of y along the y axis.
+            z : The location of z along the z axis.
+            side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+            nut_type : Type of nut to be inserted.
+            depth : depth of the rectangle. 
+        
+        """   
+        
         Location.__init__(self, x, y, z, side)
         self.type = nut_type
         self.depth = depth
 
     def export(self):
-        """Create a dictionary with the definition of a nut."""
+        """
+        This will create a dictionary of the nut that can be used for the json.
+        
+        Returns:
+            dict: this will return a dictionary.
+            
+        """
         dict_nut = {
             "name": "nut",
             "type": "cut",

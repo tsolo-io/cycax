@@ -55,7 +55,7 @@ class CycadPart(Location):
         """
         location_output = self.side_location_calculator(side=side, x=x, y=y)
         temp_hole = Holes(
-            side=side, x=location_output[0], y=location_output[1], z=location_output[2], big=diameter, depth=depth
+            side=side, x=location_output[0], y=location_output[1], z=location_output[2], diameter=diameter, depth=depth
         )
         if inner:
             self.features.append(temp_hole)

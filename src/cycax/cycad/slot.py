@@ -24,12 +24,12 @@ class Slot:
         horizontal: bool = True,
     ):
         if horizontal:
-            self.hole_left = Holes(side=side, x=x, y=y, z=z, big=y_size, depth=z_size)
-            self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, big=y_size, depth=z_size)
+            self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
+            self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, diameter=y_size, depth=z_size)
             self.rectangle = RectangleCutOut(side=side, width=x_size, x=x, y=y, z=z, height=y_size, depth=z_size)
         else:
-            self.hole_left = Holes(side=side, x=x, y=y, z=z, big=y_size, depth=z_size)
-            self.hole_right = Holes(side=side, x=x, y=y + y_size, z=z, big=y_size, depth=z_size)
+            self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
+            self.hole_right = Holes(side=side, x=x, y=y + y_size, z=z, diameter=y_size, depth=z_size)
             self.rectangle = RectangleCutOut(side=side, width=y_size, x=x, y=y, z=z, height=x_size, depth=z_size)
 
     def export(self):
