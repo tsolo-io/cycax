@@ -46,41 +46,18 @@ class Location:
         while rot != 0:
             self.y, self.x = self.x, max_y - self.y
             rot = rot - 1
-        if self.side == LEFT:
-            self.side = BACK
-        elif self.side == RIGHT:
-            self.side = FRONT
-        elif self.side == FRONT:
-            self.side = LEFT
-        elif self.side == BACK:
-            self.side = RIGHT
+        self.side = {LEFT: BACK, BACK: RIGHT, RIGHT: FRONT, FRONT: LEFT, TOP: TOP, BOTTOM: BOTTOM}.get(self.side)
 
     def swap_xz(self, rot: float, max_x: float):
         """Rotate while holding the front where it currenly is."""
         while rot != 0:
             self.x, self.z = self.z, max_x - self.x
             rot = rot - 1
-        if self.side == LEFT:
-            self.side = BOTTOM
-        elif self.side == RIGHT:
-            self.side = TOP
-        elif self.side == TOP:
-            self.side = LEFT
-        elif self.side == BOTTOM:
-            self.side = RIGHT
+        self.side = {LEFT: BOTTOM, BOTTOM: RIGHT, RIGHT: TOP, TOP: LEFT, FRONT: FRONT, BACK: BACK}.get(self.side)
 
     def swap_yz(self, rot: float, max_z: float):
         """Rotate while holding the left where it currenly is."""
         while rot != 0:
             self.y, self.z = max_z - self.z, self.y
             rot = rot - 1
-        if self.side == TOP:
-            self.side = BACK
-        elif self.side == BOTTOM:
-            self.side = FRONT
-        elif self.side == BACK:
-            self.side = BOTTOM
-        elif self.side == FRONT:
-            self.side = TOP
-
-
+        self.side = {TOP: BACK, BACK: BOTTOM, BOTTOM: FRONT, FRONT: TOP, LEFT: LEFT, RIGHT: RIGHT}.get(self.side)

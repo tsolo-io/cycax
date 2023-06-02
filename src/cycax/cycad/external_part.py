@@ -9,14 +9,13 @@ from cycax.cycad.cycad_part import CycadPart
 
 
 class ExternalPart(CycadPart):
-
     def __init__(self, part_no: str, colour="purple"):
         """This class allows for external parts to be added into the object.
         These external STLs can be editted in similar ways to ones created in the program.
         """
         super().__init__(0, 0, 0, None, part_no, 0, 0, 0)
         self.calculate()
-        self.colour=colour
+        self.colour = colour
 
     def calculate(self):
         """This function will be used to find the bounding box of the STL that is being imported.
@@ -32,21 +31,19 @@ class ExternalPart(CycadPart):
             self.y_min = min(point[stl.Dimension.Y], self.y_min)
             self.z_max = max(point[stl.Dimension.Z], self.z_max)
             self.z_min = min(point[stl.Dimension.Z], self.z_min)
-        
-        self.x_size = self.x_max - self.x_min
-        self.y_size = self.y_max - self.y_min 
-        self.z_size = self.z_max - self.z_min
-        
-        self.x, self.y, self.z = self.x_size/2, self.y_size/2, self.z_size/2
-        
-        self.x_max=self.x_size
-        self.x_min=0
-        self.y_max=self.y_size
-        self.y_min=0
-        self.z_max=self.z_size
-        self.z_min=0
 
-        
+        self.x_size = self.x_max - self.x_min
+        self.y_size = self.y_max - self.y_min
+        self.z_size = self.z_max - self.z_min
+
+        self.x, self.y, self.z = self.x_size / 2, self.y_size / 2, self.z_size / 2
+
+        self.x_max = self.x_size
+        self.x_min = 0
+        self.y_max = self.y_size
+        self.y_min = 0
+        self.z_max = self.z_size
+        self.z_min = 0
 
     def export(self):
         """This creates a dictionary for the external part so that it can be exported into JSON and decoded."""
@@ -69,7 +66,3 @@ class ExternalPart(CycadPart):
             else:
                 dict_part.append(ret)
         return dict_part
-
-
-
-    

@@ -6,6 +6,7 @@ class Slot:
 
     To get a verticle slot enter the details in exactly the same manner to
     the horizontle slot and then specify that horrizontal to False."""
+
     hole_left: Holes
     hole_right: Holes
     rectangle: RectangleCutOut
