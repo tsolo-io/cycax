@@ -5,21 +5,26 @@ import stl  # TODO: Add to pyprojects
 
 from cycax.cycad.cycad_part import CycadPart
 
-from cycax.cycad.cycad_part import CycadPart
-
 
 class ExternalPart(CycadPart):
     def __init__(self, part_no: str, colour="purple"):
         """This class allows for external parts to be added into the object.
         These external STLs can be editted in similar ways to ones created in the program.
+
+        Args:
+            part_no : The unique name that will be given to a type of parts. 
+            colour: This will specify the colour of the object and can be overwritten from purple.
+        
         """
-        super().__init__(0, 0, 0, None, part_no, 0, 0, 0)
+        super().__init__(0, 0, 0, None, part_no, 0, 0, 0) #initialized to location (0,0,0)
         self.calculate()
         self.colour = colour
 
     def calculate(self):
-        """This function will be used to find the bounding box of the STL that is being imported.
-        It makes use of the python stl function."""
+        """
+        This function will be used to find the bounding box of the STL that is being imported.
+        It makes use of the python stl function.
+        """
         STLname = "./parts_stl/" + self.part_no + ".stl"
         if not os.path.exists(STLname):
             sys.exit("ERROR: file %s was not found!" % STLname)
@@ -46,7 +51,12 @@ class ExternalPart(CycadPart):
         self.z_min = 0
 
     def export(self):
-        """This creates a dictionary for the external part so that it can be exported into JSON and decoded."""
+        """
+        This method will take the values stored within the part and export it to a dict so that it can be decoded.
+
+        Returns:
+            dict : The dictionary of the part.
+        """
         dict_external = {
             "name": "external",
             "type": "add",

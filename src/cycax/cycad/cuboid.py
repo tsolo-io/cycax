@@ -1,8 +1,19 @@
 from cycax.cycad.cycad_part import CycadPart
 
-
 class Cuboid(CycadPart):
+    """This class will contain information on the 3D printed part."""
     def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour="red"):
+        """
+        This method will initialize a Cuboid at the desired location.
+
+        Args:
+            x_size : The size of x.
+            y_size : The size of y.
+            z_size : The siez of z.
+            part_no : The unique name that will be given to a type of parts. 
+            colour: This will specify the colour of the object and can be overwritten from red.
+        
+        """ 
         super().__init__(
             x=0,
             y=0,
@@ -12,10 +23,16 @@ class Cuboid(CycadPart):
             x_size=x_size,
             y_size=y_size,
             z_size=z_size,
-        )
+        ) #initializes the cuboid to (0,0,0)
         self.colour = colour
 
     def export(self):
+        """
+        This method will take the values stored within the part and export it to a dict so that it can be decoded.
+
+        Returns:
+            dict : The dictionary of the part.
+        """
         dict_cube = {
             "name": "cube",
             "type": "add",

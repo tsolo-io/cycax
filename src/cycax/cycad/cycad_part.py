@@ -254,6 +254,9 @@ class CycadPart(Location):
             
             Raises: 
                 ValueError: if the side is not one of the available and expected sides.
+                
+            Returns:
+                tupel: tupel containing floats of the x, y and z values.
 
             
         """
