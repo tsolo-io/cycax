@@ -16,8 +16,7 @@ class Holes(Location):
             z : The location of z along the z axis.
             side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
             diameter : Diameter of the hole.
-            depth : depth of the hole. 
-        
+            depth : depth of the hole.
         
         """        
         
@@ -56,12 +55,12 @@ class RectangleCutOut(Location):
     def __init__(
         self,
         side: str,
-        width: float,
         x: float = 0,
         y: float = 0,
         z: float = 0,
-        height: float = 0,
-        depth: float = 2,
+        x_size: float = 0,
+        z_size: float = 0,
+        y_size: float = 2,
         center: bool = False,
     ):
         
@@ -80,9 +79,9 @@ class RectangleCutOut(Location):
         
         """   
         Location.__init__(self, x, y, z, side)
-        self.x_size = width
-        self.y_size = height
-        self.z_size = depth
+        self.x_size = x_size
+        self.y_size = z_size
+        self.z_size = y_size
         self.center = center
 
     def export(self):
