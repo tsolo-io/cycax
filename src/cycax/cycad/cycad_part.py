@@ -44,7 +44,9 @@ class CycadPart(Location):
         inner: bool = True,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
-        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max) it would be more affective as the guessing wouldn't need to occur. These if statements wouldn't and is would work even when not a square.
+        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+        it would be more affective as the guessing wouldn't need to occur.
+        These if statements wouldn't and is would work even when not a square.
         It would however require more lines of code to be written on the user end.
 
         Args:
@@ -78,7 +80,8 @@ class CycadPart(Location):
         inner=True,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
-        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max) it would be more affective as the guessing wouldn't need to occur.
+        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+        it would be more affective as the guessing wouldn't need to occur.
         These if statements wouldn't and is would work even when not a square.
         It would however require more lines of code to be written on the user end."""
 
@@ -101,7 +104,8 @@ class CycadPart(Location):
             self.move_holes.append(temp_slot)
 
     def make_nut(self, side: str, x: float, y: float, type: float, depth: float, sink: float):
-        """This class will be used for cutting nut cut outs into an odject. It still requires some developement to improve accuracy."""
+        """This class will be used for cutting nut cut outs into an odject. It still requires
+        some developement to improve accuracy."""
 
         location_output = self.side_location_calculator(side=side, x=x, y=y, sink=sink)
         temp_nut = NutCutOut(

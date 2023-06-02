@@ -1,5 +1,3 @@
-from typing import Dict
-
 from cycax.cycad.cycad_part import CycadPart
 
 
