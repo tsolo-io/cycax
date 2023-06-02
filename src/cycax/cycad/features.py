@@ -29,6 +29,7 @@ class Holes(Location):
             dict: this will return a dictionary.
 
         """
+        
         dict_hole = {}
         dict_hole["name"] = "hole"
         dict_hole["type"] = "cut"
@@ -137,7 +138,7 @@ class NutCutOut(Location):
     def __init__(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float):
 
         Location.__init__(self, x, y, z, side)
-        self.type = nut_type
+        self.nut_type = nut_type
         self.depth = depth
 
     def export(self)-> dict:
@@ -148,14 +149,10 @@ class NutCutOut(Location):
             dict: this will return a dictionary.
 
         """
-        dict_nut = {
-            "name": "nut",
-            "type": "cut",
-            "side": self.side,
-            "x": str(self.x),
-            "y": str(self.y),
-            "z": str(self.z),
-            "diameter": self.type,
-            "depth": self.depth,
-        }
+        dict_nut = {}
+        for key, value in vars(self).items():
+            dict_nut[key] = value
+        dict_nut["name"] = "nut"
+        dict_nut["type"] = "cut"
+        
         return dict_nut
