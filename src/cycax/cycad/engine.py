@@ -1,5 +1,6 @@
 import json
 import subprocess
+import logging
 from cycax.cycad.location import TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK
 from cycax.cycad.cycad_part import CycadPart
 
@@ -84,7 +85,7 @@ class Engine:
 
     def decode_cut(self)->str:
         """
-        This method returns a simple scad string neceseray to cut.
+        This method returns a simple OpenSCAD string neceseray to cut.
         """
         return "difference(){"
 
@@ -201,8 +202,11 @@ class Engine:
         result = subprocess.run(
             ["openscad", "-o", out_stl_name, out_name], capture_output=True, text=True
         )
-        print("stdout:", result.stdout)
-        print("stderr:", result.stderr)
+        
+        if result.stdout:
+            logging.info('OpenSCAD: %s', result.stdout)
+        if result.stderr:
+            logging.error('OpenSCAD: %s', result.stderr)
         
     def add(self, part):
         """
