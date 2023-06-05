@@ -36,6 +36,7 @@ class Cuboid(CycadPart):
         Returns:
             dict : The dictionary of the part.
         """
+        
         dict_cube = {
             "name": "cube",
             "type": "add",
@@ -44,9 +45,9 @@ class Cuboid(CycadPart):
             "y": self.y,
             "z": self.z,
             # TODO: Update. Maybe just ?_size and not width,length, or depth.
-            "x_width": self.x_size,
-            "y_length": self.y_size,
-            "z_depth": self.z_size,
+            "x_size": self.x_size,
+            "y_size": self.y_size,
+            "z_size": self.z_size,
             "center": False,
         }
         dict_part = []
