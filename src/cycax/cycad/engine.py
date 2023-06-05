@@ -211,7 +211,6 @@ class Engine:
         Args:
             part(CycadPart) : This is the part that will be eported to a json.  
         """
-        jsonFile = open("./JSON/" + part.part_no + ".json", "w")
-        jsonStr = json.dumps(part.export(), indent=4)
-        jsonFile.write(jsonStr)
-        jsonFile.close()
+        
+        with open("./JSON/" + part.part_no + ".json", "w") as jsonfile:
+            json.dump(part.export(), jsonfile, indent=4)
