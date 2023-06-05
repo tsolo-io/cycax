@@ -75,8 +75,9 @@ class CycadPart(Location):
         if inner:
             self.features.append(temp_hole)
         else:
+            move_hole=temp_hole
             self.features.append(temp_hole)
-            self.move_holes.append(temp_hole)
+            self.move_holes.append(move_hole)
 
     def make_slot(
         self,
@@ -117,8 +118,9 @@ class CycadPart(Location):
         if inner:
             self.features.append(temp_slot)
         else:
+            move_slot=temp_slot
             self.features.append(temp_slot)
-            self.move_holes.append(temp_slot)
+            self.move_holes.append(move_slot)
 
     def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float =0.0):
         """This method will insert a nut into a CycadPart.
