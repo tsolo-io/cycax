@@ -14,7 +14,6 @@ class SheetMetal(CycadPart):
     """
 
     def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour: str = "grey"):
-
         super().__init__(
             x=0,
             y=0,
@@ -27,14 +26,14 @@ class SheetMetal(CycadPart):
         )  # initialized to location (0,0,0)
         self.colour = colour
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This method will take the values stored within the part and export it to a dict so that it can be decoded.
 
         Returns:
             dict : The dictionary of the part.
         """
-        
+
         dict_metal = {
             "name": "cube",
             "type": "add",

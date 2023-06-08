@@ -10,7 +10,7 @@ BACK = "BACK"
 class Location:
     """This class will define the loation of an object in 3D space.
     This class will initialize a location along the x, y, z axis.
-        
+
     Args:
         x : The location of x along the x axis.
         y : The location of y along the y axis.
@@ -19,13 +19,12 @@ class Location:
     """
 
     def __init__(self, x: float, y: float, z: float, side: str):
-
         self.x = x
         self.y = y
         self.z = z
         self.side = side
 
-    def __repr__(self)->str:
+    def __repr__(self) -> str:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 
     def move(self, x: float = 0, y: float = 0, z: float = 0):

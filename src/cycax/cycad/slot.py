@@ -6,7 +6,7 @@ class Slot:
 
     To get a verticle slot enter the details in exactly the same manner to
     the horizontle slot and then specify that horrizontal to False.
-    
+
     This class will initialize a slot in the desired location.
 
     Args:
@@ -37,18 +37,18 @@ class Slot:
         z: float,
         horizontal: bool = True,
     ):
-
-
         if horizontal:
-            self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
+            self.hole_left = Holes(side=side, x=x+y_size, y=y, z=z, diameter=y_size, depth=z_size)
             self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, diameter=y_size, depth=z_size)
-            self.rectangle = RectangleCutOut(side=side, width=x_size, x=x, y=y, z=z, height=y_size, depth=z_size)
+            self.rectangle = RectangleCutOut(side=side, x=x + x_size, y=y-y_size/2, z=z, x_size=x_size-y_size, y_size=y_size, z_size=z_size)
+           
         else:
-            self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
-            self.hole_right = Holes(side=side, x=x, y=y + y_size, z=z, diameter=y_size, depth=z_size)
-            self.rectangle = RectangleCutOut(side=side, width=y_size, x=x, y=y, z=z, height=x_size, depth=z_size)
+            self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size/2, depth=z_size)
+            self.hole_right = Holes(side=side, x=x, y=y + y_size, z=z, diameter=y_size/2, depth=z_size)
+            self.rectangle = RectangleCutOut(side=side, x=x, y=y, z=z, x_size=y_size, y_size=x_size, z_size=z_size)
+            
 
-    def export(self)-> tuple:
+    def export(self) -> tuple:
         """
         This will create a dictionary of the slot that can be used for the json.
 

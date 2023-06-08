@@ -1,28 +1,25 @@
-import json
-import os
-from cycax.cycad.engine import Engine
-from cycax.cycad.assembly_stl import AssemblyStl
 import copy
+import json
+import logging
+import os
 
-LEFT = "LEFT"
-RIGHT = "RIGHT"
-TOP = "TOP"
-BOTTOM = "BOTTOM"
-FRONT = "FRONT"
-BACK = "BACK"
+from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
+from cycax.cycad.engine_openscad import EngineOpenSCAD
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
 class Assembly:
     """
     This Assembly class will take multiple different cycad parts and combine them together to form complex parts.
-    
+
     Args:
         part_number: this is the destinct part number that the conplex part will have.
     """
+
     def __init__(self, part_number: str):
         self.part_number = part_number
-        self.decoder = Engine()
-        self.assembler = AssemblyStl(part_number)
+        self.decoder = EngineOpenSCAD()
+        self.assembler = AssemblyOpenSCAD(part_number)
         self.pieces = []
 
     def render(self):
@@ -34,46 +31,45 @@ class Assembly:
             name = part["part_no"]
 
             STLname = "./STL/" + name + ".stl"
-            if os.path.exists(STLname):
-                pass
-            else:
+            if not os.path.exists(STLname):
                 SCADname = "./SCAD/" + name + ".scad"
-                if os.path.exists(SCADname):
-                    pass
-                else:
-                    print("Creating a SCAD file of the pieces of the object.")
+                if not os.path.exists(SCADname):
+                    logging.info("Creating a SCAD file of the pieces of the object.")
                     self.decoder.decode(name)
-                self.decoder.render_stl(name)           
+                else:
+                    pass
+                self.decoder.render_stl(name)
+            else:
+                pass
 
         with open("./JSON/" + self.part_number + ".json", "w") as jsonfile:
             json.dump(datafile, jsonfile, indent=4)
-            
-        print("moving to the assembler")
-        self.assembler.assembly_stl()
+
+        logging.info("moving to the assembler")
+        self.assembler.assembly_openscad()
 
     def add(self, part):
         """
-        This adds a new object into the assembly and decodes it into a json if that's what the user wants. 
+        This adds a new object into the assembly and decodes it into a json if that's what the user wants.
         Once the part has been added to the assembler it can no longer be moved around or eddited.
-        
-        Args: 
+
+        Args:
             part(CycadPart): this in the part that will be added to the assembly.
         """
 
-        with open("./JSON/"  + "temp.json", "w") as jsonfile:
-                json.dump(part.export(), jsonfile, indent=4)
+        with open("./JSON/" + "temp.json", "w") as jsonfile:
+            json.dump(part.export(), jsonfile, indent=4)
 
-        JSONname="./JSON/" + part.part_no + ".json"
-        if(os.path.exists(JSONname)): #checking if the file is already in the directory.
-            current =  os.stat(JSONname).st_size
-            new= os.stat("./JSON/temp.json").st_size
-            if new>=current: #addind the file if it is bigger.
+        JSONname = "./JSON/" + part.part_no + ".json"
+        if os.path.exists(JSONname):  # checking if the file is already in the directory.
+            current = os.stat(JSONname).st_size
+            new = os.stat("./JSON/temp.json").st_size
+            if new >= current:  # addind the file if it is bigger.
                 os.rename("./JSON/temp.json", JSONname)
-            else: #removing the file if it is not bigger.
+            else:  # removing the file if it is not bigger.
                 os.remove("./JSON/temp.json")
-        else:  #renaming the file if there isn't one already in the file.
+        else:  # renaming the file if there isn't one already in the file.
             os.rename("./JSON/temp.json", JSONname)
-            
 
         self.pieces.append(part)
 
@@ -92,13 +88,12 @@ class Assembly:
             }
             dict_out.append(dict_part)
         return dict_out
-    
 
     def rotateFreezeTop(self, part):
         """
         This method will hold the front and the left while holding the top where it currently is.
         Args:
-            part(CycadPart): This is the part that will be rotated. 
+            part(CycadPart): This is the part that will be rotated.
         """
 
         part.rotate[2] = part.rotate[2] + 90
@@ -115,7 +110,7 @@ class Assembly:
         """
         This method will rotate the top and front while holding the left where it currently is.
         Args:
-            part(CycadPart): This is the part that will be rotated. 
+            part(CycadPart): This is the part that will be rotated.
         """
 
         part.rotate[0] = part.rotate[0] + 90
@@ -132,7 +127,7 @@ class Assembly:
         """
         This method will rotate the left and top while holding the front where it currently is.
         Args:
-            part(CycadPart): This is the part that will be rotated. 
+            part(CycadPart): This is the part that will be rotated.
         """
 
         part.rotate[1] = part.rotate[1] + 90
@@ -153,11 +148,12 @@ class Assembly:
             part1(CycadPart):This is the part that will be moved to match the plane of the other part.
             side1: This is the side of part1 which will be moved around to match the plane of part2
             part2(CycadPart): This is the part that will used to reference the moving of part1.
-            side2: This is the side which will dictate the plane used to as a reference to move part1.    
+            side2: This is the side which will dictate the plane used to as a reference to move part1.
         """
         part2.make_bounding_box()
         part1.make_bounding_box()
         to_here = part2.bounding_box[side2]
+
         if side1 == BOTTOM:
             part1.move(z=to_here)
         if side1 == TOP:
@@ -182,7 +178,7 @@ class Assembly:
         This class should be private. It is used to move the move_holes to their final location before they are subtracted from the other part.
         """
         for hole in range(len(part.move_holes)):
-            temp_hole=copy.deepcopy(part.move_holes[hole])
+            temp_hole = copy.deepcopy(part.move_holes[hole])
             temp_hole.swap_yz(part.rotate[0] / 90, part.rotmax[1])
             temp_hole.swap_xz(part.rotate[1] / 90, part.rotmax[2])
             temp_hole.swap_xy(part.rotate[2] / 90, part.rotmax[0])
@@ -192,20 +188,20 @@ class Assembly:
                 temp_hole.move(y=part.moves[1])
             if part.moves[2] != 0:
                 temp_hole.move(z=part.moves[2])
-            part.move_holes[hole]=temp_hole
+            part.move_holes[hole] = temp_hole
         part.final_location = True
 
     def subtract(self, part1, side: str, part2):
         """
-        This method adds the hols of part2 to the part1 on the side where they touch. 
+        This method adds the hols of part2 to the part1 on the side where they touch.
         This method will be used for moving around concube and harddive screw holes.
-        
+
         Args:
             part1(CycadPart): This is the part that will receive the hole of the other part.
             side: This is the side of the parth that will receive the holes.
             part2(CycadPart): This is the part while will be used as the template when transferring holes.
         """
-        if (part2.final_location) != True:
+        if part2.final_location is not True:
             self._final_place_(part2)
         Holes = part2.move_holes
 

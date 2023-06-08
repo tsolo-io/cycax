@@ -4,7 +4,7 @@ from cycax.cycad.location import Location
 class Holes(Location):
     """This class will store data on holes. A whole will be a cylinider cut into an odject.
         This class will initialize a hole at the desired location.
-        
+
     Args:
         x : The location of x along the x axis.
         y : The location of y along the y axis.
@@ -16,12 +16,11 @@ class Holes(Location):
     """
 
     def __init__(self, side: str, x: float, y: float, z: float, diameter: float, depth: float):
-
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
         self.depth = depth
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This will create a dictionary of the hole that can be used for the json.
 
@@ -29,7 +28,7 @@ class Holes(Location):
             dict: this will return a dictionary.
 
         """
-        
+
         dict_hole = {}
         dict_hole["name"] = "hole"
         dict_hole["type"] = "cut"
@@ -43,7 +42,7 @@ class RectangleCutOut(Location):
 
     This class is a hole that is not round.
     The location refers to its bottom left hand corner.
-    
+
     This class will initialize a Rectangle Cut Out at the desired location.
 
     Args:
@@ -69,14 +68,13 @@ class RectangleCutOut(Location):
         y_size: float = 2,
         center: bool = False,
     ):
-
         Location.__init__(self, x, y, z, side)
         self.x_size = x_size
-        self.y_size = z_size
-        self.z_size = y_size
+        self.y_size = y_size
+        self.z_size = z_size
         self.center = center
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This will create a dictionary of the rectangle cut out that can be used for the json.
 
@@ -113,10 +111,10 @@ class RectangleCutOut(Location):
 
 class NutCutOut(Location):
     """
-    Class for holding the data for nut cut outs. 
-    The nut cut outs will allow us to hold nuts in 3D printed plastic. 
+    Class for holding the data for nut cut outs.
+    The nut cut outs will allow us to hold nuts in 3D printed plastic.
     There will be more nut information added in version 2.
-    
+
     This class will initialize a Nut Cut Out at the desired location.
 
     Args:
@@ -136,12 +134,11 @@ class NutCutOut(Location):
     }
 
     def __init__(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float):
-
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type
         self.depth = depth
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This will create a dictionary of the nut that can be used for the json.
 
@@ -154,5 +151,5 @@ class NutCutOut(Location):
             dict_nut[key] = value
         dict_nut["name"] = "nut"
         dict_nut["type"] = "cut"
-        
+
         return dict_nut

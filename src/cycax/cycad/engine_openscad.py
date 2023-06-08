@@ -56,7 +56,7 @@ class EngineOpenSCAD:
             lookup : This will be a dictionary containing the necessary information about the hole.
 
         """
-        tempdiam = lookup["diameter"] / 2
+        tempdiam = lookup["diameter"]/2
         res = "cylinder(r=" + str(tempdiam) + ", h=" + str(lookup["depth"]) + ", $fn=64);"
         return res
 

@@ -16,7 +16,6 @@ class Cuboid(CycadPart):
     """
 
     def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour="red"):
-
         super().__init__(
             x=0,
             y=0,
@@ -29,14 +28,14 @@ class Cuboid(CycadPart):
         )  # initializes the cuboid to (0,0,0)
         self.colour = colour
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This method will take the values stored within the part and export it to a dict so that it can be decoded.
 
         Returns:
             dict : The dictionary of the part.
         """
-        
+
         dict_cube = {
             "name": "cube",
             "type": "add",

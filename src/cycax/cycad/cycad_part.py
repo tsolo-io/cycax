@@ -1,5 +1,5 @@
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
-from cycax.cycad.location import TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK, Location
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
 
@@ -29,7 +29,6 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
     ):
-
         super().__init__(x, y, z, side)
         self.part_no = part_no
         self.x_size = x_size
@@ -75,7 +74,7 @@ class CycadPart(Location):
         if inner:
             self.features.append(temp_hole)
         else:
-            move_hole=temp_hole
+            move_hole = temp_hole
             self.features.append(temp_hole)
             self.move_holes.append(move_hole)
 
@@ -118,11 +117,11 @@ class CycadPart(Location):
         if inner:
             self.features.append(temp_slot)
         else:
-            move_slot=temp_slot
+            move_slot = temp_slot
             self.features.append(temp_slot)
             self.move_holes.append(move_slot)
 
-    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float =0.0):
+    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float = 0.0):
         """This method will insert a nut into a CycadPart.
 
         Args:
@@ -148,7 +147,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
-        sink: float =0.0,
+        sink: float = 0.0,
         center=False,
     ):
         """This method will cut a block out of the CycadPart.
@@ -245,8 +244,7 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
 
-    def side_location_calculator(self, side: str, x: float, y: float, sink: float =0.0)-> tuple:
-        
+    def side_location_calculator(self, side: str, x: float, y: float, sink: float = 0.0) -> tuple:
         """
         Calculate given the side of and object and the relative x and y location on that side where the definite location is.
         Args:
