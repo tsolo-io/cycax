@@ -37,7 +37,7 @@ class SheetMetal(CycadPart):
         dict_metal = {
             "name": "cube",
             "type": "add",
-            "side": None,
+            "side": self.side,
             "x": self.x,
             "y": self.y,
             "z": self.z,

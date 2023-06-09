@@ -21,18 +21,18 @@ class Fan:
         y: float,
         internal: bool = True,
         depth: float = 2.0,
-        hole_diameter: float = 3.0
+        hole_diameter: float = 3.0,
     ) -> None:
         self.width = width
-        self.border=1
-        self.diameter=width-2*self.border
+        self.border = 1
+        self.diameter = width - 2 * self.border
         self.surface = surface
         self.internal = internal
         self.x = x
         self.y = y
         self.depth = depth
         self.hole_diameter = hole_diameter
-        
+
         self.calculate()
 
     def calculate(self):
@@ -50,10 +50,10 @@ class Fan:
         """
         This method will cut the securing_holes of the fan into the sheet_metal.
         """
-        start_x = self.x - self.width / 2 + self.hole_diameter+self.border
-        start_y = self.y - self.width / 2 + self.hole_diameter+self.border
-        end_x = self.x + self.width / 2 - self.hole_diameter+self.border
-        end_y = self.y + self.width / 2 - self.hole_diameter+self.border
+        start_x = self.x - self.diameter / 2 + self.hole_diameter / 2
+        start_y = self.y - self.diameter / 2 + self.hole_diameter / 2
+        end_x = self.x + self.diameter / 2 - self.hole_diameter / 2
+        end_y = self.y + self.diameter / 2 - self.hole_diameter / 2
         for working_x in [start_x, end_x]:
             for working_y in [start_y, end_y]:
                 self.surface.make_hole(x=working_x, y=working_y, side="TOP", diameter=self.hole_diameter, depth=2)
@@ -69,15 +69,29 @@ class Fan:
         This method will cut multiple slots into the SheetMetal surface to make gaps that will allow the internal fan to circulate the air.
         """
         slot_area = self.diameter - 16
-        slots = int((slot_area)/8)
-        spaces=(slot_area -slots*4)/(slots-1)
-        start_x = self.x -self.diameter / 2
-        # finish_y = self.y + counter
-        start_y = self.y - (self.diameter - 16)/2
-        while start_y < self.diameter/2 + self.y -counter:
-            self.surface.make_slot(x=start_x, y=start_y, side="TOP", x_size=self.diameter -2, y_size=counter, z_size=self.depth)
-            # self.surface.make_slot(x=start_x, y=finish_y, side="TOP", x_size=self.diameter-2, y_size=counter, z_size=self.depth)
-            start_y = start_y + 2*counter
-            # finish_y = finish_y - 2*counter
-        self.surface.make_slot(x=self.x - self.width/2 + self.hole_diameter+self.border+1, y=self.y - self.width / 2 + self.hole_diameter+self.border, side="TOP", x_size=self.width - 2*self.hole_diameter - 2*self.border  - 4, y_size=4, z_size=self.depth)
-        self.surface.make_slot(x=self.x - self.width/2 + self.hole_diameter+self.border+1, y=self.y + self.width / 2 - self.hole_diameter+self.border, side="TOP", x_size=self.width - 2*self.hole_diameter - 2*self.border  - 4, y_size=4, z_size=self.depth)
+        slots = int((slot_area) / 8)
+        spaces = (slot_area + 8 - slots * 4) / (slots + 1)
+        start_x = self.x - self.diameter / 2
+        finish_y = self.y - spaces / 2 - 2
+        start_y = self.y + spaces / 2 + 2
+        while start_y < self.diameter / 2 + self.y - 8:
+            self.surface.make_slot(x=start_x, y=start_y, side="TOP", x_size=self.diameter, y_size=4, z_size=self.depth)
+            self.surface.make_slot(x=start_x, y=finish_y, side="TOP", x_size=self.diameter, y_size=4, z_size=self.depth)
+            start_y = start_y + spaces + 4
+            finish_y = finish_y - spaces - 4
+        self.surface.make_slot(
+            x=self.x - self.diameter / 2 + self.hole_diameter + 2,
+            y=self.y + self.diameter / 2 - self.hole_diameter / 2,
+            side="TOP",
+            x_size=self.diameter - 2 * self.hole_diameter - 4,
+            y_size=4,
+            z_size=self.depth,
+        )
+        self.surface.make_slot(
+            x=self.x - self.diameter / 2 + self.hole_diameter + 2,
+            y=self.y - self.diameter / 2 + self.hole_diameter / 2,
+            side="TOP",
+            x_size=self.diameter - 2 * self.hole_diameter - 4,
+            y_size=4,
+            z_size=self.depth,
+        )

@@ -82,8 +82,6 @@ class RectangleCutOut(Location):
             dict: this will return a dictionary.
 
         """
-        if self.side in ["FRONT", "LEFT", "BOTTOM"]:
-            self.side = None
         dict_cube = {}
         dict_cube["name"] = "cube"
         dict_cube["type"] = "cut"

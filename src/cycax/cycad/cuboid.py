@@ -39,11 +39,10 @@ class Cuboid(CycadPart):
         dict_cube = {
             "name": "cube",
             "type": "add",
-            "side": None,
+            "side": self.side,
             "x": self.x,
             "y": self.y,
             "z": self.z,
-            # TODO: Update. Maybe just ?_size and not width,length, or depth.
             "x_size": self.x_size,
             "y_size": self.y_size,
             "z_size": self.z_size,

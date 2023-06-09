@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import subprocess
 
 from cycax.cycad.cycad_part import CycadPart
@@ -21,10 +22,11 @@ class EngineOpenSCAD:
             lookup: this will be the dictionary that contains the details about the cube so that is can be encoded in scad.
 
         """
+        res = self.move_cube(lookup)
         center = ""
         if lookup["center"] is True:
             center = ", center=true"
-        res = (
+        res = res + (
             "cube(["
             + str(lookup["x_size"])
             + ", "
@@ -56,8 +58,11 @@ class EngineOpenSCAD:
             lookup : This will be a dictionary containing the necessary information about the hole.
 
         """
-        tempdiam = lookup["diameter"]/2
-        res = "cylinder(r=" + str(tempdiam) + ", h=" + str(lookup["depth"]) + ", $fn=64);"
+        tempdiam = lookup["diameter"] / 2
+        res = []
+        res.append(self.translate(lookup))
+        res.append(self.rotate(lookup["side"]))
+        res.append("cylinder(r=" + str(tempdiam) + ", h=" + str(lookup["depth"]) + ", $fn=64);")
         return res
 
     def decode_nut(self, lookup: dict) -> str:
@@ -68,20 +73,10 @@ class EngineOpenSCAD:
             lookup : This will be a dictionary containing the necessary information about the nut.
 
         """
-        res = (
-            "rotate(["
-            + str(0)
-            + ", "
-            + str(0)
-            + ", "
-            + str(0)
-            + "])"
-            + "cylinder(r="
-            + str(lookup["nut_type"])
-            + ", h="
-            + str(lookup["depth"])
-            + ", $fn=6);"
-        )
+        res = []
+        res.append(self.translate(lookup))
+        res.append(self.rotate(lookup["side"]))
+        res.append("cylinder(r=" + str(lookup["nut_type"]) + ", h=" + str(lookup["depth"]) + ", $fn=6);")
         return res
 
     def decode_cut(self) -> str:
@@ -100,6 +95,38 @@ class EngineOpenSCAD:
         res = "translate([" + str(lookup["x"]) + ", " + str(lookup["y"]) + ", " + str(lookup["z"]) + "])"
         return res
 
+    def move_cube(self, features: dict) -> str:
+        """
+        Accounts for when a cube is not going to penetrate the surface but rather sit above is.
+
+        Args:
+            features: This is the dictionary that contains the deatails of where the cube must be places and its details.
+        """
+
+        angles = [0, 0, 0]
+        if features["side"] is not None:
+            angles = features["side"]
+            angles = {
+                TOP: [0, 0, -features["z_size"]],
+                BACK: [-features["y_size"], 0, 0],
+                BOTTOM: [0, 0, 0],
+                FRONT: [0, 0, 0],
+                LEFT: [0, 0, 0],
+                RIGHT: [0, -features["x_size"], 0],
+            }.get(angles)
+
+        output = (
+            "translate(["
+            + str(angles[0] + features["x"])
+            + ", "
+            + str(angles[1] + features["y"])
+            + ", "
+            + str(angles[2] + features["z"])
+            + "])"
+        )
+
+        return output
+
     def rotate(self, side: str) -> str:
         """
         This will rotate the object and return the scad necessary.
@@ -109,21 +136,16 @@ class EngineOpenSCAD:
         Args:
             side : this is the side as retrieved form the dictionary.
         """
-        if side == TOP:
-            return "rotate([" + str(0) + ", " + str(180) + ", " + str(0) + "])"
-        elif side == BOTTOM:
-            return "rotate([" + str(0) + ", " + str(0) + ", " + str(0) + "])"
-        elif side == LEFT:
-            return "rotate([" + str(0) + ", " + str(90) + ", " + str(0) + "])"
-        elif side == RIGHT:
-            return "rotate([" + str(0) + ", " + str(270) + ", " + str(0) + "])"
-        elif side == FRONT:
-            return "rotate([" + str(270) + ", " + str(0) + ", " + str(0) + "])"
-        elif side == BACK:
-            return "rotate([" + str(90) + ", " + str(0) + ", " + str(0) + "])"
-        else:
-            msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-            raise ValueError(msg)
+        side = {
+            TOP: "rotate([0, 180, 0])",
+            BACK: "rotate([90, 0, 0])",
+            BOTTOM: "rotate([0, 0, 0])",
+            FRONT: "rotate([270, 0, 0])",
+            LEFT: "rotate([0, 90, 0])",
+            RIGHT: "rotate([0, 270, 0])",
+        }.get(side)
+
+        return side
 
     def decode(self, data_file: str):
         """
@@ -148,11 +170,6 @@ class EngineOpenSCAD:
                 dif = dif + 1
                 output.insert(0, self.decode_cut())
 
-            output.append(self.translate(action))
-
-            if action["side"] is not None:
-                output.append(self.rotate(action["side"]))
-
             if action["name"] == "cube":
                 output.append(self.decode_cube(action))
 
@@ -171,7 +188,11 @@ class EngineOpenSCAD:
             output.append("}")
 
         for out in output:
-            SCAD.write(out)
+            if type(out) == list:
+                for small in out:
+                    SCAD.write(small)
+            else:
+                SCAD.write(out)
 
         SCAD.close()
 
@@ -204,6 +225,8 @@ class EngineOpenSCAD:
         Args:
             part(CycadPart) : This is the part that will be eported to a json.
         """
-
+        # dir_name = os.getcwd() + "/" + part.part_no
+        # if not os.path.exists(dir_name):
+        #     os.mkdir(dir_name)
         with open("./JSON/" + part.part_no + ".json", "w") as jsonfile:
             json.dump(part.export(), jsonfile, indent=4)
