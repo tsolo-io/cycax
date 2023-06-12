@@ -30,9 +30,9 @@ class Assembly:
         for part in datafile:
             name = part["part_no"]
 
-            STLname = "./STL/" + name + ".stl"
+            STLname = os.getcwd() + "/" + name + "/" + name + ".stl"
             if not os.path.exists(STLname):
-                SCADname = "./SCAD/" + name + ".scad"
+                SCADname = os.getcwd() + "/" + name + "/" + name + ".scad"
                 if not os.path.exists(SCADname):
                     logging.info("Creating a SCAD file of the pieces of the object.")
                     self.decoder.decode(name)
@@ -42,8 +42,11 @@ class Assembly:
             else:
                 pass
 
-        with open("./JSON/" + self.part_number + ".json", "w") as jsonfile:
-            json.dump(datafile, jsonfile, indent=4)
+        dir_name = os.getcwd() + "/" + self.part_number
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
+        with open(dir_name + "/" + self.part_number + ".json", "w") as jsonfile:
+            json.dump(self.export(), jsonfile, indent=4)
 
         logging.info("moving to the assembler")
         self.assembler.assembly_openscad()
@@ -57,19 +60,23 @@ class Assembly:
             part(CycadPart): this in the part that will be added to the assembly.
         """
 
-        with open("./JSON/" + "temp.json", "w") as jsonfile:
+        dir_name = os.getcwd() + "/" + part.part_no
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
+
+        with open("./" + "temp.json", "w") as jsonfile:
             json.dump(part.export(), jsonfile, indent=4)
 
-        JSONname = "./JSON/" + part.part_no + ".json"
+        JSONname = dir_name + "/" + part.part_no + ".json"
         if os.path.exists(JSONname):  # checking if the file is already in the directory.
             current = os.stat(JSONname).st_size
-            new = os.stat("./JSON/temp.json").st_size
+            new = os.stat("./temp.json").st_size
             if new >= current:  # addind the file if it is bigger.
-                os.rename("./JSON/temp.json", JSONname)
+                os.rename("./temp.json", JSONname)
             else:  # removing the file if it is not bigger.
-                os.remove("./JSON/temp.json")
+                os.remove("./temp.json")
         else:  # renaming the file if there isn't one already in the file.
-            os.rename("./JSON/temp.json", JSONname)
+            os.rename("./temp.json", JSONname)
 
         self.pieces.append(part)
 

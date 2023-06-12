@@ -1,36 +1,34 @@
-from cycax.cycad.sheet_metal import SheetMetal
+from cycax.cycad.external_part import ExternalPart
 
 
-class Fan:
+class Fan(ExternalPart):
     """This class will initializa a fan cut out in the sheet metal specified.
 
     Args:
-        diameter: This is the diameter of the fan.
+        width: Width of the fan. This will be used to create the fan's square bounding box.
+        depth: The depth of the fan, used to make the bounding box.
+        part_no: The specific part number of the fan.
         internal: This is a boolean to establish whether the fan is external or internal. If the fan is internal slots will be cut out and if it is external a big hole will be cut.
-        surface: This is the CycaxPart which the fan template will be cut into.
-        x: x location of th center of the fan.
-        y: y location of the center of the fan.
-        depth: How thick the surface is that the fan is being placed into.
+        hole_depth: The depth of the material the fan will be set to cut out. This is automated for 2mm steel.
+        hole_diameter: The diamter of the securing holes of the fan. This is automated to 3mm.
     """
 
     def __init__(
         self,
         width: float,
-        surface: SheetMetal,
-        x: float,
-        y: float,
+        depth: float,
+        part_no: str,
         internal: bool = True,
-        depth: float = 2.0,
+        hole_depth: float = 2.0,
         hole_diameter: float = 3.0,
-    ) -> None:
-        self.width = width
+    ):
+        super().__init__(part_no=part_no, x_size=width, y_size=width, z_size=depth)
         self.border = 1
         self.diameter = width - 2 * self.border
-        self.surface = surface
         self.internal = internal
-        self.x = x
-        self.y = y
-        self.depth = depth
+        self.hole_x = width / 2
+        self.hole_y = width / 2
+        self.hole_depth = hole_depth
         self.hole_diameter = hole_diameter
 
         self.calculate()
@@ -50,19 +48,22 @@ class Fan:
         """
         This method will cut the securing_holes of the fan into the sheet_metal.
         """
-        start_x = self.x - self.diameter / 2 + self.hole_diameter / 2
-        start_y = self.y - self.diameter / 2 + self.hole_diameter / 2
-        end_x = self.x + self.diameter / 2 - self.hole_diameter / 2
-        end_y = self.y + self.diameter / 2 - self.hole_diameter / 2
+        start_x = self.hole_x - self.diameter / 2 + self.hole_diameter / 2
+        start_y = self.hole_y - self.diameter / 2 + self.hole_diameter / 2
+        end_x = self.hole_x + self.diameter / 2 - self.hole_diameter / 2
+        end_y = self.hole_y + self.diameter / 2 - self.hole_diameter / 2
         for working_x in [start_x, end_x]:
             for working_y in [start_y, end_y]:
-                self.surface.make_hole(x=working_x, y=working_y, side="TOP", diameter=self.hole_diameter, depth=2)
+                self.make_hole(
+                    x=working_x, y=working_y, side="TOP", diameter=self.hole_diameter, depth=2, external_only=True
+                )
+                self.make_hole(x=working_x, y=working_y, side="TOP", diameter=self.hole_diameter, depth=self.z_size)
 
     def externa(self):
         """
         This method will cut a large hole in the SheetMetal for the fan.
         """
-        self.surface.make_hole(x=self.x, y=self.y, side="TOP", diameter=self.diameter, depth=2)
+        self.make_hole(x=self.hole_x, y=self.hole_y, side="TOP", diameter=self.diameter, depth=2, external_only=True)
 
     def interna(self):
         """
@@ -71,27 +72,45 @@ class Fan:
         slot_area = self.diameter - 16
         slots = int((slot_area) / 8)
         spaces = (slot_area + 8 - slots * 4) / (slots + 1)
-        start_x = self.x - self.diameter / 2
-        finish_y = self.y - spaces / 2 - 2
-        start_y = self.y + spaces / 2 + 2
-        while start_y < self.diameter / 2 + self.y - 8:
-            self.surface.make_slot(x=start_x, y=start_y, side="TOP", x_size=self.diameter, y_size=4, z_size=self.depth)
-            self.surface.make_slot(x=start_x, y=finish_y, side="TOP", x_size=self.diameter, y_size=4, z_size=self.depth)
+        start_x = self.hole_x - self.diameter / 2
+        finish_y = self.hole_y - spaces / 2 - 2
+        start_y = self.hole_y + spaces / 2 + 2
+        while start_y < self.diameter / 2 + self.hole_y - 8:
+            self.make_slot(
+                x=start_x,
+                y=start_y,
+                side="TOP",
+                x_size=self.diameter,
+                y_size=4,
+                z_size=self.hole_depth,
+                external_only=True,
+            )
+            self.make_slot(
+                x=start_x,
+                y=finish_y,
+                side="TOP",
+                x_size=self.diameter,
+                y_size=4,
+                z_size=self.hole_depth,
+                external_only=True,
+            )
             start_y = start_y + spaces + 4
             finish_y = finish_y - spaces - 4
-        self.surface.make_slot(
-            x=self.x - self.diameter / 2 + self.hole_diameter + 2,
-            y=self.y + self.diameter / 2 - self.hole_diameter / 2,
+        self.make_slot(
+            x=self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
+            y=self.hole_y + self.diameter / 2 - self.hole_diameter / 2,
             side="TOP",
             x_size=self.diameter - 2 * self.hole_diameter - 4,
             y_size=4,
-            z_size=self.depth,
+            z_size=self.hole_depth,
+            external_only=True,
         )
-        self.surface.make_slot(
-            x=self.x - self.diameter / 2 + self.hole_diameter + 2,
-            y=self.y - self.diameter / 2 + self.hole_diameter / 2,
+        self.make_slot(
+            x=self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
+            y=self.hole_y - self.diameter / 2 + self.hole_diameter / 2,
             side="TOP",
             x_size=self.diameter - 2 * self.hole_diameter - 4,
             y_size=4,
-            z_size=self.depth,
+            z_size=self.hole_depth,
+            external_only=True,
         )

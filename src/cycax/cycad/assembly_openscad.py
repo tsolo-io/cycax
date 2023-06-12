@@ -1,4 +1,5 @@
 import json
+import os
 
 
 class AssemblyOpenSCAD:
@@ -20,7 +21,8 @@ class AssemblyOpenSCAD:
         Args:
             part: this is the name of the part that will be imported.
         """
-        return 'import("../STL/' + part + '.stl");'
+        os.getcwd() + "/" + self.part_no + "/"
+        return 'import("' + os.getcwd() + "/" + part + "/" + part + '.stl");'
 
     def _swap_xy_(self, rotation: tuple, rot: float, max_y: float) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
@@ -86,9 +88,9 @@ class AssemblyOpenSCAD:
         """
         Decodes the provided json and moves the object around as required, making a new openSCAD which will use imported stl.
         """
-        out_name = "./SCAD/" + self.part_no + ".scad"
+        out_name = os.getcwd() + "/" + self.part_no + "/" + self.part_no + ".scad"
         SCAD = open(out_name, "w")
-        in_name = "./JSON/" + self.part_no + ".json"
+        in_name = os.getcwd() + "/" + self.part_no + "/" + self.part_no + ".json"
         with open(in_name) as f:
             data = json.load(f)
         f.close()

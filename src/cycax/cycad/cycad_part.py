@@ -56,6 +56,7 @@ class CycadPart(Location):
         diameter: float,
         depth: float,
         inner: bool = True,
+        external_only: bool = False,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
         If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
@@ -71,9 +72,11 @@ class CycadPart(Location):
         temp_hole = Holes(
             side=side, x=location_output[0], y=location_output[1], z=location_output[2], diameter=diameter, depth=depth
         )
-        if inner:
+        if external_only:
+            self.move_holes.append(temp_hole)
+        elif inner:
             self.features.append(temp_hole)
-        else:
+        elif not inner:
             move_hole = temp_hole
             self.features.append(temp_hole)
             self.move_holes.append(move_hole)
@@ -88,6 +91,7 @@ class CycadPart(Location):
         z_size: float,
         horizontal: bool = True,
         inner=True,
+        external_only: bool = False,
     ):
         """This method will insert a slot into a CycadPart.
 
@@ -114,12 +118,21 @@ class CycadPart(Location):
             horizontal=horizontal,
         )
         # This will add it to the relevnt array
-        if inner:
-            self.features.append(temp_slot)
-        else:
-            move_slot = temp_slot
-            self.features.append(temp_slot)
-            self.move_holes.append(move_slot)
+        if external_only:
+            self.move_holes.append(temp_slot.hole_left)
+            self.move_holes.append(temp_slot.hole_right)
+            self.move_holes.append(temp_slot.rectangle)
+        elif inner:
+            self.features.append(temp_slot.hole_left)
+            self.features.append(temp_slot.hole_right)
+            self.features.append(temp_slot.rectangle)
+        elif not inner:
+            self.move_holes.append(temp_slot.hole_left)
+            self.move_holes.append(temp_slot.hole_right)
+            self.move_holes.append(temp_slot.rectangle)
+            self.features.append(temp_slot.hole_left)
+            self.features.append(temp_slot.hole_right)
+            self.features.append(temp_slot.rectangle)
 
     def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float = 0.0):
         """This method will insert a nut into a CycadPart.

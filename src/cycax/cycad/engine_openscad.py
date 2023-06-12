@@ -24,7 +24,7 @@ class EngineOpenSCAD:
         """
         res = self.move_cube(lookup)
         center = ""
-        if lookup["center"] is True:
+        if "center" in lookup is True:
             center = ", center=true"
         res = res + (
             "cube(["
@@ -156,9 +156,9 @@ class EngineOpenSCAD:
         Args:
             data_file : name of the file that is to be decoded into a scad.
         """
-        out_name = "./SCAD/" + data_file + ".scad"
+        out_name = os.getcwd() + "/" + data_file + "/" + data_file + ".scad"
         SCAD = open(out_name, "w")
-        in_name = "./JSON/" + data_file + ".json"
+        in_name = os.getcwd() + "/" + data_file + "/" + data_file + ".json"
 
         with open(in_name) as f:
             data = json.load(f)
@@ -207,8 +207,8 @@ class EngineOpenSCAD:
             filename : This is the name of the file which will be converted from a scad to a stl
 
         """
-        out_name = "./SCAD/" + filename + ".scad"
-        out_stl_name = "./STL/" + filename + ".stl"
+        out_name = os.getcwd() + "/" + filename + "/" + filename + ".scad"
+        out_stl_name = os.getcwd() + "/" + filename + "/" + filename + ".stl"
 
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!!")
         result = subprocess.run(["openscad", "-o", out_stl_name, out_name], capture_output=True, text=True)
@@ -225,8 +225,8 @@ class EngineOpenSCAD:
         Args:
             part(CycadPart) : This is the part that will be eported to a json.
         """
-        # dir_name = os.getcwd() + "/" + part.part_no
-        # if not os.path.exists(dir_name):
-        #     os.mkdir(dir_name)
-        with open("./JSON/" + part.part_no + ".json", "w") as jsonfile:
+        dir_name = os.getcwd() + "/" + part.part_no
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
+        with open(dir_name + "/" + part.part_no + ".json", "w") as jsonfile:
             json.dump(part.export(), jsonfile, indent=4)

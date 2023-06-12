@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -140,7 +141,7 @@ class Figure:
 
     def save_as_figure(self):
         """This method will coordinate the drawing and saving of the figure that is being decoded from the provided json."""
-        in_name = "./JSON/" + self.data_file + ".json"
+        in_name = os.getcwd() + "/" + self.data_file + "/" + self.data_file + ".json"
         with open(in_name) as f:
             data = json.load(f)
         fig, ax = plt.subplots()
@@ -152,6 +153,6 @@ class Figure:
         ax.set_title(self.data_file)
         ax.autoscale_view()
         ax.set_aspect("equal", "box")
-        figfile = f"./figures/{self.data_file}-fig.svg"
+        figfile = os.getcwd() + "/" + self.data_file + "/" + self.data_file + "-fig.svg"
         plt.savefig(figfile)
         logging.info("Write to %s", figfile)
