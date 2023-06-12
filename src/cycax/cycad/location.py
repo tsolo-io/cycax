@@ -5,6 +5,7 @@ TOP = "TOP"
 BOTTOM = "BOTTOM"
 FRONT = "FRONT"
 BACK = "BACK"
+REAR= "BACK"
 
 
 class Location:
@@ -27,29 +28,6 @@ class Location:
     def __repr__(self) -> str:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 
-    def move(self, x: float = 0, y: float = 0, z: float = 0):
-        """Update position relative to its current location.
-
-        Args:
-            x: Move this many units on the X-axis.
-            y: Move this many units on the Y-axis.
-            z: Move this many units on the Z-axis.
-        """
-        self.x = self.x + x
-        self.y = self.y + y
-        self.z = self.z + z
-
-    def at(self, x: float = 0, y: float = 0, z: float = 0):
-        """This class will move a location to the exact location provided.
-
-        Args:
-            x: Move to this exact location on the X-axis.
-            y: Move to this exact location on the Y-axis.
-            z: Move to this exact location on the Z-axis.
-        """
-        self.x = x
-        self.y = y
-        self.z = z
 
     def swap_xy(self, rot: float, max_y: float):
         """Rotate while holding the top where it currenly is.

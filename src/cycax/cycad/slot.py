@@ -60,19 +60,6 @@ class Slot:
 
         return dict_hole_left, dict_hole_right, dict_rectangle
 
-    def move(self, x: float = 0, y: float = 0, z: float = 0):
-        """
-        Move to a new location, the location refers to its top left hand corner.
-        Args:
-            x: move this x this many units along the x axis.
-            y: move this y this many units along the y axis.
-            z: move this z this many units along the z axis.
-        """
-
-        self.hole_left.move(x, y, z)
-        self.hole_right.move(x, y, z)
-        self.rectangle.move(x, y, z)
-
     def swap_xy(self, rot: float, max_y: float):
         """Rotate while holding the top where it currenly is.
 
