@@ -7,7 +7,6 @@ from cycax.cycad.external_part import ExternalPart
 from cycax.cycad.sheet_metal import SheetMetal
 
 
-
 class Thing(Cuboid):
     part_no = "thing7653"
     x_size = 10
@@ -23,7 +22,7 @@ class Thing(Cuboid):
                 self.make_hole(x, y, "TOP", diameter=3.1, depth=12, inner=False)
 
 
-class Blob(Cuboid): # ExternalPart):
+class Blob(Cuboid):  # ExternalPart):
     part_no = "Blob-XD-F-0"
     model_file = Path("~/Downloads/stolen/STL/Blob.stl")
     x_size = 10

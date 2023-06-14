@@ -201,7 +201,7 @@ class CycadPart(Location):
             "BACK": self.y_max,
         }
 
-    def move(self, x: float=None, y: float=None, z: float=None):
+    def move(self, x: float = None, y: float = None, z: float = None):
         """This method will be used for moving the part.
 
         Args:
@@ -216,22 +216,20 @@ class CycadPart(Location):
         y_size = self.y_max - self.y_min
         z_size = self.z_max - self.z_min
 
-        if x != None:
+        if x is not None:
             self.x_min = x
             self.x_max = x + x_size
             self.moves[0] = x
-        if y != None:
+        if y is not None:
             self.y_min = y
             self.y_max = y + y_size
             self.moves[1] = y
-        if z != None:
+        if z is not None:
             self.z_min = z
             self.z_max = z + z_size
             self.moves[2] = z
 
         self.make_bounding_box()
-        
-        
 
     def insert_hole(self, hole):
         """This method will be used for inserting the hole into an object.
