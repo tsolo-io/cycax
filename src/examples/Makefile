@@ -5,7 +5,7 @@ all: install box fan
 main:
 	. ./.venv/bin/activate
 	pip install --force-reinstall $(shell ls ${PWD}/../cycax/dist/cycax-*.whl | sort | head -n1)
-	./main.py
+	./thlob_example.py
 
 box:
 	. ./.venv/bin/activate
