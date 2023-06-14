@@ -5,7 +5,7 @@ TOP = "TOP"
 BOTTOM = "BOTTOM"
 FRONT = "FRONT"
 BACK = "BACK"
-REAR= "BACK"
+REAR = "BACK"
 
 
 class Location:
@@ -27,7 +27,6 @@ class Location:
 
     def __repr__(self) -> str:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
-
 
     def swap_xy(self, rot: float, max_y: float):
         """Rotate while holding the top where it currenly is.

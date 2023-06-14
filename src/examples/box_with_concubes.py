@@ -1,12 +1,8 @@
-#!/usr/bin/python
-
-import json
+#!/usr/bin/env python3
 
 from ConCube import ConCube
 
 from cycax.cycad.assembly import Assembly
-from cycax.cycad.cuboid import Cuboid
-from cycax.cycad.engine import Engine
 from cycax.cycad.external_part import ExternalPart
 from cycax.cycad.sheet_metal import SheetMetal
 
