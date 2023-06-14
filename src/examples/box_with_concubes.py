@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
-from ConCube import ConCube
-
-from cycax.cycad.assembly import Assembly
-from cycax.cycad.external_part import ExternalPart
-from cycax.cycad.sheet_metal import SheetMetal
+from cycax.cycad import Assembly, Cuboid, ExternalPart, SheetMetal
 
 LEFT = "LEFT"
 RIGHT = "RIGHT"
@@ -12,6 +8,10 @@ TOP = "TOP"
 BOTTOM = "BOTTOM"
 FRONT = "FRONT"
 BACK = "BACK"
+
+
+class ConCube(Cuboid):
+    pass
 
 
 class main:
