@@ -40,9 +40,7 @@ class Location:
         while rot != 0:
             self.y, self.x = self.x, max_y - self.y
             rot = rot - 1
-        self.side = {LEFT: BACK, BACK: RIGHT, RIGHT: FRONT, FRONT: LEFT, TOP: TOP, BOTTOM: BOTTOM}.get(
-            self.side
-        )  # This will compute which side of the object the feature now inserts into.
+        self.side = {LEFT: BACK, BACK: RIGHT, RIGHT: FRONT, FRONT: LEFT, TOP: TOP, BOTTOM: BOTTOM}[self.side] # This will compute which side of the object the feature now inserts into.
 
     def swap_xz(self, rot: float, max_x: float):
         """Rotate while holding the front where it currenly is.
@@ -55,9 +53,21 @@ class Location:
         while rot != 0:
             self.x, self.z = self.z, max_x - self.x
             rot = rot - 1
-        self.side = {LEFT: BOTTOM, BOTTOM: RIGHT, RIGHT: TOP, TOP: LEFT, FRONT: FRONT, BACK: BACK}.get(
-            self.side
-        )  # This will compute which side of the object the feature now inserts into.
+        self.side = {LEFT: BOTTOM, BOTTOM: RIGHT, RIGHT: TOP, TOP: LEFT, FRONT: FRONT, BACK: BACK}[self.side]  # This will compute which side of the object the feature now inserts into.
+        
+    def move(self, x: float=None, y: float=None, z: float=None):
+        """This move can be used to translate objects based on the provided arguments.
+        Args:
+            x: the value to which x needs to be moved.
+            y: the value to which y needs to be moved.
+            z: the value to which z needs to be moved.
+        """
+        if x is not None:
+            self.x=x
+        if y is not None:
+            self.y=y
+        if z is not None:
+            self.z=z
 
     def swap_yz(self, rot: float, max_z: float):
         """Rotate while holding the left where it currenly is.
@@ -70,6 +80,4 @@ class Location:
         while rot != 0:
             self.y, self.z = max_z - self.z, self.y
             rot = rot - 1
-        self.side = {TOP: BACK, BACK: BOTTOM, BOTTOM: FRONT, FRONT: TOP, LEFT: LEFT, RIGHT: RIGHT}.get(
-            self.side
-        )  # This will compute which side of the object the feature now inserts into.
+        self.side = {TOP: BACK, BACK: BOTTOM, BOTTOM: FRONT, FRONT: TOP, LEFT: LEFT, RIGHT: RIGHT}[self.side]  # This will compute which side of the object the feature now inserts into.

@@ -21,8 +21,7 @@ class AssemblyOpenSCAD:
         Args:
             part: this is the name of the part that will be imported.
         """
-        os.getcwd() + "/" + self.part_no + "/"
-        return 'import("' + os.getcwd() + "/" + part + "/" + part + '.stl");'
+        return 'import("{cwd}/{part}/{part}.stl");'.format(cwd=os.getcwd(), part=part)
 
     def _swap_xy_(self, rotation: tuple, rot: float, max_y: float) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
@@ -64,16 +63,8 @@ class AssemblyOpenSCAD:
         rotation = self._swap_xz_(rotation, Rotate[1] / 90, Rotmax[2])
         rotation = self._swap_xy_(rotation, Rotate[2] / 90, Rotmax[0])
 
-        output = (
-            "translate(["
-            + str(rotation[0] + float(moves[0]))
-            + ", "
-            + str(rotation[1] + float(moves[1]))
-            + ", "
-            + str(rotation[2] + float(moves[2]))
-            + "])"
-        )
-        output = output + "rotate([" + str(Rotate[0]) + ", " + str(Rotate[1]) + ", " + str(Rotate[2]) + "])"
+        output = "translate([{x}, {y}, {z}])".format(x=rotation[0] + float(moves[0]), y=rotation[1] + float(moves[1]), z=rotation[2] + float(moves[2]))
+        output = output + "rotate([{x}, {y}, {z}])".format(x=Rotate[0], y=Rotate[1], z=Rotate[2])
         return output
 
     def colour(self, colour: str) -> str:
@@ -82,15 +73,15 @@ class AssemblyOpenSCAD:
         Args:
             colour: Colour which the object will become.
         """
-        return 'color("' + colour + '")'
+        return 'color("{colour}")'.format(colour=colour)
 
     def assembly_openscad(self):
         """
         Decodes the provided json and moves the object around as required, making a new openSCAD which will use imported stl.
         """
-        out_name = os.getcwd() + "/" + self.part_no + "/" + self.part_no + ".scad"
+        out_name = "{cwd}/{part_no}/{part_no}.scad".format(cwd=os.getcwd(), part_no=self.part_no)
         SCAD = open(out_name, "w")
-        in_name = os.getcwd() + "/" + self.part_no + "/" + self.part_no + ".json"
+        in_name = "{cwd}/{part_no}/{part_no}.json".format(cwd=os.getcwd(), part_no=self.part_no)
         with open(in_name) as f:
             data = json.load(f)
         f.close()

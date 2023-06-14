@@ -66,7 +66,7 @@ class Figure:
         self.boundin_box[BACK]: self.boundin_box[BACK] + feature["y_size"]
         self.plane = self.side
         self.hole_sink = self.side
-        self.plane = {TOP: z, BACK: y, BOTTOM: z, FRONT: y, LEFT: x, RIGHT: x}.get(self.plane)
+        self.plane = {TOP: z, BACK: y, BOTTOM: z, FRONT: y, LEFT: x, RIGHT: x}[self.plane]
         self.hole_sink = {
             TOP: "depth",
             BACK: "diameter",
@@ -74,7 +74,7 @@ class Figure:
             FRONT: "diameter",
             LEFT: "diameter",
             RIGHT: "diameter",
-        }.get(self.hole_sink)
+        }[self.hole_sink]
 
     def hole(self, ax, feature: dict):
         """This method will draw a hole on the plot if the given hole reaches the side which it is drawing.
@@ -112,7 +112,7 @@ class Figure:
                 FRONT: "x_size",
                 LEFT: "y_size",
                 RIGHT: "y_size",
-            }.get(length)
+            }[length]
             width = self.side
             width = {
                 TOP: "y_size",
@@ -121,7 +121,7 @@ class Figure:
                 FRONT: "z_size",
                 LEFT: "z_size",
                 RIGHT: "z_size",
-            }.get(width)
+            }[width]
             length = feature[length]
             width = feature[width]
             ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self.get_feature_style(feature)))

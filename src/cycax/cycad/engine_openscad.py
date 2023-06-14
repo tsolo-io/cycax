@@ -26,17 +26,7 @@ class EngineOpenSCAD:
         center = ""
         if "center" in lookup is True:
             center = ", center=true"
-        res = res + (
-            "cube(["
-            + str(lookup["x_size"])
-            + ", "
-            + str(lookup["y_size"])
-            + ","
-            + str(lookup["z_size"])
-            + "]"
-            + center
-            + ");"
-        )
+        res = res + "cube([{x_size:}, {y_size:}, {z_size:}]{center});".format(**lookup, center=center)
         return res
 
     def decode_external(self, data_file: str) -> str:
@@ -48,7 +38,7 @@ class EngineOpenSCAD:
 
         """
 
-        return 'import("../parts_stl/' + data_file + '.stl");'
+        return 'import("../parts_stl/{data}.stl");'.format(data=data_file)
 
     def decode_hole(self, lookup: dict) -> str:
         """
@@ -62,7 +52,8 @@ class EngineOpenSCAD:
         res = []
         res.append(self.translate(lookup))
         res.append(self.rotate(lookup["side"]))
-        res.append("cylinder(r=" + str(tempdiam) + ", h=" + str(lookup["depth"]) + ", $fn=64);")
+        res.append("cylinder(r= {diam}, h={depth}, $fn=64);").format(diam=tempdiam, depth=lookup["depth"])
+        res.append()
         return res
 
     def decode_nut(self, lookup: dict) -> str:
@@ -76,7 +67,9 @@ class EngineOpenSCAD:
         res = []
         res.append(self.translate(lookup))
         res.append(self.rotate(lookup["side"]))
-        res.append("cylinder(r=" + str(lookup["nut_type"]) + ", h=" + str(lookup["depth"]) + ", $fn=6);")
+        res.append("cylinder(r={nut_type:}, h={depth:}, $fn=6);".format(**lookup))
+        
+        
         return res
 
     def decode_cut(self) -> str:
@@ -92,7 +85,7 @@ class EngineOpenSCAD:
         Args:
             lookup : This will be a dictionary containing the necessary information about the hole.
         """
-        res = "translate([" + str(lookup["x"]) + ", " + str(lookup["y"]) + ", " + str(lookup["z"]) + "])"
+        res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
 
     def move_cube(self, features: dict) -> str:
@@ -113,17 +106,9 @@ class EngineOpenSCAD:
                 FRONT: [0, 0, 0],
                 LEFT: [0, 0, 0],
                 RIGHT: [0, -features["x_size"], 0],
-            }.get(angles)
+            }[angles]
 
-        output = (
-            "translate(["
-            + str(angles[0] + features["x"])
-            + ", "
-            + str(angles[1] + features["y"])
-            + ", "
-            + str(angles[2] + features["z"])
-            + "])"
-        )
+        output ="translate([{x}, {y}, {z}])".format(x=angles[0] + features["x"], y=angles[1] + features["y"], z=angles[2] + features["z"])
 
         return output
 
@@ -143,7 +128,7 @@ class EngineOpenSCAD:
             FRONT: "rotate([270, 0, 0])",
             LEFT: "rotate([0, 90, 0])",
             RIGHT: "rotate([0, 270, 0])",
-        }.get(side)
+        }[side]
 
         return side
 
@@ -156,9 +141,9 @@ class EngineOpenSCAD:
         Args:
             data_file : name of the file that is to be decoded into a scad.
         """
-        out_name = os.getcwd() + "/" + data_file + "/" + data_file + ".scad"
+        out_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=data_file)
         SCAD = open(out_name, "w")
-        in_name = os.getcwd() + "/" + data_file + "/" + data_file + ".json"
+        in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=data_file)
 
         with open(in_name) as f:
             data = json.load(f)
@@ -207,8 +192,8 @@ class EngineOpenSCAD:
             filename : This is the name of the file which will be converted from a scad to a stl
 
         """
-        out_name = os.getcwd() + "/" + filename + "/" + filename + ".scad"
-        out_stl_name = os.getcwd() + "/" + filename + "/" + filename + ".stl"
+        out_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=filename)
+        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=os.getcwd(), data=filename)
 
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!!")
         result = subprocess.run(["openscad", "-o", out_stl_name, out_name], capture_output=True, text=True)
@@ -225,8 +210,8 @@ class EngineOpenSCAD:
         Args:
             part(CycadPart) : This is the part that will be eported to a json.
         """
-        dir_name = os.getcwd() + "/" + part.part_no
+        dir_name = "{cwd}/{part}".format(cwd=os.getcwd(), part=part.part_no)
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
-        with open(dir_name + "/" + part.part_no + ".json", "w") as jsonfile:
+        with open("{dir_name}/{part}.json".format(dir_name=dir_name, part=part.part_no), "w") as jsonfile:
             json.dump(part.export(), jsonfile, indent=4)

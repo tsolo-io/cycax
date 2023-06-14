@@ -30,9 +30,9 @@ class Assembly:
         for part in datafile:
             name = part["part_no"]
 
-            STLname = os.getcwd() + "/" + name + "/" + name + ".stl"
+            STLname = "{cwd}/{name}/{name}.stl".format(cwd=os.getcwd, name=name)
             if not os.path.exists(STLname):
-                SCADname = os.getcwd() + "/" + name + "/" + name + ".scad"
+                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=os.getcwd, name=name)
                 if not os.path.exists(SCADname):
                     logging.info("Creating a SCAD file of the pieces of the object.")
                     self.decoder.decode(name)
@@ -42,10 +42,10 @@ class Assembly:
             else:
                 pass
 
-        dir_name = os.getcwd() + "/" + self.part_number
+        dir_name = "{cwd}/{part_number}".format(cwd=os.getcwd(), part_number=self.part_number)
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
-        with open(dir_name + "/" + self.part_number + ".json", "w") as jsonfile:
+        with open("{dir_name}/{part_number}.json".format(dir_name=dir_name, part_number=self.part_number), "w") as jsonfile:
             json.dump(self.export(), jsonfile, indent=4)
 
         logging.info("moving to the assembler")
@@ -60,14 +60,14 @@ class Assembly:
             part(CycadPart): this in the part that will be added to the assembly.
         """
 
-        dir_name = os.getcwd() + "/" + part.part_no
+        dir_name = "{cwd}/{part_no}".format(cwd=os.getcwd(), part_no=part.part_no)
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
 
-        with open("./" + "temp.json", "w") as jsonfile:
+        with open("./temp.json", "w") as jsonfile:
             json.dump(part.export(), jsonfile, indent=4)
 
-        JSONname = dir_name + "/" + part.part_no + ".json"
+        JSONname = "{dir_name}/{part_no}.json".format(dir_name=dir_name, part_no=part.part_no)
         if os.path.exists(JSONname):  # checking if the file is already in the directory.
             current = os.stat(JSONname).st_size
             new = os.stat("./temp.json").st_size
@@ -163,20 +163,23 @@ class Assembly:
 
         if side1 == BOTTOM:
             part1.move(z=to_here)
-        if side1 == TOP:
+        elif side1 == TOP:
             z_size = part1.z_max - part1.z_min
             part1.move(z=to_here - z_size)
-        if side1 == LEFT:
+        elif side1 == LEFT:
             part1.move(x=to_here)
             x_size = part1.x_max - part1.x_min
-        if side1 == RIGHT:
+        elif side1 == RIGHT:
             x_size = part1.x_max - part1.x_min
             part1.move(x=to_here - x_size)
-        if side1 == FRONT:
+        elif side1 == FRONT:
             part1.move(y=to_here)
-        if side1 == BACK:
+        elif side1 == BACK:
             y_size = part1.y_max - part1.y_min
             part1.move(y=to_here - y_size)
+        else:
+            msg = f"Side: {side1} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+            raise ValueError(msg)
 
         part1.make_bounding_box()
 
@@ -217,23 +220,26 @@ class Assembly:
                 if hole.z == part1.bounding_box[TOP]:
                     hole.side = TOP
                     part1.insert_hole(hole)
-            if side == BOTTOM:
+            elif side == BOTTOM:
                 if hole.z == part1.bounding_box[BOTTOM]:
                     hole.side = BOTTOM
                     part1.insert_hole(hole)
-            if side == LEFT:
+            elif side == LEFT:
                 if hole.x == part1.bounding_box[LEFT]:
                     hole.side = LEFT
                     part1.insert_hole(hole)
-            if side == RIGHT:
+            elif side == RIGHT:
                 if hole.x == part1.bounding_box[RIGHT]:
                     hole.side = RIGHT
                     part1.insert_hole(hole)
-            if side == FRONT:
+            elif side == FRONT:
                 if hole.y == part1.bounding_box[FRONT]:
                     hole.side = FRONT
                     part1.insert_hole(hole)
-            if side == BACK:
+            elif side == BACK:
                 if hole.y == part1.bounding_box[BACK]:
                     hole.side = BACK
                     part1.insert_hole(hole)
+            else:
+                msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+                raise ValueError(msg)

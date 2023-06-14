@@ -1,0 +1,1 @@
+difference(){difference(){difference(){difference(){translate([0, 0, 0])cube([10, 10,10]);translate([4, 4, 0.0])rotate([0, 0, 0])cylinder(r=1.0, h=12, $fn=64);translate([4, 6, 0.0])rotate([0, 0, 0])cylinder(r=1.0, h=12, $fn=64);translate([6, 4, 0.0])rotate([0, 0, 0])cylinder(r=1.0, h=12, $fn=64);translate([6, 6, 0.0])rotate([0, 0, 0])cylinder(r=1.0, h=12, $fn=64);}}}}
