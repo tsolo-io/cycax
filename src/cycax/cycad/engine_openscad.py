@@ -26,7 +26,7 @@ class EngineOpenSCAD:
         center = ""
         if "center" in lookup is True:
             center = ", center=true"
-        res = res + "cube([{x_size:}, {y_size:}, {z_size:}]{center});".format(**lookup, center=center)
+        res = res + "cube([{x_size:}, {y_size:}, {z_size:}]{centered});".format(**lookup, centered=center)
         return res
 
     def decode_external(self, data_file: str) -> str:
@@ -52,8 +52,7 @@ class EngineOpenSCAD:
         res = []
         res.append(self.translate(lookup))
         res.append(self.rotate(lookup["side"]))
-        res.append("cylinder(r= {diam}, h={depth}, $fn=64);").format(diam=tempdiam, depth=lookup["depth"])
-        res.append()
+        res.append("cylinder(r= {diam}, h={depth}, $fn=64);".format(diam=tempdiam, depth=lookup["depth"]))
         return res
 
     def decode_nut(self, lookup: dict) -> str:

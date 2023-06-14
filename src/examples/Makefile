@@ -2,7 +2,7 @@
 
 all: install box fan
 
-main:
+thlob_example:
 	. ./.venv/bin/activate
 	pip install --force-reinstall $(shell ls ${PWD}/../cycax/dist/cycax-*.whl | sort | head -n1)
 	./thlob_example.py
