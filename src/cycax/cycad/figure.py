@@ -145,7 +145,6 @@ class Figure:
         with open(in_name) as f:
             data = json.load(f)
         fig, ax = plt.subplots()
-        print(type(ax))
         for feature in data:
             if feature["type"] == "add":
                 self.bounding_box(feature)

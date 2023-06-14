@@ -30,9 +30,9 @@ class Assembly:
         for part in datafile:
             name = part["part_no"]
 
-            STLname = "{cwd}/{name}/{name}.stl".format(cwd=os.getcwd, name=name)
+            STLname = "{cwd}/{name}/{name}.stl".format(cwd=os.getcwd(), name=name)
             if not os.path.exists(STLname):
-                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=os.getcwd, name=name)
+                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=os.getcwd(), name=name)
                 if not os.path.exists(SCADname):
                     logging.info("Creating a SCAD file of the pieces of the object.")
                     self.decoder.decode(name)
@@ -42,10 +42,12 @@ class Assembly:
             else:
                 pass
 
-        dir_name = "{cwd}/{part_number}".format(cwd=os.getcwd(), part_number=self.part_number)
+        dir_name = f"{os.getcwd()}/{self.part_number}"
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
-        with open("{dir_name}/{part_number}.json".format(dir_name=dir_name, part_number=self.part_number), "w") as jsonfile:
+        with open(
+            f"{dir_name}/{self.part_number}.json", "w"
+        ) as jsonfile:
             json.dump(self.export(), jsonfile, indent=4)
 
         logging.info("moving to the assembler")
@@ -60,14 +62,14 @@ class Assembly:
             part(CycadPart): this in the part that will be added to the assembly.
         """
 
-        dir_name = "{cwd}/{part_no}".format(cwd=os.getcwd(), part_no=part.part_no)
+        dir_name = f"{os.getcwd()}/{part.part_no}"
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
 
         with open("./temp.json", "w") as jsonfile:
             json.dump(part.export(), jsonfile, indent=4)
 
-        JSONname = "{dir_name}/{part_no}.json".format(dir_name=dir_name, part_no=part.part_no)
+        JSONname = f"{dir_name}/{part.part_no}.json"
         if os.path.exists(JSONname):  # checking if the file is already in the directory.
             current = os.stat(JSONname).st_size
             new = os.stat("./temp.json").st_size

@@ -63,8 +63,10 @@ class AssemblyOpenSCAD:
         rotation = self._swap_xz_(rotation, Rotate[1] / 90, Rotmax[2])
         rotation = self._swap_xy_(rotation, Rotate[2] / 90, Rotmax[0])
 
-        output = "translate([{x}, {y}, {z}])".format(x=rotation[0] + float(moves[0]), y=rotation[1] + float(moves[1]), z=rotation[2] + float(moves[2]))
-        output = output + "rotate([{x}, {y}, {z}])".format(x=Rotate[0], y=Rotate[1], z=Rotate[2])
+        output = "translate([{x}, {y}, {z}])".format(
+            x=rotation[0] + float(moves[0]), y=rotation[1] + float(moves[1]), z=rotation[2] + float(moves[2])
+        )
+        output = output + f"rotate([{Rotate[0]}, {Rotate[1]}, {Rotate[2]}])"
         return output
 
     def colour(self, colour: str) -> str:
@@ -73,7 +75,7 @@ class AssemblyOpenSCAD:
         Args:
             colour: Colour which the object will become.
         """
-        return 'color("{colour}")'.format(colour=colour)
+        return f'color("{colour}")'
 
     def assembly_openscad(self):
         """

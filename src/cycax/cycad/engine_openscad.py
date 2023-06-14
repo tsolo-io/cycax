@@ -24,7 +24,7 @@ class EngineOpenSCAD:
         """
         res = self.move_cube(lookup)
         center = ""
-        if "center" in lookup is True:
+        if lookup["center"] is True:
             center = ", center=true"
         res = res + "cube([{x_size:}, {y_size:}, {z_size:}]{centered});".format(**lookup, centered=center)
         return res
@@ -38,7 +38,7 @@ class EngineOpenSCAD:
 
         """
 
-        return 'import("../parts_stl/{data}.stl");'.format(data=data_file)
+        return f'import("../parts_stl/{data_file}.stl");'
 
     def decode_hole(self, lookup: dict) -> str:
         """
@@ -67,8 +67,7 @@ class EngineOpenSCAD:
         res.append(self.translate(lookup))
         res.append(self.rotate(lookup["side"]))
         res.append("cylinder(r={nut_type:}, h={depth:}, $fn=6);".format(**lookup))
-        
-        
+
         return res
 
     def decode_cut(self) -> str:
@@ -107,7 +106,9 @@ class EngineOpenSCAD:
                 RIGHT: [0, -features["x_size"], 0],
             }[angles]
 
-        output ="translate([{x}, {y}, {z}])".format(x=angles[0] + features["x"], y=angles[1] + features["y"], z=angles[2] + features["z"])
+        output = "translate([{x}, {y}, {z}])".format(
+            x=angles[0] + features["x"], y=angles[1] + features["y"], z=angles[2] + features["z"]
+        )
 
         return output
 
@@ -209,8 +210,8 @@ class EngineOpenSCAD:
         Args:
             part(CycadPart) : This is the part that will be eported to a json.
         """
-        dir_name = "{cwd}/{part}".format(cwd=os.getcwd(), part=part.part_no)
+        dir_name = f"{os.getcwd()}/{part.part_no}"
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
-        with open("{dir_name}/{part}.json".format(dir_name=dir_name, part=part.part_no), "w") as jsonfile:
+        with open(f"{dir_name}/{part.part_no}.json", "w") as jsonfile:
             json.dump(part.export(), jsonfile, indent=4)

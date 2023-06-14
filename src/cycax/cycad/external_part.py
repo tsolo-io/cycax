@@ -73,6 +73,7 @@ class ExternalPart(CycadPart):
             "x_size": self.x_size,
             "y_size": self.y_size,
             "z_size": self.z_size,
+            "center": False,
         }
         dict_part = []
 
