@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build docs') {
             steps {
-                sh 'haatch run docs:build'
+                sh 'hatch run docs:build'
             }
         }
     }
