@@ -4,6 +4,7 @@ import logging
 import os
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
+from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.engine_openscad import EngineOpenSCAD
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
@@ -45,21 +46,19 @@ class Assembly:
         dir_name = f"{os.getcwd()}/{self.part_number}"
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
-        with open(
-            f"{dir_name}/{self.part_number}.json", "w"
-        ) as jsonfile:
+        with open(f"{dir_name}/{self.part_number}.json", "w") as jsonfile:
             json.dump(self.export(), jsonfile, indent=4)
 
         logging.info("moving to the assembler")
         self.assembler.assembly_openscad()
 
-    def add(self, part):
+    def add(self, part: CycadPart):
         """
         This adds a new object into the assembly and decodes it into a json if that's what the user wants.
         Once the part has been added to the assembler it can no longer be moved around or eddited.
 
         Args:
-            part(CycadPart): this in the part that will be added to the assembly.
+            part: this in the part that will be added to the assembly.
         """
 
         dir_name = f"{os.getcwd()}/{part.part_no}"
@@ -98,11 +97,11 @@ class Assembly:
             dict_out.append(dict_part)
         return dict_out
 
-    def rotateFreezeTop(self, part):
+    def rotateFreezeTop(self, part: CycadPart):
         """
         This method will hold the front and the left while holding the top where it currently is.
         Args:
-            part(CycadPart): This is the part that will be rotated.
+            part: This is the part that will be rotated.
         """
 
         part.rotate[2] = part.rotate[2] + 90
@@ -115,11 +114,11 @@ class Assembly:
             part.z_max - part.z_min,
         ]
 
-    def rotateFreezeLeft(self, part):
+    def rotateFreezeLeft(self, part: CycadPart):
         """
         This method will rotate the top and front while holding the left where it currently is.
         Args:
-            part(CycadPart): This is the part that will be rotated.
+            part: This is the part that will be rotated.
         """
 
         part.rotate[0] = part.rotate[0] + 90
@@ -132,11 +131,11 @@ class Assembly:
             part.z_max - part.z_min,
         ]
 
-    def rotateFreezeFront(self, part):
+    def rotateFreezeFront(self, part: CycadPart):
         """
         This method will rotate the left and top while holding the front where it currently is.
         Args:
-            part(CycadPart): This is the part that will be rotated.
+            part: This is the part that will be rotated.
         """
 
         part.rotate[1] = part.rotate[1] + 90
@@ -149,14 +148,14 @@ class Assembly:
             part.z_max - part.z_min,
         ]
 
-    def level(self, part1, side1: str, part2, side2: str):
+    def level(self, part1: CycadPart, side1: str, part2: CycadPart, side2: str):
         """
         level takes the plane of part 2 specified and moves part 1 so that its specified side has a plane equal to part 2.
         part1 "FRONT" part2 "BACK" will gve part 1 and part 2 a front and back which are on the same plane. It moves part1.
         Args:
-            part1(CycadPart):This is the part that will be moved to match the plane of the other part.
+            part1:This is the part that will be moved to match the plane of the other part.
             side1: This is the side of part1 which will be moved around to match the plane of part2
-            part2(CycadPart): This is the part that will used to reference the moving of part1.
+            part2: This is the part that will used to reference the moving of part1.
             side2: This is the side which will dictate the plane used to as a reference to move part1.
         """
         part2.make_bounding_box()
@@ -203,15 +202,15 @@ class Assembly:
             part.move_holes[hole] = temp_hole
         part.final_location = True
 
-    def subtract(self, part1, side: str, part2):
+    def subtract(self, part1: CycadPart, side: str, part2: CycadPart):
         """
         This method adds the hols of part2 to the part1 on the side where they touch.
         This method will be used for moving around concube and harddive screw holes.
 
         Args:
-            part1(CycadPart): This is the part that will receive the hole of the other part.
+            part1: This is the part that will receive the hole of the other part.
             side: This is the side of the parth that will receive the holes.
-            part2(CycadPart): This is the part while will be used as the template when transferring holes.
+            part2: This is the part while will be used as the template when transferring holes.
         """
         if part2.final_location is not True:
             self._final_place_(part2)

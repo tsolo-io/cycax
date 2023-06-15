@@ -16,7 +16,9 @@ class ExternalPart(CycadPart):
 
     """
 
-    def __init__(self, part_no: str, x_size: float = 0.0, y_size: float = 0.0, z_size: float = 0.0, colour="purple"):
+    def __init__(
+        self, part_no: str, x_size: float = 0.0, y_size: float = 0.0, z_size: float = 0.0, colour: str = "purple"
+    ):
         super().__init__(
             x=0, y=0, z=0, side=None, part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size
         )  # initialized to location (0,0,0)

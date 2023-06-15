@@ -203,12 +203,12 @@ class EngineOpenSCAD:
         if result.stderr:
             logging.error("OpenSCAD: %s", result.stderr)
 
-    def add(self, part):
+    def add(self, part: CycadPart):
         """
         This takes the provided part and will create its dictionary and export it to a json
 
         Args:
-            part(CycadPart) : This is the part that will be eported to a json.
+            part : This is the part that will be eported to a json.
         """
         dir_name = f"{os.getcwd()}/{part.part_no}"
         if not os.path.exists(dir_name):
