@@ -30,11 +30,11 @@ class CycaxSide:
             external_only (bool, optional): This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False.
         """
         _depth = self._depth_check(depth)
-        _location_tupple = self._location_calc(pos=pos, sink=0.0)
+        _location_tupple = self._location_calc(pos=pos, sink=0)
         self._parent.make_hole(
             x=_location_tupple[0],
             y=_location_tupple[1],
-            z=_location_tupple[3],
+            z=_location_tupple[2],
             side=self.name,
             diameter=diameter,
             depth=_depth,
@@ -132,7 +132,6 @@ class CycaxSide:
             inner=inner,
             external_only=external_only,
         )
-        print(f"Cut a box on the {self.name} side" + "depth=" + str(_depth))
 
     def _depth_check(self, val: float):
         """
