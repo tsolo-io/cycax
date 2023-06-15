@@ -22,7 +22,7 @@ pipeline {
         }
 	stage('Mypy') {
 	    steps {
-		sh 'hatch run lint:typing |& tee mypy.log'
+		sh 'hatch run lint:typing | tee mypy.log'
 	    }
 
 	    post{
