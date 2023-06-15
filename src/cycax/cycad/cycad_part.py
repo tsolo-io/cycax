@@ -1,5 +1,5 @@
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
-from cycax.cycad.location import TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK, Location
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
 
@@ -29,7 +29,6 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
     ):
-
         super().__init__(x, y, z, side)
         self.part_no = part_no
         self.x_size = x_size
@@ -57,6 +56,7 @@ class CycadPart(Location):
         diameter: float,
         depth: float,
         inner: bool = True,
+        external_only: bool = False,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
         If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
@@ -72,11 +72,14 @@ class CycadPart(Location):
         temp_hole = Holes(
             side=side, x=location_output[0], y=location_output[1], z=location_output[2], diameter=diameter, depth=depth
         )
-        if inner:
-            self.features.append(temp_hole)
-        else:
-            self.features.append(temp_hole)
+        if external_only:
             self.move_holes.append(temp_hole)
+        elif inner:
+            self.features.append(temp_hole)
+        elif not inner:
+            move_hole = temp_hole
+            self.features.append(temp_hole)
+            self.move_holes.append(move_hole)
 
     def make_slot(
         self,
@@ -87,7 +90,8 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
         horizontal: bool = True,
-        inner=True,
+        inner: bool = True,
+        external_only: bool = False,
     ):
         """This method will insert a slot into a CycadPart.
 
@@ -114,13 +118,23 @@ class CycadPart(Location):
             horizontal=horizontal,
         )
         # This will add it to the relevnt array
-        if inner:
-            self.features.append(temp_slot)
-        else:
-            self.features.append(temp_slot)
-            self.move_holes.append(temp_slot)
+        if external_only:
+            self.move_holes.append(temp_slot.hole_left)
+            self.move_holes.append(temp_slot.hole_right)
+            self.move_holes.append(temp_slot.rectangle)
+        elif inner:
+            self.features.append(temp_slot.hole_left)
+            self.features.append(temp_slot.hole_right)
+            self.features.append(temp_slot.rectangle)
+        elif not inner:
+            self.move_holes.append(temp_slot.hole_left)
+            self.move_holes.append(temp_slot.hole_right)
+            self.move_holes.append(temp_slot.rectangle)
+            self.features.append(temp_slot.hole_left)
+            self.features.append(temp_slot.hole_right)
+            self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float =0.0):
+    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float = 0.0):
         """This method will insert a nut into a CycadPart.
 
         Args:
@@ -146,7 +160,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
-        sink: float =0.0,
+        sink: float = 0.0,
         center=False,
     ):
         """This method will cut a block out of the CycadPart.
@@ -187,7 +201,7 @@ class CycadPart(Location):
             "BACK": self.y_max,
         }
 
-    def move(self, x=0, y=0, z=0):
+    def move(self, x: float = None, y: float = None, z: float = None):
         """This method will be used for moving the part.
 
         Args:
@@ -202,22 +216,22 @@ class CycadPart(Location):
         y_size = self.y_max - self.y_min
         z_size = self.z_max - self.z_min
 
-        if x != 0:
+        if x is not None:
             self.x_min = x
             self.x_max = x + x_size
             self.moves[0] = x
-        if y != 0:
+        if y is not None:
             self.y_min = y
             self.y_max = y + y_size
             self.moves[1] = y
-        if z != 0:
+        if z is not None:
             self.z_min = z
             self.z_max = z + z_size
             self.moves[2] = z
 
         self.make_bounding_box()
 
-    def insert_hole(self, hole):
+    def insert_hole(self, hole: Holes):
         """This method will be used for inserting the hole into an object.
 
         Args:
@@ -243,8 +257,7 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
 
-    def side_location_calculator(self, side: str, x: float, y: float, sink: float =0.0)-> tuple:
-        
+    def side_location_calculator(self, side: str, x: float, y: float, sink: float = 0.0) -> tuple:
         """
         Calculate given the side of and object and the relative x and y location on that side where the definite location is.
         Args:

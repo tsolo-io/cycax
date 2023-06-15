@@ -5,12 +5,13 @@ TOP = "TOP"
 BOTTOM = "BOTTOM"
 FRONT = "FRONT"
 BACK = "BACK"
+REAR = "BACK"
 
 
 class Location:
     """This class will define the loation of an object in 3D space.
     This class will initialize a location along the x, y, z axis.
-        
+
     Args:
         x : The location of x along the x axis.
         y : The location of y along the y axis.
@@ -19,38 +20,13 @@ class Location:
     """
 
     def __init__(self, x: float, y: float, z: float, side: str):
-
         self.x = x
         self.y = y
         self.z = z
         self.side = side
 
-    def __repr__(self)->str:
+    def __repr__(self) -> str:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
-
-    def move(self, x: float = 0, y: float = 0, z: float = 0):
-        """Update position relative to its current location.
-
-        Args:
-            x: Move this many units on the X-axis.
-            y: Move this many units on the Y-axis.
-            z: Move this many units on the Z-axis.
-        """
-        self.x = self.x + x
-        self.y = self.y + y
-        self.z = self.z + z
-
-    def at(self, x: float = 0, y: float = 0, z: float = 0):
-        """This class will move a location to the exact location provided.
-
-        Args:
-            x: Move to this exact location on the X-axis.
-            y: Move to this exact location on the Y-axis.
-            z: Move to this exact location on the Z-axis.
-        """
-        self.x = x
-        self.y = y
-        self.z = z
 
     def swap_xy(self, rot: float, max_y: float):
         """Rotate while holding the top where it currenly is.
@@ -63,9 +39,9 @@ class Location:
         while rot != 0:
             self.y, self.x = self.x, max_y - self.y
             rot = rot - 1
-        self.side = {LEFT: BACK, BACK: RIGHT, RIGHT: FRONT, FRONT: LEFT, TOP: TOP, BOTTOM: BOTTOM}.get(
+        self.side = {LEFT: BACK, BACK: RIGHT, RIGHT: FRONT, FRONT: LEFT, TOP: TOP, BOTTOM: BOTTOM}[
             self.side
-        )  # This will compute which side of the object the feature now inserts into.
+        ]  # This will compute which side of the object the feature now inserts into.
 
     def swap_xz(self, rot: float, max_x: float):
         """Rotate while holding the front where it currenly is.
@@ -78,9 +54,37 @@ class Location:
         while rot != 0:
             self.x, self.z = self.z, max_x - self.x
             rot = rot - 1
-        self.side = {LEFT: BOTTOM, BOTTOM: RIGHT, RIGHT: TOP, TOP: LEFT, FRONT: FRONT, BACK: BACK}.get(
+        self.side = {LEFT: BOTTOM, BOTTOM: RIGHT, RIGHT: TOP, TOP: LEFT, FRONT: FRONT, BACK: BACK}[
             self.side
-        )  # This will compute which side of the object the feature now inserts into.
+        ]  # This will compute which side of the object the feature now inserts into.
+
+    def move(self, x: float = None, y: float = None, z: float = None):
+        """This move can be used to translate objects based on the provided arguments.
+        Args:
+            x: the value to which x needs to be moved.
+            y: the value to which y needs to be moved.
+            z: the value to which z needs to be moved.
+        """
+        if x is not None:
+            self.x = self.x + x
+        if y is not None:
+            self.y = self.y + y
+        if z is not None:
+            self.z = self.z + z
+
+    def cardinal_possition(self, x: float = None, y: float = None, z: float = None):
+        """This move can be used to translate objects based on the provided arguments.
+        Args:
+            x: the value to which x needs to be moved to on the axis.
+            y: the value to which y needs to be moved to on the axis.
+            z: the value to which z needs to be moved to on the axis.
+        """
+        if x is not None:
+            self.x = x
+        if y is not None:
+            self.y = y
+        if z is not None:
+            self.z = z
 
     def swap_yz(self, rot: float, max_z: float):
         """Rotate while holding the left where it currenly is.
@@ -93,6 +97,6 @@ class Location:
         while rot != 0:
             self.y, self.z = max_z - self.z, self.y
             rot = rot - 1
-        self.side = {TOP: BACK, BACK: BOTTOM, BOTTOM: FRONT, FRONT: TOP, LEFT: LEFT, RIGHT: RIGHT}.get(
+        self.side = {TOP: BACK, BACK: BOTTOM, BOTTOM: FRONT, FRONT: TOP, LEFT: LEFT, RIGHT: RIGHT}[
             self.side
-        )  # This will compute which side of the object the feature now inserts into.
+        ]  # This will compute which side of the object the feature now inserts into.

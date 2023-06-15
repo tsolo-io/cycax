@@ -6,7 +6,7 @@ class Slot:
 
     To get a verticle slot enter the details in exactly the same manner to
     the horizontle slot and then specify that horrizontal to False.
-    
+
     This class will initialize a slot in the desired location.
 
     Args:
@@ -21,11 +21,6 @@ class Slot:
 
     """
 
-    hole_left: Holes
-    hole_right: Holes
-    rectangle: RectangleCutOut
-    depth: float = 2
-
     def __init__(
         self,
         side: str,
@@ -37,18 +32,21 @@ class Slot:
         z: float,
         horizontal: bool = True,
     ):
-
-
         if horizontal:
-            self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
-            self.hole_right = Holes(side=side, x=x + x_size, y=y, z=z, diameter=y_size, depth=z_size)
-            self.rectangle = RectangleCutOut(side=side, width=x_size, x=x, y=y, z=z, height=y_size, depth=z_size)
-        else:
-            self.hole_left = Holes(side=side, x=x, y=y, z=z, diameter=y_size, depth=z_size)
-            self.hole_right = Holes(side=side, x=x, y=y + y_size, z=z, diameter=y_size, depth=z_size)
-            self.rectangle = RectangleCutOut(side=side, width=y_size, x=x, y=y, z=z, height=x_size, depth=z_size)
+            self.hole_left = Holes(side=side, x=x + y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
+            self.hole_right = Holes(side=side, x=x + x_size - y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
+            self.rectangle = RectangleCutOut(
+                side=side, x=x + y_size / 2, y=y - y_size / 2, z=z, x_size=x_size - y_size, y_size=y_size, z_size=z_size
+            )
 
-    def export(self)-> tuple:
+        else:
+            self.hole_left = Holes(side=side, x=x, y=y + x_size / 2, z=z, diameter=x_size, depth=z_size)
+            self.hole_right = Holes(side=side, x=x, y=y + y_size - x_size / 2, z=z, diameter=x_size, depth=z_size)
+            self.rectangle = RectangleCutOut(
+                side=side, x=x - x_size / 2, y=y + x_size / 2, z=z, x_size=x_size, y_size=y_size - x_size, z_size=z_size
+            )
+
+    def export(self) -> tuple:
         """
         This will create a dictionary of the slot that can be used for the json.
 
@@ -62,15 +60,38 @@ class Slot:
 
         return dict_hole_left, dict_hole_right, dict_rectangle
 
-    def move(self, x: float = 0, y: float = 0, z: float = 0):
-        """
-        Move to a new location, the location refers to its top left hand corner.
-        Args:
-            x: move this x this many units along the x axis.
-            y: move this y this many units along the y axis.
-            z: move this z this many units along the z axis.
-        """
+    def swap_xy(self, rot: float, max_y: float):
+        """Rotate while holding the top where it currenly is.
 
-        self.hole_left.move(x, y, z)
-        self.hole_right.move(x, y, z)
-        self.rectangle.move(x, y, z)
+        Args:
+            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            max_y: This is the maximium value of the object on the y axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+
+        """
+        self.hole_left.swap_xy(rot=rot, max_y=max_y)
+        self.hole_right.swap_xy(rot=rot, max_y=max_y)
+        self.rectangle.swap_xy(rot=rot, max_y=max_y)
+
+    def swap_xz(self, rot: float, max_x: float):
+        """Rotate while holding the front where it currenly is.
+
+        Args:
+            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            max_x: This is the maximium value of the object on the x axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+
+        """
+        self.hole_left.swap_xz(rot=rot, max_x=max_x)
+        self.hole_right.swap_xz(rot=rot, max_x=max_x)
+        self.rectangle.swap_xz(rot=rot, max_x=max_x)
+
+    def swap_yz(self, rot: float, max_z: float):
+        """Rotate while holding the left where it currenly is.
+
+        Args:
+            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            max_z: This is the maximium value of the object on the z axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+
+        """
+        self.hole_left.swap_yz(rot=rot, max_z=max_z)
+        self.hole_right.swap_yz(rot=rot, max_z=max_z)
+        self.rectangle.swap_yz(rot=rot, max_z=max_z)

@@ -15,10 +15,17 @@ class ExternalPart(CycadPart):
         colour: This will specify the colour of the object and can be overwritten from purple.
 
     """
-    def __init__(self, part_no: str, colour="purple"):
 
-        super().__init__(0, 0, 0, None, part_no, 0, 0, 0)  # initialized to location (0,0,0)
-        self.calculate()
+    def __init__(
+        self, part_no: str, x_size: float = 0.0, y_size: float = 0.0, z_size: float = 0.0, colour: str = "purple"
+    ):
+        super().__init__(
+            x=0, y=0, z=0, side=None, part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size
+        )  # initialized to location (0,0,0)
+        self.name = "cube"
+        if x_size == y_size == z_size == 0.0:
+            self.name = "external"
+            self.calculate()
         self.colour = colour
 
     def calculate(self):
@@ -51,7 +58,7 @@ class ExternalPart(CycadPart):
         self.z_max = self.z_size
         self.z_min = 0
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This method will take the values stored within the part and export it to a dict so that it can be decoded.
 
@@ -59,12 +66,16 @@ class ExternalPart(CycadPart):
             dict : The dictionary of the part.
         """
         dict_external = {
-            "name": "external",
+            "name": self.name,
             "type": "add",
             "side": None,
-            "x": str(self.x),
-            "y": str(self.y),
-            "z": str(self.z),
+            "x": self.x,
+            "y": self.y,
+            "z": self.z,
+            "x_size": self.x_size,
+            "y_size": self.y_size,
+            "z_size": self.z_size,
+            "center": False,
         }
         dict_part = []
 
