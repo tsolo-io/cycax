@@ -3,6 +3,7 @@ import logging
 import os
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, PathPatch, Polygon, Rectangle, Wedge
 from matplotlib.path import Path
@@ -76,11 +77,11 @@ class Figure:
             RIGHT: "diameter",
         }[self.hole_sink]
 
-    def hole(self, ax, feature: dict):
+    def hole(self, ax: matplotlib.axes._axes.Axes, feature: dict):
         """This method will draw a hole on the plot if the given hole reaches the side which it is drawing.
 
         Args:
-            ax(matplotlib.axes._axes.Axes): this is the axes onto which the object will be drawn.
+            ax: this is the axes onto which the object will be drawn.
             feature: this is the dictionary of the object that is being plotted.
         """
         if (
@@ -92,11 +93,11 @@ class Figure:
                 Circle((feature["x"], feature["y"]), feature["diameter"] / 2, **self.get_feature_style(feature))
             )
 
-    def box(self, ax, feature):
+    def box(self, ax: matplotlib.axes._axes.Axes, feature: dict):
         """This method will draw a box on the plot if the given cube reaches the side which it is drawing. It uses a dict to figure out the dimentions of the box it is drawing.
 
         Args:
-            ax(matplotlib.axes._axes.Axes): this is the axes onto which the object will be drawn.
+            ax: this is the axes onto which the object will be drawn.
             feature: this is the dictionary of the object that is being plotted.
         """
         if (
@@ -126,11 +127,11 @@ class Figure:
             width = feature[width]
             ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self.get_feature_style(feature)))
 
-    def figure_feature(self, ax, feature: dict):
+    def figure_feature(self, ax: matplotlib.axes._axes.Axes, feature: dict):
         """This method will coordingte the decoding of the dictionary.
 
         Args:
-            ax(matplotlib.axes._axes.Axes): this is the axes onto which the object will be drawn.
+            ax: this is the axes onto which the object will be drawn.
             feature: this is the dictionary of the object that is being plotted.
         """
         feature_type = feature["name"]

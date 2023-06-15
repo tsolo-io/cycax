@@ -15,7 +15,7 @@ class Cuboid(CycadPart):
 
     """
 
-    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour="red"):
+    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour: str = "red"):
         super().__init__(
             x=0,
             y=0,

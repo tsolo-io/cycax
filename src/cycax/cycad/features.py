@@ -50,9 +50,9 @@ class RectangleCutOut(Location):
         y : The location of y along the y axis.
         z : The location of z along the z axis.
         side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-        width : width of the rectangle.
-        depth : depth of the rectangle.
-        height : height of the rectangle.
+        x_size : x_size of the rectangle.
+        y_size : y_size of the rectangle.
+        z_size : z_size of the rectangle.
         center : This can be over ridden to instead specify the rectangle's location from its center.
 
     """

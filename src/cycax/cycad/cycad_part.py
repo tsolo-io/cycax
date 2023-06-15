@@ -90,7 +90,7 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
         horizontal: bool = True,
-        inner=True,
+        inner: bool = True,
         external_only: bool = False,
     ):
         """This method will insert a slot into a CycadPart.
@@ -231,7 +231,7 @@ class CycadPart(Location):
 
         self.make_bounding_box()
 
-    def insert_hole(self, hole):
+    def insert_hole(self, hole: Holes):
         """This method will be used for inserting the hole into an object.
 
         Args:
