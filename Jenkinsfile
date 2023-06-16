@@ -27,5 +27,11 @@ pipeline {
                 recordIssues(tools: [myPy(pattern: 'reports/mypy.txt', skipSymbolicLinks: true)])
             }
         }
+        stage('Ruff') {
+            steps {
+                sh "hatch run lint:ruff check . --format=pylint 2>&1 | tee reports/ruff.txt"
+                recordIssues(tools: [pyLint(pattern: 'reports/ruff.txt', skipSymbolicLinks: true)])
+            }
+        }
     }
 }
