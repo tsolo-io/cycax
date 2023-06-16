@@ -6,36 +6,26 @@ pipeline {
                 sh 'hatch run docs:build'
             }
 
-	    post {
-      		 success {
-        	  publishHTML([allowMissing: false,
+            post {
+                 success {
+                  publishHTML([allowMissing: false,
                      alwaysLinkToLastBuild: false,
                      keepAll: true,
                      reportDir: 'docs/site',
                      reportFiles: 'index.html',
                      includes: '**/*',
-                     reportName: 'Cycax Docs',
-                     reportTitles: 'Cycax Docs report'
+                     reportName: 'CyCAx docs',
+                     reportTitles: 'CyCAx docs'
                   ])
                 }
-            }	
+            }
         }
-	stage('Mypy') {
-	    steps {
-		sh (label: 'Run MyPy',
-		    script: '''
-			    mkdir -p logs
-			    hatch run lint:typing | tee logs/mypy.log
-			    '''
-		)
-	    }
-
-	    post{
-                always {
-                  recordIssues(tools: [myPy(name: 'MyPy', pattern: 'logs/mypy.log')])
-                  publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'logs/site', reportFiles: 'index.html', reportName: 'MyPy Logs', reportTitles: 'Cycax Mypy logs'])
-                 }
-             }
+        stage('Mypy') {
+            steps {
+                sh "mkdir -p reports"
+                sh "hatch run lint:typing 2>&1 | tee reports/mypy.txt"
+                recordIssues(tools: [myPy(pattern: 'reports/mypy.txt', skipSymbolicLinks: true)])
+            }
         }
     }
 }
