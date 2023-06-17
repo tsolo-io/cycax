@@ -20,6 +20,13 @@ pipeline {
                 }
             }
         }
+	stage('PyTest') {
+  	    steps {
+		echo "pytest"
+	        sh "hatch run coverage run -m pytest --junitxml=reports/test_results_cov.xml ./tests"
+		recordIssues(tools: [junitParser(pattern: 'reports/test_results_cov.xml', skipSymbolicLinks: true)])
+	    }
+	}
         stage('Mypy') {
             steps {
                 sh "mkdir -p reports"
