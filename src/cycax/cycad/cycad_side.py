@@ -23,11 +23,11 @@ class CycaxSide:
         This will insert a whole given the relatice details, into the correct side.
 
         Args:
-            pos (tuple[float, float]): this is a tupple that contains the (x, y) coordinates of the object.
-            diameter (float): The diameter of the hole.
-            depth (float, optional): How deep to drill the hole, if not specified will drill the hole all the way through.
-            inner (bool, optional): This is specified that the hole is internal and will not be coppied onto other surface. Defaults to True.
-            external_only (bool, optional): This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False.
+            pos : this is a tupple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            depth: How deep to drill the hole, if not specified will drill the hole all the way through.
+            inner: This is specified that the hole is internal and will not be coppied onto other surface. Defaults to True.
+            external_only: This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0)
@@ -55,12 +55,12 @@ class CycaxSide:
         This box will insert a rectangle shape cut out into the object.
 
         Args:
-            pos (tuple[float, float]): The (x, y) coordinates of the box.
-            length (float): The length of the box as viewed from the specified side.
-            width (float): The width of the box as viewed from the specified side.
-            depth (float, optional): The depth of the box, if not specified will drill all the way through th box. Defaults to None.
-            sink (float, optional): The box can be sunk bellow the surface of the specified side to make a plocket. Defaults to 0.
-            center (bool, optional): The box can be specified from the ceter of the box. Defaults to False.
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through th box. Defaults to None.
+            sink: The box can be sunk bellow the surface of the specified side to make a plocket. Defaults to 0.
+            center: The box can be specified from the ceter of the box. Defaults to False.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=sink)
@@ -80,10 +80,10 @@ class CycaxSide:
         """
         This method allows a nut cut out to be cut into a specified side.
         Args:
-            pos (tuple[float, float]): The (x,y) coordinates of the nut cut out.
-            nut_type (float, optional): The type of nut to be cut. This is used to create the diameter of the nut but will be developed in later versions. Defaults to 3.0.
-            depth (float, optional): How deep to make the nut cut out. If it is not specified the nut cut out will be drilled all the way through. Defaults to None.
-            sink (float, optional): The nut cut out can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            pos: The (x,y) coordinates of the nut cut out.
+            nut_type: The type of nut to be cut. This is used to create the diameter of the nut but will be developed in later versions. Defaults to 3.0.
+            depth: How deep to make the nut cut out. If it is not specified the nut cut out will be drilled all the way through. Defaults to None.
+            sink: The nut cut out can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=sink)
@@ -109,13 +109,13 @@ class CycaxSide:
         """
         This allows a slot cut out to be cut into the specified side.
         Args:
-            pos (tuple[float, float]): The (x,y) coordinates of the slot cut out.
-            length (float): The length of the slot as viewed from the specified side.
-            width (float): The width of the slot as viewed from the specified side.
-            depth (float, optional): The depth of the slot as viewed from the specified side. If not specified it will cut the slot all the way through the surface. Defaults to None.
-            horizontal (bool, optional): Slots can either run verticall or horizontally. Defaults to horizontal.
-            inner (bool, optional): This is specified that the slot is internal and will not be coppied onto other surface. Defaults to True.
-            external_only (bool, optional): This is specified that the slot will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False.
+            pos: The (x,y) coordinates of the slot cut out.
+            length: The length of the slot as viewed from the specified side.
+            width: The width of the slot as viewed from the specified side.
+            depth: The depth of the slot as viewed from the specified side. If not specified it will cut the slot all the way through the surface. Defaults to None.
+            horizontal: Slots can either run verticall or horizontally. Defaults to horizontal.
+            inner: This is specified that the slot is internal and will not be coppied onto other surface. Defaults to True.
+            external_only: This is specified that the slot will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0.0)
@@ -138,7 +138,7 @@ class CycaxSide:
         This is used to check the depth of an object. This method is just used for error catching.
 
         Args:
-            val (float): Depth of object.
+            val: Depth of object.
 
         Raises:
             ValueError: The side specidfied does not have a depth check method.
@@ -154,8 +154,8 @@ class LeftSide(CycaxSide):
         location is calculated for the (x, y) plane using two values and a side.
 
         Args:
-            pos (tuple[float, float]): (x, y) location of an object which is used to find the location with the side.
-            sink (float, optional): The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            pos: (x, y) location of an object which is used to find the location with the side.
+            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
 
         Returns:
             tuple[float, float, float]: (x, y, z) location of an object.
@@ -170,9 +170,9 @@ class LeftSide(CycaxSide):
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
         """ "This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
         Args:
-            width (float): This is how wide the box must be.
-            length (float): This is how long the box must be.
-            depth (float): This is the depth of the box.
+            width: This is how wide the box must be.
+            length: This is how long the box must be.
+            depth: This is the depth of the box.
 
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
@@ -187,7 +187,7 @@ class LeftSide(CycaxSide):
         """
         This method is used so that objects can penetrate through the entire object.
         Args:
-            val (float): Depth as specified by the user.
+            val: Depth as specified by the user.
 
         Returns:
             float: Depth of the ocjet or depth specified by the user.
@@ -201,16 +201,13 @@ class LeftSide(CycaxSide):
 class RightSide(CycaxSide):
     name = "RIGHT"
 
-    def _box_calculation_bal_s(self, val):
-        return val + 5
-
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
         """
         location is calculated for the (x, y) plane using two values and a side.
 
         Args:
-            pos (tuple[float, float]): (x, y) location of an object which is used to find the location with the side.
-            sink (float, optional): The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            pos: (x, y) location of an object which is used to find the location with the side.
+            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
 
         Returns:
             tuple[float, float, float]: (x, y, z) location of an object.
@@ -226,7 +223,7 @@ class RightSide(CycaxSide):
         """
         This method is used so that objects can penetrate through the entire object.
         Args:
-            val (float): Depth as specified by the user.
+            val: Depth as specified by the user.
 
         Returns:
             float: Depth of the ocjet or depth specified by the user.
@@ -239,9 +236,9 @@ class RightSide(CycaxSide):
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
         """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
         Args:
-            width (float): This is how wide the box must be.
-            length (float): This is how long the box must be.
-            depth (float): This is the depth of the box.
+            width: This is how wide the box must be.
+            length: This is how long the box must be.
+            depth: This is the depth of the box.
 
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
@@ -261,8 +258,8 @@ class TopSide(CycaxSide):
         location is calculated for the (x, y) plane using two values and a side.
 
         Args:
-            pos (tuple[float, float]): (x, y) location of an object which is used to find the location with the side.
-            sink (float, optional): The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            pos: (x, y) location of an object which is used to find the location with the side.
+            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
 
         Returns:
             tuple[float, float, float]: (x, y, z) location of an object.
@@ -278,7 +275,7 @@ class TopSide(CycaxSide):
         """
         This method is used so that objects can penetrate through the entire object.
         Args:
-            val (float): Depth as specified by the user.
+            val: Depth as specified by the user.
 
         Returns:
             float: Depth of the ocjet or depth specified by the user.
@@ -291,9 +288,9 @@ class TopSide(CycaxSide):
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
         """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
         Args:
-            width (float): This is how wide the box must be.
-            length (float): This is how long the box must be.
-            depth (float): This is the depth of the box.
+            width: This is how wide the box must be.
+            length: This is how long the box must be.
+            depth: This is the depth of the box.
 
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
@@ -313,8 +310,8 @@ class BottomSide(CycaxSide):
         location is calculated for the (x, y) plane using two values and a side.
 
         Args:
-            pos (tuple[float, float]): (x, y) location of an object which is used to find the location with the side.
-            sink (float, optional): The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            pos: (x, y) location of an object which is used to find the location with the side.
+            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
 
         Returns:
             tuple[float, float, float]: (x, y, z) location of an object.
@@ -330,7 +327,7 @@ class BottomSide(CycaxSide):
         """
         This method is used so that objects can penetrate through the entire object.
         Args:
-            val (float): Depth as specified by the user.
+            val: Depth as specified by the user.
 
         Returns:
             float: Depth of the ocjet or depth specified by the user.
@@ -343,9 +340,9 @@ class BottomSide(CycaxSide):
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
         """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
         Args:
-            width (float): This is how wide the box must be.
-            length (float): This is how long the box must be.
-            depth (float): This is the depth of the box.
+            width: This is how wide the box must be.
+            length: This is how long the box must be.
+            depth: This is the depth of the box.
 
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
@@ -365,8 +362,8 @@ class FrontSide(CycaxSide):
         location is calculated for the (x, y) plane using two values and a side.
 
         Args:
-            pos (tuple[float, float]): (x, y) location of an object which is used to find the location with the side.
-            sink (float, optional): The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            pos: (x, y) location of an object which is used to find the location with the side.
+            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
 
         Returns:
             tuple[float, float, float]: (x, y, z) location of an object.
@@ -382,7 +379,7 @@ class FrontSide(CycaxSide):
         """
         This method is used so that objects can penetrate through the entire object.
         Args:
-            val (float): Depth as specified by the user.
+            val: Depth as specified by the user.
 
         Returns:
             float: Depth of the ocjet or depth specified by the user.
@@ -395,9 +392,9 @@ class FrontSide(CycaxSide):
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
         """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
         Args:
-            width (float): This is how wide the box must be.
-            length (float): This is how long the box must be.
-            depth (float): This is the depth of the box.
+            width: This is how wide the box must be.
+            length: This is how long the box must be.
+            depth: This is the depth of the box.
 
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
@@ -417,8 +414,8 @@ class BackSide(CycaxSide):
         location is calculated for the (x, y) plane using two values and a side.
 
         Args:
-            pos (tuple[float, float]): (x, y) location of an object which is used to find the location with the side.
-            sink (float, optional): The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            pos: (x, y) location of an object which is used to find the location with the side.
+            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
 
         Returns:
             tuple[float, float, float]: (x, y, z) location of an object.
@@ -434,7 +431,7 @@ class BackSide(CycaxSide):
         """
         This method is used so that objects can penetrate through the entire object.
         Args:
-            val (float): Depth as specified by the user.
+            val: Depth as specified by the user.
 
         Returns:
             float: Depth of the ocjet or depth specified by the user.
@@ -448,9 +445,9 @@ class BackSide(CycaxSide):
         """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
 
         Args:
-            width (float): This is how wide the box must be.
-            length (float): This is how long the box must be.
-            depth (float): This is the depth of the box.
+            width: This is how wide the box must be.
+            length: This is how long the box must be.
+            depth: This is the depth of the box.
 
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.

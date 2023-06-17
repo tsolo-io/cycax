@@ -14,7 +14,7 @@ class AssemblyOpenSCAD:
     def __init__(self, part_no: str) -> None:
         self.part_no = part_no
 
-    def fetch_part(self, part: str) -> str:
+    def _fetch_part(self, part: str) -> str:
         """
         Retrieves the part that will be imported and possitioned.
 
@@ -44,7 +44,7 @@ class AssemblyOpenSCAD:
             rot = rot - 1
         return rotation
 
-    def move(self, Rotmax: tuple, moves: tuple, Rotate: tuple) -> str:
+    def _move(self, Rotmax: tuple, moves: tuple, Rotate: tuple) -> str:
         """
         Computes the moving and rotating of the stl to the desired location.
 
@@ -69,7 +69,7 @@ class AssemblyOpenSCAD:
         output = output + f"rotate([{Rotate[0]}, {Rotate[1]}, {Rotate[2]}])"
         return output
 
-    def colour(self, colour: str) -> str:
+    def _colour(self, colour: str) -> str:
         """
         Gives the colour.
         Args:
@@ -90,9 +90,9 @@ class AssemblyOpenSCAD:
 
         output = []
         for action in data:
-            output.append(self.move(action["rotmax"], action["moves"], action["rotate"]))
-            output.append(self.colour(action["colour"]))
-            output.append(self.fetch_part(action["part_no"]))
+            output.append(self._move(action["rotmax"], action["moves"], action["rotate"]))
+            output.append(self._colour(action["colour"]))
+            output.append(self._fetch_part(action["part_no"]))
 
         for out in output:
             SCAD.write(out)

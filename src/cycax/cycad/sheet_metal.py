@@ -1,5 +1,8 @@
 from cycax.cycad.cycad_part import CycadPart
 
+import os
+import json
+
 
 class SheetMetal(CycadPart):
     """Class stores the data of the Bottom of a box.
@@ -58,3 +61,13 @@ class SheetMetal(CycadPart):
             else:
                 dict_part.append(ret)
         return dict_part
+    
+    def save(self):
+        """
+        This takes the provided part and will create its dictionary and export it to a json
+        """
+        dir_name = f"{os.getcwd()}/{self.part_no}/{self.part_no}"
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
+        with open(f"{dir_name}/{self.part_no}/{self.part_no}.json", "w") as jsonfile:
+            json.dump(self.export(), jsonfile, indent=4)

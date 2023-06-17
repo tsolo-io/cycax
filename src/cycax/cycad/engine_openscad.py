@@ -14,7 +14,7 @@ class EngineOpenSCAD:
 
     dif = 0
 
-    def decode_cube(self, lookup: dict) -> str:
+    def _decode_cube(self, lookup: dict) -> str:
         """
         This method will return the string that will have the scad for a cube.
 
@@ -22,14 +22,14 @@ class EngineOpenSCAD:
             lookup: this will be the dictionary that contains the details about the cube so that is can be encoded in scad.
 
         """
-        res = self.move_cube(lookup)
+        res = self._move_cube(lookup)
         center = ""
         if lookup["center"] is True:
             center = ", center=true"
         res = res + "cube([{x_size:}, {y_size:}, {z_size:}]{centered});".format(**lookup, centered=center)
         return res
 
-    def decode_external(self, data_file: str) -> str:
+    def _decode_external(self, data_file: str) -> str:
         """
         This method will return the scad string necessary for processing the external part.
 
@@ -40,7 +40,7 @@ class EngineOpenSCAD:
 
         return f'import("../parts_stl/{data_file}.stl");'
 
-    def decode_hole(self, lookup: dict) -> str:
+    def _decode_hole(self, lookup: dict) -> str:
         """
         This method will return the string that will have the scad for a hole.
 
@@ -50,12 +50,12 @@ class EngineOpenSCAD:
         """
         tempdiam = lookup["diameter"] / 2
         res = []
-        res.append(self.translate(lookup))
-        res.append(self.rotate(lookup["side"]))
+        res.append(self._translate(lookup))
+        res.append(self._rotate(lookup["side"]))
         res.append("cylinder(r= {diam}, h={depth}, $fn=64);".format(diam=tempdiam, depth=lookup["depth"]))
         return res
 
-    def decode_nut(self, lookup: dict) -> str:
+    def _decode_nut(self, lookup: dict) -> str:
         """
         This method will return the string that will have the scad for a nut cut out.
 
@@ -64,19 +64,19 @@ class EngineOpenSCAD:
 
         """
         res = []
-        res.append(self.translate(lookup))
-        res.append(self.rotate(lookup["side"]))
+        res.append(self._translate(lookup))
+        res.append(self._rotate(lookup["side"]))
         res.append("cylinder(r={nut_type:}, h={depth:}, $fn=6);".format(**lookup))
 
         return res
 
-    def decode_cut(self) -> str:
+    def _decode_cut(self) -> str:
         """
         This method returns a simple OpenSCAD string neceseray to cut.
         """
         return "difference(){"
 
-    def translate(self, lookup: dict) -> str:
+    def _translate(self, lookup: dict) -> str:
         """
         This will move the object around and return the scad necessary.
 
@@ -86,7 +86,7 @@ class EngineOpenSCAD:
         res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
 
-    def move_cube(self, features: dict) -> str:
+    def _move_cube(self, features: dict) -> str:
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
@@ -112,7 +112,7 @@ class EngineOpenSCAD:
 
         return output
 
-    def rotate(self, side: str) -> str:
+    def _rotate(self, side: str) -> str:
         """
         This will rotate the object and return the scad necessary.
 
@@ -132,18 +132,39 @@ class EngineOpenSCAD:
 
         return side
 
-    def decode(self, data_file: str):
+    def decode(self, part_name: str=None, part: CycadPart= None):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
         !!!For this method to work properly it will be necessary to add a JSON, STL and SCAD file into the working repository.!!!
 
         Args:
-            data_file : name of the file that is to be decoded into a scad.
+            part_name : name of the file that is to be decoded into a scad.
+            part : this is the CycadPart that needs to be decoded. If the CycadPart is provided it is possible to also create its relevant json file if that has not been done already.
+            
+         Raises:
+            ValueError: If you do not provide a filename and not a part it will raise and exception.
+            ValueError: If the part_name provided does not map to anything and the part is not provided it will raise and exception.  
         """
-        out_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=data_file)
+        if part_name is None:
+            if part is None:
+                msg = "You need to provide the method with a part or part_no, you have not provided either."
+                raise ValueError(msg)
+            else:
+                part_name=CycadPart.part_no
+            
+        out_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=part_name)
         SCAD = open(out_name, "w")
-        in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=data_file)
+        in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=part_name)
+        
+        
+        if not os.path.exists(in_name):
+            if part is not None:
+                part.save()
+            else:
+                msg = "You have either provided an incorrect part_name or you have not saved the part and have not provided this code with it."
+                raise ValueError(msg) 
+
 
         with open(in_name) as f:
             data = json.load(f)
@@ -153,19 +174,19 @@ class EngineOpenSCAD:
         for action in data:
             if action["type"] == "cut":
                 dif = dif + 1
-                output.insert(0, self.decode_cut())
+                output.insert(0, self._decode_cut())
 
             if action["name"] == "cube":
-                output.append(self.decode_cube(action))
+                output.append(self._decode_cube(action))
 
             if action["name"] == "external":
-                output.append(self.decode_external(data_file))
+                output.append(self._decode_external(part_name))
 
             if action["name"] == "hole":
-                output.append(self.decode_hole(action))
+                output.append(self._decode_hole(action))
 
             if action["name"] == "nut":
-                output.append(self.decode_nut(action))
+                output.append(self._decode_nut(action))
 
         i = 0
         while i < dif:
@@ -181,7 +202,7 @@ class EngineOpenSCAD:
 
         SCAD.close()
 
-    def render_stl(self, filename: str):
+    def render_stl(self, filename: str= None, part: CycadPart= None):
         """
 
         This takes a SCAD object and runs a command through linex that converts it into an stl.
@@ -189,29 +210,33 @@ class EngineOpenSCAD:
         It prints out some messages to the terminal so that the impatient user will hopefully wait.(Similar to many windows request.)
 
         Args:
-            filename : This is the name of the file which will be converted from a scad to a stl
+            filename : This is the name of the file which will be converted from a scad to a stl.
+            part: this can be used to find the name of the part if none is provided.
+            
+        Raises:
+            ValueError: If you do not provide a filename and not a part it will raise and exception.
+            ValueError: If the name of the part does not map to a scad file.
 
         """
-        out_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=filename)
+        if filename is None:
+            if part is None:
+                msg = "You need to provide the method with a part or part_no, you have not provided either."
+                raise ValueError(msg)
+            else:
+                filename=part.part_no
+        in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=filename)
         out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=os.getcwd(), data=filename)
+        
+        if not os.path.exists(in_name):
+            msg = "The name of the part provided does not map to any scad file. Maybe the part still needs to be decoded."
+            raise ValueError(msg)
 
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!!")
-        result = subprocess.run(["openscad", "-o", out_stl_name, out_name], capture_output=True, text=True)
+        result = subprocess.run(["openscad", "-o", out_stl_name, in_name], capture_output=True, text=True)
 
         if result.stdout:
             logging.info("OpenSCAD: %s", result.stdout)
         if result.stderr:
             logging.error("OpenSCAD: %s", result.stderr)
 
-    def add(self, part: CycadPart):
-        """
-        This takes the provided part and will create its dictionary and export it to a json
-
-        Args:
-            part : This is the part that will be eported to a json.
-        """
-        dir_name = f"{os.getcwd()}/{part.part_no}"
-        if not os.path.exists(dir_name):
-            os.mkdir(dir_name)
-        with open(f"{dir_name}/{part.part_no}.json", "w") as jsonfile:
-            json.dump(part.export(), jsonfile, indent=4)
+    
