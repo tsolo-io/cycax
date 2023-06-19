@@ -22,8 +22,11 @@ pipeline {
         }
 	stage('PyTest') {
   	    steps {
-	        sh "hatch run coverage run -m pytest --junitxml=reports/test_results_cov.xml ./tests"
-	    }
+  	        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: "One or more tests failed at this stage.") {
+	            sh "hatch run coverage run -m pytest --junitxml=reports/test_results_cov.xml ./tests"
+  	        }
+  	            
+  	    }
 	    post {
 	        always{
 	            junit 'reports/test_results_cov.xml'
@@ -45,3 +48,4 @@ pipeline {
         }
     }
 }
+
