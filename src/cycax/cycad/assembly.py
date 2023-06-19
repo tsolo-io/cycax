@@ -51,6 +51,14 @@ class Assembly:
 
         logging.info("moving to the assembler")
         self.assembler.assembly_openscad()
+        
+    def save(self):
+        """
+        !!!!There is a comment about this method in the jira ticket to assert its relevance.
+        """
+        for item in self.pieces:
+            self.add(item)   
+        self.export()
 
     def add(self, part: CycadPart):
         """

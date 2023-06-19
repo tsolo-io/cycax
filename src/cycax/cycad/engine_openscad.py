@@ -5,6 +5,7 @@ import subprocess
 
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
+from cycax.cycad.features import nut_specifications
 
 
 class EngineOpenSCAD:
@@ -29,16 +30,16 @@ class EngineOpenSCAD:
         res = res + "cube([{x_size:}, {y_size:}, {z_size:}]{centered});".format(**lookup, centered=center)
         return res
 
-    def _decode_external(self, data_file: str) -> str:
+    def _decode_external(self, lookup: dict) -> str:
         """
         This method will return the scad string necessary for processing the external part.
 
         Args:
-            data_file : This will contain the part number of the external part so that it can be fetched from the parts_stl folder.
+            lookup: this will provide the details of the external part
 
         """
 
-        return f'import("../parts_stl/{data_file}.stl");'
+        return f'import("{lookup["label"]}");'
 
     def _decode_hole(self, lookup: dict) -> str:
         """
@@ -66,7 +67,8 @@ class EngineOpenSCAD:
         res = []
         res.append(self._translate(lookup))
         res.append(self._rotate(lookup["side"]))
-        res.append("cylinder(r={nut_type:}, h={depth:}, $fn=6);".format(**lookup))
+        radius=nut_specifications["nut_type"]["diameter"]/2
+        res.append("cylinder(r={rad}, h={deep}, $fn=6);".format(rad=radius, deep=lookup["depth"]))
 
         return res
 
@@ -228,8 +230,12 @@ class EngineOpenSCAD:
         out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=os.getcwd(), data=filename)
         
         if not os.path.exists(in_name):
-            msg = "The name of the part provided does not map to any scad file. Maybe the part still needs to be decoded."
-            raise ValueError(msg)
+            if part is not None:
+                self.decode(part)
+            else:
+                msg = "The OpenSCAD file for this part does not exist under the filename. Either the filename provided is incorrect or the part needs to be provided so that the OpenSCAD file can be produced."
+                raise ValueError(msg)
+                
 
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!!")
         result = subprocess.run(["openscad", "-o", out_stl_name, in_name], capture_output=True, text=True)

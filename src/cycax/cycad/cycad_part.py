@@ -1,7 +1,10 @@
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
+from cycax.cycad.render import Render
 from cycax.cycad.slot import Slot
+import json
+import os
 
 
 class CycadPart(Location):
@@ -16,6 +19,8 @@ class CycadPart(Location):
         y_size : The size of y.
         z_size : The siez of z.
         part_no : The unique name that will be given to a type of parts.
+        poligon: currently only cube availabe.
+        colour: colour of the part.
 
     """
 
@@ -29,6 +34,8 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
+        poligon: str,
+        colour: str = "orange", 
     ):
         super().__init__(x, y, z, side)
         self.left = LeftSide(self)
@@ -37,6 +44,7 @@ class CycadPart(Location):
         self.bottom = BottomSide(self)
         self.front = FrontSide(self)
         self.back = BackSide(self)
+        self.render = Render(self)
 
         self.part_no = part_no
         self.x_size = x_size
@@ -55,7 +63,22 @@ class CycadPart(Location):
         self.moves = [0, 0, 0]
         self.rotate = [0, 0, 0]
         self.final_location = False
+        self.poligon=poligon
+        self.colour = colour
+        self.label = ""
 
+    def add_label(self, path: str):
+        """
+        eThis method will use the 3D model provided in the path rather than the object drawn.
+
+        Args:
+            path: path to 3Dpart
+        """
+        self.colour="purple"
+        self.name="external"
+        self.label=path  
+        self.x, self.y, self.z = self.x_size / 2, self.y_size / 2, self.z_size / 2      
+    
     def make_hole(
         self,
         x: float,
@@ -259,3 +282,47 @@ class CycadPart(Location):
 
         self.features.append(hole)
         self.move_holes.append(hole)
+        
+    def save(self):
+        """
+        This takes the provided part and will create its dictionary and export it to a json
+        """
+        dir_name = f"{os.getcwd()}/{self.part_no}/{self.part_no}"
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
+        with open(f"{dir_name}/{self.part_no}/{self.part_no}.json", "w") as jsonfile:
+            json.dump(self.export(), jsonfile, indent=4)
+            
+            
+    def export(self) -> dict:
+        """
+        This method will take the values stored within the part and export it to a dict so that it can be decoded.
+
+        Returns:
+            dict : The dictionary of the part.
+        """
+
+        dict_metal = {
+            "name": self.poligon,
+            "type": "add",
+            "side": self.side,
+            "x": self.x,
+            "y": self.y,
+            "z": self.z,
+            "x_size": self.x_size,
+            "y_size": self.y_size,
+            "z_size": self.z_size,
+            "center": False,
+        }
+
+        dict_part = []
+
+        dict_part.append(dict_metal)
+        for item in self.features:
+            ret = item.export()
+            if type(ret) != dict:
+                for part in ret:
+                    dict_part.append(part)
+            else:
+                dict_part.append(ret)
+        return dict_part
