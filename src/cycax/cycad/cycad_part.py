@@ -75,7 +75,7 @@ class CycadPart(Location):
     def definition(self):
         """This method will be ovedridden to do a calculation."""
         pass
-    
+
     def add_file(self, file_type: str, file_path: Path):
         """
         This method will use the 3D model provided in the path rather than the object drawn.
