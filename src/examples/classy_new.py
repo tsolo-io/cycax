@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3   
 
 from cycax.cycad import Cuboid
 
-classy = Cuboid(part_no="classy classy", x_size=10, y_size=10, z_size=10)
+classy= Cuboid(part_no= "classy classy", x_size=10, y_size=10, z_size=10)
 
 classy.left.hole(pos=(5, 5), diameter=2)
 

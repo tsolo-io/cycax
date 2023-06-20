@@ -70,7 +70,12 @@ class CycadPart(Location):
         self.colour = colour
         self.label: set[str] = set()
         self._files = {}
+        self.definition()
 
+    def definition(self):
+        """This method will be ovedridden to do a calculation."""
+        pass
+    
     def add_file(self, file_type: str, file_path: Path):
         """
         This method will use the 3D model provided in the path rather than the object drawn.
@@ -350,8 +355,10 @@ class CycadPart(Location):
             side: this will be used for pyplot
         """
 
-        if eng == "pyplot":
+        if eng == "simple2D":
             # This method will created a pyplot drawing of the object.
+            if side is None:
+                side = "TOP"
             plotter = Figure(part_no=self.part_no, side=side)
             plotter.save_as_figure()
 
@@ -377,5 +384,5 @@ class CycadPart(Location):
             cutter.render_stl(self)
 
         else:
-            msg = f"engine: {eng} is not one of pyplot, OpenSCAD or STL."
+            msg = f"engine: {eng} is not one of simple2D, OpenSCAD or STL."
             raise ValueError(msg)
