@@ -96,5 +96,6 @@ class AssemblyOpenSCAD:
 
         for out in output:
             SCAD.write(out)
+            SCAD.write("\n")
 
         SCAD.close()

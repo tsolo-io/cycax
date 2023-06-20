@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from cycax.cycad import Assembly, Cuboid, SheetMetal, Print3D
+from cycax.cycad import Assembly, Cuboid, Print3D, SheetMetal
 
 LEFT = "LEFT"
 RIGHT = "RIGHT"
@@ -19,13 +19,13 @@ class ConCube(Print3D):
     def definition(self):
         """Calculate the concube."""
         for side in (self.left, self.bottom, self.front):
-            side.hole(pos=[7,7], diameter=3.2, depth=2, inner=False)
-            side.hole(pos=[7,7], diameter=2.9, inner=True)  # Through everything
+            side.hole(pos=[7, 7], diameter=3.2, depth=2, inner=False)
+            side.hole(pos=[7, 7], diameter=2.9, inner=True)  # Through everything
             side.nut(pos=[7, 7], nut_type="M3", depth=2, sink=1)  # Coordinates based on center of the Nut.
-            side.box(pos=[7, 10], depth=2, width=6.2, length=3, sink=2, center=True) #holes to fit the nuts into       
+            side.box(pos=[7, 10], depth=2, width=6.2, length=3, sink=2, center=True)  # holes to fit the nuts into
 
         # Cut the excess material we dont want to print.
-        self.top.box(pos=[4,4], length=7, width=7, depth=7)
+        self.top.box(pos=[4, 4], length=7, width=7, depth=7)
 
 
 class main:

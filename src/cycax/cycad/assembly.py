@@ -2,6 +2,7 @@ import copy
 import json
 import logging
 import os
+from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
@@ -53,13 +54,31 @@ class Assembly:
         logging.info("moving to the assembler")
         self.assembler.assembly_openscad()
 
-    def save(self):
+    def save(self, path: Path | None = None):
         """
-        !!!!There is a comment about this method in the jira ticket to assert its relevance.
+        Save the assembly and added part to JSON files.
+        Args:
+            path: The location where the assembly is stored. A directory for each part will be created in this path.
         """
+
+        if path is None:
+            path = Path(".")
+        if not path.exists():
+            msg = f"The directory {path} does not exists."
+            raise FileNotFoundError(msg)
+
         for item in self.pieces:
-            self.add(item)
-        self.export()
+            item.save(path)
+
+        data = self.export()
+        data_filename = path / "assembly.json"
+        data_filename.write_text(json.dumps(data))
+        # Old location. Do we need to store the assembly in its own folder?
+        # At the same level as the Python main file should be fine.
+        path = path / self.part_number
+        path.mkdir(exist_ok=True)
+        data_filename = path / f"{self.part_number}.json"
+        data_filename.write_text(json.dumps(data))
 
     def add(self, part: CycadPart):
         """
@@ -69,24 +88,6 @@ class Assembly:
         Args:
             part: this in the part that will be added to the assembly.
         """
-
-        dir_name = f"{os.getcwd()}/{part.part_no}"
-        if not os.path.exists(dir_name):
-            os.mkdir(dir_name)
-
-        with open("./temp.json", "w") as jsonfile:
-            json.dump(part.export(), jsonfile, indent=4)
-
-        JSONname = f"{dir_name}/{part.part_no}.json"
-        if os.path.exists(JSONname):  # checking if the file is already in the directory.
-            current = os.stat(JSONname).st_size
-            new = os.stat("./temp.json").st_size
-            if new >= current:  # addind the file if it is bigger.
-                os.rename("./temp.json", JSONname)
-            else:  # removing the file if it is not bigger.
-                os.remove("./temp.json")
-        else:  # renaming the file if there isn't one already in the file.
-            os.rename("./temp.json", JSONname)
 
         self.pieces.append(part)
 
@@ -113,7 +114,7 @@ class Assembly:
             part: This is the part that will be rotated.
         """
 
-        part.rotate[2] = part.rotate[2] + 90
+        part.rotate[2] = (part.rotate[2] + 90) % 360
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
@@ -130,7 +131,7 @@ class Assembly:
             part: This is the part that will be rotated.
         """
 
-        part.rotate[0] = part.rotate[0] + 90
+        part.rotate[0] = (part.rotate[0] + 90) % 360
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
@@ -147,7 +148,7 @@ class Assembly:
             part: This is the part that will be rotated.
         """
 
-        part.rotate[1] = part.rotate[1] + 90
+        part.rotate[1] = (part.rotate[1] + 90) % 360
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()

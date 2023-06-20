@@ -2,7 +2,7 @@
 from pathlib import Path
 
 from cycax.cycad.assembly import Assembly
-from cycax.cycad.cuboid import Cuboid, SheetMetal, Print3D
+from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
 
 
 class Thing(Cuboid):
@@ -18,15 +18,27 @@ class Thing(Cuboid):
                 self.bottom.hole(pos=[x, y], diameter=3.1, depth=12, inner=False)
                 self.top.hole(pos=[x, y], diameter=3.1, depth=12, inner=False)
 
-        self.front.box(pos=[self.x_size / 3, 5], width=(self.x_size) / 3, depth=self.y_size / 3 + 2, length=self.z_size - 10, sink=-1)
-        self.left.box(pos=[self.x_size / 3, 5], width=(self.x_size) / 3, depth=self.y_size / 3 + 2, length=self.z_size - 10, sink=-1)
+        self.front.box(
+            pos=[self.x_size / 3, 5],
+            width=(self.x_size) / 3,
+            depth=self.y_size / 3 + 2,
+            length=self.z_size - 10,
+            sink=-1,
+        )
+        self.left.box(
+            pos=[self.x_size / 3, 5],
+            width=(self.x_size) / 3,
+            depth=self.y_size / 3 + 2,
+            length=self.z_size - 10,
+            sink=-1,
+        )
 
 
 class Blob(Print3D):  # ExternalPart):
     def __init__(self):
-    	super().__init__(part_no = "Blob", x_size = 10, y_size = 10, z_size = 10)
-    	self.calculate()
-	
+        super().__init__(part_no="Blob", x_size=10, y_size=10, z_size=10)
+        self.calculate()
+
     def calculate(self):
         for x in [4, 6]:
             for y in [4, 6]:

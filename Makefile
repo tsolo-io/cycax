@@ -4,6 +4,9 @@
 build:
 	hatch build
 
+test:
+	hatch run test
+
 format:
 	hatch run lint:fmt
 

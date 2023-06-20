@@ -9,7 +9,7 @@ from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 class EngineOpenSCAD:
     """
-    This class willbe used to decode a json to a scad file which can be rendered in openscad for 3D view.
+    Decode a JSON to a OpenSCAD file which can be rendered in openscad for 3D view.
     """
 
     dif = 0
@@ -185,8 +185,10 @@ class EngineOpenSCAD:
             if type(out) == list:
                 for small in out:
                     SCAD.write(small)
+                    SCAD.write("\n")
             else:
                 SCAD.write(out)
+                SCAD.write("\n")
 
         SCAD.close()
 

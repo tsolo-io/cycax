@@ -35,6 +35,7 @@ path = "src/cycax/__about__.py"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "matplotlib"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"

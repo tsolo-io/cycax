@@ -75,7 +75,7 @@ class CycadPart(Location):
     def definition(self):
         """This method will be ovedridden to do a calculation."""
         pass
-    
+
     def add_file(self, file_type: str, file_path: Path):
         """
         This method will use the 3D model provided in the path rather than the object drawn.
@@ -306,11 +306,20 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
 
-    def save(self):
+    def save(self, path: Path | None = None):
         """
         This takes the provided part and will create its dictionary and export it to a json
+        Args:
+            path: Base path for storing part information.
+                  A directory with the part_no will be created in this path.
         """
-        dir_name = Path(".") / self.part_no
+        if path is None:
+            path = Path(".")
+        if not path.exists():
+            msg = f"The directory {path} does not exists."
+            raise FileNotFoundError(msg)
+
+        dir_name = path / self.part_no
         dir_name.mkdir(exist_ok=True)
         file_path = dir_name / f"{self.part_no}.json"
         json.dump(self.export(), file_path.open("w+"))
