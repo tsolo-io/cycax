@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-class CycaxSide:
+class CycadSide:
     def __init__(self, parent):
         self._parent = parent
 
@@ -102,7 +102,7 @@ class CycaxSide:
         length: float,
         width: float,
         depth: float = None,
-        horizontal=True,
+        horizontal: bool = True,
         inner: bool = True,
         external_only: bool = False,
     ):
@@ -146,7 +146,7 @@ class CycaxSide:
         raise ValueError("_depth_check is Not implimented on" + self.name)
 
 
-class LeftSide(CycaxSide):
+class LeftSide(CycadSide):
     name = "LEFT"
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
@@ -198,7 +198,7 @@ class LeftSide(CycaxSide):
             return val
 
 
-class RightSide(CycaxSide):
+class RightSide(CycadSide):
     name = "RIGHT"
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
@@ -250,7 +250,7 @@ class RightSide(CycaxSide):
         return x_size, y_size, z_size
 
 
-class TopSide(CycaxSide):
+class TopSide(CycadSide):
     name = "TOP"
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
@@ -302,7 +302,7 @@ class TopSide(CycaxSide):
         return x_size, y_size, z_size
 
 
-class BottomSide(CycaxSide):
+class BottomSide(CycadSide):
     name = "BOTTOM"
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
@@ -354,7 +354,7 @@ class BottomSide(CycaxSide):
         return x_size, y_size, z_size
 
 
-class FrontSide(CycaxSide):
+class FrontSide(CycadSide):
     name = "FRONT"
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
@@ -406,7 +406,7 @@ class FrontSide(CycaxSide):
         return x_size, y_size, z_size
 
 
-class BackSide(CycaxSide):
+class BackSide(CycadSide):
     name = "BACK"
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:

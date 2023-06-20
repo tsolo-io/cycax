@@ -1,10 +1,14 @@
-from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
-from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
-from cycax.cycad.render import Render
-from cycax.cycad.slot import Slot
 import json
+import logging
 import os
+from pathlib import Path
+
+from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
+from cycax.cycad.engine_openscad import EngineOpenSCAD
+from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
+from cycax.cycad.figure import Figure
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
+from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
@@ -35,7 +39,7 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
         poligon: str,
-        colour: str = "orange", 
+        colour: str = "orange",
     ):
         super().__init__(x, y, z, side)
         self.left = LeftSide(self)
@@ -44,7 +48,6 @@ class CycadPart(Location):
         self.bottom = BottomSide(self)
         self.front = FrontSide(self)
         self.back = BackSide(self)
-        self.render = Render(self)
 
         self.part_no = part_no
         self.x_size = x_size
@@ -63,22 +66,35 @@ class CycadPart(Location):
         self.moves = [0, 0, 0]
         self.rotate = [0, 0, 0]
         self.final_location = False
-        self.poligon=poligon
+        self.poligon = poligon
         self.colour = colour
-        self.label = ""
+        self.label: set[str] = set()
+        self._files = {}
 
-    def add_label(self, path: str):
+    def add_file(self, file_type: str, file_path: Path):
         """
-        eThis method will use the 3D model provided in the path rather than the object drawn.
+        This method will use the 3D model provided in the path rather than the object drawn.
 
         Args:
-            path: path to 3Dpart
+            file_type: this is the extenstion name of the file.
+            file_path: this is the path to the file.
         """
-        self.colour="purple"
-        self.name="external"
-        self.label=path  
-        self.x, self.y, self.z = self.x_size / 2, self.y_size / 2, self.z_size / 2      
-    
+        f_type = str(file_type).upper().strip()
+        self._files[f_type] = file_path
+        if not file_path.exists():
+            logging.warning("File does not exists. Its ok we carry on but its not good.")
+        self.colour = "purple"
+        self.name = "external"
+        self.x, self.y, self.z = self.x_size / 2, self.y_size / 2, self.z_size / 2
+
+    def add_labels(self, label_names: str):
+        """This method adds a label:
+        Args:
+            label_names: add these labels.
+        """
+        for label in label_names:
+            self.labels.add(str(label).lower())
+
     def make_hole(
         self,
         x: float,
@@ -216,7 +232,9 @@ class CycadPart(Location):
         self.features.append(temp_rect)
 
     def make_bounding_box(self):
-        """This bounding box will be used to help keep track of and update the bounds."""
+        """This bounding box will be used to help keep track of and update the bounds.
+        This method is used extensively in assemble to keep track of where the box "should" be after moving it around.
+        """
 
         self.bounding_box = {
             "TOP": self.z_max,
@@ -282,27 +300,25 @@ class CycadPart(Location):
 
         self.features.append(hole)
         self.move_holes.append(hole)
-        
+
     def save(self):
         """
         This takes the provided part and will create its dictionary and export it to a json
         """
-        dir_name = f"{os.getcwd()}/{self.part_no}/{self.part_no}"
-        if not os.path.exists(dir_name):
-            os.mkdir(dir_name)
-        with open(f"{dir_name}/{self.part_no}/{self.part_no}.json", "w") as jsonfile:
-            json.dump(self.export(), jsonfile, indent=4)
-            
-            
-    def export(self) -> dict:
+        dir_name = Path(".") / self.part_no
+        dir_name.mkdir(exist_ok=True)
+        file_path = dir_name / f"{self.part_no}.json"
+        json.dump(self.export(), file_path.open("w+"))
+
+    def export(self) -> list:
         """
         This method will take the values stored within the part and export it to a dict so that it can be decoded.
 
         Returns:
-            dict : The dictionary of the part.
+            list : The dictionary of the part.
         """
 
-        dict_metal = {
+        dict_piece = {
             "name": self.poligon,
             "type": "add",
             "side": self.side,
@@ -315,14 +331,51 @@ class CycadPart(Location):
             "center": False,
         }
 
-        dict_part = []
+        list_part = []
 
-        dict_part.append(dict_metal)
+        list_part.append(dict_piece)
         for item in self.features:
             ret = item.export()
             if type(ret) != dict:
                 for part in ret:
-                    dict_part.append(part)
+                    list_part.append(part)
             else:
-                dict_part.append(ret)
-        return dict_part
+                list_part.append(ret)
+        return list_part
+
+    def render(self, eng: str, side: str = None):
+        """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
+        Args:
+            eng: type of engine to use
+            side: this will be used for pyplot
+        """
+
+        if eng == "pyplot":
+            # This method will created a pyplot drawing of the object.
+            plotter = Figure(part_no=self.part_no, side=side)
+            plotter.save_as_figure()
+
+        elif eng == "OpenSCAD":
+            # This method will produce an OpenSCAD 3D drawing of the given object.
+            cutter = EngineOpenSCAD()
+
+            in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=self.part_no)
+
+            if not os.path.exists(in_name):
+                self.save()
+
+            cutter.decode(self.part_no)
+
+        elif eng == "STL":
+            # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
+            cutter = EngineOpenSCAD()
+            in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=self.part_no)
+
+            if not os.path.exists(in_name):
+                self.Render("OpenSCAD")
+
+            cutter.render_stl(self)
+
+        else:
+            msg = f"engine: {eng} is not one of pyplot, OpenSCAD or STL."
+            raise ValueError(msg)

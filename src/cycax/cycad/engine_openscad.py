@@ -3,9 +3,8 @@ import logging
 import os
 import subprocess
 
-from cycax.cycad.cycad_part import CycadPart
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 from cycax.cycad.features import nut_specifications
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
 class EngineOpenSCAD:
@@ -67,7 +66,7 @@ class EngineOpenSCAD:
         res = []
         res.append(self._translate(lookup))
         res.append(self._rotate(lookup["side"]))
-        radius=nut_specifications["nut_type"]["diameter"]/2
+        radius = nut_specifications[lookup["nut_type"]]["diameter"] / 2
         res.append("cylinder(r={rad}, h={deep}, $fn=6);".format(rad=radius, deep=lookup["depth"]))
 
         return res
@@ -134,7 +133,7 @@ class EngineOpenSCAD:
 
         return side
 
-    def decode(self, part_name: str=None, part: CycadPart= None):
+    def decode(self, part_name: str = None):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
@@ -142,31 +141,18 @@ class EngineOpenSCAD:
 
         Args:
             part_name : name of the file that is to be decoded into a scad.
-            part : this is the CycadPart that needs to be decoded. If the CycadPart is provided it is possible to also create its relevant json file if that has not been done already.
-            
+
          Raises:
-            ValueError: If you do not provide a filename and not a part it will raise and exception.
-            ValueError: If the part_name provided does not map to anything and the part is not provided it will raise and exception.  
+            ValueError: if incorrect part_name is provided.
         """
-        if part_name is None:
-            if part is None:
-                msg = "You need to provide the method with a part or part_no, you have not provided either."
-                raise ValueError(msg)
-            else:
-                part_name=CycadPart.part_no
-            
+
         out_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=part_name)
         SCAD = open(out_name, "w")
         in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=part_name)
-        
-        
-        if not os.path.exists(in_name):
-            if part is not None:
-                part.save()
-            else:
-                msg = "You have either provided an incorrect part_name or you have not saved the part and have not provided this code with it."
-                raise ValueError(msg) 
 
+        if not os.path.exists(in_name):
+            msg = f"the part name {part_name} does not map to a json file at {in_name}."
+            raise ValueError(msg)
 
         with open(in_name) as f:
             data = json.load(f)
@@ -204,7 +190,7 @@ class EngineOpenSCAD:
 
         SCAD.close()
 
-    def render_stl(self, filename: str= None, part: CycadPart= None):
+    def render_stl(self, part_name: str = None):
         """
 
         This takes a SCAD object and runs a command through linex that converts it into an stl.
@@ -212,30 +198,17 @@ class EngineOpenSCAD:
         It prints out some messages to the terminal so that the impatient user will hopefully wait.(Similar to many windows request.)
 
         Args:
-            filename : This is the name of the file which will be converted from a scad to a stl.
-            part: this can be used to find the name of the part if none is provided.
-            
+            part_name : This is the name of the file which will be converted from a scad to a stl.
+
         Raises:
-            ValueError: If you do not provide a filename and not a part it will raise and exception.
-            ValueError: If the name of the part does not map to a scad file.
+            ValueError: if incorrect part_name is provided.
 
         """
-        if filename is None:
-            if part is None:
-                msg = "You need to provide the method with a part or part_no, you have not provided either."
-                raise ValueError(msg)
-            else:
-                filename=part.part_no
-        in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=filename)
-        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=os.getcwd(), data=filename)
-        
+        in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=part_name)
+        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=os.getcwd(), data=part_name)
         if not os.path.exists(in_name):
-            if part is not None:
-                self.decode(part)
-            else:
-                msg = "The OpenSCAD file for this part does not exist under the filename. Either the filename provided is incorrect or the part needs to be provided so that the OpenSCAD file can be produced."
-                raise ValueError(msg)
-                
+            msg = f"the part name {part_name} does not map to a scad file at {in_name}."
+            raise ValueError(msg)
 
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!!")
         result = subprocess.run(["openscad", "-o", out_stl_name, in_name], capture_output=True, text=True)
@@ -244,5 +217,3 @@ class EngineOpenSCAD:
             logging.info("OpenSCAD: %s", result.stdout)
         if result.stderr:
             logging.error("OpenSCAD: %s", result.stderr)
-
-    

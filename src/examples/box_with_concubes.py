@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from cycax.cycad import Assembly, Cuboid, ExternalPart, SheetMetal
+from cycax.cycad import Assembly, Cuboid, Print3D, SheetMetal
 
 LEFT = "LEFT"
 RIGHT = "RIGHT"
@@ -10,28 +10,23 @@ FRONT = "FRONT"
 BACK = "BACK"
 
 
-class ConCube(Cuboid):
+class ConCube(Print3D):
     """This class holds the data for the corner cube."""
 
     def __init__(self):
-        Cuboid.__init__(self, part_no="con_cube", x_size=11, y_size=11, z_size=11)
+        super().__init__(part_no="con_cube", x_size=11, y_size=11, z_size=11)
         self.calculate()
 
     def calculate(self):
         """Calculate the concube."""
-        for side in (LEFT, BOTTOM, FRONT):
-            self.make_hole(x=7, y=7, side=side, diameter=3.2, depth=2, inner=False)
-            self.make_hole(x=7, y=7, side=side, diameter=2.9, depth=11, inner=True)  # Through everything
-            self.make_nut(side=side, x=7, y=7, nut_type=3, depth=2, sink=1)  # Coordinates based on center of the Nut.
-
-            # # Two holes for the bolt. The bolt go into a slightly bigger hole, then through the nut then a tight hole to act like a thread lock.
-
-        self.make_rectangle(side=LEFT, x=7, y=10, y_size=6.2, x_size=2, z_size=3, sink=2, center=True)
-        self.make_rectangle(side=BOTTOM, x=7, y=10, y_size=3, x_size=6.2, z_size=2, sink=2, center=True)
-        self.make_rectangle(side=FRONT, x=7, y=10, y_size=2, x_size=6.2, z_size=3, sink=2, center=True)
+        for side in (self.left, self.bottom, self.front):
+            side.hole(pos=[7, 7], diameter=3.2, depth=2, inner=False)
+            side.hole(pos=[7, 7], diameter=2.9, inner=True)  # Through everything
+            side.nut(pos=[7, 7], nut_type="M3", depth=2, sink=1)  # Coordinates based on center of the Nut.
+            side.box(pos=[7, 10], depth=2, width=6.2, length=3, sink=2, center=True)  # holes to fit the nuts into
 
         # Cut the excess material we dont want to print.
-        self.make_rectangle(TOP, x=4, y=4, y_size=7, x_size=7, z_size=7)
+        self.top.box(pos=[4, 4], length=7, width=7, depth=7)
 
 
 class main:
@@ -52,16 +47,16 @@ class main:
         box.rotateFreezeLeft(front)
         box.rotateFreezeLeft(back)
 
-        box.level(front, BACK, bottom, FRONT)
-        box.level(back, FRONT, bottom, BACK)
+        box.level(front.back, bottom.front)
+        box.level(back.front, bottom.back)
 
-        box.level(left, RIGHT, bottom, LEFT)
-        box.level(right, LEFT, bottom, RIGHT)
+        box.level(left.right, bottom.left)
+        box.level(right.left, bottom.right)
 
-        box.level(top, TOP, back, TOP)
+        box.level(top.top, back.top)
 
-        box.level(left, FRONT, front, FRONT)
-        box.level(right, FRONT, front, FRONT)
+        box.level(left.front, front.front)
+        box.level(right.front, front.front)
 
         cubes = [0, 0, 0, 0, 0, 0, 0, 0]
         for cube in range(8):
@@ -82,31 +77,31 @@ class main:
             box.rotateFreezeTop(cubes[cube])
 
         for cube in range(4):
-            box.level(cubes[cube], RIGHT, right, LEFT)
+            box.level(cubes[cube].right, right.left)
 
         for cube in range(4, 8):
-            box.level(cubes[cube], LEFT, left, RIGHT)
+            box.level(cubes[cube].left, left.right)
 
         for cube in range(2, 6):
-            box.level(cubes[cube], BACK, back, FRONT)
+            box.level(cubes[cube].back, back.front)
 
         for cube in [0, 1, 6, 7]:
-            box.level(cubes[cube], FRONT, front, BACK)
+            box.level(cubes[cube].front, front.back)
 
         for cube in range(0, 8, 2):
-            box.level(cubes[cube], BOTTOM, bottom, TOP)
+            box.level(cubes[cube].bottom, bottom.top)
 
         for cube in range(1, 8, 2):
-            box.level(cubes[cube], TOP, top, BOTTOM)
+            box.level(cubes[cube].top, top.bottom)
 
         for cube in range(0, 8, 2):
-            box.subtract(bottom, TOP, cubes[cube])
+            box.subtract(bottom.top, cubes[cube])
 
         for cube in range(4, 8):
-            box.subtract(left, RIGHT, cubes[cube])
+            box.subtract(left.right, cubes[cube])
 
         for cube in [0, 1, 6, 7]:
-            box.subtract(front, BACK, cubes[cube])
+            box.subtract(front.back, cubes[cube])
 
         # HD.make_hole(20, 20, TOP, 20, 20)
 

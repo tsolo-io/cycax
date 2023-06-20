@@ -2,55 +2,47 @@
 from pathlib import Path
 
 from cycax.cycad.assembly import Assembly
-from cycax.cycad.cuboid import Cuboid
-from cycax.cycad.external_part import ExternalPart
-from cycax.cycad.sheet_metal import SheetMetal
+from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
 
 
 class Thing(Cuboid):
     def __init__(self):
-        super().__init__(part_no="Thing", x_size=10, y_size=10, z_size=26, colour="red")
+        super().__init__(part_no="Thing", x_size=10, y_size=10, z_size=26)
         self.calculate()
 
     def calculate(self):
         for x in [4, 6]:
             for y in [4, 6]:
-                self.make_hole(x, y, "TOP", diameter=2, depth=12)
-                self.make_hole(x, y, "BOTTOM", diameter=3, depth=12)
-                self.make_hole(x, y, "BOTTOM", diameter=3.1, depth=12, inner=False)
-                self.make_hole(x, y, "TOP", diameter=3.1, depth=12, inner=False)
+                self.top.hole(pos=[x, y], diameter=2, depth=12)
+                self.bottom.hole(pos=[x, y], diameter=3, depth=12)
+                self.bottom.hole(pos=[x, y], diameter=3.1, depth=12, inner=False)
+                self.top.hole(pos=[x, y], diameter=3.1, depth=12, inner=False)
 
-        self.make_rectangle(
-            side="FRONT",
-            x=self.x_size / 3,
-            y=5,
-            x_size=(self.x_size) / 3,
-            y_size=self.y_size / 3 + 2,
-            z_size=self.z_size - 10,
+        self.front.box(
+            pos=[self.x_size / 3, 5],
+            width=(self.x_size) / 3,
+            depth=self.y_size / 3 + 2,
+            length=self.z_size - 10,
             sink=-1,
         )
-        self.make_rectangle(
-            side="LEFT",
-            x=self.x_size / 3,
-            y=5,
-            y_size=(self.x_size) / 3,
-            x_size=self.y_size / 3 + 2,
-            z_size=self.z_size - 10,
+        self.left.box(
+            pos=[self.x_size / 3, 5],
+            width=(self.x_size) / 3,
+            depth=self.y_size / 3 + 2,
+            length=self.z_size - 10,
             sink=-1,
         )
 
 
-class Blob(Cuboid):  # ExternalPart):
-    part_no = "Blob-XD-F-0"
-    model_file = Path("~/Downloads/stolen/STL/Blob.stl")
-    x_size = 10
-    y_size = 10
-    z_size = 10
+class Blob(Print3D):  # ExternalPart):
+    def __init__(self):
+        super().__init__(part_no="Blob", x_size=10, y_size=10, z_size=10)
+        self.calculate()
 
     def calculate(self):
         for x in [4, 6]:
             for y in [4, 6]:
-                self.make_hole(x, y, "BOTTOM", diameter=2, depth=12)
+                self.bottom.hole(pos=[x, y], diameter=2)
 
 
 def main():
@@ -60,16 +52,16 @@ def main():
     for thing_no in range(1, 11):
         thing = Thing()
         thing.move(x=thing_no * 100)
-        assembly.level(thing, "BOTTOM", base_board, "TOP")
-        assembly.level(thing, "BACK", base_board, "BACK")
-        assembly.subtract(base_board, "TOP", thing)
+        assembly.level(thing.bottom, base_board.top)
+        assembly.level(thing.back, base_board.back)
+        assembly.subtract(base_board.top, thing)
         assembly.add(thing)
 
-        blob = Blob("Blob", 10, 10, 10)
+        blob = Blob()
         blob.calculate()
-        assembly.level(blob, "BOTTOM", thing, "TOP")
-        assembly.level(blob, "BACK", thing, "BACK")
-        assembly.level(blob, "LEFT", thing, "LEFT")
+        assembly.level(blob.bottom, thing.top)
+        assembly.level(blob.back, thing.back)
+        assembly.level(blob.left, thing.left)
         assembly.add(blob)
 
     assembly.add(base_board)
