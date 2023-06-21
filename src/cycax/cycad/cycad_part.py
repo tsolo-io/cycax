@@ -49,6 +49,7 @@ class CycadPart(Location):
         self.front = FrontSide(self)
         self.back = BackSide(self)
 
+        self._base_path = Path(".")
         self.part_no = part_no
         self.x_size = x_size
         self.y_size = y_size
@@ -319,6 +320,7 @@ class CycadPart(Location):
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
 
+        self._base_path = path
         dir_name = path / self.part_no
         dir_name.mkdir(exist_ok=True)
         file_path = dir_name / f"{self.part_no}.json"
@@ -375,7 +377,7 @@ class CycadPart(Location):
             # This method will produce an OpenSCAD 3D drawing of the given object.
             cutter = EngineOpenSCAD()
 
-            in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=self.part_no)
+            in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
 
             if not os.path.exists(in_name):
                 self.save()
@@ -385,7 +387,7 @@ class CycadPart(Location):
         elif eng == "STL":
             # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
             cutter = EngineOpenSCAD()
-            in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=self.part_no)
+            in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
 
             if not os.path.exists(in_name):
                 self.Render("OpenSCAD")

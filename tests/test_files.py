@@ -15,7 +15,7 @@ def test_save(tmp_path):
     assembly.add(mypart1)
     assembly.add(mypart2)
     assembly.save(tmp_path)
-    assert len(tuple(tmp_path.glob("*"))) > 3, "Expect a directory per part and files for Assembly"
+    assert len(tuple(tmp_path.glob("*"))) > 2, "Expect a directory per part and files for Assembly"
     for i in range(1, 3):
         part_expected_path = tmp_path / f"part-test{i}"
         assert part_expected_path.is_dir(), "Directory for part should exists"

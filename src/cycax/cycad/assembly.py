@@ -24,34 +24,29 @@ class Assembly:
         self.decoder = EngineOpenSCAD()
         self.assembler = AssemblyOpenSCAD(part_number)
         self.pieces = []
+        self._base_path = Path(".")
 
     def render(self):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
         """
-        datafile = self.export()
-        for part in datafile:
+        data = self.export()
+        self.decoder.set_path(self._base_path)
+        for part in data:
+            # FIXME: Should just be: `part.render()` the part render should sort out its own stuff.
             name = part["part_no"]
 
-            STLname = "{cwd}/{name}/{name}.stl".format(cwd=os.getcwd(), name=name)
+            STLname = "{cwd}/{name}/{name}.stl".format(cwd=self._base_path, name=name)
             if not os.path.exists(STLname):
-                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=os.getcwd(), name=name)
+                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=self._base_path, name=name)
                 if not os.path.exists(SCADname):
                     logging.info("Creating a SCAD file of the pieces of the object.")
                     self.decoder.decode(name)
                 else:
                     pass
                 self.decoder.render_stl(name)
-            else:
-                pass
 
-        dir_name = f"{os.getcwd()}/{self.part_number}"
-        if not os.path.exists(dir_name):
-            os.mkdir(dir_name)
-        with open(f"{dir_name}/{self.part_number}.json", "w") as jsonfile:
-            json.dump(self.export(), jsonfile, indent=4)
-
-        logging.info("moving to the assembler")
+        logging.info("Calling to the assembler")
         self.assembler.assembly_openscad()
 
     def save(self, path: Path | None = None):
@@ -70,13 +65,8 @@ class Assembly:
         for item in self.pieces:
             item.save(path)
 
+        self._base_path = path
         data = self.export()
-        data_filename = path / "assembly.json"
-        data_filename.write_text(json.dumps(data))
-        # Old location. Do we need to store the assembly in its own folder?
-        # At the same level as the Python main file should be fine.
-        path = path / self.part_number
-        path.mkdir(exist_ok=True)
         data_filename = path / f"{self.part_number}.json"
         data_filename.write_text(json.dumps(data))
 
