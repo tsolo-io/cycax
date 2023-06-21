@@ -70,6 +70,31 @@ class Assembly:
         data_filename = path / f"{self.part_number}.json"
         data_filename.write_text(json.dumps(data))
 
+    def merge(self, part1: CycadPart, part2: CycadPart):
+        """This method will be used to merge 2 parts together whcich have identical sizes but different features.
+
+        Args:
+            part1: this part will receive the features present on part2.
+            part2: this part will receive the features present on part1.
+
+        Raises:
+            ValueError: if the sizes of the parts are not identical.
+        """
+        if (
+            part1.size.x_size == part2.size.x_size
+            and part1.size.y_size == part2.size.y_size
+            and part1.size.z_size == part2.size.z_size
+        ):
+            for item in part2.features:
+                part1.features.append(item)
+            for item in part2.move_holes:
+                part1.move_holes.append(item)
+            part2.features = part1.features
+            part2.move_holes = part1.move_holes
+        else:
+            msg = f"merging {part1} and {part2} but they are not of the same size."
+            raise ValueError(msg)
+
     def add(self, part: CycadPart):
         """
         This adds a new object into the assembly and decodes it into a json if that's what the user wants.
@@ -140,6 +165,8 @@ class Assembly:
         Args:
             partside1:This is the CycadSide that will be moved to match the plane of the other part.
             partside2: This is the Cycadside which will dictate the plane used to as a reference to move part1.
+        Raises:
+            ValueError: if the side present in CycadSide does not match one of the expected side.
         """
         part1 = partside1._parent
         part2 = partside2._parent
@@ -177,9 +204,10 @@ class Assembly:
         """
         for hole in range(len(part.move_holes)):
             temp_hole = copy.deepcopy(part.move_holes[hole])
-            temp_hole.swap_yz(part.rotate[0] / 90, part.rotmax[1])
-            temp_hole.swap_xz(part.rotate[1] / 90, part.rotmax[2])
-            temp_hole.swap_xy(part.rotate[2] / 90, part.rotmax[0])
+            rotation = [part.x_size, part.y_size, part.z_size]
+            rotation = temp_hole.swap_yz(rot=part.rotate[0] / 90, rotmax=rotation)
+            rotation = temp_hole.swap_xz(rot=part.rotate[1] / 90, rotmax=rotation)
+            rotation = temp_hole.swap_xy(rot=part.rotate[2] / 90, rotmax=rotation)
             if part.moves[0] != 0:
                 temp_hole.move(x=part.moves[0])
             if part.moves[1] != 0:
@@ -189,7 +217,7 @@ class Assembly:
             part.move_holes[hole] = temp_hole
         part.final_location = True
 
-    def subtract(self, partside1: CycadPart, part2: CycadPart):
+    def subtract(self, partside1: CycadSide, part2: CycadPart):
         """
         This method adds the hols of part2 to the part1 on the side where they touch.
         This method will be used for moving around concube and harddive screw holes.
@@ -197,6 +225,9 @@ class Assembly:
         Args:
             partside1: This is the part side that will receive the holes.
             part2: This is the part while will be used as the template when transferring holes.
+
+        Raises:
+            ValueError: if the side present in CycadSide does not match one of the expected side.
         """
         part1 = partside1._parent
         side = partside1.name
@@ -209,32 +240,26 @@ class Assembly:
             if side == TOP:
                 if hole.z == part1.bounding_box[TOP]:
                     hole.side = TOP
-                    hole.depth = part1.z_size
                     part1.insert_hole(hole)
             elif side == BOTTOM:
                 if hole.z == part1.bounding_box[BOTTOM]:
                     hole.side = BOTTOM
-                    hole.depth = part1.z_size
                     part1.insert_hole(hole)
             elif side == LEFT:
                 if hole.x == part1.bounding_box[LEFT]:
                     hole.side = LEFT
-                    hole.depth = part1.x_size
                     part1.insert_hole(hole)
             elif side == RIGHT:
                 if hole.x == part1.bounding_box[RIGHT]:
                     hole.side = RIGHT
-                    hole.depth = part1.x_size
                     part1.insert_hole(hole)
             elif side == FRONT:
                 if hole.y == part1.bounding_box[FRONT]:
                     hole.side = FRONT
-                    hole.depth = part1.y_size
                     part1.insert_hole(hole)
             elif side == BACK:
                 if hole.y == part1.bounding_box[BACK]:
                     hole.side = BACK
-                    hole.depth = part1.y_size
                     part1.insert_hole(hole)
             else:
                 msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
