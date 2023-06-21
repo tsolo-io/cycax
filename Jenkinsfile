@@ -5,7 +5,6 @@ pipeline {
             steps {
                 sh 'hatch run docs:build'
             }
-
             post {
                  success {
                   publishHTML([allowMissing: false,
@@ -20,19 +19,19 @@ pipeline {
                 }
             }
         }
-	stage('PyTest') {
-  	    steps {
-  	        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: "One or more tests failed at this stage.") {
-	            sh "hatch run coverage run -m pytest --junitxml=reports/test_results_cov.xml ./tests"
-  	        }
-  	            
-  	    }
-	    post {
-	        always{
-	            junit 'reports/test_results_cov.xml'
-	        }
-	    }
-	}
+        stage('PyTest') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: "One or more tests failed at this stage.") {
+                    sh "hatch run coverage run -m pytest --junitxml=reports/test_results_cov.xml ./tests"
+                }
+                    
+            }
+            post {
+                always{
+                    junit 'reports/test_results_cov.xml'
+                }
+            }
+        }
         stage('Mypy') {
             steps {
                 sh "mkdir -p reports"
@@ -48,4 +47,3 @@ pipeline {
         }
     }
 }
-

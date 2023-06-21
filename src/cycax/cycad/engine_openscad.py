@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import subprocess
+from pathlib import Path
 
 from cycax.cycad.features import nut_specifications
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
@@ -9,10 +10,13 @@ from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 class EngineOpenSCAD:
     """
-    This class willbe used to decode a json to a scad file which can be rendered in openscad for 3D view.
+    Decode a JSON to a OpenSCAD file which can be rendered in openscad for 3D view.
     """
 
     dif = 0
+
+    def __init__(self):
+        self._base_path = Path(".")
 
     def _decode_cube(self, lookup: dict) -> str:
         """
@@ -133,6 +137,11 @@ class EngineOpenSCAD:
 
         return side
 
+    def set_path(self, path: Path):
+        if not path.exists():
+            logging.error("Engin using a path that does not exists. Path=%s", path)
+        self._base_path = path
+
     def decode(self, part_name: str = None):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
@@ -146,9 +155,9 @@ class EngineOpenSCAD:
             ValueError: if incorrect part_name is provided.
         """
 
-        out_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=part_name)
+        out_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=part_name)
         SCAD = open(out_name, "w")
-        in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=part_name)
+        in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=part_name)
 
         if not os.path.exists(in_name):
             msg = f"the part name {part_name} does not map to a json file at {in_name}."
@@ -185,8 +194,10 @@ class EngineOpenSCAD:
             if type(out) == list:
                 for small in out:
                     SCAD.write(small)
+                    SCAD.write("\n")
             else:
                 SCAD.write(out)
+                SCAD.write("\n")
 
         SCAD.close()
 
@@ -204,8 +215,8 @@ class EngineOpenSCAD:
             ValueError: if incorrect part_name is provided.
 
         """
-        in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=part_name)
-        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=os.getcwd(), data=part_name)
+        in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=part_name)
+        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=self._base_path, data=part_name)
         if not os.path.exists(in_name):
             msg = f"the part name {part_name} does not map to a scad file at {in_name}."
             raise ValueError(msg)

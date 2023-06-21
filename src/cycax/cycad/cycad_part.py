@@ -49,6 +49,7 @@ class CycadPart(Location):
         self.front = FrontSide(self)
         self.back = BackSide(self)
 
+        self._base_path = Path(".")
         self.part_no = part_no
         self.x_size = x_size
         self.y_size = y_size
@@ -306,11 +307,21 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
 
-    def save(self):
+    def save(self, path: Path | None = None):
         """
         This takes the provided part and will create its dictionary and export it to a json
+        Args:
+            path: Base path for storing part information.
+                  A directory with the part_no will be created in this path.
         """
-        dir_name = Path(".") / self.part_no
+        if path is None:
+            path = Path(".")
+        if not path.exists():
+            msg = f"The directory {path} does not exists."
+            raise FileNotFoundError(msg)
+
+        self._base_path = path
+        dir_name = path / self.part_no
         dir_name.mkdir(exist_ok=True)
         file_path = dir_name / f"{self.part_no}.json"
         json.dump(self.export(), file_path.open("w+"))
@@ -366,7 +377,7 @@ class CycadPart(Location):
             # This method will produce an OpenSCAD 3D drawing of the given object.
             cutter = EngineOpenSCAD()
 
-            in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=self.part_no)
+            in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
 
             if not os.path.exists(in_name):
                 self.save()
@@ -376,7 +387,7 @@ class CycadPart(Location):
         elif eng == "STL":
             # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
             cutter = EngineOpenSCAD()
-            in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=self.part_no)
+            in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
 
             if not os.path.exists(in_name):
                 self.Render("OpenSCAD")

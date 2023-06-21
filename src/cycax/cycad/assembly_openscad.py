@@ -1,5 +1,6 @@
 import json
-import os
+import logging
+from pathlib import Path
 
 
 class AssemblyOpenSCAD:
@@ -13,6 +14,7 @@ class AssemblyOpenSCAD:
 
     def __init__(self, part_no: str) -> None:
         self.part_no = part_no
+        self._base_path = Path(".")
 
     def _fetch_part(self, part: str) -> str:
         """
@@ -21,7 +23,10 @@ class AssemblyOpenSCAD:
         Args:
             part: this is the name of the part that will be imported.
         """
-        return 'import("{cwd}/{part}/{part}.stl");'.format(cwd=os.getcwd(), part=part)
+        stl_file = self._base_path / part / f"{part}.stl"
+        if not stl_file.exists():
+            logging.warning("Referencing a file that does not exists. File name %s", stl_file)
+        return f'import("{stl_file}");'
 
     def _swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
@@ -90,13 +95,15 @@ class AssemblyOpenSCAD:
         """
         return f'color("{colour}")'
 
-    def assembly_openscad(self):
+    def assembly_openscad(self, path: Path | None = None):
         """
         Decodes the provided json and moves the object around as required, making a new openSCAD which will use imported stl.
         """
-        out_name = "{cwd}/{part_no}/{part_no}.scad".format(cwd=os.getcwd(), part_no=self.part_no)
+        if path is not None:
+            self._base_path = path
+        out_name = "{cwd}/{part_no}/{part_no}.scad".format(cwd=self._base_path, part_no=self.part_no)
         SCAD = open(out_name, "w")
-        in_name = "{cwd}/{part_no}/{part_no}.json".format(cwd=os.getcwd(), part_no=self.part_no)
+        in_name = "{cwd}/{part_no}/{part_no}.json".format(cwd=self._base_path, part_no=self.part_no)
         with open(in_name) as f:
             data = json.load(f)
         f.close()
@@ -109,5 +116,6 @@ class AssemblyOpenSCAD:
 
         for out in output:
             SCAD.write(out)
+            SCAD.write("\n")
 
         SCAD.close()

@@ -2,6 +2,7 @@ import copy
 import json
 import logging
 import os
+from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
@@ -23,43 +24,51 @@ class Assembly:
         self.decoder = EngineOpenSCAD()
         self.assembler = AssemblyOpenSCAD(part_number)
         self.pieces = []
+        self._base_path = Path(".")
 
     def render(self):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
         """
-        datafile = self.export()
-        for part in datafile:
+        data = self.export()
+        self.decoder.set_path(self._base_path)
+        for part in data:
+            # FIXME: Should just be: `part.render()` the part render should sort out its own stuff.
             name = part["part_no"]
 
-            STLname = "{cwd}/{name}/{name}.stl".format(cwd=os.getcwd(), name=name)
+            STLname = "{cwd}/{name}/{name}.stl".format(cwd=self._base_path, name=name)
             if not os.path.exists(STLname):
-                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=os.getcwd(), name=name)
+                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=self._base_path, name=name)
                 if not os.path.exists(SCADname):
                     logging.info("Creating a SCAD file of the pieces of the object.")
                     self.decoder.decode(name)
                 else:
                     pass
                 self.decoder.render_stl(name)
-            else:
-                pass
 
-        dir_name = f"{os.getcwd()}/{self.part_number}"
-        if not os.path.exists(dir_name):
-            os.mkdir(dir_name)
-        with open(f"{dir_name}/{self.part_number}.json", "w") as jsonfile:
-            json.dump(self.export(), jsonfile, indent=4)
-
-        logging.info("moving to the assembler")
+        logging.info("Calling to the assembler")
         self.assembler.assembly_openscad()
 
-    def save(self):
+    def save(self, path: Path | None = None):
         """
-        !!!!There is a comment about this method in the jira ticket to assert its relevance.
+        Save the assembly and added part to JSON files.
+        Args:
+            path: The location where the assembly is stored. A directory for each part will be created in this path.
         """
+
+        if path is None:
+            path = Path(".")
+        if not path.exists():
+            msg = f"The directory {path} does not exists."
+            raise FileNotFoundError(msg)
+
         for item in self.pieces:
-            self.add(item)
-        self.export()
+            item.save(path)
+
+        self._base_path = path
+        data = self.export()
+        data_filename = path / f"{self.part_number}.json"
+        data_filename.write_text(json.dumps(data))
 
     def add(self, part: CycadPart):
         """
@@ -69,24 +78,6 @@ class Assembly:
         Args:
             part: this in the part that will be added to the assembly.
         """
-
-        dir_name = f"{os.getcwd()}/{part.part_no}"
-        if not os.path.exists(dir_name):
-            os.mkdir(dir_name)
-
-        with open("./temp.json", "w") as jsonfile:
-            json.dump(part.export(), jsonfile, indent=4)
-
-        JSONname = f"{dir_name}/{part.part_no}.json"
-        if os.path.exists(JSONname):  # checking if the file is already in the directory.
-            current = os.stat(JSONname).st_size
-            new = os.stat("./temp.json").st_size
-            if new >= current:  # addind the file if it is bigger.
-                os.rename("./temp.json", JSONname)
-            else:  # removing the file if it is not bigger.
-                os.remove("./temp.json")
-        else:  # renaming the file if there isn't one already in the file.
-            os.rename("./temp.json", JSONname)
 
         self.pieces.append(part)
 
@@ -113,7 +104,7 @@ class Assembly:
             part: This is the part that will be rotated.
         """
 
-        part.rotate[2] = part.rotate[2] + 90
+        part.rotate[2] = (part.rotate[2] + 90) % 360
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
@@ -125,7 +116,7 @@ class Assembly:
             part: This is the part that will be rotated.
         """
 
-        part.rotate[0] = part.rotate[0] + 90
+        part.rotate[0] = (part.rotate[0] + 90) % 360
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
@@ -137,7 +128,7 @@ class Assembly:
             part: This is the part that will be rotated.
         """
 
-        part.rotate[1] = part.rotate[1] + 90
+        part.rotate[1] = (part.rotate[1] + 90) % 360
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()
