@@ -5,6 +5,7 @@ import os
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
+from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engine_openscad import EngineOpenSCAD
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
@@ -51,6 +52,14 @@ class Assembly:
 
         logging.info("moving to the assembler")
         self.assembler.assembly_openscad()
+
+    def save(self):
+        """
+        !!!!There is a comment about this method in the jira ticket to assert its relevance.
+        """
+        for item in self.pieces:
+            self.add(item)
+        self.export()
 
     def add(self, part: CycadPart):
         """
@@ -108,11 +117,6 @@ class Assembly:
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
-        part.rotmax = [
-            part.x_max - part.x_min,
-            part.y_max - part.y_min,
-            part.z_max - part.z_min,
-        ]
 
     def rotateFreezeLeft(self, part: CycadPart):
         """
@@ -125,11 +129,6 @@ class Assembly:
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
-        part.rotmax = [
-            part.x_max - part.x_min,
-            part.y_max - part.y_min,
-            part.z_max - part.z_min,
-        ]
 
     def rotateFreezeFront(self, part: CycadPart):
         """
@@ -142,22 +141,19 @@ class Assembly:
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()
-        part.rotmax = [
-            part.x_max - part.x_min,
-            part.y_max - part.y_min,
-            part.z_max - part.z_min,
-        ]
 
-    def level(self, part1: CycadPart, side1: str, part2: CycadPart, side2: str):
+    def level(self, partside1: CycadSide, partside2: CycadSide):
         """
         level takes the plane of part 2 specified and moves part 1 so that its specified side has a plane equal to part 2.
-        part1 "FRONT" part2 "BACK" will gve part 1 and part 2 a front and back which are on the same plane. It moves part1.
+        part1.front part2.back will gve part 1 and part 2 a front and back which are on the same plane. It moves part1.
         Args:
-            part1:This is the part that will be moved to match the plane of the other part.
-            side1: This is the side of part1 which will be moved around to match the plane of part2
-            part2: This is the part that will used to reference the moving of part1.
-            side2: This is the side which will dictate the plane used to as a reference to move part1.
+            partside1:This is the CycadSide that will be moved to match the plane of the other part.
+            partside2: This is the Cycadside which will dictate the plane used to as a reference to move part1.
         """
+        part1 = partside1._parent
+        part2 = partside2._parent
+        side1 = partside1.name
+        side2 = partside2.name
         part2.make_bounding_box()
         part1.make_bounding_box()
         to_here = part2.bounding_box[side2]
@@ -202,16 +198,18 @@ class Assembly:
             part.move_holes[hole] = temp_hole
         part.final_location = True
 
-    def subtract(self, part1: CycadPart, side: str, part2: CycadPart):
+    def subtract(self, partside1: CycadPart, part2: CycadPart):
         """
         This method adds the hols of part2 to the part1 on the side where they touch.
         This method will be used for moving around concube and harddive screw holes.
 
         Args:
-            part1: This is the part that will receive the hole of the other part.
-            side: This is the side of the parth that will receive the holes.
+            partside1: This is the part side that will receive the holes.
             part2: This is the part while will be used as the template when transferring holes.
         """
+        part1 = partside1._parent
+        side = partside1.name
+
         if part2.final_location is not True:
             self._final_place_(part2)
         Holes = part2.move_holes
@@ -220,26 +218,32 @@ class Assembly:
             if side == TOP:
                 if hole.z == part1.bounding_box[TOP]:
                     hole.side = TOP
+                    hole.depth = part1.z_size
                     part1.insert_hole(hole)
             elif side == BOTTOM:
                 if hole.z == part1.bounding_box[BOTTOM]:
                     hole.side = BOTTOM
+                    hole.depth = part1.z_size
                     part1.insert_hole(hole)
             elif side == LEFT:
                 if hole.x == part1.bounding_box[LEFT]:
                     hole.side = LEFT
+                    hole.depth = part1.x_size
                     part1.insert_hole(hole)
             elif side == RIGHT:
                 if hole.x == part1.bounding_box[RIGHT]:
                     hole.side = RIGHT
+                    hole.depth = part1.x_size
                     part1.insert_hole(hole)
             elif side == FRONT:
                 if hole.y == part1.bounding_box[FRONT]:
                     hole.side = FRONT
+                    hole.depth = part1.y_size
                     part1.insert_hole(hole)
             elif side == BACK:
                 if hole.y == part1.bounding_box[BACK]:
                     hole.side = BACK
+                    hole.depth = part1.y_size
                     part1.insert_hole(hole)
             else:
                 msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."

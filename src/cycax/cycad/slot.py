@@ -46,20 +46,6 @@ class Slot:
                 side=side, x=x - x_size / 2, y=y + x_size / 2, z=z, x_size=x_size, y_size=y_size - x_size, z_size=z_size
             )
 
-    def export(self) -> tuple:
-        """
-        This will create a dictionary of the slot that can be used for the json.
-
-        Returns:
-            tpl: this will return a tupple of dictionaries. This needs to be changed to releasing dictionarties.
-
-        """
-        dict_hole_left = self.hole_left.export()
-        dict_hole_right = self.hole_right.export()
-        dict_rectangle = self.rectangle.export()
-
-        return dict_hole_left, dict_hole_right, dict_rectangle
-
     def swap_xy(self, rot: float, max_y: float):
         """Rotate while holding the top where it currenly is.
 

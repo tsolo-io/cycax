@@ -19,14 +19,14 @@ class Figure:
     """This is a class that will be used to draw pyplots of various views of a 3D object.
 
     Args:
-        data_file: This is the name of the json file that needs to be decoded.
+        part_no: This is the name of the json file that needs to be decoded.
         side: Thi argument will suggest which side of the object the view is of.
 
     """
 
-    def __init__(self, data_file: str, side: str) -> None:
+    def __init__(self, part_no: str, side: str) -> None:
         self.side = side
-        self.data_file = data_file
+        self.part_no = part_no
         self.plane = ""
         self.hole_sink = ""
 
@@ -39,7 +39,7 @@ class Figure:
             BACK: 0,
         }
 
-    def get_feature_style(self, feature: dict) -> dict:
+    def _get_feature_style(self, feature: dict) -> dict:
         """Return a dict with the style used by Matplotlib add_patch
 
         Args:
@@ -56,7 +56,7 @@ class Figure:
         else:
             return {"color": "blue", "edgecolor": "blue", "alpha": 0.6}
 
-    def bounding_box(self, feature: dict):
+    def _bounding_box(self, feature: dict):
         """This method will update the bounding box of a feature when called. It is also used to update other information with regards to the plane of the odject that is affected by the side.
 
         Args:
@@ -77,7 +77,7 @@ class Figure:
             RIGHT: "diameter",
         }[self.hole_sink]
 
-    def hole(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def _hole(self, ax: matplotlib.axes._axes.Axes, feature: dict):
         """This method will draw a hole on the plot if the given hole reaches the side which it is drawing.
 
         Args:
@@ -90,10 +90,10 @@ class Figure:
             or feature[self.plane] - feature[self.hole_sink] == self.boundin_box[self.side]
         ):
             ax.add_patch(
-                Circle((feature["x"], feature["y"]), feature["diameter"] / 2, **self.get_feature_style(feature))
+                Circle((feature["x"], feature["y"]), feature["diameter"] / 2, **self._get_feature_style(feature))
             )
 
-    def box(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def _box(self, ax: matplotlib.axes._axes.Axes, feature: dict):
         """This method will draw a box on the plot if the given cube reaches the side which it is drawing. It uses a dict to figure out the dimentions of the box it is drawing.
 
         Args:
@@ -125,9 +125,9 @@ class Figure:
             }[width]
             length = feature[length]
             width = feature[width]
-            ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self.get_feature_style(feature)))
+            ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self._get_feature_style(feature)))
 
-    def figure_feature(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def _figure_feature(self, ax: matplotlib.axes._axes.Axes, feature: dict):
         """This method will coordingte the decoding of the dictionary.
 
         Args:
@@ -136,23 +136,23 @@ class Figure:
         """
         feature_type = feature["name"]
         if feature_type == "cube":
-            self.box(ax, feature)
+            self._box(ax, feature)
         elif feature_type == "hole":
-            self.hole(ax, feature)
+            self._hole(ax, feature)
 
     def save_as_figure(self):
         """This method will coordinate the drawing and saving of the figure that is being decoded from the provided json."""
-        in_name = os.getcwd() + "/" + self.data_file + "/" + self.data_file + ".json"
+        in_name = os.getcwd() + "/" + self.part_no + "/" + self.part_no + ".json"
         with open(in_name) as f:
             data = json.load(f)
         fig, ax = plt.subplots()
         for feature in data:
             if feature["type"] == "add":
-                self.bounding_box(feature)
-            self.figure_feature(ax, feature)
-        ax.set_title(self.data_file)
+                self._bounding_box(feature)
+            self._figure_feature(ax, feature)
+        ax.set_title(self.part_no)
         ax.autoscale_view()
         ax.set_aspect("equal", "box")
-        figfile = os.getcwd() + "/" + self.data_file + "/" + self.data_file + "-fig.svg"
+        figfile = os.getcwd() + "/" + self.part_no + "/" + self.part_no + "-fig.svg"
         plt.savefig(figfile)
         logging.info("Write to %s", figfile)

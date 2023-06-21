@@ -17,6 +17,13 @@ fan:
 	pip install --force-reinstall $(shell ls ${PWD}/../cycax/dist/cycax-*.whl | sort | head -n1)
 	./fan_example.py
 
+
+classy:
+	. ./.venv/bin/activate
+	pip install --force-reinstall $(shell ls ${PWD}/../cycax/dist/cycax-*.whl | sort | head -n1)
+	./classy_new.py
+
+
 install:
 	test -d ./.venv || python3 -m venv ./.venv
 	. ./.venv/bin/activate                                                                                                                                                                       

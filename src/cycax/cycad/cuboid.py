@@ -9,13 +9,13 @@ class Cuboid(CycadPart):
     Args:
         x_size : The size of x.
         y_size : The size of y.
-        z_size : The siez of z.
+        z_size : The size of z.
         part_no : The unique name that will be given to a type of parts.
         colour: This will specify the colour of the object and can be overwritten from red.
 
     """
 
-    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour: str = "red"):
+    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour: str = "pink"):
         super().__init__(
             x=0,
             y=0,
@@ -25,37 +25,38 @@ class Cuboid(CycadPart):
             x_size=x_size,
             y_size=y_size,
             z_size=z_size,
+            colour=colour,
+            poligon="cube",
         )  # initializes the cuboid to (0,0,0)
-        self.colour = colour
 
-    def export(self) -> dict:
-        """
-        This method will take the values stored within the part and export it to a dict so that it can be decoded.
 
-        Returns:
-            dict : The dictionary of the part.
-        """
+class SheetMetal(Cuboid):
 
-        dict_cube = {
-            "name": "cube",
-            "type": "add",
-            "side": self.side,
-            "x": self.x,
-            "y": self.y,
-            "z": self.z,
-            "x_size": self.x_size,
-            "y_size": self.y_size,
-            "z_size": self.z_size,
-            "center": False,
-        }
-        dict_part = []
+    """
+    This class will initialize a sheetmetal part at the  location (0,0,0).
 
-        dict_part.append(dict_cube)
-        for item in self.features:
-            ret = item.export()
-            if type(ret) != dict:
-                for part in ret:
-                    dict_part.append(part)
-            else:
-                dict_part.append(ret)
-        return dict_part
+    Args:
+        x_size : The size of x.
+        y_size : The size of y.
+        z_size : The siez of z.
+        part_no : The unique name that will be given to a type of parts.
+    """
+
+    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float = 2.0):
+        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="grey")
+
+
+class Print3D(Cuboid):
+
+    """
+    This class will initialize a 3DPrint part at the  location (0,0,0).
+
+    Args:
+        x_size : The size of x.
+        y_size : The size of y.
+        z_size : The siez of z.
+        part_no : The unique name that will be given to a type of parts.
+    """
+
+    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float):
+        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="red")

@@ -1,4 +1,12 @@
+import json
+import logging
+import os
+from pathlib import Path
+
+from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
+from cycax.cycad.engine_openscad import EngineOpenSCAD
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
+from cycax.cycad.figure import Figure
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -15,6 +23,8 @@ class CycadPart(Location):
         y_size : The size of y.
         z_size : The siez of z.
         part_no : The unique name that will be given to a type of parts.
+        poligon: currently only cube availabe.
+        colour: colour of the part.
 
     """
 
@@ -28,8 +38,17 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
+        poligon: str,
+        colour: str = "orange",
     ):
         super().__init__(x, y, z, side)
+        self.left = LeftSide(self)
+        self.right = RightSide(self)
+        self.top = TopSide(self)
+        self.bottom = BottomSide(self)
+        self.front = FrontSide(self)
+        self.back = BackSide(self)
+
         self.part_no = part_no
         self.x_size = x_size
         self.y_size = y_size
@@ -47,11 +66,45 @@ class CycadPart(Location):
         self.moves = [0, 0, 0]
         self.rotate = [0, 0, 0]
         self.final_location = False
+        self.poligon = poligon
+        self.colour = colour
+        self.label: set[str] = set()
+        self._files = {}
+        self.definition()
+
+    def definition(self):
+        """This method will be ovedridden to do a calculation."""
+        pass
+
+    def add_file(self, file_type: str, file_path: Path):
+        """
+        This method will use the 3D model provided in the path rather than the object drawn.
+
+        Args:
+            file_type: this is the extenstion name of the file.
+            file_path: this is the path to the file.
+        """
+        f_type = str(file_type).upper().strip()
+        self._files[f_type] = file_path
+        if not file_path.exists():
+            logging.warning("File does not exists. Its ok we carry on but its not good.")
+        self.colour = "purple"
+        self.name = "external"
+        self.x, self.y, self.z = self.x_size / 2, self.y_size / 2, self.z_size / 2
+
+    def add_labels(self, label_names: str):
+        """This method adds a label:
+        Args:
+            label_names: add these labels.
+        """
+        for label in label_names:
+            self.labels.add(str(label).lower())
 
     def make_hole(
         self,
         x: float,
         y: float,
+        z: float,
         side: str,
         diameter: float,
         depth: float,
@@ -63,28 +116,27 @@ class CycadPart(Location):
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
             side: The side of the part the hole will be made in.
             diameter: The diameter of the hole.
             depth: The depth of the hole. If Null the hole is through the part.
             inner: If this is an internal or an external hole.
         """
-        location_output = self.side_location_calculator(side=side, x=x, y=y)
-        temp_hole = Holes(
-            side=side, x=location_output[0], y=location_output[1], z=location_output[2], diameter=diameter, depth=depth
-        )
+
+        temp_hole = Holes(side=side, x=x, y=y, z=z, diameter=diameter, depth=depth)
         if external_only:
             self.move_holes.append(temp_hole)
         elif inner:
             self.features.append(temp_hole)
         elif not inner:
-            move_hole = temp_hole
             self.features.append(temp_hole)
-            self.move_holes.append(move_hole)
+            self.move_holes.append(temp_hole)
 
     def make_slot(
         self,
         x: float,
         y: float,
+        z: float,
         side: str,
         x_size: float,
         y_size: float,
@@ -98,6 +150,7 @@ class CycadPart(Location):
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
             side: The side of the part the hole will be made in.
             x_size : The size of x of slot.
             y_size : The size of y of slot.
@@ -106,15 +159,14 @@ class CycadPart(Location):
             inner: If this is an internal or an external hole.
         """
 
-        location_output = self.side_location_calculator(side=side, x=x, y=y)
         temp_slot = Slot(
             side=side,
             x_size=x_size,
             y_size=y_size,
             z_size=z_size,
-            x=location_output[0],
-            y=location_output[1],
-            z=location_output[2],
+            x=x,
+            y=y,
+            z=z,
             horizontal=horizontal,
         )
         # This will add it to the relevnt array
@@ -134,22 +186,18 @@ class CycadPart(Location):
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, nut_type: float, depth: float, sink: float = 0.0):
+    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float):
         """This method will insert a nut into a CycadPart.
 
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
             side: The side of the part the hole will be made in.
             nut_type: This is the type of nut specified as a float. This method will be updated in version 2.
             depth: This is how deep the nut cut out must be.
-            sink: This can be specified if you would like an embedded nut. One that is not a vissible cut from the outside but rather deeper in the 3D print.
         """
-
-        location_output = self.side_location_calculator(side=side, x=x, y=y, sink=sink)
-        temp_nut = NutCutOut(
-            side=side, x=location_output[0], y=location_output[1], z=location_output[2], nut_type=nut_type, depth=depth
-        )
+        temp_nut = NutCutOut(side=side, x=x, y=y, z=z, nut_type=nut_type, depth=depth)
         self.features.append(temp_nut)
 
     def make_rectangle(
@@ -157,10 +205,10 @@ class CycadPart(Location):
         side: str,
         x: float,
         y: float,
+        z: float,
         x_size: float,
         y_size: float,
         z_size: float,
-        sink: float = 0.0,
         center=False,
     ):
         """This method will cut a block out of the CycadPart.
@@ -168,20 +216,19 @@ class CycadPart(Location):
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
             side: The side of the part the hole will be made in.
             x_size : The size of x of rectangle.
             y_size : The size of y of rectangle.
             z_size : The size of z of rectangle.
-            sink : This can be changed if you would like an embedded cut out.
             center : This can be overridden if you would like to have the location of the cut out specified from its center.
         """
 
-        location_output = self.side_location_calculator(side=side, x=x, y=y, sink=sink)
         temp_rect = RectangleCutOut(
             side=side,
-            x=location_output[0],
-            y=location_output[1],
-            z=location_output[2],
+            x=x,
+            y=y,
+            z=z,
             x_size=x_size,
             y_size=y_size,
             z_size=z_size,
@@ -190,7 +237,9 @@ class CycadPart(Location):
         self.features.append(temp_rect)
 
     def make_bounding_box(self):
-        """This bounding box will be used to help keep track of and update the bounds."""
+        """This bounding box will be used to help keep track of and update the bounds.
+        This method is used extensively in assemble to keep track of where the box "should" be after moving it around.
+        """
 
         self.bounding_box = {
             "TOP": self.z_max,
@@ -257,49 +306,83 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
 
-    def side_location_calculator(self, side: str, x: float, y: float, sink: float = 0.0) -> tuple:
+    def save(self):
         """
-        Calculate given the side of and object and the relative x and y location on that side where the definite location is.
-        Args:
-            x: x location
-            y: y location
-            side: side of object
+        This takes the provided part and will create its dictionary and export it to a json
+        """
+        dir_name = Path(".") / self.part_no
+        dir_name.mkdir(exist_ok=True)
+        file_path = dir_name / f"{self.part_no}.json"
+        json.dump(self.export(), file_path.open("w+"))
 
-        Raises:
-            ValueError: if the side is not one of the available and expected sides.
+    def export(self) -> list:
+        """
+        This method will take the values stored within the part and export it to a dict so that it can be decoded.
 
         Returns:
-            tupel: tupel containing floats of the x, y and z values.
-
-
+            list : The dictionary of the part.
         """
 
-        if side == TOP:
-            temp_x = x
-            temp_y = y
-            temp_z = self.z_max - sink  # Where is self.z_max defined??
-        elif side == BOTTOM:
-            temp_x = x
-            temp_y = y
-            temp_z = self.z_min + sink
-        elif side == LEFT:
-            temp_x = self.x_min + sink
-            temp_y = x
-            temp_z = y
-        elif side == RIGHT:
-            temp_x = self.x_max - sink
-            temp_y = x
-            temp_z = y
-        elif side == FRONT:
-            temp_x = x
-            temp_y = self.y_min + sink
-            temp_z = y
-        elif side == BACK:
-            temp_x = x
-            temp_y = self.y_max - sink
-            temp_z = y
-        else:
-            msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-            raise ValueError(msg)
+        dict_piece = {
+            "name": self.poligon,
+            "type": "add",
+            "side": self.side,
+            "x": self.x,
+            "y": self.y,
+            "z": self.z,
+            "x_size": self.x_size,
+            "y_size": self.y_size,
+            "z_size": self.z_size,
+            "center": False,
+        }
 
-        return temp_x, temp_y, temp_z
+        list_part = []
+
+        list_part.append(dict_piece)
+        for item in self.features:
+            ret = item.export()
+            if type(ret) != dict:
+                for part in ret:
+                    list_part.append(part)
+            else:
+                list_part.append(ret)
+        return list_part
+
+    def render(self, eng: str, side: str = None):
+        """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
+        Args:
+            eng: type of engine to use
+            side: this will be used for pyplot
+        """
+
+        if eng == "simple2D":
+            # This method will created a pyplot drawing of the object.
+            if side is None:
+                side = "TOP"
+            plotter = Figure(part_no=self.part_no, side=side)
+            plotter.save_as_figure()
+
+        elif eng == "OpenSCAD":
+            # This method will produce an OpenSCAD 3D drawing of the given object.
+            cutter = EngineOpenSCAD()
+
+            in_name = "{cwd}/{data}/{data}.json".format(cwd=os.getcwd(), data=self.part_no)
+
+            if not os.path.exists(in_name):
+                self.save()
+
+            cutter.decode(self.part_no)
+
+        elif eng == "STL":
+            # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
+            cutter = EngineOpenSCAD()
+            in_name = "{cwd}/{data}/{data}.scad".format(cwd=os.getcwd(), data=self.part_no)
+
+            if not os.path.exists(in_name):
+                self.Render("OpenSCAD")
+
+            cutter.render_stl(self)
+
+        else:
+            msg = f"engine: {eng} is not one of simple2D, OpenSCAD or STL."
+            raise ValueError(msg)

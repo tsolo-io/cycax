@@ -127,6 +127,18 @@ class RectangleCutOut(Location):
             rot = rot - 1
 
 
+nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
+    "M3": {
+        "diameter": 6.01,
+        "thickness": 2.4,
+    },
+    "M6": {
+        "diameter": 11.05,
+        "thickness": 5.2,
+    },
+}
+
+
 class NutCutOut(Location):
     """
     Class for holding the data for nut cut outs.
@@ -145,13 +157,7 @@ class NutCutOut(Location):
 
     """
 
-    nuts = {
-        "type": 3,
-        "diameter": 6.01,
-        "height": 2.4,
-    }
-
-    def __init__(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float):
+    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type
         self.depth = depth

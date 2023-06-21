@@ -1,7 +1,7 @@
-from cycax.cycad.external_part import ExternalPart
+from cycax.cycad.cuboid import Cuboid
 
 
-class Fan(ExternalPart):
+class Fan(Cuboid):
     """This class will initializa a fan cut out in the sheet metal specified.
 
     Args:
@@ -54,16 +54,14 @@ class Fan(ExternalPart):
         end_y = self.hole_y + self.diameter / 2 - self.hole_diameter / 2
         for working_x in [start_x, end_x]:
             for working_y in [start_y, end_y]:
-                self.make_hole(
-                    x=working_x, y=working_y, side="TOP", diameter=self.hole_diameter, depth=2, external_only=True
-                )
-                self.make_hole(x=working_x, y=working_y, side="TOP", diameter=self.hole_diameter, depth=self.z_size)
+                self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=2, external_only=True)
+                self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=self.z_size)
 
     def externa(self):
         """
         This method will cut a large hole in the SheetMetal for the fan.
         """
-        self.make_hole(x=self.hole_x, y=self.hole_y, side="TOP", diameter=self.diameter, depth=2, external_only=True)
+        self.top.hole(pos=[self.hole_x, self.hole_y], diameter=self.diameter, depth=2, external_only=True)
 
     def interna(self):
         """
@@ -76,41 +74,39 @@ class Fan(ExternalPart):
         finish_y = self.hole_y - spaces / 2 - 2
         start_y = self.hole_y + spaces / 2 + 2
         while start_y < self.diameter / 2 + self.hole_y - 8:
-            self.make_slot(
-                x=start_x,
-                y=start_y,
-                side="TOP",
-                x_size=self.diameter,
-                y_size=4,
-                z_size=self.hole_depth,
+            self.top.slot(
+                pos=[start_x, start_y],
+                width=self.diameter,
+                length=4,
+                depth=self.hole_depth,
                 external_only=True,
             )
-            self.make_slot(
-                x=start_x,
-                y=finish_y,
-                side="TOP",
-                x_size=self.diameter,
-                y_size=4,
-                z_size=self.hole_depth,
+            self.top.slot(
+                pos=[start_x, finish_y],
+                width=self.diameter,
+                length=4,
+                depth=self.hole_depth,
                 external_only=True,
             )
             start_y = start_y + spaces + 4
             finish_y = finish_y - spaces - 4
-        self.make_slot(
-            x=self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
-            y=self.hole_y + self.diameter / 2 - self.hole_diameter / 2,
-            side="TOP",
-            x_size=self.diameter - 2 * self.hole_diameter - 4,
-            y_size=4,
-            z_size=self.hole_depth,
+        self.top.slot(
+            pos=[
+                self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
+                self.hole_y + self.diameter / 2 - self.hole_diameter / 2,
+            ],
+            width=self.diameter - 2 * self.hole_diameter - 4,
+            length=4,
+            depth=self.hole_depth,
             external_only=True,
         )
-        self.make_slot(
-            x=self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
-            y=self.hole_y - self.diameter / 2 + self.hole_diameter / 2,
-            side="TOP",
-            x_size=self.diameter - 2 * self.hole_diameter - 4,
-            y_size=4,
-            z_size=self.hole_depth,
+        self.top.slot(
+            pos=[
+                self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
+                self.hole_y - self.diameter / 2 + self.hole_diameter / 2,
+            ],
+            width=self.diameter - 2 * self.hole_diameter - 4,
+            length=4,
+            depth=self.hole_depth,
             external_only=True,
         )
