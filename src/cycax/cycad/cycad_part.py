@@ -296,13 +296,19 @@ class CycadPart(Location):
         if self.moves[2] != 0:
             hole.move(z=-self.moves[2])
 
+        rotation = [self.x_size, self.y_size, self.z_size]
         if self.rotate[0] != 0:
-            hole.swap_yz(((360 - self.rotate[0]) / 90), self.rotmax[1])
+            rotation = hole.swap_yz(((360 - self.rotate[0]) / 90), rotation)
         if self.rotate[1] != 0:
-            hole.swap_xz(((360 - self.rotate[1]) / 90), self.rotmax[2])
+            rotation = hole.swap_xz(((360 - self.rotate[1]) / 90), rotation)
         if self.rotate[2] != 0:
-            hole.swap_xy(((360 - self.rotate[2]) / 90), self.rotmax[0])
-
+            rotation = hole.swap_xy(((360 - self.rotate[2]) / 90), rotation)
+        if hole.side == TOP or hole.side == BOTTOM:
+            hole.depth = self.z_size
+        if hole.side == LEFT or hole.side == RIGHT:
+            hole.depth = self.x_size
+        if hole.side == FRONT or hole.side == BACK:
+            hole.depth = self.y_size
         self.features.append(hole)
         self.move_holes.append(hole)
 

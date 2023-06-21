@@ -28,35 +28,68 @@ class Location:
     def __repr__(self) -> str:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 
-    def swap_xy(self, rot: float, max_y: float):
+    def swap_xy(self, rot: float, rotmax: list) -> list:
         """Rotate while holding the top where it currenly is.
 
         Args:
             rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
-            max_y: This is the maximium value of the object on the y axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+            rotmax: This is the dimetntions of the object that is being rotated.
 
+        Returns:
+            list: new dimentions of the object.
         """
+        max_y = rotmax[1]
         while rot != 0:
             self.y, self.x = self.x, max_y - self.y
             rot = rot - 1
-        self.side = {LEFT: BACK, BACK: RIGHT, RIGHT: FRONT, FRONT: LEFT, TOP: TOP, BOTTOM: BOTTOM}[
-            self.side
-        ]  # This will compute which side of the object the feature now inserts into.
+            rotmax[0], rotmax[1] = rotmax[1], rotmax[0]
+            self.side = {BACK: LEFT, RIGHT: BACK, FRONT: RIGHT, LEFT: FRONT, TOP: TOP, BOTTOM: BOTTOM}[
+                self.side
+            ]  # This will compute which side of the object the feature now inserts into.
 
-    def swap_xz(self, rot: float, max_x: float):
+        return rotmax
+
+    def swap_xz(self, rot: float, rotmax: list) -> list:
         """Rotate while holding the front where it currenly is.
 
         Args:
             rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
-            max_x: This is the maximium value of the object on the x axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
+            rotmax: This is the dimetntions of the object that is being rotated.
 
+        Returns:
+            list: new dimentions of the object.
         """
+        max_x = rotmax[0]
         while rot != 0:
             self.x, self.z = self.z, max_x - self.x
+            rotmax[2], rotmax[0] = rotmax[0], rotmax[2]
             rot = rot - 1
-        self.side = {LEFT: BOTTOM, BOTTOM: RIGHT, RIGHT: TOP, TOP: LEFT, FRONT: FRONT, BACK: BACK}[
-            self.side
-        ]  # This will compute which side of the object the feature now inserts into.
+            self.side = {BOTTOM: LEFT, RIGHT: BOTTOM, TOP: RIGHT, LEFT: TOP, FRONT: FRONT, BACK: BACK}[
+                self.side
+            ]  # This will compute which side of the object the feature now inserts into.
+
+        return rotmax
+
+    def swap_yz(self, rot: float, rotmax: list) -> list:
+        """Rotate while holding the left where it currenly is.
+
+        Args:
+            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            rotmax: This is the dimetntions of the object that is being rotated.
+
+        Returns:
+            list: new dimentions of the object.
+        """
+        max_z = rotmax[2]
+        while rot != 0:
+            self.y, self.z = max_z - self.z, self.y
+            rotmax[2], rotmax[1] = rotmax[1], rotmax[2]
+            rot = rot - 1
+            self.side = {BACK: TOP, BOTTOM: BACK, FRONT: BOTTOM, TOP: FRONT, LEFT: LEFT, RIGHT: RIGHT}[
+                self.side
+            ]  # This will compute which side of the object the feature now inserts into.
+
+        return rotmax
 
     def move(self, x: float = None, y: float = None, z: float = None):
         """This move can be used to translate objects based on the provided arguments.
@@ -85,18 +118,3 @@ class Location:
             self.y = y
         if z is not None:
             self.z = z
-
-    def swap_yz(self, rot: float, max_z: float):
-        """Rotate while holding the left where it currenly is.
-
-        Args:
-            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
-            max_z: This is the maximium value of the object on the z axis. This is used as a metric to move the value once swapped back into the quadrant it came from. In this manner if performs bot a rotate and a translate back to its original quadrant.
-
-        """
-        while rot != 0:
-            self.y, self.z = max_z - self.z, self.y
-            rot = rot - 1
-        self.side = {TOP: BACK, BACK: BOTTOM, BOTTOM: FRONT, FRONT: TOP, LEFT: LEFT, RIGHT: RIGHT}[
-            self.side
-        ]  # This will compute which side of the object the feature now inserts into.
