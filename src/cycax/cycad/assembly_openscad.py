@@ -23,26 +23,33 @@ class AssemblyOpenSCAD:
         """
         return 'import("{cwd}/{part}/{part}.stl");'.format(cwd=os.getcwd(), part=part)
 
-    def _swap_xy_(self, rotation: tuple, rot: float, max_y: float) -> tuple:
+    def _swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
-        while rot != 0:
-            rotation[0], rotation[1] = max_y - rotation[1], rotation[0]
-            rot = rot - 1
-        return rotation
 
-    def _swap_xz_(self, rotation: tuple, rot: float, max_x: float) -> tuple:
+        while rot != 0:
+            max_y = rotmax[1]
+            rotation[0], rotation[1] = max_y - rotation[1], rotation[0]
+            rotmax[0], rotmax[1] = rotmax[1], rotmax[0]
+            rot = rot - 1
+        return rotation, rotmax
+
+    def _swap_xz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the front"""
         while rot != 0:
+            max_x = rotmax[0]
             rotation[0], rotation[2] = rotation[2], max_x - rotation[0]
+            rotmax[0], rotmax[2] = rotmax[2], rotmax[0]
             rot = rot - 1
-        return rotation
+        return rotation, rotmax
 
-    def _swap_yz_(self, rotation: tuple, rot: float, max_z: float) -> tuple:
+    def _swap_yz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the left"""
         while rot != 0:
+            max_z = rotmax[2]
             rotation[1], rotation[2] = max_z - rotation[2], rotation[1]
+            rotmax[2], rotmax[1] = rotmax[1], rotmax[2]
             rot = rot - 1
-        return rotation
+        return rotation, rotmax
 
     def _move(self, Rotmax: tuple, moves: tuple, Rotate: tuple) -> str:
         """
@@ -59,9 +66,15 @@ class AssemblyOpenSCAD:
                 piece[index] = float(piece[index])
 
         rotation = [0, 0, 0]
-        rotation = self._swap_yz_(rotation, Rotate[0] / 90, Rotmax[1])
-        rotation = self._swap_xz_(rotation, Rotate[1] / 90, Rotmax[2])
-        rotation = self._swap_xy_(rotation, Rotate[2] / 90, Rotmax[0])
+        working = self._swap_yz_(rotation, Rotate[0] / 90, Rotmax)
+        rotation = working[0]
+        Rotmax = working[1]
+        working = self._swap_xz_(rotation, Rotate[1] / 90, Rotmax)
+        rotation = working[0]
+        Rotmax = working[1]
+        working = self._swap_xy_(rotation, Rotate[2] / 90, Rotmax)
+        rotation = working[0]
+        Rotmax = working[1]
 
         output = "translate([{x}, {y}, {z}])".format(
             x=rotation[0] + float(moves[0]), y=rotation[1] + float(moves[1]), z=rotation[2] + float(moves[2])

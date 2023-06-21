@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from pathlib import Path
 
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal

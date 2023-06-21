@@ -118,11 +118,6 @@ class Assembly:
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
-        part.rotmax = [
-            part.x_max - part.x_min,
-            part.y_max - part.y_min,
-            part.z_max - part.z_min,
-        ]
 
     def rotateFreezeLeft(self, part: CycadPart):
         """
@@ -135,11 +130,6 @@ class Assembly:
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
-        part.rotmax = [
-            part.x_max - part.x_min,
-            part.y_max - part.y_min,
-            part.z_max - part.z_min,
-        ]
 
     def rotateFreezeFront(self, part: CycadPart):
         """
@@ -152,11 +142,6 @@ class Assembly:
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()
-        part.rotmax = [
-            part.x_max - part.x_min,
-            part.y_max - part.y_min,
-            part.z_max - part.z_min,
-        ]
 
     def level(self, partside1: CycadSide, partside2: CycadSide):
         """

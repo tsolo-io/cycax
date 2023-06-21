@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 
-from cycax.cycad import Cuboid
+from cycax.cycad.assembly import Assembly
+from cycax.cycad.cuboid import SheetMetal
 
-classy = Cuboid(part_no="classy classy", x_size=10, y_size=10, z_size=10)
+moving = SheetMetal(part_no="face", x_size=50, y_size=100, z_size=2)
 
-classy.left.hole(pos=(5, 5), diameter=2)
-
-classy.right.box(pos=(5, 5), width=4, length=2)
-
-classy.top.nut(pos=(2, 4), nut_type=3, depth=2, sink=1)
-
-classy.bottom.slot(pos=(6, 6), width=2, length=2)
+box = Assembly("box")
+box.rotateFreezeLeft(moving)
+box.rotateFreezeLeft(moving)
+box.rotateFreezeFront(moving)
+box.rotateFreezeTop(moving)
+box.rotateFreezeLeft(moving)
+box.rotateFreezeLeft(moving)
+box.rotateFreezeFront(moving)
+box.rotateFreezeTop(moving)
+box.add(moving)
+box.render()
