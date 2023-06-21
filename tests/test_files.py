@@ -12,6 +12,12 @@ def check_json_file(dir_path: Path, name: str):
     json.loads(json_file.read_text())
 
 
+def check_files(dir_path: Path, name: str, file_extensions: list[str]):
+    for ext in file_extensions:
+        file_path = dir_path / f"{name}.{ext}"
+        assert file_path.exists(), "File should exists"
+
+
 def test_save(tmp_path):
     """Test save on assembly and parts."""
 
@@ -28,3 +34,25 @@ def test_save(tmp_path):
         part_expected_path = tmp_path / f"part-test{i}"
         assert part_expected_path.is_dir(), "Directory for part should exists"
         check_json_file(part_expected_path, f"part-test{i}")
+
+
+def test_render(tmp_path):
+    """Test render on assembly and parts."""
+
+    assert len(tuple(tmp_path.glob("*"))) == 0, "Test directory should be empty"
+    assembly = Assembly("assembly-test")
+    parts = {}
+    for part in ["part_A", "part-B", "partC", "partD", "partE", "partF"]:
+        mypart = SheetMetal(x_size=2, y_size=2, z_size=2, part_no=part)
+        assembly.add(mypart)
+        parts[part] = mypart
+    # TODO: Rotate and level parts.
+    assembly.save(tmp_path)
+    assembly.render()
+
+    assert len(tuple(tmp_path.glob("*"))) > len(parts.keys()), "Expect a directory per part and files for Assembly"
+    check_files(tmp_path, "assembly-test", ["json", "scad"])
+    for part in parts.keys():
+        part_expected_path = tmp_path / part
+        assert part_expected_path.is_dir(), "Directory for part should exists"
+        check_files(part_expected_path, part, ["json", "scad", "stl"])
