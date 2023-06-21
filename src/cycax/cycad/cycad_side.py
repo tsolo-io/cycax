@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 class CycadSide:
     def __init__(self, parent):
         self._parent = parent
