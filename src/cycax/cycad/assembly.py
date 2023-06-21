@@ -62,6 +62,15 @@ class Assembly:
         self.export()
 
     def merge(self, part1: CycadPart, part2: CycadPart):
+        """This method will be used to merge 2 parts together whcich have identical sizes but different features.
+
+        Args:
+            part1: this part will receive the features present on part2.
+            part2: this part will receive the features present on part1.
+
+        Raises:
+            ValueError: if the sizes of the parts are not identical.
+        """
         if (
             part1.size.x_size == part2.size.x_size
             and part1.size.y_size == part2.size.y_size
@@ -165,6 +174,8 @@ class Assembly:
         Args:
             partside1:This is the CycadSide that will be moved to match the plane of the other part.
             partside2: This is the Cycadside which will dictate the plane used to as a reference to move part1.
+        Raises:
+            ValueError: if the side present in CycadSide does not match one of the expected side.
         """
         part1 = partside1._parent
         part2 = partside2._parent
@@ -223,6 +234,9 @@ class Assembly:
         Args:
             partside1: This is the part side that will receive the holes.
             part2: This is the part while will be used as the template when transferring holes.
+
+        Raises:
+            ValueError: if the side present in CycadSide does not match one of the expected side.
         """
         part1 = partside1._parent
         side = partside1.name
