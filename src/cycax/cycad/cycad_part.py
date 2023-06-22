@@ -71,6 +71,7 @@ class CycadPart(Location):
         self.colour = colour
         self.label: set[str] = set()
         self._files = {}
+        self.pos={"x":0,"y":1, "z":2}
         self.definition()
 
     def definition(self):

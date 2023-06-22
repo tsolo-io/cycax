@@ -128,10 +128,10 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-
-        part.rotate[2] = (part.rotate[2] + 90) % 360
+        part.rotate[part.pos["z"]] = (part.rotate[part.pos["z"]] + 90) % 360
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
+        part.pos["x"], part.pos["y"] = part.pos["y"], part.pos["x"]
         part.make_bounding_box()
 
     def rotateFreezeLeft(self, part: CycadPart):
@@ -140,10 +140,10 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-
-        part.rotate[0] = (part.rotate[0] + 90) % 360
+        part.rotate[part.pos["x"]] = (part.rotate[part.pos["x"]] + 90) % 360
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
+        part.pos["z"], part.pos["y"] = part.pos["y"], part.pos["z"]
         part.make_bounding_box()
 
     def rotateFreezeFront(self, part: CycadPart):
@@ -152,10 +152,10 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-
-        part.rotate[1] = (part.rotate[1] + 90) % 360
+        part.rotate[part.pos["y"]] = (part.rotate[part.pos["y"]] + 90) % 360
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
+        part.pos["x"], part.pos["z"] = part.pos["z"], part.pos["x"]
         part.make_bounding_box()
 
     def level(self, partside1: CycadSide, partside2: CycadSide):
