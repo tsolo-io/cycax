@@ -16,13 +16,13 @@ class Assembly:
     This Assembly class will take multiple different cycad parts and combine them together to form complex parts.
 
     Args:
-        part_number: this is the destinct part number that the conplex part will have.
+        part_no: this is the destinct part number that the conplex part will have.
     """
 
-    def __init__(self, part_number: str):
-        self.part_number = part_number
+    def __init__(self, part_no: str):
+        self.part_no = part_no
         self.decoder = EngineOpenSCAD()
-        self.assembler = AssemblyOpenSCAD(part_number)
+        self.assembler = AssemblyOpenSCAD(part_no)
         self.pieces = []
         self._base_path = Path(".")
 
@@ -32,7 +32,7 @@ class Assembly:
         """
         data = self.export()
         self.decoder.set_path(self._base_path)
-        for part in data:
+        for part in data["parts"]:
             # FIXME: Should just be: `part.render()` the part render should sort out its own stuff.
             name = part["part_no"]
 
@@ -65,7 +65,7 @@ class Assembly:
 
         self._base_path = path
         data = self.export()
-        data_filename = path / f"{self.part_number}.json"
+        data_filename = path / f"{self.part_no}.json"
         data_filename.write_text(json.dumps(data))
 
     def merge(self, part1: CycadPart, part2: CycadPart):
@@ -106,20 +106,26 @@ class Assembly:
 
         self.pieces.append(part)
 
-    def export(self):
+    def export(self)-> dict:
         """
         This creates a dict of the assembly, used to make the json.
+        
+        Returns:
+            dict: this is the dict that will be used to form a json decoded in assembly.
         """
-        dict_out = []
+        list_out = []
         for item in self.pieces:
             dict_part = {
                 "part_no": item.part_no,
-                "rotmax": item.rotmax,
                 "moves": item.moves,
                 "rotate": item.rotate,
+                "rotmax": [item.x_size, item.y_size, item.z_size],
                 "colour": item.colour,
             }
-            dict_out.append(dict_part)
+            list_out.append(dict_part)
+        dict_out={}
+        dict_out["name"]=self.part_no
+        dict_out["parts"]=list_out
         return dict_out
 
     def rotateFreezeTop(self, part: CycadPart):

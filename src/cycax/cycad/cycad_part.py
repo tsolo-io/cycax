@@ -63,7 +63,6 @@ class CycadPart(Location):
         self.z_min: float = 0  # Location.Bottom
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
-        self.rotmax = [self.x_size, self.y_size, self.z_size]
         self.moves = [0, 0, 0]
         self.rotate = [0, 0, 0]
         self.final_location = False
@@ -333,12 +332,12 @@ class CycadPart(Location):
         file_path = dir_name / f"{self.part_no}.json"
         json.dump(self.export(), file_path.open("w+"))
 
-    def export(self) -> list:
+    def export(self) -> dict:
         """
         This method will take the values stored within the part and export it to a dict so that it can be decoded.
 
         Returns:
-            list : The dictionary of the part.
+            dict : The dictionary of the part.
         """
 
         dict_piece = {
@@ -364,7 +363,10 @@ class CycadPart(Location):
                     list_part.append(part)
             else:
                 list_part.append(ret)
-        return list_part
+        dict_out={}
+        dict_out["name"]=self.part_no        
+        dict_out["parts"]=list_part
+        return dict_out
 
     def render(self, eng: str, side: str = None):
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).

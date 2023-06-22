@@ -66,10 +66,6 @@ class AssemblyOpenSCAD:
             Rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
         """
 
-        for piece in [Rotmax, moves, Rotate]:
-            for index in range(len(piece)):
-                piece[index] = float(piece[index])
-
         rotation = [0, 0, 0]
         working = self._swap_yz_(rotation, Rotate[0] / 90, Rotmax)
         rotation = working[0]
@@ -106,7 +102,7 @@ class AssemblyOpenSCAD:
         data = json.loads(json_file.read_text())
 
         output = []
-        for action in data:
+        for action in data["parts"]:
             output.append(self._move(action["rotmax"], action["moves"], action["rotate"]))
             output.append(self._colour(action["colour"]))
             output.append(self._fetch_part(action["part_no"]))

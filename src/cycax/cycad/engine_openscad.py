@@ -168,7 +168,7 @@ class EngineOpenSCAD:
 
         output = []
         dif = 0
-        for action in data:
+        for action in data["parts"]:
             if action["type"] == "cut":
                 dif = dif + 1
                 output.insert(0, self._decode_cut())
