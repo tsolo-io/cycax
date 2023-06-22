@@ -36,18 +36,16 @@ class Assembly:
             # FIXME: Should just be: `part.render()` the part render should sort out its own stuff.
             name = part["part_no"]
 
-            STLname = "{cwd}/{name}/{name}.stl".format(cwd=self._base_path, name=name)
-            if not os.path.exists(STLname):
-                SCADname = "{cwd}/{name}/{name}.scad".format(cwd=self._base_path, name=name)
-                if not os.path.exists(SCADname):
-                    logging.info("Creating a SCAD file of the pieces of the object.")
+            stl_name = "{cwd}/{name}/{name}.stl".format(cwd=self._base_path, name=name)
+            if not os.path.exists(stl_name):
+                scad_name = "{cwd}/{name}/{name}.scad".format(cwd=self._base_path, name=name)
+                if not os.path.exists(scad_name):
+                    logging.info("Creating SCAD file %s of the pieces of the object.", scad_name)
                     self.decoder.decode(name)
-                else:
-                    pass
                 self.decoder.render_stl(name)
 
         logging.info("Calling to the assembler")
-        self.assembler.assembly_openscad()
+        self.assembler.assembly_openscad(self._base_path)
 
     def save(self, path: Path | None = None):
         """

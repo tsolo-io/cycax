@@ -101,12 +101,9 @@ class AssemblyOpenSCAD:
         """
         if path is not None:
             self._base_path = path
-        out_name = "{cwd}/{part_no}/{part_no}.scad".format(cwd=self._base_path, part_no=self.part_no)
-        SCAD = open(out_name, "w")
-        in_name = "{cwd}/{part_no}/{part_no}.json".format(cwd=self._base_path, part_no=self.part_no)
-        with open(in_name) as f:
-            data = json.load(f)
-        f.close()
+
+        json_file = self._base_path / f"{self.part_no}.json"
+        data = json.loads(json_file.read_text())
 
         output = []
         for action in data:
@@ -114,8 +111,8 @@ class AssemblyOpenSCAD:
             output.append(self._colour(action["colour"]))
             output.append(self._fetch_part(action["part_no"]))
 
-        for out in output:
-            SCAD.write(out)
-            SCAD.write("\n")
-
-        SCAD.close()
+        scad_file = self._base_path / f"{self.part_no}.scad"
+        with scad_file.open("w") as scad_fh:
+            for out in output:
+                scad_fh.write(out)
+                scad_fh.write("\n")
