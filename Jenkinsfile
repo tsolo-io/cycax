@@ -1,9 +1,11 @@
 pipeline {
     agent any
     stages {
-        stage('Build docs') {
+        stage('Build') {
             steps {
                 sh 'hatch run docs:build'
+		sh 'cd src/cycax &&  hatch build'
+		sh 'pip install --force-reinstall $(ls ../cycax/dist/cycax-*.whl | sort | head -n1)'
             }
             post {
                  success {
@@ -45,5 +47,10 @@ pipeline {
                 recordIssues(tools: [pyLint(pattern: 'reports/ruff.txt', skipSymbolicLinks: true)])
             }
         }
+	stage('Test Coverage') {
+	   steps {
+		echo "Hello from coverage"
+	   }
+	}
     }
 }
