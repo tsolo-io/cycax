@@ -49,7 +49,7 @@ pipeline {
         }
 	stage('Test Coverage') {
 	   steps {
-	       catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+	       catchError(buildResult: 'UNSTABLE', stageResult: 'SUCCESS') {
 		        sh "python3 -m coverage xml -o reports/coverage.xml"
 	       }
 	   }
