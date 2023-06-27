@@ -4,8 +4,8 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'hatch run docs:build'
-		sh 'cd src/cycax &&  hatch build'
-		sh 'pip install --force-reinstall $(ls ../cycax/dist/cycax-*.whl | sort | head -n1)'
+		        sh 'cd src/cycax && hatch build'
+		        sh 'pip install --force-reinstall $(ls dist/cycax-*.whl | sort | head -n1)'
             }
             post {
                  success {
@@ -49,8 +49,16 @@ pipeline {
         }
 	stage('Test Coverage') {
 	   steps {
-		echo "Hello from coverage"
+	       catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+		        sh "python3 -m coverage xml -o reports/coverage.xml"
+	       }
+	   }
+	   post {
+	       always{
+		        recordCoverage(tools: [[parser: 'COBERTURA', pattern: 'reports/coverage.xml']])
+	       }
 	   }
 	}
     }
 }
+
