@@ -134,10 +134,9 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate[part.pos["z"]] = (part.rotate[part.pos["z"]] + 90) % 360
+        part.rotate.append(2)
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
-        part.pos["x"], part.pos["y"] = part.pos["y"], part.pos["x"]
         part.make_bounding_box()
 
     def rotateFreezeLeft(self, part: CycadPart):
@@ -146,10 +145,9 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate[part.pos["x"]] = (part.rotate[part.pos["x"]] + 90) % 360
+        part.rotate.append(0)
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
-        part.pos["z"], part.pos["y"] = part.pos["y"], part.pos["z"]
         part.make_bounding_box()
 
     def rotateFreezeFront(self, part: CycadPart):
@@ -158,10 +156,9 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate[part.pos["y"]] = (part.rotate[part.pos["y"]] + 90) % 360
+        part.rotate.append(1)
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
-        part.pos["x"], part.pos["z"] = part.pos["z"], part.pos["x"]
         part.make_bounding_box()
 
     def level(self, partside1: CycadSide, partside2: CycadSide):
@@ -211,9 +208,13 @@ class Assembly:
         for hole_i, hole in enumerate(part.move_holes):
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
-            rotation = temp_hole.swap_yz(rot=part.rotate[0] / 90, rotmax=rotation)
-            rotation = temp_hole.swap_xz(rot=part.rotate[1] / 90, rotmax=rotation)
-            rotation = temp_hole.swap_xy(rot=part.rotate[2] / 90, rotmax=rotation)
+            for rot in part.rotate:
+                if rot==0:
+                    rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
+                if rot==1:
+                    rotation = temp_hole.swap_xz(rot=1, rotmax=rotation)
+                if rot==2:
+                    rotation = temp_hole.swap_xy(rot=1, rotmax=rotation)
             if part.moves[0] != 0:
                 temp_hole.move(x=part.moves[0])
             if part.moves[1] != 0:

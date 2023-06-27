@@ -65,22 +65,33 @@ class AssemblyOpenSCAD:
             moves: This is the tuple that contains the amount which the (x,y,z) needs to move by.
             Rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
         """
-
         rotation = [0, 0, 0]
-        working = self._swap_yz_(rotation, Rotate[0] / 90, Rotmax)
-        rotation = working[0]
-        Rotmax = working[1]
-        working = self._swap_xz_(rotation, Rotate[1] / 90, Rotmax)
-        rotation = working[0]
-        Rotmax = working[1]
-        working = self._swap_xy_(rotation, Rotate[2] / 90, Rotmax)
-        rotation = working[0]
-        Rotmax = working[1]
+        rotout=""
+        for item in Rotate:
+            rotwork=item
+            rotwork = {
+                0: "rotate([90, 0, 0])",
+                1: "rotate([0, 90, 0])",
+                2: "rotate([0, 0, 90])",
+            }[rotwork]
+            rotout= rotwork + rotout
+            if item==0: 
+                working = self._swap_yz_(rotation, 1, Rotmax)
+                rotation = working[0]
+                Rotmax = working[1]
+            if item==1: 
+                working = self._swap_xz_(rotation, 1, Rotmax)
+                rotation = working[0]
+                Rotmax = working[1]
+            if item==2:
+                working = self._swap_xy_(rotation, 1, Rotmax)
+                rotation = working[0]
+                Rotmax = working[1]
 
         output = "translate([{x}, {y}, {z}])".format(
             x=rotation[0] + float(moves[0]), y=rotation[1] + float(moves[1]), z=rotation[2] + float(moves[2])
         )
-        output = output + f"rotate([{Rotate[0]}, {Rotate[1]}, {Rotate[2]}])"
+        output = output + rotout
         return output
 
     def _colour(self, colour: str) -> str:

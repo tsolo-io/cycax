@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import copy
 
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engine_openscad import EngineOpenSCAD
@@ -64,13 +65,12 @@ class CycadPart(Location):
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
         self.moves = [0, 0, 0]
-        self.rotate = [0, 0, 0]
+        self.rotate = []
         self.final_location = False
         self.poligon = poligon
         self.colour = colour
         self.label: set[str] = set()
         self._files = {}
-        self.pos={"x":0,"y":1, "z":2}
         self.definition()
 
     def definition(self):
@@ -297,13 +297,18 @@ class CycadPart(Location):
         if self.moves[2] != 0:
             hole.move(z=-self.moves[2])
 
-        rotation = [self.x_size, self.y_size, self.z_size]
-        if self.rotate[0] != 0:
-            rotation = hole.swap_yz(((360 - self.rotate[0]) / 90), rotation)
-        if self.rotate[1] != 0:
-            rotation = hole.swap_xz(((360 - self.rotate[1]) / 90), rotation)
-        if self.rotate[2] != 0:
-            rotation = hole.swap_xy(((360 - self.rotate[2]) / 90), rotation)
+        
+        working_rotate=copy.deepcopy(self.rotate)
+        rotation = [self.x_max-self.x_min, self.y_max-self.y_min, self.z_max-self.z_min]
+        while len(working_rotate)>0:
+            
+            rot=working_rotate.pop()
+            if rot==0:
+                rotation=hole.swap_yz(3, rotation)
+            if rot==1:
+                rotation=hole.swap_xz(3, rotation)
+            if rot==2:
+                rotation=hole.swap_xy(3, rotation)
         if hole.side == TOP or hole.side == BOTTOM:
             hole.depth = self.z_size
         if hole.side == LEFT or hole.side == RIGHT:
