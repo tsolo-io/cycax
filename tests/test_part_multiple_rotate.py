@@ -68,15 +68,15 @@ def test_rotate():
     
     
     assembly_def = assembly.export()
-    assert assembly_def[0]["rotate"] == [180, 0, 270]
-    assert assembly_def[1]["rotate"] == [180, 0, 90]
-    assert assembly_def[2]["rotate"] == [90, 0, 90]
-    assert assembly_def[3]["rotate"] == [0, 90, 90]
-    assert assembly_def[4]["rotate"] == [90, 0, 90]
-    assert assembly_def[5]["rotate"] == [90, 90, 0]
-    assert assembly_def[6]["rotate"] == [90, 90, 0]
-    assert assembly_def[7]["rotate"] == [0, 90, 90]
-    assert assembly_def[8]["rotate"] == [270, 0, 270]
+    assert assembly_def["parts"][0]["rotate"] == [0, 1, 2, 0, 0]
+    assert assembly_def["parts"][1]["rotate"] == [0, 1, 2]
+    assert assembly_def["parts"][2]["rotate"] == [0, 1]
+    assert assembly_def["parts"][3]["rotate"] == [1, 0]
+    assert assembly_def["parts"][4]["rotate"] == [2, 1]
+    assert assembly_def["parts"][5]["rotate"] == [1, 2]
+    assert assembly_def["parts"][6]["rotate"] == [0, 2]
+    assert assembly_def["parts"][7]["rotate"] == [2, 0]
+    assert assembly_def["parts"][8]["rotate"] == [0, 1, 2, 0, 1, 2]
 
 
 # TODO: Add tests that rotate the part in multiple directions.
