@@ -70,7 +70,7 @@ class CycadPart(Location):
         self.colour = colour
         self.label: set[str] = set()
         self._files = {}
-        self.pos={"x":0,"y":1, "z":2}
+        self.pos = {"x": 0, "y": 1, "z": 2}
         self.definition()
 
     def definition(self):
@@ -363,9 +363,9 @@ class CycadPart(Location):
                     list_part.append(part)
             else:
                 list_part.append(ret)
-        dict_out={}
-        dict_out["name"]=self.part_no        
-        dict_out["parts"]=list_part
+        dict_out = {}
+        dict_out["name"] = self.part_no
+        dict_out["parts"] = list_part
         return dict_out
 
     def render(self, eng: str, side: str = None):

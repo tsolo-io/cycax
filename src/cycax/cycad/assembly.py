@@ -106,10 +106,10 @@ class Assembly:
 
         self.pieces.append(part)
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This creates a dict of the assembly, used to make the json.
-        
+
         Returns:
             dict: this is the dict that will be used to form a json decoded in assembly.
         """
@@ -123,9 +123,9 @@ class Assembly:
                 "colour": item.colour,
             }
             list_out.append(dict_part)
-        dict_out={}
-        dict_out["name"]=self.part_no
-        dict_out["parts"]=list_out
+        dict_out = {}
+        dict_out["name"] = self.part_no
+        dict_out["parts"] = list_out
         return dict_out
 
     def rotateFreezeTop(self, part: CycadPart):

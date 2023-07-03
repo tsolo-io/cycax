@@ -45,7 +45,7 @@ class Blob(Print3D):  # ExternalPart):
 
 
 def main():
-    assembly = Assembly(part_no="Thlob") 
+    assembly = Assembly(part_no="Thlob")
     base_board = SheetMetal(part_no="BaseBoard", x_size=1100, y_size=100, z_size=15)
 
     for thing_no in range(1, 11):
