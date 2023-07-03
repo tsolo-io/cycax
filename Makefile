@@ -5,7 +5,7 @@ build:
 	hatch build
 
 test:
-	hatch run test
+	hatch run cov
 
 format:
 	hatch run lint:fmt
