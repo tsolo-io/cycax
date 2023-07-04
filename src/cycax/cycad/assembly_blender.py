@@ -1,11 +1,12 @@
 import json
 import logging
+import bpy
+import math
 from pathlib import Path
 
-
-class AssemblyOpenSCAD:
+class AssemblyBlender:
     """
-     This class will use the STLs that have been printed and import them to a OpenSCAD file that will move them around to their correct location.
+     This class will use the STLs that have been printed and import them to a Blender file that will move them around to their correct location.
 
     Args:
         part_no: This is the part number of the complex part that is being assembled.
@@ -15,8 +16,9 @@ class AssemblyOpenSCAD:
     def __init__(self, part_no: str) -> None:
         self.part_no = part_no
         self._base_path = Path(".")
+        self.parts=[]
 
-    def _fetch_part(self, part: str) -> str:
+    def _fetch_part(self, part: str):
         """
         Retrieves the part that will be imported and possitioned.
 
@@ -26,7 +28,15 @@ class AssemblyOpenSCAD:
         stl_file = self._base_path / part / f"{part}.stl"
         if not stl_file.exists():
             logging.warning("Referencing a file that does not exists. File name %s", stl_file)
-        return f'import("{stl_file}");'
+        bpy.ops.import_mesh.stl(filepath=stl_file)
+        for obj in bpy.context.selected_objects:
+            if part in self.parts:
+                obj.name = "{item}_{item_no}".format(item=part, item_no=self.parts[part]+1)
+                self.parts[part]=self.parts[part]+1
+            else:
+                obj.name = "{item}_{item_no}".format(item=part, item_no=1)
+                self.part[part]=1
+                
 
     def _swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
@@ -56,7 +66,7 @@ class AssemblyOpenSCAD:
             rot = rot - 1
         return rotation, rotmax
 
-    def _move(self, Rotmax: tuple, moves: tuple, Rotate: tuple) -> str:
+    def _move(self, Rotmax: tuple, moves: tuple, Rotate: tuple):
         """
         Computes the moving and rotating of the stl to the desired location.
 
@@ -66,44 +76,40 @@ class AssemblyOpenSCAD:
             Rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
         """
         rotation = [0, 0, 0]
-        rotout=""
         for item in Rotate:
-            rotwork=item
-            rotwork = {
-                0: "rotate([90, 0, 0])",
-                1: "rotate([0, 90, 0])",
-                2: "rotate([0, 0, 90])",
-            }[rotwork]
-            rotout= rotwork + rotout
-            if item==0: 
+            if item==0:
+                bpy.ops.transform.rotate(value=math.radians(90), orient_axis='X')
                 working = self._swap_yz_(rotation, 1, Rotmax)
                 
-            if item==1: 
+            if item==1:
+                bpy.ops.transform.rotate(value=math.radians(90), orient_axis='Y')
                 working = self._swap_xz_(rotation, 1, Rotmax)
-               
+                
             if item==2:
+                bpy.ops.transform.rotate(value=math.radians(90), orient_axis='Z')
                 working = self._swap_xy_(rotation, 1, Rotmax)
                 
             rotation = working[0]
             Rotmax = working[1]
 
-        output = "translate([{x}, {y}, {z}])".format(
-            x=rotation[0] + float(moves[0]), y=rotation[1] + float(moves[1]), z=rotation[2] + float(moves[2])
-        )
-        output = output + rotout
-        return output
+        bpy.ops.transform.translate(value= (rotation[0] + moves[0], rotation[1] + moves[1], rotation[2] + moves[2]))
 
-    def _colour(self, colour: str) -> str:
+    def _colour(self, colour: str, part:str) -> str:
         """
         Gives the colour.
         Args:
             colour: Colour which the object will become.
         """
-        return f'color("{colour}")'
+        working_part = f"{part}_{self.parts[part]}"
+        template_object = bpy.data.objects.get(working_part)
+        matcolour = bpy.data.materials.new(colour)
+        matcolour.diffuse_color = (0,1,0,0.8)
+        
+        template_object.active_material = matcolour   
 
-    def assembly_openscad(self, path: Path | None = None):
+    def assembly_blender(self, path: Path | None = None):
         """
-        Decodes the provided json and moves the object around as required, making a new openSCAD which will use imported stl.
+        Decodes the provided json and moves the object around as required, making a new blender file which will use imported stl.
         """
         if path is not None:
             self._base_path = path
@@ -111,14 +117,11 @@ class AssemblyOpenSCAD:
         json_file = self._base_path / f"{self.part_no}.json"
         data = json.loads(json_file.read_text())
 
-        output = []
         for action in data["parts"]:
-            output.append(self._move(action["rotmax"], action["moves"], action["rotate"]))
-            output.append(self._colour(action["colour"]))
-            output.append(self._fetch_part(action["part_no"]))
-
-        scad_file = self._base_path / f"{self.part_no}.scad"
-        with scad_file.open("w") as scad_fh:
-            for out in output:
-                scad_fh.write(out)
-                scad_fh.write("\n")
+            self._fetch_part(action["part_no"])
+            self._move(action["rotmax"], action["moves"], action["rotate"])
+            self._colour(action["colour"], action["part_no"])
+            
+        bpy.ops.wm.save_as_mainfile(filepath=self._base_path)
+            
+            

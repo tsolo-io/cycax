@@ -255,13 +255,39 @@ class CycadPart(Location):
         """This method will be used for moving the part.
 
         Args:
-            x: the amount the object should be moved along the x axis.
-            y: the amount the object should be moved along the y axis.
-            z: the amound the object should be moved along the z axis
+            x: the amount the object should be moved by along the x axis.
+            y: the amount the object should be moved by along the y axis.
+            z: the amound the object should be moved by along the z axis
 
 
         """
 
+        x_size = self.x_max - self.x_min
+        y_size = self.y_max - self.y_min
+        z_size = self.z_max - self.z_min
+
+        if x is not None:
+            self.x_min = self.x_min + x
+            self.x_max = self.x_min + x_size
+            self.moves[0] = self.moves[0]+ x
+        if y is not None:
+            self.y_min = self.y_min + y
+            self.y_max = self.y_min + y_size
+            self.moves[1] = self.moves[1] + y
+        if z is not None:
+            self.z_min = self.z_min + z
+            self.z_max = self.z_min + z_size
+            self.moves[2] = self.moves[2] + z
+
+        self.make_bounding_box()
+        
+    def cardinal_possition(self, x: float = None, y: float = None, z: float = None):
+        """This move can be used to translate objects to the exact provided coordinates.
+        Args:
+            x: the value to which x needs to be moved to on the axis.
+            y: the value to which y needs to be moved to on the axis.
+            z: the value to which z needs to be moved to on the axis.
+        """
         x_size = self.x_max - self.x_min
         y_size = self.y_max - self.y_min
         z_size = self.z_max - self.z_min
@@ -278,8 +304,6 @@ class CycadPart(Location):
             self.z_min = z
             self.z_max = z + z_size
             self.moves[2] = z
-
-        self.make_bounding_box()
 
     def insert_hole(self, hole: Holes):
         """This method will be used for inserting the hole into an object.

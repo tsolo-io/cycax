@@ -8,6 +8,7 @@ from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engine_openscad import EngineOpenSCAD
+from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
@@ -22,11 +23,12 @@ class Assembly:
     def __init__(self, part_no: str):
         self.part_no = part_no
         self.decoder = EngineOpenSCAD()
-        self.assembler = AssemblyOpenSCAD(part_no)
+        self.assembler_openscad = AssemblyOpenSCAD(part_no)
+        self.assembler_blender = AssemblyBlender(part_no)
         self.pieces = []
         self._base_path = Path(".")
 
-    def render(self):
+    def render(self, assembler: str="OpenSCAD"):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
         """
@@ -45,7 +47,14 @@ class Assembly:
                 self.decoder.render_stl(name)
 
         logging.info("Calling to the assembler")
-        self.assembler.assembly_openscad(self._base_path)
+        if assembler.lower() == "openscad":
+            self.assembler_openscad.assembly_openscad(self._base_path)
+        elif assembler.lower() == "blender":
+            self.assembler_blender.assembly_blender(self._base_path)
+        else:
+            msg = f"Engine {assembler} is not one of the recognized engines for assebling parts. Choose one of OpenSCAD (default) or Blender."
+            raise ValueError(msg)
+            
 
     def save(self, path: Path | None = None):
         """
@@ -79,9 +88,9 @@ class Assembly:
             ValueError: if the sizes of the parts are not identical.
         """
         if (
-            part1.size.x_size == part2.size.x_size
-            and part1.size.y_size == part2.size.y_size
-            and part1.size.z_size == part2.size.z_size
+            part1.x_size == part2.x_size
+            and part1.y_size == part2.y_size
+            and part1.z_size == part2.z_size
         ):
             for item in part2.features:
                 if item not in part1.features:
@@ -180,21 +189,21 @@ class Assembly:
         to_here = part2.bounding_box[side2]
 
         if side1 == BOTTOM:
-            part1.move(z=to_here)
+            part1.cardinal_possition(z=to_here)
         elif side1 == TOP:
             z_size = part1.z_max - part1.z_min
-            part1.move(z=to_here - z_size)
+            part1.cardinal_possition(z=to_here - z_size)
         elif side1 == LEFT:
-            part1.move(x=to_here)
+            part1.cardinal_possition(x=to_here)
             x_size = part1.x_max - part1.x_min
         elif side1 == RIGHT:
             x_size = part1.x_max - part1.x_min
-            part1.move(x=to_here - x_size)
+            part1.cardinal_possition(x=to_here - x_size)
         elif side1 == FRONT:
-            part1.move(y=to_here)
+            part1.cardinal_possition(y=to_here)
         elif side1 == BACK:
             y_size = part1.y_max - part1.y_min
-            part1.move(y=to_here - y_size)
+            part1.cardinal_possition(y=to_here - y_size)
         else:
             msg = f"Side: {side1} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
             raise ValueError(msg)
