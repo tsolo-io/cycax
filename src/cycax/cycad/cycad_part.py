@@ -1,8 +1,8 @@
+import copy
 import json
 import logging
 import os
 from pathlib import Path
-import copy
 
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engine_openscad import EngineOpenSCAD
@@ -269,7 +269,7 @@ class CycadPart(Location):
         if x is not None:
             self.x_min = self.x_min + x
             self.x_max = self.x_min + x_size
-            self.moves[0] = self.moves[0]+ x
+            self.moves[0] = self.moves[0] + x
         if y is not None:
             self.y_min = self.y_min + y
             self.y_max = self.y_min + y_size
@@ -280,7 +280,7 @@ class CycadPart(Location):
             self.moves[2] = self.moves[2] + z
 
         self.make_bounding_box()
-        
+
     def cardinal_possition(self, x: float = None, y: float = None, z: float = None):
         """This move can be used to translate objects to the exact provided coordinates.
         Args:
@@ -321,18 +321,16 @@ class CycadPart(Location):
         if self.moves[2] != 0:
             hole.move(z=-self.moves[2])
 
-        
-        working_rotate=copy.deepcopy(self.rotate)
-        rotation = [self.x_max-self.x_min, self.y_max-self.y_min, self.z_max-self.z_min]
-        while len(working_rotate)>0:
-            
-            rot=working_rotate.pop()
-            if rot==0:
-                rotation=hole.swap_yz(3, rotation)
-            if rot==1:
-                rotation=hole.swap_xz(3, rotation)
-            if rot==2:
-                rotation=hole.swap_xy(3, rotation)
+        working_rotate = copy.deepcopy(self.rotate)
+        rotation = [self.x_max - self.x_min, self.y_max - self.y_min, self.z_max - self.z_min]
+        while len(working_rotate) > 0:
+            rot = working_rotate.pop()
+            if rot == 0:
+                rotation = hole.swap_yz(3, rotation)
+            if rot == 1:
+                rotation = hole.swap_xz(3, rotation)
+            if rot == 2:
+                rotation = hole.swap_xy(3, rotation)
         if hole.side == TOP or hole.side == BOTTOM:
             hole.depth = self.z_size
         if hole.side == LEFT or hole.side == RIGHT:
@@ -392,9 +390,9 @@ class CycadPart(Location):
                     list_part.append(part)
             else:
                 list_part.append(ret)
-        dict_out={}
-        dict_out["name"]=self.part_no        
-        dict_out["parts"]=list_part
+        dict_out = {}
+        dict_out["name"] = self.part_no
+        dict_out["parts"] = list_part
         return dict_out
 
     def render(self, eng: str, side: str = None):

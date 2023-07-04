@@ -38,8 +38,8 @@ class Location:
         Returns:
             list: new dimentions of the object.
         """
-        
-        while rot> 0:
+
+        while rot > 0:
             max_y = rotmax[1]
             self.y, self.x = self.x, max_y - self.y
             rot = rot - 1
@@ -60,8 +60,8 @@ class Location:
         Returns:
             list: new dimentions of the object.
         """
-        
-        while rot>0:
+
+        while rot > 0:
             max_x = rotmax[0]
             self.x, self.z = self.z, max_x - self.x
             rotmax[2], rotmax[0] = rotmax[0], rotmax[2]
@@ -82,7 +82,7 @@ class Location:
         Returns:
             list: new dimentions of the object.
         """
-        
+
         while rot > 0:
             max_z = rotmax[2]
             self.y, self.z = max_z - self.z, self.y

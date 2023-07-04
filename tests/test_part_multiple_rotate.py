@@ -26,8 +26,7 @@ def test_rotate():
     assembly.add(mypart6)
     assembly.add(mypart7)
     assembly.add(mypart8)
-    assembly.add(mypart9) 
-
+    assembly.add(mypart9)
 
     # Test that a part is rotated multiple times.
     assembly.rotateFreezeLeft(mypart1)
@@ -35,38 +34,36 @@ def test_rotate():
     assembly.rotateFreezeTop(mypart1)
     assembly.rotateFreezeLeft(mypart1)
     assembly.rotateFreezeLeft(mypart1)
-    
+
     assembly.rotateFreezeLeft(mypart2)
     assembly.rotateFreezeFront(mypart2)
     assembly.rotateFreezeTop(mypart2)
-    
+
     assembly.rotateFreezeLeft(mypart3)
     assembly.rotateFreezeFront(mypart3)
-    
+
     assembly.rotateFreezeFront(mypart4)
     assembly.rotateFreezeLeft(mypart4)
-    
+
     assembly.rotateFreezeTop(mypart5)
     assembly.rotateFreezeFront(mypart5)
-    
+
     assembly.rotateFreezeFront(mypart6)
     assembly.rotateFreezeTop(mypart6)
-    
+
     assembly.rotateFreezeLeft(mypart7)
     assembly.rotateFreezeTop(mypart7)
-    
+
     assembly.rotateFreezeTop(mypart8)
     assembly.rotateFreezeLeft(mypart8)
-    
+
     assembly.rotateFreezeLeft(mypart9)
     assembly.rotateFreezeFront(mypart9)
     assembly.rotateFreezeTop(mypart9)
     assembly.rotateFreezeLeft(mypart9)
     assembly.rotateFreezeFront(mypart9)
     assembly.rotateFreezeTop(mypart9)
-    
-    
-    
+
     assembly_def = assembly.export()
     assert assembly_def["parts"][0]["rotate"] == [0, 1, 2, 0, 0]
     assert assembly_def["parts"][1]["rotate"] == [0, 1, 2]

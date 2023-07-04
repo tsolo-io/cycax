@@ -14,9 +14,9 @@ def test_merge():
     assembly.add(mypart1)
     assembly.add(mypart2)
     assembly.merge(mypart1, mypart2)
-     
+
     assert mypart1.features == mypart2.features
     assert mypart2.move_holes == mypart1.move_holes
- 
+
 
 # TODO: Add tests that level then rotate a part. If rotate after level is not allowed then err.

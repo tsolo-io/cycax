@@ -4,11 +4,11 @@ import logging
 import os
 from pathlib import Path
 
+from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engine_openscad import EngineOpenSCAD
-from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
@@ -28,7 +28,7 @@ class Assembly:
         self.pieces = []
         self._base_path = Path(".")
 
-    def render(self, assembler: str="OpenSCAD"):
+    def render(self, assembler: str = "OpenSCAD"):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
         """
@@ -54,7 +54,6 @@ class Assembly:
         else:
             msg = f"Engine {assembler} is not one of the recognized engines for assebling parts. Choose one of OpenSCAD (default) or Blender."
             raise ValueError(msg)
-            
 
     def save(self, path: Path | None = None):
         """
@@ -87,11 +86,7 @@ class Assembly:
         Raises:
             ValueError: if the sizes of the parts are not identical.
         """
-        if (
-            part1.x_size == part2.x_size
-            and part1.y_size == part2.y_size
-            and part1.z_size == part2.z_size
-        ):
+        if part1.x_size == part2.x_size and part1.y_size == part2.y_size and part1.z_size == part2.z_size:
             for item in part2.features:
                 if item not in part1.features:
                     part1.features.append(item)
@@ -115,10 +110,10 @@ class Assembly:
 
         self.pieces.append(part)
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This creates a dict of the assembly, used to make the json.
-        
+
         Returns:
             dict: this is the dict that will be used to form a json decoded in assembly.
         """
@@ -132,9 +127,9 @@ class Assembly:
                 "colour": item.colour,
             }
             list_out.append(dict_part)
-        dict_out={}
-        dict_out["name"]=self.part_no
-        dict_out["parts"]=list_out
+        dict_out = {}
+        dict_out["name"] = self.part_no
+        dict_out["parts"] = list_out
         return dict_out
 
     def rotateFreezeTop(self, part: CycadPart):
@@ -218,11 +213,11 @@ class Assembly:
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
             for rot in part.rotate:
-                if rot==0:
+                if rot == 0:
                     rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
-                if rot==1:
+                if rot == 1:
                     rotation = temp_hole.swap_xz(rot=1, rotmax=rotation)
-                if rot==2:
+                if rot == 2:
                     rotation = temp_hole.swap_xy(rot=1, rotmax=rotation)
             if part.moves[0] != 0:
                 temp_hole.move(x=part.moves[0])

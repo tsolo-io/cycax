@@ -1,8 +1,10 @@
 import json
 import logging
-import bpy
 import math
 from pathlib import Path
+
+import bpy
+
 
 class AssemblyBlender:
     """
@@ -16,7 +18,7 @@ class AssemblyBlender:
     def __init__(self, part_no: str) -> None:
         self.part_no = part_no
         self._base_path = Path(".")
-        self.parts=[]
+        self.parts = []
 
     def _fetch_part(self, part: str):
         """
@@ -31,12 +33,11 @@ class AssemblyBlender:
         bpy.ops.import_mesh.stl(filepath=stl_file)
         for obj in bpy.context.selected_objects:
             if part in self.parts:
-                obj.name = "{item}_{item_no}".format(item=part, item_no=self.parts[part]+1)
-                self.parts[part]=self.parts[part]+1
+                obj.name = f"{part}_{self.parts[part] + 1}"
+                self.parts[part] = self.parts[part] + 1
             else:
-                obj.name = "{item}_{item_no}".format(item=part, item_no=1)
-                self.part[part]=1
-                
+                obj.name = f"{part}_{1}"
+                self.part[part] = 1
 
     def _swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
@@ -77,24 +78,24 @@ class AssemblyBlender:
         """
         rotation = [0, 0, 0]
         for item in Rotate:
-            if item==0:
-                bpy.ops.transform.rotate(value=math.radians(90), orient_axis='X')
+            if item == 0:
+                bpy.ops.transform.rotate(value=math.radians(90), orient_axis="X")
                 working = self._swap_yz_(rotation, 1, Rotmax)
-                
-            if item==1:
-                bpy.ops.transform.rotate(value=math.radians(90), orient_axis='Y')
+
+            if item == 1:
+                bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Y")
                 working = self._swap_xz_(rotation, 1, Rotmax)
-                
-            if item==2:
-                bpy.ops.transform.rotate(value=math.radians(90), orient_axis='Z')
+
+            if item == 2:
+                bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Z")
                 working = self._swap_xy_(rotation, 1, Rotmax)
-                
+
             rotation = working[0]
             Rotmax = working[1]
 
-        bpy.ops.transform.translate(value= (rotation[0] + moves[0], rotation[1] + moves[1], rotation[2] + moves[2]))
+        bpy.ops.transform.translate(value=(rotation[0] + moves[0], rotation[1] + moves[1], rotation[2] + moves[2]))
 
-    def _colour(self, colour: str, part:str) -> str:
+    def _colour(self, colour: str, part: str) -> str:
         """
         Gives the colour.
         Args:
@@ -103,9 +104,9 @@ class AssemblyBlender:
         working_part = f"{part}_{self.parts[part]}"
         template_object = bpy.data.objects.get(working_part)
         matcolour = bpy.data.materials.new(colour)
-        matcolour.diffuse_color = (0,1,0,0.8)
-        
-        template_object.active_material = matcolour   
+        matcolour.diffuse_color = (0, 1, 0, 0.8)
+
+        template_object.active_material = matcolour
 
     def assembly_blender(self, path: Path | None = None):
         """
@@ -121,7 +122,5 @@ class AssemblyBlender:
             self._fetch_part(action["part_no"])
             self._move(action["rotmax"], action["moves"], action["rotate"])
             self._colour(action["colour"], action["part_no"])
-            
+
         bpy.ops.wm.save_as_mainfile(filepath=self._base_path)
-            
-            
