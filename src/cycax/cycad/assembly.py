@@ -97,7 +97,7 @@ class Assembly:
 
     def add(self, part: CycadPart):
         """
-        This adds a new object into the assembly and decodes it into a json if that's what the user wants.
+        This adds a part into the assembly.
         Once the part has been added to the assembler it can no longer be moved around or eddited.
 
         Args:
@@ -105,6 +105,7 @@ class Assembly:
         """
 
         self.pieces.append(part)
+        part.assembly = self
 
     def export(self) -> dict:
         """
