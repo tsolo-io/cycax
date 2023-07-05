@@ -141,9 +141,6 @@ class PartEngineOpenSCAD(PartEngine):
 
         !!!For this method to work properly it will be necessary to add a JSON, STL and SCAD file into the working repository.!!!
 
-        Args:
-            part_name : name of the file that is to be decoded into a scad.
-
          Raises:
             ValueError: if incorrect part_name is provided.
         """
