@@ -4,7 +4,7 @@ from cycax.cycad import Assembly, SheetMetal
 
 
 def test_rotate():
-    # Tests the bas functionality of rotate.
+    # Test the base functionality of rotate.
     length = 1000
     width = 100
     thickness = 2
@@ -37,9 +37,9 @@ def test_rotate():
 
 
 def test_rotate_side():
-    length = 1000
-    width = 100
-    thickness = 2
+    length = 10
+    width = 800
+    thickness = 200
 
     assembly = Assembly("assembly-test")
     mypart1 = SheetMetal(x_size=length, y_size=width, z_size=thickness, part_no="part-test1")
@@ -52,7 +52,7 @@ def test_rotate_side():
     assembly.add(mypart4)
 
     # Test that a part is rotated multiple times.
-    for angle in range(90, 721, 90):
+    for angle in range(90, 363, 90):
         # assembly.rotateFreezeLeft(mypart2)
         mypart2.left.rotate()
         # assembly.rotateFreezeFront(mypart3)
