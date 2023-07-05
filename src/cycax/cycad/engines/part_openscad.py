@@ -190,6 +190,8 @@ class PartEngineOpenSCAD(PartEngine):
                 scad_file.write("\n")
 
         scad_file.close()
+        # TODO: Only build STL if stl in config['output']
+        self.build_stl()
 
     def build_stl(self):
         """Calls OpenSCAD to create a STL for the part.

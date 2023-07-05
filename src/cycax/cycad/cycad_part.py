@@ -406,9 +406,10 @@ class CycadPart(Location):
             side: this will be used for pyplot
         """
 
-        model_files = {}
+        artefacts = {}
         _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
+            # TODO: Update simple2d to match openscad and freecad part engines.
             # This method will created a pyplot drawing of the object.
             if side is None:
                 side = "TOP"
@@ -417,30 +418,31 @@ class CycadPart(Location):
 
         elif _eng_lower == "openscad":
             # This method will produce an OpenSCAD 3D drawing of the given object.
-            cutter = PartEngineOpenSCAD(name=self.part_no, path=self._base_path)
+            part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
 
-            in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
+            # in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
 
-            if not os.path.exists(in_name):
-                self.save()
+            # if not os.path.exists(in_name):
+            #    self.save()
 
-            cutter.build()
+            part_engine.build()
 
-            # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
-            # cutter = PartEngineOpenSCAD(name=self.part_no)
-            in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
+            ## This method will convert a OpenSCAD drawing of a given file into a STL drawing.
+            ## cutter = PartEngineOpenSCAD(name=self.part_no)
+            # in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
 
-            if not os.path.exists(in_name):
-                self.Render("OpenSCAD")
+            # if not os.path.exists(in_name):
+            #    self.Render("OpenSCAD")
 
-            cutter.build_stl()
+            # cutter.build_stl()
         elif _eng_lower == "freecad":
-            part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path)
+            part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
             part_engine.build()
 
         else:
             msg = f"engine: {engine} is not one of simple2D, OpenSCAD or STL."
             raise ValueError(msg)
 
+        # TODO: part_engine build should be called here outside of the if/elif
         # part_engine.build()
-        return model_files
+        return artefacts
