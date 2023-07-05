@@ -282,7 +282,7 @@ class CycadPart(Location):
 
         self.make_bounding_box()
 
-    def cardinal_possition(self, x: float = None, y: float = None, z: float = None):
+    def at(self, x: float = None, y: float = None, z: float = None):
         """This move can be used to translate objects to the exact provided coordinates.
         Args:
             x: the value to which x needs to be moved to on the axis.

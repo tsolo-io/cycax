@@ -108,7 +108,7 @@ class Location:
         if z is not None:
             self.z = self.z + z
 
-    def cardinal_possition(self, x: float = None, y: float = None, z: float = None):
+    def at(self, x: float = None, y: float = None, z: float = None):
         """This move can be used to translate objects based on the provided arguments.
         Args:
             x: the value to which x needs to be moved to on the axis.

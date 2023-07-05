@@ -184,20 +184,20 @@ class Assembly:
         to_here = part2.bounding_box[side2]
 
         if side1 == BOTTOM:
-            part1.cardinal_possition(z=to_here)
+            part1.at(z=to_here)
         elif side1 == TOP:
             z_size = part1.z_max - part1.z_min
-            part1.cardinal_possition(z=to_here - z_size)
+            part1.at(z=to_here - z_size)
         elif side1 == LEFT:
-            part1.cardinal_possition(x=to_here)
+            part1.at(x=to_here)
         elif side1 == RIGHT:
             x_size = part1.x_max - part1.x_min
-            part1.cardinal_possition(x=to_here - x_size)
+            part1.at(x=to_here - x_size)
         elif side1 == FRONT:
-            part1.cardinal_possition(y=to_here)
+            part1.at(y=to_here)
         elif side1 == BACK:
             y_size = part1.y_max - part1.y_min
-            part1.cardinal_possition(y=to_here - y_size)
+            part1.at(y=to_here - y_size)
         else:
             msg = f"Side: {side1} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
             raise ValueError(msg)
