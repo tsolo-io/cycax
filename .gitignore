@@ -44,13 +44,14 @@ htmlcov/
 .coverage.*
 .cache
 nosetests.xml
+tests.xml
 coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
 .pytest_cache/
 cover/
-
+reports/
 # Translations
 *.mo
 *.pot
