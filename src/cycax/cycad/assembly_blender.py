@@ -67,31 +67,31 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def _move(self, Rotmax: tuple, position: tuple, Rotate: tuple):
+    def _move(self, rotmax: tuple, position: tuple, rotate: tuple):
         """
         Computes the moving and rotating of the stl to the desired location.
 
         Args:
-            Rotmax: This is the tuple that contains the original (x,y,z) location.
+            rotmax: This is the tuple that contains the original (x,y,z) location.
             position: This is the tuple that contains the amount which the (x,y,z) needs to move by.
-            Rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
+            rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
         """
         rotation = [0, 0, 0]
-        for item in Rotate:
+        for item in rotate:
             if item == 0:
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="X")
-                working = self._swap_yz_(rotation, 1, Rotmax)
+                working = self._swap_yz_(rotation, 1, rotmax)
 
             if item == 1:
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Y")
-                working = self._swap_xz_(rotation, 1, Rotmax)
+                working = self._swap_xz_(rotation, 1, rotmax)
 
             if item == 2:
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Z")
-                working = self._swap_xy_(rotation, 1, Rotmax)
+                working = self._swap_xy_(rotation, 1, rotmax)
 
             rotation = working[0]
-            Rotmax = working[1]
+            rotmax = working[1]
 
         bpy.ops.transform.translate(value=(rotation[0] + position[0], rotation[1] + position[1], rotation[2] + position[2]))
 

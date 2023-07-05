@@ -56,18 +56,18 @@ class AssemblyOpenSCAD:
             rot = rot - 1
         return rotation, rotmax
 
-    def _move(self, Rotmax: tuple, position: tuple, Rotate: tuple) -> str:
+    def _move(self, rotmax: tuple, position: tuple, rotate: tuple) -> str:
         """
         Computes the moving and rotating of the stl to the desired location.
 
         Args:
-            Rotmax: This is the tuple that contains the original (x,y,z) location.
+            rotmax: This is the tuple that contains the original (x,y,z) location.
             position: This is the tuple that contains the amount which the (x,y,z) needs to move by.
-            Rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
+            rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
         """
         rotation = [0, 0, 0]
         rotout = ""
-        for item in Rotate:
+        for item in rotate:
             rotwork = item
             rotwork = {
                 0: "rotate([90, 0, 0])",
@@ -76,16 +76,16 @@ class AssemblyOpenSCAD:
             }[rotwork]
             rotout = rotwork + rotout
             if item == 0:
-                working = self._swap_yz_(rotation, 1, Rotmax)
+                working = self._swap_yz_(rotation, 1, rotmax)
 
             elif item == 1:
-                working = self._swap_xz_(rotation, 1, Rotmax)
+                working = self._swap_xz_(rotation, 1, rotmax)
 
             elif item == 2:
-                working = self._swap_xy_(rotation, 1, Rotmax)
+                working = self._swap_xy_(rotation, 1, rotmax)
 
             rotation = working[0]
-            Rotmax = working[1]
+            rotmax = working[1]
 
         output = "translate([{x}, {y}, {z}])".format(
             x=rotation[0] + float(position[0]), y=rotation[1] + float(position[1]), z=rotation[2] + float(position[2])
