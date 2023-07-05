@@ -4,6 +4,7 @@ import logging
 import os
 from pathlib import Path
 
+# from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
@@ -22,11 +23,10 @@ class Assembly:
     def __init__(self, part_no: str):
         self.part_no = part_no
         self.decoder = EngineOpenSCAD()
-        self.assembler = AssemblyOpenSCAD(part_no)
         self.pieces = []
         self._base_path = Path(".")
 
-    def render(self):
+    def render(self, assembler: str = "OpenSCAD"):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
         """
@@ -45,7 +45,14 @@ class Assembly:
                 self.decoder.render_stl(name)
 
         logging.info("Calling to the assembler")
-        self.assembler.assembly_openscad(self._base_path)
+        if assembler.lower() == "openscad":
+            assembler = AssemblyOpenSCAD(self.part_no)
+        # elif assembler.lower() == "blender":
+        #     assembler= AssemblyBlender(part_no)
+        else:
+            msg = f"Engine {assembler} is not one of the recognized engines for assebling parts. Choose one of OpenSCAD (default) or Blender."
+            raise ValueError(msg)
+        assembler.build(self._base_path)
 
     def save(self, path: Path | None = None):
         """
@@ -78,11 +85,7 @@ class Assembly:
         Raises:
             ValueError: if the sizes of the parts are not identical.
         """
-        if (
-            part1.size.x_size == part2.size.x_size
-            and part1.size.y_size == part2.size.y_size
-            and part1.size.z_size == part2.size.z_size
-        ):
+        if part1.x_size == part2.x_size and part1.y_size == part2.y_size and part1.z_size == part2.z_size:
             for item in part2.features:
                 if item not in part1.features:
                     part1.features.append(item)
@@ -106,10 +109,10 @@ class Assembly:
 
         self.pieces.append(part)
 
-    def export(self)-> dict:
+    def export(self) -> dict:
         """
         This creates a dict of the assembly, used to make the json.
-        
+
         Returns:
             dict: this is the dict that will be used to form a json decoded in assembly.
         """
@@ -123,9 +126,9 @@ class Assembly:
                 "colour": item.colour,
             }
             list_out.append(dict_part)
-        dict_out={}
-        dict_out["name"]=self.part_no
-        dict_out["parts"]=list_out
+        dict_out = {}
+        dict_out["name"] = self.part_no
+        dict_out["parts"] = list_out
         return dict_out
 
     def rotateFreezeTop(self, part: CycadPart):
@@ -134,10 +137,9 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate[part.pos["z"]] = (part.rotate[part.pos["z"]] + 90) % 360
+        part.rotate.append(2)
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
-        part.pos["x"], part.pos["y"] = part.pos["y"], part.pos["x"]
         part.make_bounding_box()
 
     def rotateFreezeLeft(self, part: CycadPart):
@@ -146,10 +148,9 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate[part.pos["x"]] = (part.rotate[part.pos["x"]] + 90) % 360
+        part.rotate.append(0)
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
-        part.pos["z"], part.pos["y"] = part.pos["y"], part.pos["z"]
         part.make_bounding_box()
 
     def rotateFreezeFront(self, part: CycadPart):
@@ -158,10 +159,9 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate[part.pos["y"]] = (part.rotate[part.pos["y"]] + 90) % 360
+        part.rotate.append(1)
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
-        part.pos["x"], part.pos["z"] = part.pos["z"], part.pos["x"]
         part.make_bounding_box()
 
     def level(self, partside1: CycadSide, partside2: CycadSide):
@@ -183,21 +183,20 @@ class Assembly:
         to_here = part2.bounding_box[side2]
 
         if side1 == BOTTOM:
-            part1.move(z=to_here)
+            part1.cardinal_possition(z=to_here)
         elif side1 == TOP:
             z_size = part1.z_max - part1.z_min
-            part1.move(z=to_here - z_size)
+            part1.cardinal_possition(z=to_here - z_size)
         elif side1 == LEFT:
-            part1.move(x=to_here)
-            x_size = part1.x_max - part1.x_min
+            part1.cardinal_possition(x=to_here)
         elif side1 == RIGHT:
             x_size = part1.x_max - part1.x_min
-            part1.move(x=to_here - x_size)
+            part1.cardinal_possition(x=to_here - x_size)
         elif side1 == FRONT:
-            part1.move(y=to_here)
+            part1.cardinal_possition(y=to_here)
         elif side1 == BACK:
             y_size = part1.y_max - part1.y_min
-            part1.move(y=to_here - y_size)
+            part1.cardinal_possition(y=to_here - y_size)
         else:
             msg = f"Side: {side1} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
             raise ValueError(msg)
@@ -211,9 +210,13 @@ class Assembly:
         for hole_i, hole in enumerate(part.move_holes):
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
-            rotation = temp_hole.swap_yz(rot=part.rotate[0] / 90, rotmax=rotation)
-            rotation = temp_hole.swap_xz(rot=part.rotate[1] / 90, rotmax=rotation)
-            rotation = temp_hole.swap_xy(rot=part.rotate[2] / 90, rotmax=rotation)
+            for rot in part.rotate:
+                if rot == 0:
+                    rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
+                elif rot == 1:
+                    rotation = temp_hole.swap_xz(rot=1, rotmax=rotation)
+                elif rot == 2:
+                    rotation = temp_hole.swap_xy(rot=1, rotmax=rotation)
             if part.moves[0] != 0:
                 temp_hole.move(x=part.moves[0])
             if part.moves[1] != 0:
