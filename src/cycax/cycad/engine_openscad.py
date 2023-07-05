@@ -201,6 +201,19 @@ class EngineOpenSCAD:
 
         SCAD.close()
 
+    def get_appimage(self) -> Path:
+        paths = ["~/Applications", self._base_path]
+        appimage = None
+        for p in paths:
+            path = Path(p).expanduser()
+            if not path.exists():
+                # There is no such path.
+                logging.error("No path %s", path)
+                break
+            for appimg in path.glob("OpenSCAD*.AppImage"):
+                appimage = appimg
+        return appimage
+
     def render_stl(self, part_name: str = None):
         """
 
@@ -221,8 +234,10 @@ class EngineOpenSCAD:
             msg = f"the part name {part_name} does not map to a scad file at {in_name}."
             raise ValueError(msg)
 
+        app_bin = self.get_appimage()
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!!")
-        result = subprocess.run(["openscad", "-o", out_stl_name, in_name], capture_output=True, text=True)
+        print(app_bin)
+        result = subprocess.run([app_bin, "-o", out_stl_name, in_name], capture_output=True, text=True)
 
         if result.stdout:
             logging.info("OpenSCAD: %s", result.stdout)
