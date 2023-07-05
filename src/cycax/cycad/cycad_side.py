@@ -142,6 +142,37 @@ class CycadSide:
         """
         raise ValueError("_depth_check is Not implimented on" + self.name)
 
+    def _rotate(self):
+        """Rotate the part by 90 degress by keeping selected side on the same plain."""
+        msg = "_rotate should be defined for each side."
+        raise NotImplementedError(msg)
+
+    def rotate(self, angle: float = 90):
+        """Rotate the part by keeping the selected side on the same plain.
+
+        Rotation is counter clock wise. Negative angles are converted to poistive.
+
+        Args:
+            angle: The angle in degress that the part will be rotates on.
+
+        """
+        if self._parent.assembly is None:
+            # TODO: Think about which exception should be raised, maybe even a custom one.
+            msg = "Not part of an assembly"
+            raise ValueError(msg)
+
+        if angle % 90 != 0:
+            # TODO: Think about which exception should be raised, maybe even a custom one.
+            msg = "Can only rotate in multiples of 90 degrees"
+            raise ValueError(msg)
+
+        while angle < 0:
+            # Change the angle to a positive number.
+            angle = 360 + angle
+
+        for _n in range(int(angle / 90)):
+            self._rotate()
+
 
 class LeftSide(CycadSide):
     name = "LEFT"
@@ -193,6 +224,9 @@ class LeftSide(CycadSide):
             return self._parent.x_size
         else:
             return val
+
+    def _rotate(self):
+        self._parent.assembly.rotateFreezeLeft(self._parent)
 
 
 class RightSide(CycadSide):
@@ -246,6 +280,9 @@ class RightSide(CycadSide):
 
         return x_size, y_size, z_size
 
+    def _rotate(self):
+        self._parent.assembly.rotateFreezeLeft(self._parent)
+
 
 class TopSide(CycadSide):
     name = "TOP"
@@ -297,6 +334,9 @@ class TopSide(CycadSide):
         z_size = depth
 
         return x_size, y_size, z_size
+
+    def _rotate(self):
+        self._parent.assembly.rotateFreezeTop(self._parent)
 
 
 class BottomSide(CycadSide):
@@ -350,6 +390,9 @@ class BottomSide(CycadSide):
 
         return x_size, y_size, z_size
 
+    def _rotate(self):
+        self._parent.assembly.rotateFreezeTop(self._parent)
+
 
 class FrontSide(CycadSide):
     name = "FRONT"
@@ -401,6 +444,9 @@ class FrontSide(CycadSide):
         z_size = length
 
         return x_size, y_size, z_size
+
+    def _rotate(self):
+        self._parent.assembly.rotateFreezeFront(self._parent)
 
 
 class BackSide(CycadSide):
@@ -455,3 +501,6 @@ class BackSide(CycadSide):
         z_size = length
 
         return x_size, y_size, z_size
+
+    def _rotate(self):
+        self._parent.assembly.rotateFreezeFront(self._parent)
