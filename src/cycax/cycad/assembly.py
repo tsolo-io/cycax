@@ -46,14 +46,13 @@ class Assembly:
 
         logging.info("Calling to the assembler")
         if assembler.lower() == "openscad":
-            self.assembler_openscad = AssemblyOpenSCAD(self.part_no)
-            self.assembler_openscad.assembly_openscad(self._base_path)
+            assembler = AssemblyOpenSCAD(self.part_no)
         # elif assembler.lower() == "blender":
-        #     self.assembler_blender = AssemblyBlender(part_no)
-        #     self.assembler_blender.assembly_blender(self._base_path)
+        #     assembler= AssemblyBlender(part_no)
         else:
             msg = f"Engine {assembler} is not one of the recognized engines for assebling parts. Choose one of OpenSCAD (default) or Blender."
             raise ValueError(msg)
+        assembler.build(self._base_path)
 
     def save(self, path: Path | None = None):
         """
@@ -190,7 +189,6 @@ class Assembly:
             part1.cardinal_possition(z=to_here - z_size)
         elif side1 == LEFT:
             part1.cardinal_possition(x=to_here)
-            x_size = part1.x_max - part1.x_min
         elif side1 == RIGHT:
             x_size = part1.x_max - part1.x_min
             part1.cardinal_possition(x=to_here - x_size)
@@ -215,9 +213,9 @@ class Assembly:
             for rot in part.rotate:
                 if rot == 0:
                     rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
-                if rot == 1:
+                elif rot == 1:
                     rotation = temp_hole.swap_xz(rot=1, rotmax=rotation)
-                if rot == 2:
+                elif rot == 2:
                     rotation = temp_hole.swap_xy(rot=1, rotmax=rotation)
             if part.moves[0] != 0:
                 temp_hole.move(x=part.moves[0])

@@ -78,10 +78,10 @@ class AssemblyOpenSCAD:
             if item == 0:
                 working = self._swap_yz_(rotation, 1, Rotmax)
 
-            if item == 1:
+            elif item == 1:
                 working = self._swap_xz_(rotation, 1, Rotmax)
 
-            if item == 2:
+            elif item == 2:
                 working = self._swap_xy_(rotation, 1, Rotmax)
 
             rotation = working[0]
@@ -101,7 +101,7 @@ class AssemblyOpenSCAD:
         """
         return f'color("{colour}")'
 
-    def assembly_openscad(self, path: Path | None = None):
+    def build(self, path: Path | None = None):
         """
         Decodes the provided json and moves the object around as required, making a new openSCAD which will use imported stl.
         """

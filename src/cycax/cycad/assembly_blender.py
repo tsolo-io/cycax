@@ -108,7 +108,7 @@ class AssemblyBlender:
 
         template_object.active_material = matcolour
 
-    def assembly_blender(self, path: Path | None = None):
+    def build(self, path: Path | None = None):
         """
         Decodes the provided json and moves the object around as required, making a new blender file which will use imported stl.
         """
@@ -123,4 +123,5 @@ class AssemblyBlender:
             self._move(action["rotmax"], action["moves"], action["rotate"])
             self._colour(action["colour"], action["part_no"])
 
+        logging.info("Saving the .blend file.")
         bpy.ops.wm.save_as_mainfile(filepath=self._base_path)

@@ -74,13 +74,13 @@ class engine_freecad:
         hex = _calc_hex(depth=0, diameter=3)
         nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
 
-        if feature["side"] == "FRONT" or feature["side"] == "BACK":
+        if feature["side"] in ["FRONT", "BACK"]:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 30, 270))
 
-        elif feature["side"] == "TOP" or feature["side"] == "BOTTOM":
+        elif feature["side"] in ["TOP", "BOTTOM"]:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(30, 0, 0))
 
-        elif feature["side"] == "LEFT" or feature["side"] == "RIGHT":
+        elif feature["side"] in ["LEFT", "RIGHT"]:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
 
         return nut
@@ -113,15 +113,15 @@ class engine_freecad:
         """This method will be used for cutting a cylindical hole into a surface."""
         pos_vec = FreeCAD.Vector(0, 0, 0)
         cyl = Part.makeCylinder(feature["diameter"] / 2, feature["depth"], pos_vec)
-        if feature["side"] == "FRONT" or feature["side"] == "BACK":
+        if feature["side"] in ["FRONT", "BACK"]:
             cyl.Placement = App.Placement(
                 Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(1, 0, 0), 270)
             )
-        elif feature["side"] == "TOP" or feature["side"] == "BOTTOM":
+        elif feature["side"] in ["TOP", "BOTTOM"]:
             cyl.Placement = App.Placement(
                 Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 0, 1), 0)
             )
-        elif feature["side"] == "LEFT" or feature["side"] == "RIGHT":
+        elif feature["side"] in ["LEFT", "RIGHT"]:
             cyl.Placement = App.Placement(
                 Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 1, 0), 90)
             )
