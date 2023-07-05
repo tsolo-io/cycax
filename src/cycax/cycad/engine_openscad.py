@@ -211,32 +211,32 @@ class EngineOpenSCAD:
                 logging.error("No path %s", path)
                 break
             for appimg in path.glob("OpenSCAD*.AppImage"):
+                # Very simple implimentation to get tests to pass on CI.
+                # TODO: Sort the Appimages and to get the latest.
                 appimage = appimg
         return appimage
 
     def render_stl(self, part_name: str = None):
-        """
+        """Calls OpenSCAD to create a STL for the part.
 
-        This takes a SCAD object and runs a command through linex that converts it into an stl.
         Depending on the complexity of the object it can take long to compute.
-        It prints out some messages to the terminal so that the impatient user will hopefully wait.(Similar to many windows request.)
+        It prints out some messages to the terminal so that the impatient user will hopefully wait. Similar to many windows request.
 
         Args:
-            part_name : This is the name of the file which will be converted from a scad to a stl.
+            part_name : This is the name of the file which will be converted from a SCAD to a STL.
 
         Raises:
-            ValueError: if incorrect part_name is provided.
+            ValueError: If incorrect part_name is provided.
 
         """
         in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=part_name)
         out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=self._base_path, data=part_name)
         if not os.path.exists(in_name):
-            msg = f"the part name {part_name} does not map to a scad file at {in_name}."
+            msg = f"The part name {part_name} does not map to a SCAD file at {in_name}."
             raise ValueError(msg)
 
         app_bin = self.get_appimage()
-        logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!!")
-        print(app_bin)
+        logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!! using %s", app_bin)
         result = subprocess.run([app_bin, "-o", out_stl_name, in_name], capture_output=True, text=True)
 
         if result.stdout:
