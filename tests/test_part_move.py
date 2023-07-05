@@ -13,26 +13,26 @@ def test_move():
 
     assembly.add(mypart1)
 
-    assert mypart1.moves == [0, 0, 0]
+    assert mypart1.position == [0, 0, 0]
 
     mypart1.move(x=10)
 
-    assert mypart1.moves == [10, 0, 0]
+    assert mypart1.position == [10, 0, 0]
 
     mypart1.move(y=10)
 
-    assert mypart1.moves == [10, 10, 0]
+    assert mypart1.position == [10, 10, 0]
 
     mypart1.move(z=10)
 
-    assert mypart1.moves == [10, 10, 10]
+    assert mypart1.position == [10, 10, 10]
 
     mypart1.move(x=10, y=10, z=10)
 
-    assert mypart1.moves == [20, 20, 20]
+    assert mypart1.position == [20, 20, 20]
 
 
-def test_cardinal_possition():
+def test_at():
     length = 1000
     width = 100
     thickness = 2
@@ -42,20 +42,20 @@ def test_cardinal_possition():
 
     assembly.add(mypart1)
 
-    assert mypart1.moves == [0, 0, 0]
+    assert mypart1.position == [0, 0, 0]
 
-    mypart1.cardinal_possition(x=10)
+    mypart1.at(x=10)
 
-    assert mypart1.moves == [10, 0, 0]
+    assert mypart1.position == [10, 0, 0]
 
-    mypart1.cardinal_possition(y=10)
+    mypart1.at(y=10)
 
-    assert mypart1.moves == [10, 10, 0]
+    assert mypart1.position == [10, 10, 0]
 
-    mypart1.cardinal_possition(z=10)
+    mypart1.at(z=10)
 
-    assert mypart1.moves == [10, 10, 10]
+    assert mypart1.position == [10, 10, 10]
 
-    mypart1.cardinal_possition(x=10, y=10, z=10)
+    mypart1.at(x=10, y=10, z=10)
 
-    assert mypart1.moves == [10, 10, 10]
+    assert mypart1.position == [10, 10, 10]

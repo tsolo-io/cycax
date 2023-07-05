@@ -161,3 +161,6 @@ cython_debug/
 #.idea/
 #
 docs/site/
+*.whl
+*.tar.gz
+*.json

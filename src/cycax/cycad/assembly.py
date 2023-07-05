@@ -124,7 +124,7 @@ class Assembly:
         for item in self.pieces:
             dict_part = {
                 "part_no": item.part_no,
-                "moves": item.moves,
+                "position": item.position,
                 "rotate": item.rotate,
                 "rotmax": [item.x_size, item.y_size, item.z_size],
                 "colour": item.colour,
@@ -141,7 +141,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append(2)
+        part.rotate.append({"axis": "z", "angle": 90})
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
@@ -152,7 +152,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append(0)
+        part.rotate.append({"axis": "x", "angle": 90})
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
@@ -163,7 +163,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append(1)
+        part.rotate.append({"axis": "y", "angle": 90})
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()
@@ -187,20 +187,20 @@ class Assembly:
         to_here = part2.bounding_box[side2]
 
         if side1 == BOTTOM:
-            part1.cardinal_possition(z=to_here)
+            part1.at(z=to_here)
         elif side1 == TOP:
             z_size = part1.z_max - part1.z_min
-            part1.cardinal_possition(z=to_here - z_size)
+            part1.at(z=to_here - z_size)
         elif side1 == LEFT:
-            part1.cardinal_possition(x=to_here)
+            part1.at(x=to_here)
         elif side1 == RIGHT:
             x_size = part1.x_max - part1.x_min
-            part1.cardinal_possition(x=to_here - x_size)
+            part1.at(x=to_here - x_size)
         elif side1 == FRONT:
-            part1.cardinal_possition(y=to_here)
+            part1.at(y=to_here)
         elif side1 == BACK:
             y_size = part1.y_max - part1.y_min
-            part1.cardinal_possition(y=to_here - y_size)
+            part1.at(y=to_here - y_size)
         else:
             msg = f"Side: {side1} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
             raise ValueError(msg)
@@ -215,18 +215,18 @@ class Assembly:
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
             for rot in part.rotate:
-                if rot == 0:
+                if rot["axis"] == "x":
                     rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
-                elif rot == 1:
+                elif rot["axis"] == "y":
                     rotation = temp_hole.swap_xz(rot=1, rotmax=rotation)
-                elif rot == 2:
+                elif rot["axis"] == "z":
                     rotation = temp_hole.swap_xy(rot=1, rotmax=rotation)
-            if part.moves[0] != 0:
-                temp_hole.move(x=part.moves[0])
-            if part.moves[1] != 0:
-                temp_hole.move(y=part.moves[1])
-            if part.moves[2] != 0:
-                temp_hole.move(z=part.moves[2])
+            if part.position[0] != 0:
+                temp_hole.move(x=part.position[0])
+            if part.position[1] != 0:
+                temp_hole.move(y=part.position[1])
+            if part.position[2] != 0:
+                temp_hole.move(z=part.position[2])
             part.move_holes[hole_i] = temp_hole
         part.final_location = True
 

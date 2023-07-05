@@ -56,39 +56,39 @@ class AssemblyOpenSCAD:
             rot = rot - 1
         return rotation, rotmax
 
-    def _move(self, Rotmax: tuple, moves: tuple, Rotate: tuple) -> str:
+    def _move(self, rotmax: tuple, position: tuple, rotate: tuple) -> str:
         """
         Computes the moving and rotating of the stl to the desired location.
 
         Args:
-            Rotmax: This is the tuple that contains the original (x,y,z) location.
-            moves: This is the tuple that contains the amount which the (x,y,z) needs to move by.
-            Rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
+            rotmax: This is the tuple that contains the original (x,y,z) location.
+            position: This is the tuple that contains the amount which the (x,y,z) needs to move by.
+            rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
         """
         rotation = [0, 0, 0]
         rotout = ""
-        for item in Rotate:
-            rotwork = item
+        for item in rotate:
+            rotwork = item["axis"]
             rotwork = {
-                0: "rotate([90, 0, 0])",
-                1: "rotate([0, 90, 0])",
-                2: "rotate([0, 0, 90])",
+                "x": "rotate([90, 0, 0])",
+                "y": "rotate([0, 90, 0])",
+                "z": "rotate([0, 0, 90])",
             }[rotwork]
             rotout = rotwork + rotout
-            if item == 0:
-                working = self._swap_yz_(rotation, 1, Rotmax)
+            if item["axis"] == "x":
+                working = self._swap_yz_(rotation, 1, rotmax)
 
-            elif item == 1:
-                working = self._swap_xz_(rotation, 1, Rotmax)
+            elif item["axis"] == "y":
+                working = self._swap_xz_(rotation, 1, rotmax)
 
-            elif item == 2:
-                working = self._swap_xy_(rotation, 1, Rotmax)
+            elif item["axis"] == "z":
+                working = self._swap_xy_(rotation, 1, rotmax)
 
             rotation = working[0]
-            Rotmax = working[1]
+            rotmax = working[1]
 
         output = "translate([{x}, {y}, {z}])".format(
-            x=rotation[0] + float(moves[0]), y=rotation[1] + float(moves[1]), z=rotation[2] + float(moves[2])
+            x=rotation[0] + float(position[0]), y=rotation[1] + float(position[1]), z=rotation[2] + float(position[2])
         )
         output = output + rotout
         return output
@@ -103,7 +103,7 @@ class AssemblyOpenSCAD:
 
     def build(self, path: Path | None = None):
         """
-        Decodes the provided json and moves the object around as required, making a new openSCAD which will use imported stl.
+        Decodes the provided json and move the object around as required, making a new openSCAD which will use imported stl.
         """
         if path is not None:
             self._base_path = path
@@ -113,7 +113,7 @@ class AssemblyOpenSCAD:
 
         output = []
         for action in data["parts"]:
-            output.append(self._move(action["rotmax"], action["moves"], action["rotate"]))
+            output.append(self._move(action["rotmax"], action["position"], action["rotate"]))
             output.append(self._colour(action["colour"]))
             output.append(self._fetch_part(action["part_no"]))
 
