@@ -72,6 +72,7 @@ class CycadPart(Location):
         self.label: set[str] = set()
         self._files = {}
         self.definition()
+        self.assembly = None
 
     def definition(self):
         """This method will be ovedridden to do a calculation."""
@@ -402,14 +403,15 @@ class CycadPart(Location):
             side: this will be used for pyplot
         """
 
-        if eng == "simple2D":
+        _eng_lower = eng.lower()
+        if _eng_lower == "simple2d":
             # This method will created a pyplot drawing of the object.
             if side is None:
                 side = "TOP"
             plotter = Figure(part_no=self.part_no, side=side)
             plotter.save_as_figure()
 
-        elif eng == "OpenSCAD":
+        elif _eng_lower == "openscad":
             # This method will produce an OpenSCAD 3D drawing of the given object.
             cutter = EngineOpenSCAD()
 
@@ -420,7 +422,7 @@ class CycadPart(Location):
 
             cutter.decode(self.part_no)
 
-        elif eng == "STL":
+        elif _eng_lower == "stl":
             # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
             cutter = EngineOpenSCAD()
             in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
