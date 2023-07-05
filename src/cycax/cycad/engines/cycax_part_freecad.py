@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 from math import sqrt
 from pathlib import Path
@@ -8,6 +9,8 @@ import Part
 
 # from PySide import QtGui
 from FreeCAD import Rotation, Vector
+
+logging.error("Open FreeCAD")
 
 # 1. Open the file up in FreeCAD and run as a Macro.
 # 2. Run from command line. ./FreeCAD.AppImage img.py
@@ -151,18 +154,17 @@ class engine_freecad:
         print(__objs__, str(f"{target_path}{name}-perspective.dxf"))
         importDXF.export(__objs__, str(f"{target_path}{name}-perspective.dxf"))
 
-    def decode(self, part_name: str):
-        in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=part_name)
-        with open(in_name) as fp:
-            definition = json.load(fp)
+    def decode(self, in_name: Path):
+        # in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=part_name)
+        definition = json.loads(in_name.read_text())
 
         name = definition["name"]
-        filepath = "/home/helen/tsolo/test_room/"
+        filepath = self._base_path
         cut_features = []
         if FreeCAD.ActiveDocument:
             FreeCAD.closeDocument(name)
         doc = App.newDocument("beach")
-        for data in definition["parts"]:
+        for data in definition.get("features", []):
             if data:
                 if data["type"] == "add":
                     solid = _cube(data)
@@ -197,6 +199,10 @@ class engine_freecad:
 
         # QtGui.QApplication.quit()
 
-    def main():
-        engine = engine_freecad()
-        engine.decode(part_name=sys.argv[1])
+
+json_file = sys.argv[2]
+out_dir = sys.argv[3]
+logging.error(f"Json file {json_file} out dir = {out_dir}")
+engine = engine_freecad()
+engine._base_path = Path(out_dir)
+engine.decode(Path(json_file))

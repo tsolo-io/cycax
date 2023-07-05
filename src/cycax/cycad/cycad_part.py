@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
+from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.figure import Figure
@@ -283,11 +284,12 @@ class CycadPart(Location):
         self.make_bounding_box()
 
     def at(self, x: float = None, y: float = None, z: float = None):
-        """This move can be used to translate objects to the exact provided coordinates.
+        """Place part at the exact provided coordinates.
+
         Args:
-            x: the value to which x needs to be moved to on the axis.
-            y: the value to which y needs to be moved to on the axis.
-            z: the value to which z needs to be moved to on the axis.
+            x: The value to which x needs to be moved to on the axis.
+            y: The value to which y needs to be moved to on the axis.
+            z: The value to which z needs to be moved to on the axis.
         """
         x_size = self.x_max - self.x_min
         y_size = self.y_max - self.y_min
@@ -422,7 +424,7 @@ class CycadPart(Location):
             if not os.path.exists(in_name):
                 self.save()
 
-            cutter.decode()
+            cutter.build()
 
             # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
             # cutter = PartEngineOpenSCAD(name=self.part_no)
@@ -431,10 +433,14 @@ class CycadPart(Location):
             if not os.path.exists(in_name):
                 self.Render("OpenSCAD")
 
-            cutter.render_stl()
+            cutter.build_stl()
+        elif _eng_lower == "freecad":
+            part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path)
+            part_engine.build()
 
         else:
-            msg = f"engine: {eng} is not one of simple2D, OpenSCAD or STL."
+            msg = f"engine: {engine} is not one of simple2D, OpenSCAD or STL."
             raise ValueError(msg)
 
+        # part_engine.build()
         return model_files

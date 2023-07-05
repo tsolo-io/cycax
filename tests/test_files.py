@@ -36,7 +36,7 @@ def test_save(tmp_path):
         check_json_file(part_expected_path, f"part-test{i}")
 
 
-def test_render(tmp_path):
+def test_render_assembly_openscad(tmp_path):
     """Test render on assembly and parts."""
 
     assert len(tuple(tmp_path.glob("*"))) == 0, "Test directory should be empty"
@@ -48,7 +48,7 @@ def test_render(tmp_path):
         parts[part] = mypart
     # TODO: Rotate and level parts.
     assembly.save(tmp_path)
-    assembly.render()
+    assembly.render(engine="OpenSCAD")
 
     assert len(tuple(tmp_path.glob("*"))) > len(parts.keys()), "Expect a directory per part and files for Assembly"
     check_files(tmp_path, "assembly-test", ["json", "scad"])
@@ -56,3 +56,25 @@ def test_render(tmp_path):
         part_expected_path = tmp_path / part
         assert part_expected_path.is_dir(), "Directory for part should exists"
         check_files(part_expected_path, part, ["json", "scad", "stl"])
+
+
+def test_render_part_freecad(tmp_path):
+    """Test render a part with FreeCAD."""
+
+    assert len(tuple(tmp_path.glob("*"))) == 0, "Test directory should be empty"
+    assembly = Assembly("assembly-test")
+    parts = {}
+    for part in ["part_A", "part-B", "partC", "partD", "partE", "partF"]:
+        mypart = SheetMetal(x_size=2, y_size=2, z_size=2, part_no=part)
+        assembly.add(mypart)
+        parts[part] = mypart
+    # TODO: Rotate and level parts.
+    assembly.save(tmp_path)
+    assembly.render(engine="OpenSCAD", part_engine="FreeCAD")
+
+    assert len(tuple(tmp_path.glob("*"))) > len(parts.keys()), "Expect a directory per part and files for Assembly"
+    check_files(tmp_path, "assembly-test", ["json", "scad"])
+    for part in parts.keys():
+        part_expected_path = tmp_path / part
+        assert part_expected_path.is_dir(), "Directory for part should exists"
+        check_files(part_expected_path, part, ["json"])

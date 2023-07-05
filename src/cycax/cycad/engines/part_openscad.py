@@ -135,7 +135,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return side
 
-    def decode(self):
+    def build(self):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
@@ -194,7 +194,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         scad_file.close()
 
-    def render_stl(self):
+    def build_stl(self):
         """Calls OpenSCAD to create a STL for the part.
 
         Depending on the complexity of the object it can take long to compute.

@@ -25,9 +25,21 @@ class Assembly:
         self._base_path = Path(".")
         self._part_model_files = defaultdict(dict)
 
-    def render(self, assembler: str = "OpenSCAD", part_engine: str = "OpenSCAD", part_engine_config: dict = None):
+    def render(
+        self,
+        engine: str = "OpenSCAD",
+        engine_config: dict = None,
+        part_engine: str = "OpenSCAD",
+        part_engine_config: dict = None,
+    ):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
+
+        Args:
+            engine: The type of engine to use for assembly.
+            engine_config: Additional config to pass to the engine used for assembly.
+            part_engine: The engine to use for part creation.
+            part_engine_config: Additional config to pass to the part engine.
         """
         for part in self.pieces:
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
@@ -48,7 +60,7 @@ class Assembly:
         #         decoder.render_stl(name)
 
         logging.info("Calling to the assembler")
-        if assembler.lower() == "openscad":
+        if engine.lower() == "openscad":
             assembler = AssemblyOpenSCAD(self.part_no)
         # elif assembler.lower() == "blender":
         #     assembler= AssemblyBlender(part_no)

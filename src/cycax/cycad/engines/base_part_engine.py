@@ -37,3 +37,7 @@ class PartEngine:
                 # TODO: Sort the Appimages and to get the latest.
                 appimage = appimg
         return appimage
+
+    def render(self):
+        msg = "The render method needs to be implimented for this engine."
+        raise NotImplimentedError(msg)
