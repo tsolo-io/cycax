@@ -68,20 +68,20 @@ class AssemblyOpenSCAD:
         rotation = [0, 0, 0]
         rotout = ""
         for item in rotate:
-            rotwork = item
+            rotwork = item["axis"]
             rotwork = {
-                0: "rotate([90, 0, 0])",
-                1: "rotate([0, 90, 0])",
-                2: "rotate([0, 0, 90])",
+                "x": "rotate([90, 0, 0])",
+                "y": "rotate([0, 90, 0])",
+                "z": "rotate([0, 0, 90])",
             }[rotwork]
             rotout = rotwork + rotout
-            if item == 0:
+            if item["axis"] == "x":
                 working = self._swap_yz_(rotation, 1, rotmax)
 
-            elif item == 1:
+            elif item["axis"] == "y":
                 working = self._swap_xz_(rotation, 1, rotmax)
 
-            elif item == 2:
+            elif item["axis"] == "z":
                 working = self._swap_xy_(rotation, 1, rotmax)
 
             rotation = working[0]

@@ -326,11 +326,11 @@ class CycadPart(Location):
         rotation = [self.x_max - self.x_min, self.y_max - self.y_min, self.z_max - self.z_min]
         while len(working_rotate) > 0:
             rot = working_rotate.pop()
-            if rot == 0:
+            if rot["axis"] == "x":
                 rotation = hole.swap_yz(3, rotation)
-            if rot == 1:
+            if rot["axis"] == "y":
                 rotation = hole.swap_xz(3, rotation)
-            if rot == 2:
+            if rot["axis"] == "z":
                 rotation = hole.swap_xy(3, rotation)
         if hole.side == TOP or hole.side == BOTTOM:
             hole.depth = self.z_size

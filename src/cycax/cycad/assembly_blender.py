@@ -78,15 +78,15 @@ class AssemblyBlender:
         """
         rotation = [0, 0, 0]
         for item in rotate:
-            if item == 0:
+            if item["axis"] == "x":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="X")
                 working = self._swap_yz_(rotation, 1, rotmax)
 
-            if item == 1:
+            if item["axis"] == "y":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Y")
                 working = self._swap_xz_(rotation, 1, rotmax)
 
-            if item == 2:
+            if item["axis"] == "z":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Z")
                 working = self._swap_xy_(rotation, 1, rotmax)
 

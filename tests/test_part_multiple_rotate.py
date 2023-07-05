@@ -65,12 +65,12 @@ def test_rotate():
     assembly.rotateFreezeTop(mypart9)
 
     assembly_def = assembly.export()
-    assert assembly_def["parts"][0]["rotate"] == [0, 1, 2, 0, 0]
-    assert assembly_def["parts"][1]["rotate"] == [0, 1, 2]
-    assert assembly_def["parts"][2]["rotate"] == [0, 1]
-    assert assembly_def["parts"][3]["rotate"] == [1, 0]
-    assert assembly_def["parts"][4]["rotate"] == [2, 1]
-    assert assembly_def["parts"][5]["rotate"] == [1, 2]
-    assert assembly_def["parts"][6]["rotate"] == [0, 2]
-    assert assembly_def["parts"][7]["rotate"] == [2, 0]
-    assert assembly_def["parts"][8]["rotate"] == [0, 1, 2, 0, 1, 2]
+    assert assembly_def["parts"][0]["rotate"] == [{"axis":"x", "angle":90}, {"axis":"y", "angle":90}, {"axis":"z", "angle":90}, {"axis":"x", "angle":90}, {"axis":"x", "angle":90}]
+    assert assembly_def["parts"][1]["rotate"] == [{"axis":"x", "angle":90}, {"axis":"y", "angle":90}, {"axis":"z", "angle":90}]
+    assert assembly_def["parts"][2]["rotate"] == [{"axis":"x", "angle":90}, {"axis":"y", "angle":90}]
+    assert assembly_def["parts"][3]["rotate"] == [{"axis":"y", "angle":90}, {"axis":"x", "angle":90}]
+    assert assembly_def["parts"][4]["rotate"] == [{"axis":"z", "angle":90}, {"axis":"y", "angle":90}]
+    assert assembly_def["parts"][5]["rotate"] == [{"axis":"y", "angle":90}, {"axis":"z", "angle":90}]
+    assert assembly_def["parts"][6]["rotate"] == [{"axis":"x", "angle":90}, {"axis":"z", "angle":90}]
+    assert assembly_def["parts"][7]["rotate"] == [{"axis":"z", "angle":90}, {"axis":"x", "angle":90}]
+    assert assembly_def["parts"][8]["rotate"] == [{"axis":"x", "angle":90}, {"axis":"y", "angle":90}, {"axis":"z", "angle":90}, {"axis":"x", "angle":90}, {"axis":"y", "angle":90}, {"axis":"z", "angle":90}]

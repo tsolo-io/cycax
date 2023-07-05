@@ -138,7 +138,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append(2)
+        part.rotate.append({"axis": "z", "angle": 90})
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
@@ -149,7 +149,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append(0)
+        part.rotate.append({"axis": "x", "angle": 90})
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
@@ -160,7 +160,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append(1)
+        part.rotate.append({"axis": "y", "angle": 90})
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()
@@ -212,11 +212,11 @@ class Assembly:
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
             for rot in part.rotate:
-                if rot == 0:
+                if rot["axis"] == "x":
                     rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
-                elif rot == 1:
+                elif rot["axis"] == "y":
                     rotation = temp_hole.swap_xz(rot=1, rotmax=rotation)
-                elif rot == 2:
+                elif rot["axis"] == "z":
                     rotation = temp_hole.swap_xy(rot=1, rotmax=rotation)
             if part.position[0] != 0:
                 temp_hole.move(x=part.position[0])
