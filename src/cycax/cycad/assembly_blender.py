@@ -67,33 +67,33 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def _move(self, Rotmax: tuple, moves: tuple, Rotate: tuple):
+    def _move(self, rotmax: tuple, position: tuple, rotate: tuple):
         """
         Computes the moving and rotating of the stl to the desired location.
 
         Args:
-            Rotmax: This is the tuple that contains the original (x,y,z) location.
-            moves: This is the tuple that contains the amount which the (x,y,z) needs to move by.
-            Rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
+            rotmax: This is the tuple that contains the original (x,y,z) location.
+            position: This is the tuple that contains the amount which the (x,y,z) needs to move by.
+            rotate: This is the tuple that contains the amount which the (x,y,z) needs to be rotated.
         """
         rotation = [0, 0, 0]
-        for item in Rotate:
-            if item == 0:
+        for item in rotate:
+            if item["axis"] == "x":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="X")
-                working = self._swap_yz_(rotation, 1, Rotmax)
+                working = self._swap_yz_(rotation, 1, rotmax)
 
-            if item == 1:
+            if item["axis"] == "y":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Y")
-                working = self._swap_xz_(rotation, 1, Rotmax)
+                working = self._swap_xz_(rotation, 1, rotmax)
 
-            if item == 2:
+            if item["axis"] == "z":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Z")
-                working = self._swap_xy_(rotation, 1, Rotmax)
+                working = self._swap_xy_(rotation, 1, rotmax)
 
             rotation = working[0]
-            Rotmax = working[1]
+            rotmax = working[1]
 
-        bpy.ops.transform.translate(value=(rotation[0] + moves[0], rotation[1] + moves[1], rotation[2] + moves[2]))
+        bpy.ops.transform.translate(value=(rotation[0] + position[0], rotation[1] + position[1], rotation[2] + position[2]))
 
     def _colour(self, colour: str, part: str) -> str:
         """
@@ -110,7 +110,7 @@ class AssemblyBlender:
 
     def build(self, path: Path | None = None):
         """
-        Decodes the provided json and moves the object around as required, making a new blender file which will use imported stl.
+        Decodes the provided json and move the object around as required, making a new blender file which will use imported stl.
         """
         if path is not None:
             self._base_path = path
@@ -120,7 +120,7 @@ class AssemblyBlender:
 
         for action in data["parts"]:
             self._fetch_part(action["part_no"])
-            self._move(action["rotmax"], action["moves"], action["rotate"])
+            self._move(action["rotmax"], action["position"], action["rotate"])
             self._colour(action["colour"], action["part_no"])
 
         logging.info("Saving the .blend file.")

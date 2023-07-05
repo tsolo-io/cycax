@@ -26,9 +26,9 @@ def test_rotate():
         assembly.rotateFreezeTop(mypart4)
         assembly_def = assembly.export()
         assert assembly_def["parts"][0]["rotate"] == []
-        assert assembly_def["parts"][1]["rotate"] == [0] * count
-        assert assembly_def["parts"][2]["rotate"] == [1] * count
-        assert assembly_def["parts"][3]["rotate"] == [2] * count
+        assert assembly_def["parts"][1]["rotate"] == [{"axis":"x", "angle":90}] * count
+        assert assembly_def["parts"][2]["rotate"] == [{"axis":"y", "angle":90}]  * count
+        assert assembly_def["parts"][3]["rotate"] == [{"axis":"z", "angle":90}]  * count
 
 
 def test_rotate_side():
@@ -56,9 +56,9 @@ def test_rotate_side():
         mypart4.top.rotate()
         assembly_def = assembly.export()
         assert assembly_def["parts"][0]["rotate"] == []
-        assert assembly_def["parts"][1]["rotate"] == [0] * count
-        assert assembly_def["parts"][2]["rotate"] == [1] * count
-        assert assembly_def["parts"][3]["rotate"] == [2] * count
+        assert assembly_def["parts"][1]["rotate"] == [{"axis":"x", "angle":90}] * count
+        assert assembly_def["parts"][2]["rotate"] == [{"axis":"y", "angle":90}]  * count
+        assert assembly_def["parts"][3]["rotate"] == [{"axis":"z", "angle":90}]  * count
 
 
 # TODO: Add tests that rotate the part in multiple directions.

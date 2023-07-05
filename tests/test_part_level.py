@@ -17,36 +17,36 @@ def test_level():
 
     assembly.level(mypart1.bottom, mypart2.bottom)
 
-    assert mypart1.moves == mypart2.moves
+    assert mypart1.position == mypart2.position
 
     assembly.level(mypart1.right, mypart2.right)
 
-    assert mypart1.moves == mypart2.moves
+    assert mypart1.position == mypart2.position
 
     assembly.level(mypart1.front, mypart2.front)
 
-    assert mypart1.moves == mypart2.moves
+    assert mypart1.position == mypart2.position
 
     assembly.level(mypart1.bottom, mypart2.top)
 
-    assert mypart1.moves == [0, 0, 2]
+    assert mypart1.position == [0, 0, 2]
 
     assembly.level(mypart1.left, mypart2.right)
 
-    assert mypart1.moves == [1000, 0, 2]
+    assert mypart1.position == [1000, 0, 2]
 
     assembly.level(mypart1.front, mypart2.back)
 
-    assert mypart1.moves == [1000, 100, 2]
+    assert mypart1.position == [1000, 100, 2]
 
     assembly.level(mypart1.top, mypart2.bottom)
 
-    assert mypart1.moves == [1000, 100, -2]
+    assert mypart1.position == [1000, 100, -2]
 
     assembly.level(mypart1.right, mypart2.left)
 
-    assert mypart1.moves == [-1000, 100, -2]
+    assert mypart1.position == [-1000, 100, -2]
 
     assembly.level(mypart1.back, mypart2.front)
 
-    assert mypart1.moves == [-1000, -100, -2]
+    assert mypart1.position == [-1000, -100, -2]
