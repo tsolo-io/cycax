@@ -1,6 +1,6 @@
 from cycax.cycad import Assembly, Print3D
 
-# Tests the rotation of a part.
+# Tests the move method and cardinal_possition methods of a part.
 
 
 def test_move():
@@ -59,6 +59,3 @@ def test_cardinal_possition():
     mypart1.cardinal_possition(x=10, y=10, z=10)
 
     assert mypart1.moves == [10, 10, 10]
-
-
-# TODO: Add tests that level then rotate a part. If rotate after level is not allowed then err.

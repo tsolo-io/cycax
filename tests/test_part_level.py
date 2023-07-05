@@ -1,6 +1,6 @@
 from cycax.cycad import Assembly, SheetMetal
 
-# Tests the rotation of a part.
+# Test the rotation method of the part.
 
 
 def test_level():
@@ -50,8 +50,3 @@ def test_level():
     assembly.level(mypart1.back, mypart2.front)
 
     assert mypart1.moves == [-1000, -100, -2]
-
-
-# TODO: Add tests that rotate the part in multiple directions.
-# TODO: Add tests that level then rotate a part. If rotate after level is not allowed then err.
-# TODO: Test Print3D

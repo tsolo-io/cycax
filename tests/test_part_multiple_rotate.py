@@ -1,6 +1,6 @@
 from cycax.cycad import Assembly, SheetMetal
 
-# Tests the rotation of a part.
+# Tests that with mulitple roations the expected outcome is still achieved
 
 
 def test_rotate():
@@ -74,8 +74,3 @@ def test_rotate():
     assert assembly_def["parts"][6]["rotate"] == [0, 2]
     assert assembly_def["parts"][7]["rotate"] == [2, 0]
     assert assembly_def["parts"][8]["rotate"] == [0, 1, 2, 0, 1, 2]
-
-
-# TODO: Add tests that rotate the part in multiple directions.
-# TODO: Add tests that level then rotate a part. If rotate after level is not allowed then err.
-# TODO: Test Print3D

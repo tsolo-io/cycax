@@ -38,8 +38,6 @@ def test_dynamic():
     front = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
     back = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
 
-    # HD = ExternalPart(part_no="SSD_SATA_2.5")
-
     box.rotateFreezeFront(left)
     box.rotateFreezeFront(right)
     box.rotateFreezeLeft(front)
@@ -161,8 +159,3 @@ def test_dynamic():
             },
         ],
     }
-
-
-# TODO: Add tests that rotate the part in multiple directions.
-# TODO: Add tests that level then rotate a part. If rotate after level is not allowed then err.
-# TODO: Test Print3D

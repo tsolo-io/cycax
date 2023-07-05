@@ -127,10 +127,10 @@ class EngineOpenSCAD:
             side : this is the side as retrieved form the dictionary.
         """
         side = {
-            TOP: "rotate([0, 180, 0])",
-            BACK: "rotate([90, 0, 0])",
-            BOTTOM: "rotate([0, 0, 0])",
-            FRONT: "rotate([270, 0, 0])",
+            TOP: "rotate([30, 180, 0])",
+            BACK: "rotate([90, 30, 0])",
+            BOTTOM: "rotate([30, 0, 0])",
+            FRONT: "rotate([270, 30, 0])",
             LEFT: "rotate([0, 90, 0])",
             RIGHT: "rotate([0, 270, 0])",
         }[side]

@@ -34,8 +34,3 @@ def test_move_level():
     assembly_def = assembly.export()
     assert assembly_def["parts"][0]["rotate"] == assembly_def["parts"][2]["rotate"]
     assert assembly_def["parts"][0]["moves"] == assembly_def["parts"][2]["moves"]
-
-
-# TODO: Add tests that rotate the part in multiple directions.
-# TODO: Add tests that level then rotate a part. If rotate after level is not allowed then err.
-# TODO: Test Print3D
