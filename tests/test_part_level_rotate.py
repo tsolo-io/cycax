@@ -33,4 +33,4 @@ def test_move_level():
 
     assembly_def = assembly.export()
     assert assembly_def["parts"][0]["rotate"] == assembly_def["parts"][2]["rotate"]
-    assert assembly_def["parts"][0]["moves"] == assembly_def["parts"][2]["moves"]
+    assert assembly_def["parts"][0]["position"] == assembly_def["parts"][2]["position"]

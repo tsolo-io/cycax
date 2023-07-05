@@ -64,7 +64,7 @@ class CycadPart(Location):
         self.z_min: float = 0  # Location.Bottom
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
-        self.moves = [0, 0, 0]
+        self.position = [0, 0, 0]
         self.rotate = []
         self.final_location = False
         self.poligon = poligon
@@ -270,15 +270,15 @@ class CycadPart(Location):
         if x is not None:
             self.x_min = self.x_min + x
             self.x_max = self.x_min + x_size
-            self.moves[0] = self.moves[0] + x
+            self.position[0] = self.position[0] + x
         if y is not None:
             self.y_min = self.y_min + y
             self.y_max = self.y_min + y_size
-            self.moves[1] = self.moves[1] + y
+            self.position[1] = self.position[1] + y
         if z is not None:
             self.z_min = self.z_min + z
             self.z_max = self.z_min + z_size
-            self.moves[2] = self.moves[2] + z
+            self.position[2] = self.position[2] + z
 
         self.make_bounding_box()
 
@@ -296,15 +296,15 @@ class CycadPart(Location):
         if x is not None:
             self.x_min = x
             self.x_max = x + x_size
-            self.moves[0] = x
+            self.position[0] = x
         if y is not None:
             self.y_min = y
             self.y_max = y + y_size
-            self.moves[1] = y
+            self.position[1] = y
         if z is not None:
             self.z_min = z
             self.z_max = z + z_size
-            self.moves[2] = z
+            self.position[2] = z
 
     def insert_hole(self, hole: Holes):
         """This method will be used for inserting the hole into an object.
@@ -315,12 +315,12 @@ class CycadPart(Location):
 
         """
 
-        if self.moves[0] != 0:
-            hole.move(x=-self.moves[0])
-        if self.moves[1] != 0:
-            hole.move(y=-self.moves[1])
-        if self.moves[2] != 0:
-            hole.move(z=-self.moves[2])
+        if self.position[0] != 0:
+            hole.move(x=-self.position[0])
+        if self.position[1] != 0:
+            hole.move(y=-self.position[1])
+        if self.position[2] != 0:
+            hole.move(z=-self.position[2])
 
         working_rotate = copy.deepcopy(self.rotate)
         rotation = [self.x_max - self.x_min, self.y_max - self.y_min, self.z_max - self.z_min]

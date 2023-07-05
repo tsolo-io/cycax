@@ -121,7 +121,7 @@ class Assembly:
         for item in self.pieces:
             dict_part = {
                 "part_no": item.part_no,
-                "moves": item.moves,
+                "position": item.position,
                 "rotate": item.rotate,
                 "rotmax": [item.x_size, item.y_size, item.z_size],
                 "colour": item.colour,
@@ -218,12 +218,12 @@ class Assembly:
                     rotation = temp_hole.swap_xz(rot=1, rotmax=rotation)
                 elif rot == 2:
                     rotation = temp_hole.swap_xy(rot=1, rotmax=rotation)
-            if part.moves[0] != 0:
-                temp_hole.move(x=part.moves[0])
-            if part.moves[1] != 0:
-                temp_hole.move(y=part.moves[1])
-            if part.moves[2] != 0:
-                temp_hole.move(z=part.moves[2])
+            if part.position[0] != 0:
+                temp_hole.move(x=part.position[0])
+            if part.position[1] != 0:
+                temp_hole.move(y=part.position[1])
+            if part.position[2] != 0:
+                temp_hole.move(z=part.position[2])
             part.move_holes[hole_i] = temp_hole
         part.final_location = True
 
