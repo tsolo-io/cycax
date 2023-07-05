@@ -20,20 +20,15 @@ def test_rotate():
     assembly.add(mypart4)
 
     # Test that a part is rotated multiple times.
-    for angle in range(90, 721, 90):
+    for count in range(1, 4):
         assembly.rotateFreezeLeft(mypart2)
         assembly.rotateFreezeFront(mypart3)
         assembly.rotateFreezeTop(mypart4)
         assembly_def = assembly.export()
-        assert assembly_def["parts"][0]["rotate"] == [0, 0, 0]
-        assert assembly_def["parts"][1]["rotate"] == [angle % 360, 0, 0]
-        assert assembly_def["parts"][2]["rotate"] == [0, angle % 360, 0]
-        assert assembly_def["parts"][3]["rotate"] == [0, 0, angle % 360]
-
-    # Test that after being rotate full circle, twice, that the part is still the same.
-    for i in range(1, 4):
-        assert assembly_def["parts"][0]["rotate"] == assembly_def["parts"][i]["rotate"]
-        assert assembly_def["parts"][0]["rotmax"] == assembly_def["parts"][i]["rotmax"]
+        assert assembly_def["parts"][0]["rotate"] == []
+        assert assembly_def["parts"][1]["rotate"] == [0] * count
+        assert assembly_def["parts"][2]["rotate"] == [1] * count
+        assert assembly_def["parts"][3]["rotate"] == [2] * count
 
 
 def test_rotate_side():
@@ -52,7 +47,7 @@ def test_rotate_side():
     assembly.add(mypart4)
 
     # Test that a part is rotated multiple times.
-    for angle in range(90, 363, 90):
+    for count in range(1, 4):
         # assembly.rotateFreezeLeft(mypart2)
         mypart2.left.rotate()
         # assembly.rotateFreezeFront(mypart3)
@@ -60,15 +55,10 @@ def test_rotate_side():
         # assembly.rotateFreezeTop(mypart4)
         mypart4.top.rotate()
         assembly_def = assembly.export()
-        assert assembly_def["parts"][0]["rotate"] == [0, 0, 0]
-        assert assembly_def["parts"][1]["rotate"] == [angle % 360, 0, 0]
-        assert assembly_def["parts"][2]["rotate"] == [0, angle % 360, 0]
-        assert assembly_def["parts"][3]["rotate"] == [0, 0, angle % 360]
-
-    # Test that after being rotate full circle, twice, that the part is still the same.
-    for i in range(1, 4):
-        assert assembly_def["parts"][0]["rotate"] == assembly_def["parts"][i]["rotate"]
-        assert assembly_def["parts"][0]["rotmax"] == assembly_def["parts"][i]["rotmax"]
+        assert assembly_def["parts"][0]["rotate"] == []
+        assert assembly_def["parts"][1]["rotate"] == [0] * count
+        assert assembly_def["parts"][2]["rotate"] == [1] * count
+        assert assembly_def["parts"][3]["rotate"] == [2] * count
 
 
 # TODO: Add tests that rotate the part in multiple directions.
