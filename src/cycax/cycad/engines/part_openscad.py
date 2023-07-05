@@ -4,19 +4,17 @@ import os
 import subprocess
 from pathlib import Path
 
+from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.features import nut_specifications
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
-class EngineOpenSCAD:
+class PartEngineOpenSCAD(PartEngine):
     """
     Decode a JSON to a OpenSCAD file which can be rendered in openscad for 3D view.
     """
 
     dif = 0
-
-    def __init__(self):
-        self._base_path = Path(".")
 
     def _decode_cube(self, lookup: dict) -> str:
         """
@@ -137,12 +135,7 @@ class EngineOpenSCAD:
 
         return side
 
-    def set_path(self, path: Path):
-        if not path.exists():
-            logging.error("Engin using a path that does not exists. Path=%s", path)
-        self._base_path = path
-
-    def decode(self, part_name: str = None):
+    def decode(self):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
@@ -155,9 +148,9 @@ class EngineOpenSCAD:
             ValueError: if incorrect part_name is provided.
         """
 
-        out_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=part_name)
-        SCAD = open(out_name, "w")
-        in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=part_name)
+        out_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.name)
+        scad_file = open(out_name, "w")
+        in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.name)
 
         if not os.path.exists(in_name):
             msg = f"the part name {part_name} does not map to a json file at {in_name}."
@@ -193,49 +186,31 @@ class EngineOpenSCAD:
         for out in output:
             if type(out) == list:
                 for small in out:
-                    SCAD.write(small)
-                    SCAD.write("\n")
+                    scad_file.write(small)
+                    scad_file.write("\n")
             else:
-                SCAD.write(out)
-                SCAD.write("\n")
+                scad_file.write(out)
+                scad_file.write("\n")
 
-        SCAD.close()
+        scad_file.close()
 
-    def get_appimage(self) -> Path:
-        paths = ["~/Applications", self._base_path]
-        appimage = None
-        for p in paths:
-            path = Path(p).expanduser()
-            if not path.exists():
-                # There is no such path.
-                logging.error("No path %s", path)
-                break
-            for appimg in path.glob("OpenSCAD*.AppImage"):
-                # Very simple implimentation to get tests to pass on CI.
-                # TODO: Sort the Appimages and to get the latest.
-                appimage = appimg
-        return appimage
-
-    def render_stl(self, part_name: str = None):
+    def render_stl(self):
         """Calls OpenSCAD to create a STL for the part.
 
         Depending on the complexity of the object it can take long to compute.
         It prints out some messages to the terminal so that the impatient user will hopefully wait. Similar to many windows request.
 
-        Args:
-            part_name : This is the name of the file which will be converted from a SCAD to a STL.
-
         Raises:
             ValueError: If incorrect part_name is provided.
 
         """
-        in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=part_name)
-        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=self._base_path, data=part_name)
+        in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.name)
+        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=self._base_path, data=self.name)
         if not os.path.exists(in_name):
             msg = f"The part name {part_name} does not map to a SCAD file at {in_name}."
             raise ValueError(msg)
 
-        app_bin = self.get_appimage()
+        app_bin = self.get_appimage("OpenSCAD")
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!! using %s", app_bin)
         result = subprocess.run([app_bin, "-o", out_stl_name, in_name], capture_output=True, text=True)
 

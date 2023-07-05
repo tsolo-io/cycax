@@ -1,14 +1,13 @@
 import copy
 import json
 import logging
-import os
+from collections import defaultdict
 from pathlib import Path
 
 # from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
-from cycax.cycad.engine_openscad import EngineOpenSCAD
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
@@ -22,27 +21,31 @@ class Assembly:
 
     def __init__(self, part_no: str):
         self.part_no = part_no
-        self.decoder = EngineOpenSCAD()
         self.pieces = []
         self._base_path = Path(".")
+        self._part_model_files = defaultdict(dict)
 
-    def render(self, assembler: str = "OpenSCAD"):
+    def render(self, assembler: str = "OpenSCAD", part_engine: str = "OpenSCAD", part_engine_config: dict = None):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
         """
-        data = self.export()
-        self.decoder.set_path(self._base_path)
-        for part in data["parts"]:
-            # FIXME: Should just be: `part.render()` the part render should sort out its own stuff.
-            name = part["part_no"]
+        for part in self.pieces:
+            data_files = part.render(engine=part_engine, engine_config=part_engine_config)
+            self._part_model_files[part.part_no].update(data_files)
 
-            stl_name = "{cwd}/{name}/{name}.stl".format(cwd=self._base_path, name=name)
-            if not os.path.exists(stl_name):
-                scad_name = "{cwd}/{name}/{name}.scad".format(cwd=self._base_path, name=name)
-                if not os.path.exists(scad_name):
-                    logging.info("Creating SCAD file %s of the pieces of the object.", scad_name)
-                    self.decoder.decode(name)
-                self.decoder.render_stl(name)
+        # data = self.export()
+        # for part in data["parts"]:
+        #     # FIXME: Should just be: `part.render()` the part render should sort out its own stuff.
+        #     name = part["part_no"]
+        #     decoder = PartEngineOpenSCAD(name=name, path=self._base_path)
+
+        #     stl_name = "{cwd}/{name}/{name}.stl".format(cwd=self._base_path, name=name)
+        #     if not os.path.exists(stl_name):
+        #         scad_name = "{cwd}/{name}/{name}.scad".format(cwd=self._base_path, name=name)
+        #         if not os.path.exists(scad_name):
+        #             logging.info("Creating SCAD file %s of the pieces of the object.", scad_name)
+        #             decoder.decode(name)
+        #         decoder.render_stl(name)
 
         logging.info("Calling to the assembler")
         if assembler.lower() == "openscad":

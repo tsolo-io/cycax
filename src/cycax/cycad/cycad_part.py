@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
-from cycax.cycad.engine_openscad import EngineOpenSCAD
+from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.figure import Figure
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
@@ -396,14 +396,16 @@ class CycadPart(Location):
         dict_out["parts"] = list_part
         return dict_out
 
-    def render(self, eng: str, side: str = None):
+    def render(self, engine: str = "OpenSCAD", engine_config: dict = None, side: str = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
         Args:
-            eng: type of engine to use
+            engine: Name of the engine to use.
+            engine_config: Configuration passed on to the PartEngine. It is engine specific.
             side: this will be used for pyplot
         """
 
-        _eng_lower = eng.lower()
+        model_files = {}
+        _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
             # This method will created a pyplot drawing of the object.
             if side is None:
@@ -413,25 +415,26 @@ class CycadPart(Location):
 
         elif _eng_lower == "openscad":
             # This method will produce an OpenSCAD 3D drawing of the given object.
-            cutter = EngineOpenSCAD()
+            cutter = PartEngineOpenSCAD(name=self.part_no, path=self._base_path)
 
             in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
 
             if not os.path.exists(in_name):
                 self.save()
 
-            cutter.decode(self.part_no)
+            cutter.decode()
 
-        elif _eng_lower == "stl":
             # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
-            cutter = EngineOpenSCAD()
+            # cutter = PartEngineOpenSCAD(name=self.part_no)
             in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
 
             if not os.path.exists(in_name):
                 self.Render("OpenSCAD")
 
-            cutter.render_stl(self)
+            cutter.render_stl()
 
         else:
             msg = f"engine: {eng} is not one of simple2D, OpenSCAD or STL."
             raise ValueError(msg)
+
+        return model_files
