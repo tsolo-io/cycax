@@ -20,13 +20,13 @@ class PartEngineFreeCAD(PartEngine):
 
         environment = dict(os.environ)
         environment.update({"CYCAX_JSON": self._json_file, "CYCAX_CWD": self._base_path})
-        print("Environment:", environment)
+        cmd = [app_bin, freecad_py.absolute()]
         result = subprocess.run(
-            [app_bin, freecad_py],
+            cmd,
             capture_output=True,
             text=True,
             env=environment,
-            shell=True,
+            shell=False,
         )
         # TODO: Read https://wiki.freecad.org/Start_up_and_Configuration and set logging and headless args.
 

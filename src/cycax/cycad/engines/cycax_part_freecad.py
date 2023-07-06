@@ -8,15 +8,15 @@
 import json
 import logging
 import os
+import sys
 from math import sqrt
 from pathlib import Path
-# import QtGui
 
+# import QtGui
 import Draft  # NoQa
 import Part
-
-from PySide import QtGui
 from FreeCAD import Rotation, Vector  # NoQa
+from PySide import QtGui
 
 logging.error("Open FreeCAD")
 
@@ -27,6 +27,7 @@ logging.error("Open FreeCAD")
 # class engine_freecad:
 #     # def __init__(self):
 #     #     self._base_path = Path(".")
+
 
 def _cube(feature: dict):
     """This method will draw a cube when given a dict that contains the necessary dimentions
@@ -44,12 +45,13 @@ def _cube(feature: dict):
         z = feature["z"]
     pos_vec = (x, y, z)
 
-    pos_vec =_move_cube(feature, pos_vec)
+    pos_vec = _move_cube(feature, pos_vec)
     pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
     length = feature["x_size"]
     width = feature["y_size"]
     depth = feature["z_size"]
     return Part.makeBox(length, width, depth, pos)
+
 
 def _calc_hex(depth: float, diameter: float):
     """This method will be used to find out where the points of the hexigon are located so that is can be drawn.
@@ -76,6 +78,7 @@ def _calc_hex(depth: float, diameter: float):
     face = Part.Face(shape)
     return face
 
+
 def _cut_hex(feature: dict):
     """This method will be used for drawing the actual hexigon that needs to be cut.
     Args:
@@ -95,6 +98,7 @@ def _cut_hex(feature: dict):
         nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
 
     return nut
+
 
 def _move_cube(features: dict, pos_vec) -> tuple[float, float, float]:
     """
@@ -120,6 +124,7 @@ def _move_cube(features: dict, pos_vec) -> tuple[float, float, float]:
 
     return angles
 
+
 def _hole(feature):
     """This method will be used for cutting a cylindical hole into a surface."""
     pos_vec = Vector(0, 0, 0)
@@ -138,7 +143,8 @@ def _hole(feature):
         )
     return cyl
 
-def render_to_png( active_doc, target_path, name):
+
+def render_to_png(active_doc, target_path, name):
     active_doc = FreeCADGui.activeDocument()
     target_image_file = f"{target_path}-perspective.png"
     FreeCADGui.SendMsgToActiveView("ViewFit")
@@ -153,6 +159,7 @@ def render_to_png( active_doc, target_path, name):
     active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
     print(f"Saved {target_image_file}")
 
+
 def render_to_dxf(active_doc, target_path, name):
     __objs__ = []
     __objs__.append(active_doc.getObject("Shape"))
@@ -160,7 +167,8 @@ def render_to_dxf(active_doc, target_path, name):
 
     print(__objs__, str(f"{target_path}-perspective.dxf"))
     importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
-    
+
+
 def render_to_stl(active_doc, target_path, name):
     doc = active_doc
 
@@ -169,9 +177,10 @@ def render_to_stl(active_doc, target_path, name):
             filename = f"{target_path}-FreeCAD.stl"
             obj.Shape.exportStl(filename)
 
+
 def decode(in_name: Path):
     print(in_name)
-    file = open(in_name)
+    open(in_name)
     definition = json.loads(in_name.read_text())
     print(definition)
 
@@ -222,7 +231,7 @@ def decode(in_name: Path):
     render_to_png(doc, Path(filepath), name)
     print(70)
     render_to_dxf(doc, Path(filepath), name)
-    
+
     render_to_stl(doc, Path(filepath), name)
     print(80)
     print(90)
@@ -236,4 +245,5 @@ json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 _base_path = Path(out_dir)
+print(sys.argv)
 decode(Path(json_file))
