@@ -7,7 +7,7 @@
 #
 import json
 import logging
-import sys
+import os
 from math import sqrt
 from pathlib import Path
 
@@ -207,8 +207,8 @@ class engine_freecad:
         # QtGui.QApplication.quit()
 
 
-json_file = sys.argv[2]
-out_dir = sys.argv[3]
+json_file = os.getenv("CYCAX_JSON")
+out_dir = os.getenv("CYCAX_CWD")
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = engine_freecad()
 engine._base_path = Path(out_dir)
