@@ -1,14 +1,21 @@
+#
+# This file is called directly from FreeCAD.
+# CyCAx launches the FreeCAD binary and pass in:
+# 1. The fullpath to this file.
+# 2. The path to the part JSON file.
+# 3. The path where the output files are stored.
+#
 import json
 import logging
 import sys
 from math import sqrt
 from pathlib import Path
 
-import Draft
+import Draft  # NoQa
 import Part
 
 # from PySide import QtGui
-from FreeCAD import Rotation, Vector
+from FreeCAD import Rotation, Vector  # NoQa
 
 logging.error("Open FreeCAD")
 

@@ -23,7 +23,7 @@ class Assembly:
         self.part_no = part_no
         self.pieces = []
         self._base_path = Path(".")
-        self._part_model_files = defaultdict(dict)
+        self._part_files = defaultdict(dict)
 
     def render(
         self,
@@ -43,7 +43,7 @@ class Assembly:
         """
         for part in self.pieces:
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
-            self._part_model_files[part.part_no].update(data_files)
+            self._part_files[part.part_no].update(data_files)
 
         # data = self.export()
         # for part in data["parts"]:

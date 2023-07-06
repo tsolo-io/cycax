@@ -406,7 +406,7 @@ class CycadPart(Location):
             side: this will be used for pyplot
         """
 
-        artefacts = {}
+        part_files = {}
         _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
             # TODO: Update simple2d to match openscad and freecad part engines.
@@ -445,4 +445,4 @@ class CycadPart(Location):
 
         # TODO: part_engine build should be called here outside of the if/elif
         # part_engine.build()
-        return artefacts
+        return part_files
