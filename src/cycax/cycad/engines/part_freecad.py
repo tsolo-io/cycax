@@ -18,12 +18,12 @@ class PartEngineFreeCAD(PartEngine):
         logging.error("Use freeCAD %s", app_bin)
         freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
 
-        result = subprocess.run([app_bin, freecad_py, self._json_file, self._base_path], capture_output=True, text=True)
+        result = subprocess.run([app_bin, freecad_py, self.name, self._base_path], capture_output=True, text=True)
 
         if result.stdout:
             logging.info("OpenSCAD: %s", result.stdout)
         if result.stderr:
             logging.error("OpenSCAD: %s", result.stderr)
 
-        raise AssertionError()
+        # raise AssertionError()
         return model_files
