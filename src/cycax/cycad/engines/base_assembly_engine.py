@@ -15,7 +15,7 @@ class AssemblyEngine:
         self._base_path = None
         self._json_file = None
         self.name = name
-        self.part_no = name # TODO: Depricate self.part_no
+        self.part_no = name  # TODO: Depricate self.part_no
         self.config = dict(config or {})
         self.set_path(path)
 

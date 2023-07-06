@@ -7,7 +7,7 @@
 #
 import json
 import logging
-import sys
+import os
 from math import sqrt
 from pathlib import Path
 # import QtGui
@@ -170,11 +170,9 @@ def render_to_stl(active_doc, target_path, name):
             obj.Shape.exportStl(filename)
 
 def decode(in_name: Path):
-    in_name = "{cwd}/{data}/{data}.json".format(cwd=out_dir, data=part_name)
-    #in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=part_name)
     print(in_name)
     file = open(in_name)
-    definition = json.load(file)
+    definition = json.loads(in_name.read_text())
     print(definition)
 
     name = definition["name"]
@@ -224,6 +222,8 @@ def decode(in_name: Path):
     render_to_png(doc, Path(filepath), name)
     print(70)
     render_to_dxf(doc, Path(filepath), name)
+    
+    render_to_stl(doc, Path(filepath), name)
     print(80)
     print(90)
     App.closeDocument(name)
@@ -232,10 +232,8 @@ def decode(in_name: Path):
     QtGui.QApplication.quit()
 
 
-part_name = sys.argv[2]
-out_dir = sys.argv[3]
-logging.error(f"Json file {part_name} out dir = {out_dir}")
-# engine = engine_freecad()
+json_file = os.getenv("CYCAX_JSON")
+out_dir = os.getenv("CYCAX_CWD")
+logging.error(f"Json file {json_file} out dir = {out_dir}")
 _base_path = Path(out_dir)
-
-decode(part_name)
+decode(Path(json_file))
