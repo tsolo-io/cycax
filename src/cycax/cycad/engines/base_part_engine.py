@@ -3,13 +3,22 @@ from pathlib import Path
 
 
 class PartEngine:
-    """ """
+    """Base Class for all PartEngines.
+
+    Attributes:
+        name: Name of the part.
+        path: The path where the assembly is stored.
+              Default to current working directory.
+              The part is stored in a directory matching it name in this path.
+        config: Engine specific configuration.
+    """
 
     def __init__(self, name, path: Path = None, config: dict = None):
         self._base_path = None
         self._json_file = None
         self.name = name
-        self.config = {} if config is None else config
+        self.part_no = name # TODO: Depricate self.part_no
+        self.config = dict(config or {})
         self.set_path(path)
 
     def set_path(self, path: Path):
@@ -38,6 +47,6 @@ class PartEngine:
                 appimage = appimg
         return appimage
 
-    def render(self):
-        msg = "The render method needs to be implimented for this engine."
+    def build(self):
+        msg = "The build method needs to be implimented for this engine."
         raise NotImplimentedError(msg)
