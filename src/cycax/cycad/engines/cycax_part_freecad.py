@@ -110,6 +110,7 @@ class EngineFreecad:
 
         Args:
             features: This is the dictionary that contains the deatails of where the cube must be places and its details.
+            pos_vec(list): where part is positioned.
 
         Returns:
         """
@@ -128,11 +129,11 @@ class EngineFreecad:
 
         return angles
 
-    def hole(self, feature):
+    def hole(self, feature: dict):
         """This method will be used for cutting a cylindical hole into a surface.
 
         Args:
-            features: This is the dictionary that contains the deatails of where the hole must be placed and its details.
+            feature: This is the dictionary that contains the deatails of where the hole must be placed and its details.
         """
         pos_vec = Vector(0, 0, 0)
         cyl = Part.makeCylinder(feature["diameter"] / 2, feature["depth"], pos_vec)
@@ -150,10 +151,9 @@ class EngineFreecad:
             )
         return cyl
 
-    def render_to_png(self, active_doc, target_path):
+    def render_to_png(self, target_path: Path):
         """This method will be used for creating a png of 2 specific views of the object.
         Args:
-            active_doc: The active FreeCAD Gui
             target_path: The Path the png needs to be saved under.
         """
         active_doc = FreeCADGui.activeDocument()
@@ -168,7 +168,7 @@ class EngineFreecad:
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-    def render_to_dxf(self, active_doc, target_path):
+    def render_to_dxf(self, active_doc: App.Document, target_path: Path):
         """This method will be used for creating a pdxf of the object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
@@ -179,7 +179,7 @@ class EngineFreecad:
 
         importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
 
-    def render_to_stl(self, active_doc, target_path):
+    def render_to_stl(self, active_doc: App.Document, target_path: Path):
         """This method will be used for creating a stl of an object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
@@ -233,7 +233,7 @@ class EngineFreecad:
 
         filepath = f"{self._base_path}/{name}/{name}"
         doc.saveCopy(str(f"{filepath}.FCStd"))
-        self.render_to_png(doc, Path(filepath))
+        self.render_to_png(Path(filepath))
         self.render_to_dxf(doc, Path(filepath))
         self.render_to_stl(doc, Path(filepath))
         App.closeDocument(name)
