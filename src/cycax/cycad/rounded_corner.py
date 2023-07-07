@@ -11,12 +11,15 @@ class RoundedCorner:
         axis2: This is an axis bounding the corner.
         bound2: The bound of the second axis.
     """
-    def __init__(self, corner_type: str, axis1: str, bound1: float, axis2:str, bound2: float):
-        corner_type=corner_type
-        axis1=axis1 
-        bound1=bound1
-        axis2=axis2
-        bound2=bound2
+    def __init__(self, corner_type: str, axis1: str, bound1: float, axis2:str, bound2: float, radius:float, side: str, depth: float):
+        self.corner_type=corner_type
+        self.axis1=axis1 
+        self.bound1=bound1
+        self.axis2=axis2
+        self.bound2=bound2
+        self.radius=radius
+        self.side=side
+        self.depth=depth
         
     def export(self) -> dict:
         """

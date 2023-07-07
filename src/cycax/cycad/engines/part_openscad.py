@@ -134,6 +134,42 @@ class PartEngineOpenSCAD(PartEngine):
         }[side]
 
         return side
+    
+    def decode_rounded_corner(self, features:dict)->str:
+        """
+        This method will decode a rounded corner and either make a bevel or taper
+
+        Args:
+            features: This is the dictionary that contains the details of the rounded corner.
+
+        Returns:
+            str: returns string of the rounded corner.
+        """ 
+        if features["corner_type"]=="bevel":
+            cutter="cylinder(r= {diam}, h={depth}, $fn=64);".format(diam=features["radius"], depth=features["depth"])
+                       
+        elif features["corner_type"]=="taper":
+            cutter = "rotate([0, 0, 45])cube([{size}, {size}, {depth}], center=true);".format(size=features["radius"]*2, depth=features["depth"]*2)
+            
+        cube = "cube([{size}, {size}, {depth}]);".format(size=features["radius"], depth=features["depth"])
+        rotate = self._rotate(features["side"])
+        if features["bound1"] == 0:
+            move_x=features["radius"]
+            move_cube_x = 0
+        else:
+            move_x=0
+            move_cube_x = features["bound1"] - features["radius"]
+        if features["bound2"] == 0:
+            move_y=features["radius"]
+            move_cube_y = 0
+        else:
+            move_y=0
+            move_cube_y = features["bound2"] - features["radius"]
+        cutter= f"translate([{move_x}, {move_y}, 0])" + cutter
+        template = "difference(){" + cube +cutter+ "}" 
+        res = f"translate([{move_cube_x}, {move_cube_y}, 0])" + rotate + template
+        
+        return res  
 
     def build(self):
         """
@@ -162,6 +198,9 @@ class PartEngineOpenSCAD(PartEngine):
             if action["type"] == "cut":
                 dif = dif + 1
                 output.insert(0, self._decode_cut())
+                
+            if action["name"] == "rounded_corner":
+                output.append(self.decode_rounded_corner(action))
 
             if action["name"] == "cube":
                 output.append(self._decode_cube(action))

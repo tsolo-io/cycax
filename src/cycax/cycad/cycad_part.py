@@ -399,15 +399,17 @@ class CycadPart(Location):
         dict_out["parts"] = list_part
         return dict_out
     
-    def rounded_corner(self, corner_type:str, side1: str, side2: str):
+    def rounded_corner(self, corner_type:str, side1: str, side2: str, radius: float):
         """This method will round a corner of a CycadPart.
 
         Args:
             type: Bevel or taypered.
             side1: side on edge.
             side2: side on edge.
+            radius: The radius of the rounded corner.
         """
         edge=[]
+        self.make_bounding_box()
         for side in [side1, side2]:
             axis=side
             axis = {
@@ -419,7 +421,16 @@ class CycadPart(Location):
                 RIGHT: "x",
             }[axis]
             edge.append(axis)
-        self.features.add(RoundedCorner(corner_type=corner_type, axis1=edge[0], bound1=self.bounding_box[side1], axis2=edge[1], bound2=self.bounding_box[side2]))
+        if "x" not in edge:
+            side = "LEFT"
+            depth = self.bounding_box["RIGHT"]
+        elif "y" not in edge:
+            side = "FRONT"
+            depth = self.bounding_box["BACK"]
+        elif "z" not in edge:
+            side = "BOTTOM"
+            depth = self.bounding_box["TOP"]
+        self.features.append(RoundedCorner(corner_type=corner_type, axis1=edge[0], bound1=self.bounding_box[side1], axis2=edge[1], bound2=self.bounding_box[side2], radius=radius, side=side, depth=depth))
 
     def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
