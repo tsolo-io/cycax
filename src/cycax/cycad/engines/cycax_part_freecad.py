@@ -4,6 +4,8 @@
 # 1. The fullpath to this file.
 # 2. The path to the part JSON file.
 # 3. The path where the output files are stored.
+# 1. Open the file up in FreeCAD and run as a Macro.
+# 2. Run from command line. ./FreeCAD.AppImage img.py
 #
 import json
 import logging
@@ -12,238 +14,233 @@ import sys
 from math import sqrt
 from pathlib import Path
 
+import importDXF
+
 # import QtGui
-import Draft  # NoQa
 import Part
 from FreeCAD import Rotation, Vector  # NoQa
 from PySide import QtGui
 
 logging.error("Open FreeCAD")
 
-# 1. Open the file up in FreeCAD and run as a Macro.
-# 2. Run from command line. ./FreeCAD.AppImage img.py
 
-
-# class engine_freecad:
-#     # def __init__(self):
-#     #     self._base_path = Path(".")
-
-
-def _cube(feature: dict):
-    """This method will draw a cube when given a dict that contains the necessary dimentions
+class EngineFreecad:
+    """This class will be used in FreeCAD to decode a json passed to it. The json will contain specific information of the object.
 
     Args:
-        feature: This is the dict that contains the necessary details of the cube to be cut out.
-    """
-    if feature["center"] is True:
-        x = feature["x"] - feature["x_size"] / 2
-        y = feature["y"] - feature["y_size"] / 2
-        z = feature["z"] - feature["z_size"] / 2
-    else:
-        x = feature["x"]
-        y = feature["y"]
-        z = feature["z"]
-    pos_vec = (x, y, z)
-
-    pos_vec = _move_cube(feature, pos_vec)
-    pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
-    length = feature["x_size"]
-    width = feature["y_size"]
-    depth = feature["z_size"]
-    return Part.makeBox(length, width, depth, pos)
-
-
-def _calc_hex(depth: float, diameter: float):
-    """This method will be used to find out where the points of the hexigon are located so that is can be drawn.
-
-    Args:
-        depth: this is the depth of the hexigon.
-        diameter: this is the diameter of the hexigon.
+        base_path: the path where the outputs need to be stored.
     """
 
-    a = diameter / 2
-    vector_list = []
-    z = depth
+    def __init__(self, base_path: Path):
+        self._base_path = base_path
 
-    vector_list.append(Vector(a, 0, z))
-    vector_list.append(Vector(a / 2, a * sqrt(3) / 2, z))
-    vector_list.append(Vector(-a / 2, a * sqrt(3) / 2, z))
-    vector_list.append(Vector(-a, 0, z))
-    vector_list.append(Vector(-a / 2, -a * sqrt(3) / 2, z))
-    vector_list.append(Vector(a / 2, -a * sqrt(3) / 2, z))
+    def _cube(self, feature: dict):
+        """This method will draw a cube when given a dict that contains the necessary dimentions
 
-    vector_list.append(vector_list[0])
-    wire = Part.makePolygon(vector_list)
-    shape = Part.Shape(wire)
-    face = Part.Face(shape)
-    return face
+        Args:
+            feature: This is the dict that contains the necessary details of the cube to be cut out.
+        """
+        if feature["center"] is True:
+            x = feature["x"] - feature["x_size"] / 2
+            y = feature["y"] - feature["y_size"] / 2
+            z = feature["z"] - feature["z_size"] / 2
+        else:
+            x = feature["x"]
+            y = feature["y"]
+            z = feature["z"]
+        pos_vec = (x, y, z)
 
+        pos_vec = self._move_cube(feature, pos_vec)
+        pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
+        length = feature["x_size"]
+        width = feature["y_size"]
+        depth = feature["z_size"]
+        return Part.makeBox(length, width, depth, pos)
 
-def _cut_hex(feature: dict):
-    """This method will be used for drawing the actual hexigon that needs to be cut.
-    Args:
-        feature: this is a dict containing the necessary details of the hexigon like its size and location.
-    """
+    def _calc_hex(self, depth: float, diameter: float):
+        """This method will be used to find out where the points of the hexigon are located and then drawing a 2D hexigon.
 
-    hex = _calc_hex(depth=0, diameter=3)
-    nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
+        Args:
+            depth: this is the depth of the hexigon.
+            diameter: this is the diameter of the hexigon.
+        """
 
-    if feature["side"] in ["FRONT", "BACK"]:
-        nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 30, 270))
+        a = diameter / 2
+        vector_list = []
+        z = depth
 
-    elif feature["side"] in ["TOP", "BOTTOM"]:
-        nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(30, 0, 0))
+        vector_list.append(Vector(a, 0, z))
+        vector_list.append(Vector(a / 2, a * sqrt(3) / 2, z))
+        vector_list.append(Vector(-a / 2, a * sqrt(3) / 2, z))
+        vector_list.append(Vector(-a, 0, z))
+        vector_list.append(Vector(-a / 2, -a * sqrt(3) / 2, z))
+        vector_list.append(Vector(a / 2, -a * sqrt(3) / 2, z))
 
-    elif feature["side"] in ["LEFT", "RIGHT"]:
-        nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
+        vector_list.append(vector_list[0])
+        wire = Part.makePolygon(vector_list)
+        shape = Part.Shape(wire)
+        face = Part.Face(shape)
+        return face
 
-    return nut
+    def _cut_nut(self, feature: dict):
+        """This method will take the 2D hexigon and convert it to a 3D shape and place it where it needs to go.
+        Args:
+            feature: this is a dict containing the necessary details of the hexigon like its size and location.
+        """
 
+        hex = self._calc_hex(depth=0, diameter=3)
+        nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
 
-def _move_cube(features: dict, pos_vec) -> tuple[float, float, float]:
-    """
-    Accounts for when a cube is not going to penetrate the surface but rather sit above is.
+        if feature["side"] in ["FRONT", "BACK"]:
+            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 30, 270))
 
-    Args:
-        features: This is the dictionary that contains the deatails of where the cube must be places and its details.
+        elif feature["side"] in ["TOP", "BOTTOM"]:
+            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(30, 0, 0))
 
-    Returns:
-    """
+        elif feature["side"] in ["LEFT", "RIGHT"]:
+            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
 
-    angles = [0, 0, 0]
-    if features["side"] is not None:
-        angles = features["side"]
-        angles = {
-            "TOP": [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
-            "BACK": [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
-            "BOTTOM": [pos_vec[0], pos_vec[1], pos_vec[2]],
-            "FRONT": [pos_vec[0], pos_vec[1], pos_vec[2]],
-            "LEFT": [pos_vec[0], pos_vec[1], pos_vec[2]],
-            "RIGHT": [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
-        }[angles]
+        return nut
 
-    return angles
+    def _move_cube(self, features: dict, pos_vec):
+        """
+        Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
+        Args:
+            features: This is the dictionary that contains the deatails of where the cube must be places and its details.
 
-def _hole(feature):
-    """This method will be used for cutting a cylindical hole into a surface."""
-    pos_vec = Vector(0, 0, 0)
-    cyl = Part.makeCylinder(feature["diameter"] / 2, feature["depth"], pos_vec)
-    if feature["side"] in ["FRONT", "BACK"]:
-        cyl.Placement = App.Placement(
-            Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(1, 0, 0), 270)
-        )
-    elif feature["side"] in ["TOP", "BOTTOM"]:
-        cyl.Placement = App.Placement(
-            Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 0, 1), 0)
-        )
-    elif feature["side"] in ["LEFT", "RIGHT"]:
-        cyl.Placement = App.Placement(
-            Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 1, 0), 90)
-        )
-    return cyl
+        Returns:
+        """
 
+        angles = [0, 0, 0]
+        if features["side"] is not None:
+            angles = features["side"]
+            angles = {
+                "TOP": [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
+                "BACK": [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
+                "BOTTOM": [pos_vec[0], pos_vec[1], pos_vec[2]],
+                "FRONT": [pos_vec[0], pos_vec[1], pos_vec[2]],
+                "LEFT": [pos_vec[0], pos_vec[1], pos_vec[2]],
+                "RIGHT": [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
+            }[angles]
 
-def render_to_png(active_doc, target_path, name):
-    active_doc = FreeCADGui.activeDocument()
-    target_image_file = f"{target_path}-perspective.png"
-    FreeCADGui.SendMsgToActiveView("ViewFit")
-    active_doc.activeView().viewAxometric()
-    active_doc.activeView().fitAll()
-    active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
-    print(f"Saved {target_image_file}")
-    target_image_file = f"{target_path}-perspective.png"
-    FreeCADGui.SendMsgToActiveView("ViewFit")
-    active_doc.activeView().viewTop()
-    active_doc.activeView().fitAll()
-    active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
-    print(f"Saved {target_image_file}")
+        return angles
 
+    def _hole(self, feature):
+        """This method will be used for cutting a cylindical hole into a surface.
 
-def render_to_dxf(active_doc, target_path, name):
-    __objs__ = []
-    __objs__.append(active_doc.getObject("Shape"))
-    import importDXF
+        Args:
+            features: This is the dictionary that contains the deatails of where the hole must be placed and its details.
+        """
+        pos_vec = Vector(0, 0, 0)
+        cyl = Part.makeCylinder(feature["diameter"] / 2, feature["depth"], pos_vec)
+        if feature["side"] in ["FRONT", "BACK"]:
+            cyl.Placement = App.Placement(
+                Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(1, 0, 0), 270)
+            )
+        elif feature["side"] in ["TOP", "BOTTOM"]:
+            cyl.Placement = App.Placement(
+                Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 0, 1), 0)
+            )
+        elif feature["side"] in ["LEFT", "RIGHT"]:
+            cyl.Placement = App.Placement(
+                Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 1, 0), 90)
+            )
+        return cyl
 
-    print(__objs__, str(f"{target_path}-perspective.dxf"))
-    importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
+    def _render_to_png(self, active_doc, target_path):
+        """This method will be used for creating a png of 2 specific views of the object.
+        Args:
+            active_doc: The active FreeCAD Gui
+            target_path: The Path the png needs to be saved under.
+        """
+        active_doc = FreeCADGui.activeDocument()
+        target_image_file = f"{target_path}-perspectiveAll.png"
+        FreeCADGui.SendMsgToActiveView("ViewFit")
+        active_doc.activeView().viewAxometric()
+        active_doc.activeView().fitAll()
+        active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
+        target_image_file = f"{target_path}-perspectiveTop.png"
+        FreeCADGui.SendMsgToActiveView("ViewFit")
+        active_doc.activeView().viewTop()
+        active_doc.activeView().fitAll()
+        active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
+    def _render_to_dxf(self, active_doc, target_path):
+        """This method will be used for creating a pdxf of the object currently in view.
+        Args:
+            active_doc: The active FreeCAD Gui
+            target_path: The Path the png needs to be saved under.
+        """
+        __objs__ = []
+        __objs__.append(active_doc.getObject("Shape"))
 
-def render_to_stl(active_doc, target_path, name):
-    doc = active_doc
+        importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
 
-    for obj in doc.Objects:
-        if obj.ViewObject.Visibility:
-            filename = f"{target_path}-FreeCAD.stl"
-            obj.Shape.exportStl(filename)
+    def _render_to_stl(self, active_doc, target_path):
+        """This method will be used for creating a stl of an object currently in view.
+        Args:
+            active_doc: The active FreeCAD Gui
+            target_path: The Path the png needs to be saved under.
+        """
+        for obj in active_doc.Objects:
+            if obj.ViewObject.Visibility:
+                filename = f"{target_path}-FreeCAD.stl"
+                obj.Shape.exportStl(filename)
 
+    def build(self, in_name: Path):
+        """
+        This is the main working class for decoding the FreeCAD
 
-def decode(in_name: Path):
-    print(in_name)
-    open(in_name)
-    definition = json.loads(in_name.read_text())
-    print(definition)
+        Args:
+            in_name: the path where the json is stored under.
+        """
 
-    name = definition["name"]
-    cut_features = []
-    if FreeCAD.ActiveDocument:
-        FreeCAD.closeDocument(name)
-    doc = App.newDocument(name)
-    for data in definition["parts"]:
-        print(data)
-        if data:
+        definition = json.loads(in_name.read_text())
+
+        name = definition["name"]
+        cut_features = []
+        if FreeCAD.ActiveDocument:
+            FreeCAD.closeDocument(name)
+        doc = App.newDocument(name)
+        for data in definition["parts"]:
             if data["type"] == "add":
-                solid = _cube(data)
-                print(data["type"])
+                solid = self._cube(data)
 
             if data["type"] == "cut":
-                print(data["type"])
                 if data["name"] == "hole":
-                    cut_features.append(_hole(data))
+                    cut_features.append(self._hole(data))
                 elif data["name"] == "cube":
-                    cut_features.append(_cube(data))
+                    cut_features.append(self._cube(data))
                 elif data["name"] == "nut":
-                    cut_features.append(_cut_hex(data))
+                    cut_features.append(self._cut_nut(data))
 
-    if len(cut_features) > 1:
-        s1 = cut_features.pop()
-        fused = s1.multiFuse(cut_features)
-        result = solid.cut(fused)
-    elif len(cut_features) == 1:
-        s1 = cut_features.pop()
-        result = solid.cut(s1)
-    else:
-        result = solid
-        print("success")
-    Part.show(result)
-    print(10)
-    doc.recompute()
-    print(20)
-    FreeCADGui.activeDocument().activeView().viewTop()
-    print(30)
-    FreeCADGui.SendMsgToActiveView("ViewFit")
-    print(40)
+        if len(cut_features) > 1:
+            s1 = cut_features.pop()
+            fused = s1.multiFuse(cut_features)
+            result = solid.cut(fused)
+        elif len(cut_features) == 1:
+            s1 = cut_features.pop()
+            result = solid.cut(s1)
+        else:
+            result = solid
+        Part.show(result)
+        doc.recompute()
+        FreeCADGui.activeDocument().activeView().viewTop()
+        FreeCADGui.SendMsgToActiveView("ViewFit")
 
-    filepath = f"{_base_path}/{name}/{name}"
-    print(50)
-    doc.saveCopy(str(f"{filepath}.FCStd"))
-    print(60)
-    render_to_png(doc, Path(filepath), name)
-    print(70)
-    render_to_dxf(doc, Path(filepath), name)
+        filepath = f"{self._base_path}/{name}/{name}"
+        doc.saveCopy(str(f"{filepath}.FCStd"))
+        self._render_to_png(doc, Path(filepath))
+        self._render_to_dxf(doc, Path(filepath))
+        self._render_to_stl(doc, Path(filepath))
+        App.closeDocument(name)
 
-    render_to_stl(doc, Path(filepath), name)
-    print(80)
-    print(90)
-    App.closeDocument(name)
-    print(100)
-
-    QtGui.QApplication.quit()
+        QtGui.QApplication.quit()
 
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
 logging.error(f"Json file {json_file} out dir = {out_dir}")
-_base_path = Path(out_dir)
-print(sys.argv)
-decode(Path(json_file))
+engine = EngineFreecad(Path(out_dir))
+engine.build(Path(json_file))
