@@ -34,7 +34,7 @@ class EngineFreecad:
     def __init__(self, base_path: Path):
         self._base_path = base_path
 
-    def _cube(self, feature: dict):
+    def cube(self, feature: dict):
         """This method will draw a cube when given a dict that contains the necessary dimentions
 
         Args:
@@ -65,16 +65,18 @@ class EngineFreecad:
             diameter: this is the diameter of the hexigon.
         """
 
-        a = diameter / 2
+        radius = diameter / 2
+        half_radius = radius / 2
+        radius_sqrt = radius * sqrt(3) / 2
         vector_list = []
         z = depth
 
-        vector_list.append(Vector(a, 0, z))
-        vector_list.append(Vector(a / 2, a * sqrt(3) / 2, z))
-        vector_list.append(Vector(-a / 2, a * sqrt(3) / 2, z))
-        vector_list.append(Vector(-a, 0, z))
-        vector_list.append(Vector(-a / 2, -a * sqrt(3) / 2, z))
-        vector_list.append(Vector(a / 2, -a * sqrt(3) / 2, z))
+        vector_list.append(Vector(radius, 0, z))
+        vector_list.append(Vector(half_radius, radius_sqrt, z))
+        vector_list.append(Vector(-half_radius, radius_sqrt, z))
+        vector_list.append(Vector(-radius, 0, z))
+        vector_list.append(Vector(-half_radius, -radius_sqrt, z))
+        vector_list.append(Vector(half_radius, -radius_sqrt, z))
 
         vector_list.append(vector_list[0])
         wire = Part.makePolygon(vector_list)
@@ -82,7 +84,7 @@ class EngineFreecad:
         face = Part.Face(shape)
         return face
 
-    def _cut_nut(self, feature: dict):
+    def cut_nut(self, feature: dict):
         """This method will take the 2D hexigon and convert it to a 3D shape and place it where it needs to go.
         Args:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
@@ -126,7 +128,7 @@ class EngineFreecad:
 
         return angles
 
-    def _hole(self, feature):
+    def hole(self, feature):
         """This method will be used for cutting a cylindical hole into a surface.
 
         Args:
@@ -148,7 +150,7 @@ class EngineFreecad:
             )
         return cyl
 
-    def _render_to_png(self, active_doc, target_path):
+    def render_to_png(self, active_doc, target_path):
         """This method will be used for creating a png of 2 specific views of the object.
         Args:
             active_doc: The active FreeCAD Gui
@@ -166,7 +168,7 @@ class EngineFreecad:
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-    def _render_to_dxf(self, active_doc, target_path):
+    def render_to_dxf(self, active_doc, target_path):
         """This method will be used for creating a pdxf of the object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
@@ -177,7 +179,7 @@ class EngineFreecad:
 
         importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
 
-    def _render_to_stl(self, active_doc, target_path):
+    def render_to_stl(self, active_doc, target_path):
         """This method will be used for creating a stl of an object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
@@ -205,15 +207,15 @@ class EngineFreecad:
         doc = App.newDocument(name)
         for data in definition["parts"]:
             if data["type"] == "add":
-                solid = self._cube(data)
+                solid = self.cube(data)
 
-            if data["type"] == "cut":
+            elif data["type"] == "cut":
                 if data["name"] == "hole":
-                    cut_features.append(self._hole(data))
+                    cut_features.append(self.hole(data))
                 elif data["name"] == "cube":
-                    cut_features.append(self._cube(data))
+                    cut_features.append(self.cube(data))
                 elif data["name"] == "nut":
-                    cut_features.append(self._cut_nut(data))
+                    cut_features.append(self.cut_nut(data))
 
         if len(cut_features) > 1:
             s1 = cut_features.pop()
@@ -231,9 +233,9 @@ class EngineFreecad:
 
         filepath = f"{self._base_path}/{name}/{name}"
         doc.saveCopy(str(f"{filepath}.FCStd"))
-        self._render_to_png(doc, Path(filepath))
-        self._render_to_dxf(doc, Path(filepath))
-        self._render_to_stl(doc, Path(filepath))
+        self.render_to_png(doc, Path(filepath))
+        self.render_to_dxf(doc, Path(filepath))
+        self.render_to_stl(doc, Path(filepath))
         App.closeDocument(name)
 
         QtGui.QApplication.quit()
