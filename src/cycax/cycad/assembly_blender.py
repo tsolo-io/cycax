@@ -93,7 +93,9 @@ class AssemblyBlender:
             rotation = working[0]
             rotmax = working[1]
 
-        bpy.ops.transform.translate(value=(rotation[0] + position[0], rotation[1] + position[1], rotation[2] + position[2]))
+        bpy.ops.transform.translate(
+            value=(rotation[0] + position[0], rotation[1] + position[1], rotation[2] + position[2])
+        )
 
     def _colour(self, colour: str, part: str) -> str:
         """

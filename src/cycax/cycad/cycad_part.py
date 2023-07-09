@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
-from cycax.cycad.engine_openscad import EngineOpenSCAD
+from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
+from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.figure import Figure
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
@@ -283,11 +284,12 @@ class CycadPart(Location):
         self.make_bounding_box()
 
     def at(self, x: float = None, y: float = None, z: float = None):
-        """This move can be used to translate objects to the exact provided coordinates.
+        """Place part at the exact provided coordinates.
+
         Args:
-            x: the value to which x needs to be moved to on the axis.
-            y: the value to which y needs to be moved to on the axis.
-            z: the value to which z needs to be moved to on the axis.
+            x: The value to which x needs to be moved to on the axis.
+            y: The value to which y needs to be moved to on the axis.
+            z: The value to which z needs to be moved to on the axis.
         """
         x_size = self.x_max - self.x_min
         y_size = self.y_max - self.y_min
@@ -396,15 +398,18 @@ class CycadPart(Location):
         dict_out["parts"] = list_part
         return dict_out
 
-    def render(self, eng: str, side: str = None):
+    def render(self, engine: str = "OpenSCAD", engine_config: dict = None, side: str = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
         Args:
-            eng: type of engine to use
+            engine: Name of the engine to use.
+            engine_config: Configuration passed on to the PartEngine. It is engine specific.
             side: this will be used for pyplot
         """
 
-        _eng_lower = eng.lower()
+        part_files = {}
+        _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
+            # TODO: Update simple2d to match openscad and freecad part engines.
             # This method will created a pyplot drawing of the object.
             if side is None:
                 side = "TOP"
@@ -413,25 +418,31 @@ class CycadPart(Location):
 
         elif _eng_lower == "openscad":
             # This method will produce an OpenSCAD 3D drawing of the given object.
-            cutter = EngineOpenSCAD()
+            part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
 
-            in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
+            # in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
 
-            if not os.path.exists(in_name):
-                self.save()
+            # if not os.path.exists(in_name):
+            #    self.save()
 
-            cutter.decode(self.part_no)
+            part_engine.build()
 
-        elif _eng_lower == "stl":
-            # This method will convert a OpenSCAD drawing of a given file into a STL drawing.
-            cutter = EngineOpenSCAD()
-            in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
+            ## This method will convert a OpenSCAD drawing of a given file into a STL drawing.
+            ## cutter = PartEngineOpenSCAD(name=self.part_no)
+            # in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
 
-            if not os.path.exists(in_name):
-                self.Render("OpenSCAD")
+            # if not os.path.exists(in_name):
+            #    self.Render("OpenSCAD")
 
-            cutter.render_stl(self)
+            # cutter.build_stl()
+        elif _eng_lower == "freecad":
+            part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
+            part_engine.build()
 
         else:
-            msg = f"engine: {eng} is not one of simple2D, OpenSCAD or STL."
+            msg = f"engine: {engine} is not one of simple2D, OpenSCAD or STL."
             raise ValueError(msg)
+
+        # TODO: part_engine build should be called here outside of the if/elif
+        # part_engine.build()
+        return part_files
