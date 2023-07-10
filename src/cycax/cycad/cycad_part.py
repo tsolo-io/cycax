@@ -403,7 +403,7 @@ class CycadPart(Location):
         """This method will round a edge of a CycadPart.
 
         Args:
-            type: Bevel or taypered.
+            edge_type: Bevel or taypered.
             side1: side on edge.
             side2: side on edge.
             radius: The radius of the rounded edge.

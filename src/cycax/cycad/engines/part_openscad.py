@@ -143,6 +143,8 @@ class PartEngineOpenSCAD(PartEngine):
             radius: Radius of the rounded edge that will be cut.
             depth: Depth of the part.
             side: Side which the cutting will come from.
+            center: set to True when the cube is centered at its center.
+            rotate: set to True when the cube needs to be offset by 45 deg
         """    
         if (center):
             center = ", center=true"

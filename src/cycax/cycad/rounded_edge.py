@@ -5,7 +5,7 @@ class RoundedEdge:
     """This class will store data relating to the rounding of edges on a cube.
     
     Args:
-        type: This is either a bevil or taper.
+        edge_type: This is either a bevil or taper.
         axis1: This is an axis bounding the edge.
         bound1: The bound of the first axis.
         axis2: This is an axis bounding the edge.
