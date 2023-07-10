@@ -1,18 +1,18 @@
 from cycax.cycad.features import Holes, RectangleCutOut
 
 
-class RoundedCorner:
-    """This class will store data relating to the rounding of corners on a cube.
+class RoundedEdge:
+    """This class will store data relating to the rounding of edges on a cube.
     
     Args:
         type: This is either a bevil or taper.
-        axis1: This is an axis bounding the corner.
+        axis1: This is an axis bounding the edge.
         bound1: The bound of the first axis.
-        axis2: This is an axis bounding the corner.
+        axis2: This is an axis bounding the edge.
         bound2: The bound of the second axis.
     """
-    def __init__(self, corner_type: str, axis1: str, bound1: float, axis2:str, bound2: float, radius:float, side: str, depth: float):
-        self.corner_type=corner_type
+    def __init__(self, edge_type: str, axis1: str, bound1: float, axis2:str, bound2: float, radius:float, side: str, depth: float):
+        self.edge_type=edge_type
         self.axis1=axis1 
         self.bound1=bound1
         self.axis2=axis2
@@ -29,11 +29,11 @@ class RoundedCorner:
             dict: this will return a dictionary.
 
         """
-        dict_corner = {}
-        dict_corner["name"] = "rounded_corner"
-        dict_corner["type"] = "cut"
+        dict_edge = {}
+        dict_edge["name"] = "rounded_edge"
+        dict_edge["type"] = "cut"
         for key, value in vars(self).items():
-            dict_corner[key] = value
-        return dict_corner
+            dict_edge[key] = value
+        return dict_edge
 
   

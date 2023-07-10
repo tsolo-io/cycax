@@ -11,7 +11,7 @@ from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
-from cycax.cycad.rounded_corner import RoundedCorner
+from cycax.cycad.rounded_edge import RoundedEdge
 
 
 class CycadPart(Location):
@@ -399,14 +399,14 @@ class CycadPart(Location):
         dict_out["parts"] = list_part
         return dict_out
     
-    def rounded_corner(self, corner_type:str, side1: str, side2: str, radius: float):
-        """This method will round a corner of a CycadPart.
+    def rounded_edge(self, edge_type:str, side1: str, side2: str, radius: float):
+        """This method will round a edge of a CycadPart.
 
         Args:
             type: Bevel or taypered.
             side1: side on edge.
             side2: side on edge.
-            radius: The radius of the rounded corner.
+            radius: The radius of the rounded edge.
         """
         edge=[]
         self.make_bounding_box()
@@ -430,7 +430,7 @@ class CycadPart(Location):
         elif "z" not in edge:
             side = "BOTTOM"
             depth = self.bounding_box["TOP"]
-        self.features.append(RoundedCorner(corner_type=corner_type, axis1=edge[0], bound1=self.bounding_box[side1], axis2=edge[1], bound2=self.bounding_box[side2], radius=radius, side=side, depth=depth))
+        self.features.append(RoundedEdge(edge_type=edge_type, axis1=edge[0], bound1=self.bounding_box[side1], axis2=edge[1], bound2=self.bounding_box[side2], radius=radius, side=side, depth=depth))
 
     def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
