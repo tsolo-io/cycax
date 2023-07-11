@@ -408,12 +408,8 @@ class CycadPart(Location):
         part_files = {}
         _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
-            if "side" in engine_config:
-                side = engine_config["side"]
-            else:
-                side="TOP"
-            part_engine = Simple2D(name=self.part_no, side=side)
-
+            part_engine = Simple2D(name=self.part_no, path=self._base_path, config=engine_config)
+            
         elif _eng_lower == "openscad":
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
             

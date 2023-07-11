@@ -6,6 +6,7 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, PathPatch, Polygon, Rectangle, Wedge
+from cycax.cycad.engines.base_part_engine import PartEngine
 from matplotlib.path import Path
 
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
@@ -15,7 +16,7 @@ y = "y"
 z = "z"
 
 
-class Simple2D:
+class Simple2D(PartEngine):
     """This is a class that will be used to draw pyplots of various views of a 3D object.
 
     Args:
@@ -23,10 +24,15 @@ class Simple2D:
         side: Thi argument will suggest which side of the object the view is of.
 
     """
+    def __init__(self, name, path: Path = None, config: dict = None):
+        super().__init__(name, path, config)
+        
+        self.side="TOP"
+        if self.config is not None:
+            if "side" in self.config:
+                self.side = self.config["side"]
 
-    def __init__(self, name: str, side: str) -> None:
-        self.side = side
-        self.name = name
+        
         self.plane = ""
         self.hole_sink = ""
 
@@ -38,6 +44,8 @@ class Simple2D:
             FRONT: 0,
             BACK: 0,
         }
+
+    
 
     def _get_feature_style(self, feature: dict) -> dict:
         """Return a dict with the style used by Matplotlib add_patch
@@ -142,7 +150,7 @@ class Simple2D:
 
     def build(self):
         """This method will coordinate the drawing and saving of the figure that is being decoded from the provided json."""
-        in_name = "{cwd}/{name}/{name}.json".format(cwd=os.getcwd(), name=self.name)
+        in_name = self._json_file
         with open(in_name) as f:
             data = json.load(f)
         fig, ax = plt.subplots()
@@ -153,6 +161,6 @@ class Simple2D:
         ax.set_title(self.name)
         ax.autoscale_view()
         ax.set_aspect("equal", "box")
-        figfile = os.getcwd() + "/" + self.name + "/" + self.name + "-fig.svg"
+        figfile = figfile =  self._base_path / self.name / (self.name + "-s2d.svg")
         plt.savefig(figfile)
         logging.info("Write to %s", figfile)
