@@ -34,8 +34,8 @@ def test_dynamic():
     test_box = box.export()
 
     assert "name" in test_cube
-    assert "parts" in test_cube
-    for item in test_cube["parts"]:
+    assert "features" in test_cube
+    for item in test_cube["features"]:
         assert "name" in item
         assert "type" in item
         assert "side" in item

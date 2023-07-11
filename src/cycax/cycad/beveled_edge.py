@@ -1,7 +1,7 @@
 from cycax.cycad.features import Holes, RectangleCutOut
 
 
-class RoundedEdge:
+class BeveledEdge:
     """This class will store data relating to the rounding of edges on a cube.
 
     Args:
@@ -19,7 +19,7 @@ class RoundedEdge:
         bound1: float,
         axis2: str,
         bound2: float,
-        radius: float,
+        size: float,
         side: str,
         depth: float,
     ):
@@ -28,7 +28,7 @@ class RoundedEdge:
         self.bound1 = bound1
         self.axis2 = axis2
         self.bound2 = bound2
-        self.radius = radius
+        self.size = size
         self.side = side
         self.depth = depth
 
@@ -41,7 +41,7 @@ class RoundedEdge:
 
         """
         dict_edge = {}
-        dict_edge["name"] = "rounded_edge"
+        dict_edge["name"] = "beveled_edge"
         dict_edge["type"] = "cut"
         for key, value in vars(self).items():
             dict_edge[key] = value

@@ -4,13 +4,13 @@ import logging
 import os
 from pathlib import Path
 
+from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
-from cycax.cycad.rounded_edge import RoundedEdge
 from cycax.cycad.slot import Slot
 
 
@@ -396,17 +396,17 @@ class CycadPart(Location):
                 list_part.append(ret)
         dict_out = {}
         dict_out["name"] = self.part_no
-        dict_out["parts"] = list_part
+        dict_out["features"] = list_part
         return dict_out
 
-    def rounded_edge(self, edge_type: str, side1: str, side2: str, radius: float):
+    def beveled_edge(self, edge_type: str, side1: str, side2: str, radius: float = None, length: float = None):
         """This method will round a edge of a CycadPart.
 
         Args:
             edge_type: Bevel or taypered.
             side1: side on edge.
             side2: side on edge.
-            radius: The radius of the rounded edge.
+            radius: The radius of the beveled edge.
         """
         edge = []
         self.make_bounding_box()
@@ -430,14 +430,16 @@ class CycadPart(Location):
         elif "z" not in edge:
             side = "BOTTOM"
             depth = self.bounding_box["TOP"]
+        if length is not None:
+            radius = length
         self.features.append(
-            RoundedEdge(
+            BeveledEdge(
                 edge_type=edge_type,
                 axis1=edge[0],
                 bound1=self.bounding_box[side1],
                 axis2=edge[1],
                 bound2=self.bounding_box[side2],
-                radius=radius,
+                size=radius,
                 side=side,
                 depth=depth,
             )

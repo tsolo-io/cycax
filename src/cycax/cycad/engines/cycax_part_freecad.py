@@ -197,12 +197,12 @@ class EngineFreecad:
                 filename = f"{target_path}-FreeCAD.stl"
                 obj.Shape.exportStl(filename)
 
-    def _rounded_edge_cube(self, radius: float, depth: float, side: str, move: dict):
+    def _beveled_edge_cube(self, length: float, depth: float, side: str, move: dict):
         """
-        Helper method for decode_rounded-Edge.
+        Helper method for decode_beveled_edge.
 
         Args:
-            radius: Radius of the rounded edge that will be cut.
+            length: Length of the beveled edge that will be cut.
             depth: Depth of the part.
             side: Side which the cutting will come from.
             center: set to True when the cube is centered at its center.
@@ -213,22 +213,24 @@ class EngineFreecad:
         y = move["y"]
         z = move["z"]
         if side in ["TOP", "BOTTOM"]:
-            cube = Part.makeBox(radius, radius, depth, Vector(x, y, z))
+            cube = Part.makeBox(length, length, depth, Vector(x, y, z))
         elif side in ["FRONT", "BACK"]:
-            cube = Part.makeBox(radius, depth, radius, Vector(x, y, z))
+            cube = Part.makeBox(length, depth, length, Vector(x, y, z))
         elif side in ["LEFT", "RIGHT"]:
-            cube = Part.makeBox(depth, radius, radius, Vector(x, y, z))
+            cube = Part.makeBox(depth, length, length, Vector(x, y, z))
 
         return cube
 
-    def _rhombus(self, depth: float, radius: float, move: dict, side: str):
-        """This method will be used to find out where the points of the hexigon are located and then drawing a 2D hexigon.
+    def _rhombus(self, depth: float, length: float, move: dict, side: str):
+        """This method will cut a rhombus with 90 degree andgles.
 
         Args:
-            depth: this is the depth of the hexigon.
-            diameter: this is the diameter of the hexigon.
+            depth: this is the depth of the rhombus.
+            length: this is the length of the rhombus.
+            move: x, y, z of rhombut.
+            side: side for rhombus to be cut into.
         """
-        hypot = sqrt(radius * 2 * radius * 2 + radius * 2 * radius * 2) / 2
+        hypot = sqrt(length * 2 * length * 2 + length * 2 * length * 2) / 2
         vector_list = []
 
         vector_list.append(Vector(hypot, 0, 0))
@@ -256,49 +258,47 @@ class EngineFreecad:
 
         return rhombus
 
-    def decode_rounded_edge(self, features: dict, solid):
+    def decode_beveled_edge(self, features: dict, solid):
         """
-        This method will decode a rounded edge and either make a bevel or taper
+        This method will decode a beveled edge and either make a bevel or taper
 
         Args:
-            features: This is the dictionary that contains the details of the rounded edge.
+            features: This is the dictionary that contains the details of the beveled edge.
         """
 
-        hypot = (
-            sqrt(features["radius"] * 2 * features["radius"] * 2 + features["radius"] * 2 * features["radius"] * 2) / 3
-        )
+        hypot = sqrt(features["size"] * 2 * features["size"] * 2 + features["size"] * 2 * features["size"] * 2) / 3
         move_cutter_cyl = {"x": 0, "y": 0, "z": 0}
         move_cutter_rhombus = {"x": 0, "y": 0, "z": 0}
         move_cube = {"x": 0, "y": 0, "z": 0}
         if features["bound1"] == 0:
-            move_cutter_cyl[features["axis1"]] = features["radius"]
+            move_cutter_cyl[features["axis1"]] = features["size"]
             move_cutter_rhombus[features["axis1"]] = hypot
             move_cube[features["axis1"]] = 0
         else:
-            move_cutter_cyl[features["axis1"]] = features["bound1"] - features["radius"]
+            move_cutter_cyl[features["axis1"]] = features["bound1"] - features["size"]
             move_cutter_rhombus[features["axis1"]] = features["bound1"] - hypot
-            move_cube[features["axis1"]] = features["bound1"] - features["radius"]
+            move_cube[features["axis1"]] = features["bound1"] - features["size"]
         if features["bound2"] == 0:
-            move_cutter_cyl[features["axis2"]] = features["radius"]
+            move_cutter_cyl[features["axis2"]] = features["size"]
             move_cutter_rhombus[features["axis2"]] = hypot
             move_cube[features["axis2"]] = 0
         else:
-            move_cutter_cyl[features["axis2"]] = features["bound2"] - features["radius"]
+            move_cutter_cyl[features["axis2"]] = features["bound2"] - features["size"]
             move_cutter_rhombus[features["axis2"]] = features["bound2"] - hypot
-            move_cube[features["axis2"]] = features["bound2"] - features["radius"]
+            move_cube[features["axis2"]] = features["bound2"] - features["size"]
 
-        if features["edge_type"] == "bevel":
+        if features["edge_type"] == "round":
             cutter = self.hole(
-                radius=features["radius"], depth=features["depth"], side=features["side"], move=move_cutter_cyl
+                radius=features["size"], depth=features["depth"], side=features["side"], move=move_cutter_cyl
             )
 
-        elif features["edge_type"] == "taper":
+        elif features["edge_type"] == "chamfer":
             cutter = self._rhombus(
-                depth=features["depth"], radius=features["radius"], move=move_cutter_rhombus, side=features["side"]
+                depth=features["depth"], length=features["size"], move=move_cutter_rhombus, side=features["side"]
             )
 
-        cube = self._rounded_edge_cube(
-            radius=features["radius"], depth=features["depth"], side=features["side"], move=move_cube
+        cube = self._beveled_edge_cube(
+            length=features["size"], depth=features["depth"], side=features["side"], move=move_cube
         )
 
         cutter = cube.cut(cutter)
@@ -322,15 +322,15 @@ class EngineFreecad:
         if FreeCAD.ActiveDocument:
             FreeCAD.closeDocument(name)
         doc = App.newDocument(name)
-        for data in definition["parts"]:
+        for data in definition["features"]:
             if data["type"] == "add":
                 solid = self.cube(data)
 
             elif data["type"] == "cut":
                 if data["name"] == "hole":
                     cut_features.append(self.hole(data))
-                elif data["name"] == "rounded_edge":
-                    solid = self.decode_rounded_edge(data, solid)
+                elif data["name"] == "beveled_edge":
+                    solid = self.decode_beveled_edge(data, solid)
                 elif data["name"] == "cube":
                     cut_features.append(self.cube(data))
                 elif data["name"] == "nut":
