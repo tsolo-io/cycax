@@ -273,9 +273,6 @@ class EngineFreecad:
 
         Args:
             features: This is the dictionary that contains the details of the rounded edge.
-
-        Returns:
-            str: returns string of the rounded edge.
         """ 
         
         hypot = sqrt(features["radius"]*2*features["radius"]*2+features["radius"]*2*features["radius"]*2)/3
