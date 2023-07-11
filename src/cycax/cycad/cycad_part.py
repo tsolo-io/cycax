@@ -8,7 +8,7 @@ from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, Ri
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
-from cycax.cycad.figure import Figure
+from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -398,51 +398,32 @@ class CycadPart(Location):
         dict_out["parts"] = list_part
         return dict_out
 
-    def render(self, engine: str = "OpenSCAD", engine_config: dict = None, side: str = None) -> dict:
+    def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
         Args:
             engine: Name of the engine to use.
             engine_config: Configuration passed on to the PartEngine. It is engine specific.
-            side: this will be used for pyplot
         """
 
         part_files = {}
         _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
-            # TODO: Update simple2d to match openscad and freecad part engines.
-            # This method will created a pyplot drawing of the object.
-            if side is None:
-                side = "TOP"
-            plotter = Figure(part_no=self.part_no, side=side)
-            plotter.save_as_figure()
-
+            part_engine = Simple2D(name=self.part_no, path=self._base_path, config=engine_config)
+            
         elif _eng_lower == "openscad":
-            # This method will produce an OpenSCAD 3D drawing of the given object.
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
+            
+        elif _eng_lower == "preview3d":
+            part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config={"stl":False})
 
-            # in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.part_no)
 
-            # if not os.path.exists(in_name):
-            #    self.save()
-
-            part_engine.build()
-
-            ## This method will convert a OpenSCAD drawing of a given file into a STL drawing.
-            ## cutter = PartEngineOpenSCAD(name=self.part_no)
-            # in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.part_no)
-
-            # if not os.path.exists(in_name):
-            #    self.Render("OpenSCAD")
-
-            # cutter.build_stl()
         elif _eng_lower == "freecad":
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
-            part_engine.build()
 
         else:
-            msg = f"engine: {engine} is not one of simple2D, OpenSCAD or STL."
+            msg = f"engine: {engine} is not one of Simple2D, OpenSCAD, Preview3D or FreeCAD."
             raise ValueError(msg)
 
-        # TODO: part_engine build should be called here outside of the if/elif
-        # part_engine.build()
+        
+        part_engine.build()
         return part_files

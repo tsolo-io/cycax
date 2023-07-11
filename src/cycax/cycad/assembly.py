@@ -45,20 +45,6 @@ class Assembly:
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
             self._part_files[part.part_no].update(data_files)
 
-        # data = self.export()
-        # for part in data["parts"]:
-        #     # FIXME: Should just be: `part.render()` the part render should sort out its own stuff.
-        #     name = part["part_no"]
-        #     decoder = PartEngineOpenSCAD(name=name, path=self._base_path)
-
-        #     stl_name = "{cwd}/{name}/{name}.stl".format(cwd=self._base_path, name=name)
-        #     if not os.path.exists(stl_name):
-        #         scad_name = "{cwd}/{name}/{name}.scad".format(cwd=self._base_path, name=name)
-        #         if not os.path.exists(scad_name):
-        #             logging.info("Creating SCAD file %s of the pieces of the object.", scad_name)
-        #             decoder.decode(name)
-        #         decoder.render_stl(name)
-
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":
             assembler = AssemblyOpenSCAD(self.part_no)

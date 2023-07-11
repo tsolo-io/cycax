@@ -6,6 +6,7 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, PathPatch, Polygon, Rectangle, Wedge
+from cycax.cycad.engines.base_part_engine import PartEngine
 from matplotlib.path import Path
 
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
@@ -15,18 +16,23 @@ y = "y"
 z = "z"
 
 
-class Figure:
+class Simple2D(PartEngine):
     """This is a class that will be used to draw pyplots of various views of a 3D object.
 
     Args:
-        part_no: This is the name of the json file that needs to be decoded.
+        name: This is the name of the json file that needs to be decoded.
         side: Thi argument will suggest which side of the object the view is of.
 
     """
+    def __init__(self, name, path: Path = None, config: dict = None):
+        super().__init__(name, path, config)
+        
+        self.side="TOP"
+        if self.config is not None:
+            if "side" in self.config:
+                self.side = self.config["side"]
 
-    def __init__(self, part_no: str, side: str) -> None:
-        self.side = side
-        self.part_no = part_no
+        
         self.plane = ""
         self.hole_sink = ""
 
@@ -38,6 +44,8 @@ class Figure:
             FRONT: 0,
             BACK: 0,
         }
+
+    
 
     def _get_feature_style(self, feature: dict) -> dict:
         """Return a dict with the style used by Matplotlib add_patch
@@ -56,7 +64,7 @@ class Figure:
         else:
             return {"color": "blue", "edgecolor": "blue", "alpha": 0.6}
 
-    def _bounding_box(self, feature: dict):
+    def bounding_box(self, feature: dict):
         """This method will update the bounding box of a feature when called. It is also used to update other information with regards to the plane of the odject that is affected by the side.
 
         Args:
@@ -127,7 +135,7 @@ class Figure:
             width = feature[width]
             ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self._get_feature_style(feature)))
 
-    def _figure_feature(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def figure_feature(self, ax: matplotlib.axes._axes.Axes, feature: dict):
         """This method will coordingte the decoding of the dictionary.
 
         Args:
@@ -140,19 +148,19 @@ class Figure:
         elif feature_type == "hole":
             self._hole(ax, feature)
 
-    def save_as_figure(self):
+    def build(self):
         """This method will coordinate the drawing and saving of the figure that is being decoded from the provided json."""
-        in_name = os.getcwd() + "/" + self.part_no + "/" + self.part_no + ".json"
+        in_name = self._json_file
         with open(in_name) as f:
             data = json.load(f)
         fig, ax = plt.subplots()
-        for feature in data:
+        for feature in data["parts"]:
             if feature["type"] == "add":
-                self._bounding_box(feature)
-            self._figure_feature(ax, feature)
-        ax.set_title(self.part_no)
+                self.bounding_box(feature)
+            self.figure_feature(ax, feature)
+        ax.set_title(self.name)
         ax.autoscale_view()
         ax.set_aspect("equal", "box")
-        figfile = os.getcwd() + "/" + self.part_no + "/" + self.part_no + "-fig.svg"
+        figfile = figfile =  self._base_path / self.name / (self.name + "-s2d.svg")
         plt.savefig(figfile)
         logging.info("Write to %s", figfile)

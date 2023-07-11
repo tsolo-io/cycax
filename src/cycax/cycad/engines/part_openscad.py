@@ -150,7 +150,7 @@ class PartEngineOpenSCAD(PartEngine):
         in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.name)
 
         if not os.path.exists(in_name):
-            msg = f"the part name {part_name} does not map to a json file at {in_name}."
+            msg = f"the part name {self.name} does not map to a json file at {in_name}."
             raise ValueError(msg)
 
         with open(in_name) as f:
@@ -167,7 +167,7 @@ class PartEngineOpenSCAD(PartEngine):
                 output.append(self._decode_cube(action))
 
             if action["name"] == "external":
-                output.append(self._decode_external(part_name))
+                output.append(self._decode_external(self.name))
 
             if action["name"] == "hole":
                 output.append(self._decode_hole(action))
@@ -190,8 +190,8 @@ class PartEngineOpenSCAD(PartEngine):
                 scad_file.write("\n")
 
         scad_file.close()
-        # TODO: Only build STL if stl in config['output']
-        self.build_stl()
+        if "stl" not in self.config:
+            self.build_stl()
 
     def build_stl(self):
         """Calls OpenSCAD to create a STL for the part.
@@ -206,7 +206,7 @@ class PartEngineOpenSCAD(PartEngine):
         in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.name)
         out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=self._base_path, data=self.name)
         if not os.path.exists(in_name):
-            msg = f"The part name {part_name} does not map to a SCAD file at {in_name}."
+            msg = f"The part name {self.name} does not map to a SCAD file at {in_name}."
             raise ValueError(msg)
 
         app_bin = self.get_appimage("OpenSCAD")
