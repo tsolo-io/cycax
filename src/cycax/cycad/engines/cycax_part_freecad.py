@@ -14,6 +14,7 @@ import sys
 from math import sqrt
 from pathlib import Path
 
+
 import importDXF
 
 # import QtGui
@@ -129,25 +130,36 @@ class EngineFreecad:
 
         return angles
 
-    def hole(self, feature: dict):
+    def hole(self, feature: dict = None, depth: float=None, radius: float=None, move: dict=None, side: str=None):
         """This method will be used for cutting a cylindical hole into a surface.
 
         Args:
             feature: This is the dictionary that contains the deatails of where the hole must be placed and its details.
         """
         pos_vec = Vector(0, 0, 0)
-        cyl = Part.makeCylinder(feature["diameter"] / 2, feature["depth"], pos_vec)
-        if feature["side"] in ["FRONT", "BACK"]:
+        if feature is not None:
+            print(feature)
+            cyl = Part.makeCylinder(feature["diameter"] / 2, feature["depth"], pos_vec)
+            side=feature["side"]
+            x=feature["x"]
+            y=feature["y"]
+            z=feature["z"]
+        else:
+            cyl = Part.makeCylinder(radius, depth, pos_vec)
+            x=move["x"]
+            y=move["y"]
+            z=move["z"]
+        if side in ["FRONT", "BACK"]:
             cyl.Placement = App.Placement(
-                Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(1, 0, 0), 270)
+                Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270)
             )
-        elif feature["side"] in ["TOP", "BOTTOM"]:
+        elif side in ["TOP", "BOTTOM"]:
             cyl.Placement = App.Placement(
-                Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 0, 1), 0)
+                Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0)
             )
-        elif feature["side"] in ["LEFT", "RIGHT"]:
+        elif side in ["LEFT", "RIGHT"]:
             cyl.Placement = App.Placement(
-                Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(Vector(0, 1, 0), 90)
+                Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90)
             )
         return cyl
 
@@ -189,6 +201,118 @@ class EngineFreecad:
             if obj.ViewObject.Visibility:
                 filename = f"{target_path}-FreeCAD.stl"
                 obj.Shape.exportStl(filename)
+                
+    def _rounded_edge_cube(self, radius:float, depth: float, side: str, move:dict):
+        """
+        Helper method for decode_rounded-Edge.
+
+        Args:
+            radius: Radius of the rounded edge that will be cut.
+            depth: Depth of the part.
+            side: Side which the cutting will come from.
+            center: set to True when the cube is centered at its center.
+            rotate: set to True when the cube needs to be offset by 45 deg
+        """ 
+        
+        x=move["x"]
+        y=move["y"]
+        z=move["z"]
+        if side in ["TOP", "BOTTOM"]:
+            cube= Part.makeBox(radius, radius, depth, Vector(x, y, z)) 
+        elif side in ["FRONT", "BACK"]:
+            cube= Part.makeBox(radius, depth, radius, Vector(x, y, z)) 
+        elif side in ["LEFT", "RIGHT"]:
+            cube= Part.makeBox(depth, radius, radius, Vector(x, y, z))
+            
+        return cube
+    
+    def _rhombus(self, depth: float, radius: float, move:dict, side:str):
+        """This method will be used to find out where the points of the hexigon are located and then drawing a 2D hexigon.
+
+        Args:
+            depth: this is the depth of the hexigon.
+            diameter: this is the diameter of the hexigon.
+        """
+        hypot = sqrt(radius*2*radius*2+radius*2*radius*2)/2
+        vector_list=[]
+        
+        vector_list.append(Vector(hypot, 0, 0))
+        vector_list.append(Vector(0, hypot, 0))
+        vector_list.append(Vector(-hypot, 0, 0))
+        vector_list.append(Vector(0, -hypot, 0))
+
+        vector_list.append(vector_list[0])
+        wire = Part.makePolygon(vector_list)
+        shape = Part.Shape(wire)
+        face = Part.Face(shape)
+        
+        rhombus = face.extrude(App.Vector(0, 0, depth))
+        
+        x=move["x"]
+        y=move["y"]
+        z=move["z"]
+        
+        if side in ["FRONT", "BACK"]:
+            rhombus.Placement = App.Placement(
+                Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270)
+            )
+        elif side in ["TOP", "BOTTOM"]:
+            rhombus.Placement = App.Placement(
+                Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0)
+            )
+        elif side in ["LEFT", "RIGHT"]:
+            rhombus.Placement = App.Placement(
+                Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90)
+            )
+        
+        return rhombus
+    
+    def decode_rounded_edge(self, features:dict, solid):
+        """
+        This method will decode a rounded edge and either make a bevel or taper
+
+        Args:
+            features: This is the dictionary that contains the details of the rounded edge.
+
+        Returns:
+            str: returns string of the rounded edge.
+        """ 
+        
+        hypot = sqrt(features["radius"]*2*features["radius"]*2+features["radius"]*2*features["radius"]*2)/3
+        move_cutter_cyl={"x":0, "y":0, "z":0}
+        move_cutter_rhombus={"x":0, "y":0, "z":0}
+        move_cube={"x":0, "y":0, "z":0}
+        if features["bound1"] == 0:
+            move_cutter_cyl[features["axis1"]]=features["radius"]
+            move_cutter_rhombus[features["axis1"]]=hypot
+            move_cube[features["axis1"]]=0
+        else:
+            move_cutter_cyl[features["axis1"]]=features["bound1"] - features["radius"]
+            move_cutter_rhombus[features["axis1"]]=features["bound1"] - hypot
+            move_cube[features["axis1"]]=features["bound1"] - features["radius"]
+        if features["bound2"] == 0:
+            move_cutter_cyl[features["axis2"]]=features["radius"]
+            move_cutter_rhombus[features["axis2"]]=hypot
+            move_cube[features["axis2"]]=0
+        else:
+            move_cutter_cyl[features["axis2"]]=features["bound2"] - features["radius"]
+            move_cutter_rhombus[features["axis2"]]=features["bound2"] - hypot
+            move_cube[features["axis2"]]=features["bound2"] - features["radius"]
+        
+        
+        if features["edge_type"]=="bevel":
+            cutter=self.hole(radius=features["radius"], depth=features["depth"], side=features["side"], move=move_cutter_cyl)
+                       
+        elif features["edge_type"]=="taper":
+            cutter =self._rhombus(depth = features["depth"], radius = features["radius"], move = move_cutter_rhombus, side=features["side"])
+            
+        cube = self._rounded_edge_cube(radius=features["radius"], depth=features["depth"], side=features["side"], move=move_cube)
+            
+        cutter = cube.cut(cutter)
+        res = solid.cut(cutter)
+        Part.cast_to_shape(res)
+      
+        return res
 
     def build(self, in_name: Path):
         """
@@ -212,6 +336,8 @@ class EngineFreecad:
             elif data["type"] == "cut":
                 if data["name"] == "hole":
                     cut_features.append(self.hole(data))
+                elif data["name"] == "rounded_edge":
+                    solid = self.decode_rounded_edge(data, solid)
                 elif data["name"] == "cube":
                     cut_features.append(self.cube(data))
                 elif data["name"] == "nut":
@@ -246,3 +372,5 @@ out_dir = os.getenv("CYCAX_CWD")
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
 engine.build(Path(json_file))
+
+
