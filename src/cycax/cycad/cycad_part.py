@@ -7,11 +7,11 @@ from pathlib import Path
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
-from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.engines.simple_2d import Simple2D
+from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
-from cycax.cycad.slot import Slot
 from cycax.cycad.rounded_edge import RoundedEdge
+from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
@@ -398,8 +398,8 @@ class CycadPart(Location):
         dict_out["name"] = self.part_no
         dict_out["parts"] = list_part
         return dict_out
-    
-    def rounded_edge(self, edge_type:str, side1: str, side2: str, radius: float):
+
+    def rounded_edge(self, edge_type: str, side1: str, side2: str, radius: float):
         """This method will round a edge of a CycadPart.
 
         Args:
@@ -408,10 +408,10 @@ class CycadPart(Location):
             side2: side on edge.
             radius: The radius of the rounded edge.
         """
-        edge=[]
+        edge = []
         self.make_bounding_box()
         for side in [side1, side2]:
-            axis=side
+            axis = side
             axis = {
                 TOP: "z",
                 BACK: "y",
@@ -430,7 +430,18 @@ class CycadPart(Location):
         elif "z" not in edge:
             side = "BOTTOM"
             depth = self.bounding_box["TOP"]
-        self.features.append(RoundedEdge(edge_type=edge_type, axis1=edge[0], bound1=self.bounding_box[side1], axis2=edge[1], bound2=self.bounding_box[side2], radius=radius, side=side, depth=depth))
+        self.features.append(
+            RoundedEdge(
+                edge_type=edge_type,
+                axis1=edge[0],
+                bound1=self.bounding_box[side1],
+                axis2=edge[1],
+                bound2=self.bounding_box[side2],
+                radius=radius,
+                side=side,
+                depth=depth,
+            )
+        )
 
     def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
@@ -445,15 +456,14 @@ class CycadPart(Location):
             if "side" in engine_config:
                 side = engine_config["side"]
             else:
-                side="TOP"
+                side = "TOP"
             part_engine = Simple2D(name=self.part_no, side=side)
 
         elif _eng_lower == "openscad":
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
-            
-        elif _eng_lower == "preview3d":
-            part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config={"stl":False})
 
+        elif _eng_lower == "preview3d":
+            part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config={"stl": False})
 
         elif _eng_lower == "freecad":
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
@@ -462,6 +472,5 @@ class CycadPart(Location):
             msg = f"engine: {engine} is not one of Simple2D, OpenSCAD, Preview3D or FreeCAD."
             raise ValueError(msg)
 
-        
         part_engine.build()
         return part_files

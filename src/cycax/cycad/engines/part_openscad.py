@@ -134,8 +134,8 @@ class PartEngineOpenSCAD(PartEngine):
         }[side]
 
         return side
-    
-    def _rounded_edge_cube(self, radius:float, depth: float, side: str, center: bool=False, rotate: bool=False):
+
+    def _rounded_edge_cube(self, radius: float, depth: float, side: str, center: bool = False, rotate: bool = False):
         """
         Helper method for decode_rounded-Edge.
 
@@ -145,26 +145,26 @@ class PartEngineOpenSCAD(PartEngine):
             side: Side which the cutting will come from.
             center: set to True when the cube is centered at its center.
             rotate: set to True when the cube needs to be offset by 45 deg
-        """    
-        if (center):
+        """
+        if center:
             center = ", center=true"
         else:
-            center=""
+            center = ""
         if side in ["TOP", "BOTTOM"]:
-            cube= "cube([{size}, {size}, {depth}] {center});".format(size=radius, depth=depth, center=center)  
-            if (rotate):
-                cube = f"rotate([0, 0, 45]){cube}"  
+            cube = "cube([{size}, {size}, {depth}] {center});".format(size=radius, depth=depth, center=center)
+            if rotate:
+                cube = f"rotate([0, 0, 45]){cube}"
         elif side in ["FRONT", "BACK"]:
-            cube= "cube([{size}, {depth}, {size}] {center});".format(size=radius, depth=depth, center = center) 
-            if (rotate):
+            cube = "cube([{size}, {depth}, {size}] {center});".format(size=radius, depth=depth, center=center)
+            if rotate:
                 cube = f"rotate([0, 45, 0]){cube}"
         elif side in ["LEFT", "RIGHT"]:
-            cube="cube([{depth}, {size}, {size}] {center});".format(size=radius, depth=depth, center=center) 
-            if (rotate):
+            cube = "cube([{depth}, {size}, {size}] {center});".format(size=radius, depth=depth, center=center)
+            if rotate:
                 cube = f"rotate([45, 0, 0]){cube}"
         return cube
-    
-    def decode_rounded_edge(self, features:dict)->str:
+
+    def decode_rounded_edge(self, features: dict) -> str:
         """
         This method will decode a rounded edge and either make a bevel or taper
 
@@ -173,34 +173,42 @@ class PartEngineOpenSCAD(PartEngine):
 
         Returns:
             str: returns string of the rounded edge.
-        """ 
-        if features["edge_type"]=="bevel":
+        """
+        if features["edge_type"] == "bevel":
             rotate = self._rotate(features["side"])
-            cutter="{rotate}cylinder(r= {diam}, h={depth}, $fn=64);".format(rotate=rotate, diam=features["radius"], depth=features["depth"])
-                       
-        elif features["edge_type"]=="taper":
-            cutter = self._rounded_edge_cube(radius=features["radius"]*2, depth=features["depth"]*2, side=features["side"], center=True, rotate= True)
-            
+            cutter = "{rotate}cylinder(r= {diam}, h={depth}, $fn=64);".format(
+                rotate=rotate, diam=features["radius"], depth=features["depth"]
+            )
+
+        elif features["edge_type"] == "taper":
+            cutter = self._rounded_edge_cube(
+                radius=features["radius"] * 2,
+                depth=features["depth"] * 2,
+                side=features["side"],
+                center=True,
+                rotate=True,
+            )
+
         cube = self._rounded_edge_cube(radius=features["radius"], depth=features["depth"], side=features["side"])
-        move={"x":0, "y":0, "z":0}
-        move_cube={"x":0, "y":0, "z":0}
+        move = {"x": 0, "y": 0, "z": 0}
+        move_cube = {"x": 0, "y": 0, "z": 0}
         if features["bound1"] == 0:
-            move[features["axis1"]]=features["radius"]
-            move_cube[features["axis1"]]=0
+            move[features["axis1"]] = features["radius"]
+            move_cube[features["axis1"]] = 0
         else:
-            move[features["axis1"]]=0
-            move_cube[features["axis1"]]=features["bound1"] - features["radius"]
+            move[features["axis1"]] = 0
+            move_cube[features["axis1"]] = features["bound1"] - features["radius"]
         if features["bound2"] == 0:
-            move[features["axis2"]]=features["radius"]
-            move_cube[features["axis2"]]=0
+            move[features["axis2"]] = features["radius"]
+            move_cube[features["axis2"]] = 0
         else:
-            move[features["axis2"]]=0
+            move[features["axis2"]] = 0
             move_cube[features["axis2"]] = features["bound2"] - features["radius"]
-        cutter= f"translate([{move['x']}, {move['y']}, {move['z']}])" + cutter
-        template = "difference(){" + cube +cutter+ "}" 
+        cutter = f"translate([{move['x']}, {move['y']}, {move['z']}])" + cutter
+        template = "difference(){" + cube + cutter + "}"
         res = f"translate([{move_cube['x']}, {move_cube['y']}, {move_cube['z']}])" + template
-        
-        return res  
+
+        return res
 
     def build(self):
         """
@@ -229,7 +237,7 @@ class PartEngineOpenSCAD(PartEngine):
             if action["type"] == "cut":
                 dif = dif + 1
                 output.insert(0, self._decode_cut())
-                
+
             if action["name"] == "rounded_edge":
                 output.append(self.decode_rounded_edge(action))
 

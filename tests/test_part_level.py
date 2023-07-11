@@ -48,5 +48,7 @@ def test_level():
     assert mypart1.position == [-1000, 100, -2]
 
     assembly.level(mypart1.back, mypart2.front)
+    assembly.rotateFreezeFront(mypart1)
+    assembly.rotateFreezeTop(mypart1)
 
     assert mypart1.position == [-1000, -100, -2]
