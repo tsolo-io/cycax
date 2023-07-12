@@ -4,11 +4,12 @@ import logging
 import os
 from pathlib import Path
 
+from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
-from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.engines.simple_2d import Simple2D
+from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -395,8 +396,52 @@ class CycadPart(Location):
                 list_part.append(ret)
         dict_out = {}
         dict_out["name"] = self.part_no
-        dict_out["parts"] = list_part
+        dict_out["features"] = list_part
         return dict_out
+
+    def beveled_edge(self, edge_type: str, side1: str, side2: str, size: float):
+        """This method will shape a edge of a CycadPart.
+
+        Args:
+            edge_type: round or chamfer.
+            side1: side on edge.
+            side2: side on edge.
+            size: The radius of a round when rounding or the lenght of a chamfer.
+        """
+        edge = []
+        self.make_bounding_box()
+        for side in [side1, side2]:
+            side = {
+                TOP: "z",
+                BACK: "y",
+                BOTTOM: "z",
+                FRONT: "y",
+                LEFT: "x",
+                RIGHT: "x",
+            }[side]
+            edge.append(side)
+        assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
+        if "x" not in edge:
+            side = "LEFT"
+            depth = self.bounding_box["RIGHT"]
+        elif "y" not in edge:
+            side = "FRONT"
+            depth = self.bounding_box["BACK"]
+        elif "z" not in edge:
+            side = "BOTTOM"
+            depth = self.bounding_box["TOP"]
+        self.features.append(
+            BeveledEdge(
+                edge_type=edge_type,
+                axis1=edge[0],
+                bound1=self.bounding_box[side1],
+                axis2=edge[1],
+                bound2=self.bounding_box[side2],
+                size=size,
+                side=side,
+                depth=depth,
+            )
+        )
 
     def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
@@ -409,13 +454,12 @@ class CycadPart(Location):
         _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
             part_engine = Simple2D(name=self.part_no, path=self._base_path, config=engine_config)
-            
+
         elif _eng_lower == "openscad":
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
-            
-        elif _eng_lower == "preview3d":
-            part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config={"stl":False})
 
+        elif _eng_lower == "preview3d":
+            part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config={"stl": False})
 
         elif _eng_lower == "freecad":
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
@@ -424,6 +468,5 @@ class CycadPart(Location):
             msg = f"engine: {engine} is not one of Simple2D, OpenSCAD, Preview3D or FreeCAD."
             raise ValueError(msg)
 
-        
         part_engine.build()
         return part_files

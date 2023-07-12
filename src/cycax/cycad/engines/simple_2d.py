@@ -154,7 +154,7 @@ class Simple2D(PartEngine):
         with open(in_name) as f:
             data = json.load(f)
         fig, ax = plt.subplots()
-        for feature in data["parts"]:
+        for feature in data["features"]:
             if feature["type"] == "add":
                 self.bounding_box(feature)
             self.figure_feature(ax, feature)

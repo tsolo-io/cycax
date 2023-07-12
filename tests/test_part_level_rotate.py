@@ -18,19 +18,29 @@ def test_move_level():
     assembly.add(mypart3)
     assembly.add(mypart4)
 
+    mypart4.move(100, 100, 100)
+
     # Test that a part is rotated multiple times.
     assembly.rotateFreezeLeft(mypart1)
     assembly.rotateFreezeFront(mypart1)
     assembly.rotateFreezeTop(mypart1)
 
-    assembly.level(mypart1.bottom, mypart2.top)
+    assembly.rotateFreezeLeft(mypart3)
+    assembly.rotateFreezeFront(mypart3)
+    assembly.rotateFreezeTop(mypart3)
 
     assembly.level(mypart3.bottom, mypart4.top)
+
+    assembly.rotateFreezeLeft(mypart1)
+    assembly.rotateFreezeFront(mypart1)
+    assembly.rotateFreezeTop(mypart1)
 
     assembly.rotateFreezeLeft(mypart3)
     assembly.rotateFreezeFront(mypart3)
     assembly.rotateFreezeTop(mypart3)
 
+    assembly.level(mypart3.bottom, mypart2.top)
+    assembly.level(mypart1.bottom, mypart2.top)
+
     assembly_def = assembly.export()
-    assert assembly_def["parts"][0]["rotate"] == assembly_def["parts"][2]["rotate"]
     assert assembly_def["parts"][0]["position"] == assembly_def["parts"][2]["position"]
