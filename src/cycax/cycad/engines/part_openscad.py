@@ -150,15 +150,15 @@ class PartEngineOpenSCAD(PartEngine):
             center = ", center=true"
         else:
             center = ""
-        if side in ["TOP", "BOTTOM"]:
+        if side in [TOP, BOTTOM]:
             cube = "cube([{size}, {size}, {depth}] {center});".format(size=size, depth=depth, center=center)
             if rotate:
                 cube = f"rotate([0, 0, 45]){cube}"
-        elif side in ["FRONT", "BACK"]:
+        elif side in [FRONT, BACK]:
             cube = "cube([{size}, {depth}, {size}] {center});".format(size=size, depth=depth, center=center)
             if rotate:
                 cube = f"rotate([0, 45, 0]){cube}"
-        elif side in ["LEFT", "RIGHT"]:
+        elif side in [LEFT, RIGHT]:
             cube = "cube([{depth}, {size}, {size}] {center});".format(size=size, depth=depth, center=center)
             if rotate:
                 cube = f"rotate([45, 0, 0]){cube}"

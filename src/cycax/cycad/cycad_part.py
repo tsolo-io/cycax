@@ -399,28 +399,28 @@ class CycadPart(Location):
         dict_out["features"] = list_part
         return dict_out
 
-    def beveled_edge(self, edge_type: str, side1: str, side2: str, radius: float = None, length: float = None):
-        """This method will round a edge of a CycadPart.
+    def beveled_edge(self, edge_type: str, side1: str, side2: str, size: float):
+        """This method will shape a edge of a CycadPart.
 
         Args:
-            edge_type: Bevel or taypered.
+            edge_type: round or chamfer.
             side1: side on edge.
             side2: side on edge.
-            radius: The radius of the beveled edge.
+            size: The radius of a round when rounding or the lenght of a chamfer.
         """
         edge = []
         self.make_bounding_box()
         for side in [side1, side2]:
-            axis = side
-            axis = {
+            side = {
                 TOP: "z",
                 BACK: "y",
                 BOTTOM: "z",
                 FRONT: "y",
                 LEFT: "x",
                 RIGHT: "x",
-            }[axis]
-            edge.append(axis)
+            }[side]
+            edge.append(side)
+        assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]
@@ -430,8 +430,6 @@ class CycadPart(Location):
         elif "z" not in edge:
             side = "BOTTOM"
             depth = self.bounding_box["TOP"]
-        if length is not None:
-            radius = length
         self.features.append(
             BeveledEdge(
                 edge_type=edge_type,
@@ -439,7 +437,7 @@ class CycadPart(Location):
                 bound1=self.bounding_box[side1],
                 axis2=edge[1],
                 bound2=self.bounding_box[side2],
-                size=radius,
+                size=size,
                 side=side,
                 depth=depth,
             )

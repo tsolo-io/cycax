@@ -23,6 +23,14 @@ from PySide import QtGui
 
 logging.error("Open FreeCAD")
 
+LEFT = "LEFT"
+RIGHT = "RIGHT"
+TOP = "TOP"
+BOTTOM = "BOTTOM"
+FRONT = "FRONT"
+BACK = "BACK"
+REAR = "BACK"
+
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a json passed to it. The json will contain specific information of the object.
@@ -93,13 +101,13 @@ class EngineFreecad:
         hex = self._calc_hex(depth=0, diameter=3)
         nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
 
-        if feature["side"] in ["FRONT", "BACK"]:
+        if feature["side"] in [FRONT, BACK]:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 30, 270))
 
-        elif feature["side"] in ["TOP", "BOTTOM"]:
+        elif feature["side"] in [TOP, BOTTOM]:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(30, 0, 0))
 
-        elif feature["side"] in ["LEFT", "RIGHT"]:
+        elif feature["side"] in [LEFT, RIGHT]:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
 
         return nut
@@ -119,12 +127,12 @@ class EngineFreecad:
         if features["side"] is not None:
             angles = features["side"]
             angles = {
-                "TOP": [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
-                "BACK": [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
-                "BOTTOM": [pos_vec[0], pos_vec[1], pos_vec[2]],
-                "FRONT": [pos_vec[0], pos_vec[1], pos_vec[2]],
-                "LEFT": [pos_vec[0], pos_vec[1], pos_vec[2]],
-                "RIGHT": [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
+                TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
+                BACK: [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
+                BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                RIGHT: [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
             }[angles]
 
         return angles
@@ -150,11 +158,11 @@ class EngineFreecad:
             x = move["x"]
             y = move["y"]
             z = move["z"]
-        if side in ["FRONT", "BACK"]:
+        if side in [FRONT, BACK]:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
-        elif side in ["TOP", "BOTTOM"]:
+        elif side in [TOP, BOTTOM]:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0))
-        elif side in ["LEFT", "RIGHT"]:
+        elif side in [LEFT, RIGHT]:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
         return cyl
 
@@ -212,11 +220,11 @@ class EngineFreecad:
         x = move["x"]
         y = move["y"]
         z = move["z"]
-        if side in ["TOP", "BOTTOM"]:
+        if side in [TOP, BOTTOM]:
             cube = Part.makeBox(length, length, depth, Vector(x, y, z))
-        elif side in ["FRONT", "BACK"]:
+        elif side in [FRONT, BACK]:
             cube = Part.makeBox(length, depth, length, Vector(x, y, z))
-        elif side in ["LEFT", "RIGHT"]:
+        elif side in [LEFT, RIGHT]:
             cube = Part.makeBox(depth, length, length, Vector(x, y, z))
 
         return cube
@@ -249,11 +257,11 @@ class EngineFreecad:
         y = move["y"]
         z = move["z"]
 
-        if side in ["FRONT", "BACK"]:
+        if side in [FRONT, BACK]:
             rhombus.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
-        elif side in ["TOP", "BOTTOM"]:
+        elif side in [TOP, BOTTOM]:
             rhombus.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0))
-        elif side in ["LEFT", "RIGHT"]:
+        elif side in [LEFT, RIGHT]:
             rhombus.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
 
         return rhombus
