@@ -6,9 +6,9 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, PathPatch, Polygon, Rectangle, Wedge
-from cycax.cycad.engines.base_part_engine import PartEngine
 from matplotlib.path import Path
 
+from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 x = "x"
@@ -24,15 +24,15 @@ class Simple2D(PartEngine):
         side: Thi argument will suggest which side of the object the view is of.
 
     """
+
     def __init__(self, name, path: Path = None, config: dict = None):
         super().__init__(name, path, config)
-        
-        self.side="TOP"
+
+        self.side = "TOP"
         if self.config is not None:
             if "side" in self.config:
                 self.side = self.config["side"]
 
-        
         self.plane = ""
         self.hole_sink = ""
 
@@ -44,8 +44,6 @@ class Simple2D(PartEngine):
             FRONT: 0,
             BACK: 0,
         }
-
-    
 
     def _get_feature_style(self, feature: dict) -> dict:
         """Return a dict with the style used by Matplotlib add_patch
@@ -161,6 +159,6 @@ class Simple2D(PartEngine):
         ax.set_title(self.name)
         ax.autoscale_view()
         ax.set_aspect("equal", "box")
-        figfile = figfile =  self._base_path / self.name / (self.name + "-s2d.svg")
+        figfile = figfile = self._base_path / self.name / (self.name + "-s2d.svg")
         plt.savefig(figfile)
         logging.info("Write to %s", figfile)
