@@ -19,13 +19,12 @@ z = "z"
 class Simple2D(PartEngine):
     """This is a class that will be used to draw pyplots of various views of a 3D object.
 
-    Args:
+    Attributes:
         name: This is the name of the json file that needs to be decoded.
-        side: Thi argument will suggest which side of the object the view is of.
 
     """
 
-    def __init__(self, name, path: Path = None, config: dict = None):
+    def __init__(self, name: str, path: Path = None, config: dict = None):
         super().__init__(name, path, config)
 
         self.side = "TOP"
