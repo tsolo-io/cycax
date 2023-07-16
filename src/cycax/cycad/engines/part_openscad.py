@@ -223,7 +223,7 @@ class PartEngineOpenSCAD(PartEngine):
             self.build_scad(json_file, scad_file)
         if (
             "stl" not in self.config
-        ):  # TODO: Folow this, surely it should be if stl in config then make it. Or. if self.config.get('stl'):
+        ):  # TODO: Follow this, surely it should be `if stl in config:` or. `if self.config.get('stl'):`
             if check_source_hash(scad_file, stl_file):
                 self.build_stl(scad_file, stl_file)
 
