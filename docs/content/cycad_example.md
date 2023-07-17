@@ -34,7 +34,7 @@ pip install --force-reinstall $(ls ../cycax/dist/cycax-*.whl | sort | head -n1)
 Example assembly
 ================
 
-Create the file *~/src/playpen/main.py* with the folowing content.
+Create the file *~/src/playpen/main.py* with the following content.
 
 ``` py
 #!/usr/bin/env python3
