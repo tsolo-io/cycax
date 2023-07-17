@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 
-# from cycax.cycad.assembly_blender import AssemblyBlender
+from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
@@ -48,8 +48,8 @@ class Assembly:
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":
             assembler = AssemblyOpenSCAD(self.part_no)
-        # elif assembler.lower() == "blender":
-        #     assembler= AssemblyBlender(part_no)
+        elif engine.lower() == "blender":
+            assembler= AssemblyBlender(self.part_no)
         else:
             msg = f"Engine {assembler} is not one of the recognized engines for assebling parts. Choose one of OpenSCAD (default) or Blender."
             raise ValueError(msg)
