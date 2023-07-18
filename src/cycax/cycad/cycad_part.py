@@ -53,7 +53,7 @@ class CycadPart(Location):
         self.back = BackSide(self)
 
         self._base_path = Path(".")
-        self.part_no = part_no
+        self.part_no = part_no.strip().replace("-", "_").lower()
         self.x_size = x_size
         self.y_size = y_size
         self.z_size = z_size
@@ -112,8 +112,7 @@ class CycadPart(Location):
         side: str,
         diameter: float,
         depth: float,
-        inner: bool = True,
-        external_only: bool = False,
+        external_subtract: bool=False,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
         If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
@@ -124,17 +123,14 @@ class CycadPart(Location):
             side: The side of the part the hole will be made in.
             diameter: The diameter of the hole.
             depth: The depth of the hole. If Null the hole is through the part.
-            inner: If this is an internal or an external hole.
+            external_subtract: This is to specify that the hole should only be cut into other surfaces and not itself.
         """
 
         temp_hole = Holes(side=side, x=x, y=y, z=z, diameter=diameter, depth=depth)
-        if external_only:
+        if external_subtract:
             self.move_holes.append(temp_hole)
-        elif inner:
+        else:
             self.features.append(temp_hole)
-        elif not inner:
-            self.features.append(temp_hole)
-            self.move_holes.append(temp_hole)
 
     def make_slot(
         self,
@@ -146,8 +142,7 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
         horizontal: bool = True,
-        inner: bool = True,
-        external_only: bool = False,
+        external_subtract: bool = False
     ):
         """This method will insert a slot into a CycadPart.
 
@@ -160,7 +155,7 @@ class CycadPart(Location):
             y_size : The size of y of slot.
             z_size : The siez of z of slot.
             horizontal : This can be overridden if it is preferred to have a verticle slot.
-            inner: If this is an internal or an external hole.
+            external_subtract: This is to specify that the slot should only be cut into other surfaces and not itself.
         """
 
         temp_slot = Slot(
@@ -174,18 +169,11 @@ class CycadPart(Location):
             horizontal=horizontal,
         )
         # This will add it to the relevnt array
-        if external_only:
+        if external_subtract:
             self.move_holes.append(temp_slot.hole_left)
             self.move_holes.append(temp_slot.hole_right)
             self.move_holes.append(temp_slot.rectangle)
-        elif inner:
-            self.features.append(temp_slot.hole_left)
-            self.features.append(temp_slot.hole_right)
-            self.features.append(temp_slot.rectangle)
-        elif not inner:
-            self.move_holes.append(temp_slot.hole_left)
-            self.move_holes.append(temp_slot.hole_right)
-            self.move_holes.append(temp_slot.rectangle)
+        else:
             self.features.append(temp_slot.hole_left)
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)

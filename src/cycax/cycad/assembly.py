@@ -20,7 +20,7 @@ class Assembly:
     """
 
     def __init__(self, part_no: str):
-        self.part_no = part_no
+        self.part_no = part_no.strip().replace("-", "_").lower()
         self.pieces = []
         self._base_path = Path(".")
         self._part_files = defaultdict(dict)

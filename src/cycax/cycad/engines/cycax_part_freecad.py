@@ -31,6 +31,16 @@ FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
 
+nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
+    "M3": {
+        "diameter": 6.01,
+        "thickness": 2.4,
+    },
+    "M6": {
+        "diameter": 11.05,
+        "thickness": 5.2,
+    },
+}
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a json passed to it. The json will contain specific information of the object.
@@ -98,7 +108,7 @@ class EngineFreecad:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
         """
 
-        hex = self._calc_hex(depth=0, diameter=3)
+        hex = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
         nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
 
         if feature["side"] in [FRONT, BACK]:
@@ -160,8 +170,10 @@ class EngineFreecad:
             z = move["z"]
         if side in [FRONT, BACK]:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
-        elif side in [TOP, BOTTOM]:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0))
+        elif side == TOP:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
+        elif side == BOTTOM:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
         elif side in [LEFT, RIGHT]:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
         return cyl
