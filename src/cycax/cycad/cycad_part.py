@@ -178,7 +178,7 @@ class CycadPart(Location):
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float):
+    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float, vertical: bool=True):
         """This method will insert a nut into a CycadPart.
 
         Args:
@@ -188,8 +188,9 @@ class CycadPart(Location):
             side: The side of the part the hole will be made in.
             nut_type: This is the type of nut specified as a float. This method will be updated in version 2.
             depth: This is how deep the nut cut out must be.
+            vertical: This will be set to False if you want the flat side rather than the pointy side down.
         """
-        temp_nut = NutCutOut(side=side, x=x, y=y, z=z, nut_type=nut_type, depth=depth)
+        temp_nut = NutCutOut(side=side, x=x, y=y, z=z, nut_type=nut_type, depth=depth, vertical=vertical)
         self.features.append(temp_nut)
 
     def make_rectangle(

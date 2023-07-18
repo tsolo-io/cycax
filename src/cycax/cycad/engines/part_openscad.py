@@ -67,7 +67,7 @@ class PartEngineOpenSCAD(PartEngine):
         """
         res = []
         res.append(self._translate(lookup))
-        res.append(self._rotate(lookup["side"]))
+        res.append(self._rotate(lookup["side"], vertical=lookup["vertical"]))
         radius = nut_specifications[lookup["nut_type"]]["diameter"] / 2
         res.append("cylinder(r={rad}, h={deep}, $fn=6);".format(rad=radius, deep=lookup["depth"]))
 
@@ -116,7 +116,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return output
 
-    def _rotate(self, side: str) -> str:
+    def _rotate(self, side: str, vertical:bool=False) -> str:
         """
         This will rotate the object and return the scad necessary.
 
@@ -130,9 +130,13 @@ class PartEngineOpenSCAD(PartEngine):
             BACK: "rotate([90, 0, 0])",
             BOTTOM: "rotate([0, 0, 0])",
             FRONT: "rotate([270, 0, 0])",
-            LEFT: "rotate([0, 90, 0])",
-            RIGHT: "rotate([0, 270, 0])",
+            LEFT: "rotate([0, 90, 0])rotate([0, 0, 30])",
+            RIGHT: "rotate([0, 270, 0])rotate([0, 0, 30])",
         }[side]
+            
+        if vertical == True:
+            side2 =  "rotate([0, 0, 30])"
+            side = side + side2
 
         return side
 

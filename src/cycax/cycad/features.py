@@ -154,18 +154,20 @@ class NutCutOut(Location):
         side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         nut_type : Type of nut to be inserted.
         depth : depth of the rectangle.
+        vertical: this is a bool that will be set to False if you want the flat side down. 
 
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float):
+    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool=True):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type
         self.depth = depth
+        self.vertical = vertical
 
     def export(self) -> dict:
         """
         This will create a dictionary of the nut that can be used for the json.
-
+nut
         Returns:
             dict: this will return a dictionary.
 

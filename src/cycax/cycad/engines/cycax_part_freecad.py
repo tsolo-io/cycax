@@ -108,19 +108,33 @@ class EngineFreecad:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
         """
 
+
         hex = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
         nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
-
-        if feature["side"] in [FRONT, BACK]:
-            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 30, 270))
-
-        elif feature["side"] in [TOP, BOTTOM]:
-            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(30, 0, 0))
-
-        elif feature["side"] == LEFT:
-            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
-        elif feature["side"] == RIGHT:
-            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 270, 0))
+        
+        side = feature["side"] 
+        x = feature["x"]
+        y = feature["y"]
+        z = feature["z"]
+        
+        if feature["vertical"] ==True:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 30))
+           
+        
+        
+        if side == FRONT:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
+        elif side == BACK:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90))
+        elif side == TOP:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
+        elif side == BOTTOM:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
+        elif side == LEFT:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
+        elif side == RIGHT:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
+    
 
         return nut
 

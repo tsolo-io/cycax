@@ -70,7 +70,7 @@ class CycadSide:
             center=center,
         )
 
-    def nut(self, pos: tuple[float, float], nut_type: float = 3.0, depth: float = None, sink: float = 0.0):
+    def nut(self, pos: tuple[float, float], nut_type: float = 3.0, depth: float = None, sink: float = 0.0, vertical: bool=True):
         """
         This method allows a nut cut out to be cut into a specified side.
         Args:
@@ -78,6 +78,7 @@ class CycadSide:
             nut_type: The type of nut to be cut. This is used to create the diameter of the nut but will be developed in later versions. Defaults to 3.0.
             depth: How deep to make the nut cut out. If it is not specified the nut cut out will be drilled all the way through. Defaults to None.
             sink: The nut cut out can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            vertical: This will be set to False if you want the flat side rather than the point side down.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=sink)
@@ -88,6 +89,7 @@ class CycadSide:
             z=_location_tupple[2],
             nut_type=nut_type,
             depth=_depth,
+            vertical=vertical
         )
 
     def slot(
