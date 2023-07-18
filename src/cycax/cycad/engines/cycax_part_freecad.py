@@ -141,11 +141,11 @@ class EngineFreecad:
                 angles = features["side"]
                 angles = {
                     TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
-                    BACK: [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
+                    BACK: [pos_vec[0] , pos_vec[1]- features["y_size"], pos_vec[2]],
                     BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
                     FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
                     LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                    RIGHT: [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
+                    RIGHT: [pos_vec[0]- features["x_size"], pos_vec[1], pos_vec[2]],
                 }[angles]
         else:
             angles = [pos_vec[0], pos_vec[1], pos_vec[2]]
@@ -173,14 +173,18 @@ class EngineFreecad:
             x = move["x"]
             y = move["y"]
             z = move["z"]
-        if side in [FRONT, BACK]:
+        if side == FRONT:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
+        elif side == BACK:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90))
         elif side == TOP:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
         elif side == BOTTOM:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
-        elif side in [LEFT, RIGHT]:
+        elif side == LEFT:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
+        elif side == RIGHT:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
         return cyl
 
     def render_to_png(self, target_path: Path):
