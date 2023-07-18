@@ -49,7 +49,7 @@ class Assembly:
         if engine.lower() == "openscad":
             assembler = AssemblyOpenSCAD(self.part_no)
         elif engine.lower() == "blender":
-            assembler= AssemblyBlender(self.part_no)
+            assembler = AssemblyBlender(self.part_no)
         else:
             msg = f"Engine {assembler} is not one of the recognized engines for assebling parts. Choose one of OpenSCAD (default) or Blender."
             raise ValueError(msg)

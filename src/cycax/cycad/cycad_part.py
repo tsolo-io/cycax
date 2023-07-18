@@ -112,7 +112,7 @@ class CycadPart(Location):
         side: str,
         diameter: float,
         depth: float,
-        external_subtract: bool=False,
+        external_subtract: bool = False,
     ):
         """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
         If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
@@ -142,7 +142,7 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
         horizontal: bool = True,
-        external_subtract: bool = False
+        external_subtract: bool = False,
     ):
         """This method will insert a slot into a CycadPart.
 
@@ -178,7 +178,7 @@ class CycadPart(Location):
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float, vertical: bool=True):
+    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: float, depth: float, vertical: bool = True):
         """This method will insert a nut into a CycadPart.
 
         Args:

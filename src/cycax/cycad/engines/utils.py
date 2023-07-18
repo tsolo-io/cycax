@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from pathlib import Path
 
 
@@ -59,6 +60,7 @@ def check_source_hash(source_filepath: Path, target_filepath: Path) -> bool:
 
     if target_filepath.exists():
         old_hash = load_file_hash(source_filepath)
+        # logging.debug("File %s has old hash %s and new hash %s", source_filepath, old_hash, new_hash)
         if old_hash == new_hash:
             return False
 

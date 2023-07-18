@@ -90,7 +90,7 @@ class PartEngineOpenSCAD(PartEngine):
         res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
 
-    def _move_cube(self, features: dict, center:bool =False) -> str:
+    def _move_cube(self, features: dict, center: bool = False) -> str:
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
@@ -99,7 +99,7 @@ class PartEngineOpenSCAD(PartEngine):
         """
 
         angles = [0, 0, 0]
-        if center==False:
+        if center is False:
             if features["side"] is not None:
                 angles = features["side"]
                 angles = {
@@ -117,7 +117,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return output
 
-    def _rotate(self, side: str, vertical:bool=False) -> str:
+    def _rotate(self, side: str, vertical: bool = False) -> str:
         """
         This will rotate the object and return the scad necessary.
 
@@ -134,9 +134,9 @@ class PartEngineOpenSCAD(PartEngine):
             LEFT: "rotate([0, 90, 0])rotate([0, 0, 30])",
             RIGHT: "rotate([0, 270, 0])rotate([0, 0, 30])",
         }[side]
-            
-        if vertical == True:
-            side2 =  "rotate([0, 0, 30])"
+
+        if vertical is True:
+            side2 = "rotate([0, 0, 30])"
             side = side + side2
 
         return side

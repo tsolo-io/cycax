@@ -13,7 +13,7 @@ class CycadSide:
         pos: tuple[float, float],
         diameter: float,
         depth: float = None,
-        external_subtract = False,
+        external_subtract=False,
     ):
         """
         This will insert a whole given the relatice details, into the correct side.
@@ -70,7 +70,14 @@ class CycadSide:
             center=center,
         )
 
-    def nut(self, pos: tuple[float, float], nut_type: float = 3.0, depth: float = None, sink: float = 0.0, vertical: bool=True):
+    def nut(
+        self,
+        pos: tuple[float, float],
+        nut_type: float = 3.0,
+        depth: float = None,
+        sink: float = 0.0,
+        vertical: bool = True,
+    ):
         """
         This method allows a nut cut out to be cut into a specified side.
         Args:
@@ -89,7 +96,7 @@ class CycadSide:
             z=_location_tupple[2],
             nut_type=nut_type,
             depth=_depth,
-            vertical=vertical
+            vertical=vertical,
         )
 
     def slot(
@@ -99,7 +106,7 @@ class CycadSide:
         width: float,
         depth: float = None,
         horizontal: bool = True,
-        external_subtract = False,
+        external_subtract=False,
     ):
         """
         This allows a slot cut out to be cut into the specified side.
@@ -113,7 +120,7 @@ class CycadSide:
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0.0)
-        if horizontal==False:
+        if horizontal is False:
             length, width = width, length
         _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_slot(
@@ -174,7 +181,6 @@ class CycadSide:
 
 class LeftSide(CycadSide):
     name = "LEFT"
-
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
         """
