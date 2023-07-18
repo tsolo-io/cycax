@@ -12,11 +12,13 @@ class Location:
     """This class will define the loation of an object in 3D space.
     This class will initialize a location along the x, y, z axis.
 
-    Args:
-        x : The location of x along the x axis.
-        y : The location of y along the y axis.
-        z : The location of z along the z axis.
-        side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+    Attributes:
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
     """
 
     def __init__(self, x: float, y: float, z: float, side: str):
@@ -32,11 +34,12 @@ class Location:
         """Rotate while holding the top where it currenly is.
 
         Args:
-            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            rot: This will specify the number of times the swap is to be performed.
+                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
-            list: new dimentions of the object.
+            New dimentions of the object.
         """
 
         while rot > 0:
@@ -54,11 +57,12 @@ class Location:
         """Rotate while holding the front where it currenly is.
 
         Args:
-            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            rot: This will specify the number of times the swap is to be performed.
+                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
-            list: new dimentions of the object.
+            New dimentions of the object.
         """
 
         while rot > 0:
@@ -76,11 +80,12 @@ class Location:
         """Rotate while holding the left where it currenly is.
 
         Args:
-            rot: This will specify the number of times the swap is to be performed. This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+            rot: This will specify the number of times the swap is to be performed.
+                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
-            list: new dimentions of the object.
+            New dimentions of the object.
         """
 
         while rot > 0:
@@ -96,6 +101,7 @@ class Location:
 
     def move(self, x: float = None, y: float = None, z: float = None):
         """This move can be used to translate objects based on the provided arguments.
+
         Args:
             x: the value to which x needs to be moved.
             y: the value to which y needs to be moved.
@@ -110,6 +116,7 @@ class Location:
 
     def at(self, x: float = None, y: float = None, z: float = None):
         """This move can be used to translate objects based on the provided arguments.
+
         Args:
             x: the value to which x needs to be moved to on the axis.
             y: the value to which y needs to be moved to on the axis.

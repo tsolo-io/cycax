@@ -15,7 +15,7 @@ class Assembly:
     """
     This Assembly class will take multiple different cycad parts and combine them together to form complex parts.
 
-    Args:
+    Attributes:
         part_no: this is the destinct part number that the conplex part will have.
     """
 
@@ -32,8 +32,7 @@ class Assembly:
         part_engine: str = "OpenSCAD",
         part_engine_config: dict = None,
     ):
-        """
-        This class is used to control the assembly of the object and does a few checks to determine its status.
+        """Run the assembly and produce output files.
 
         Args:
             engine: The type of engine to use for assembly.
@@ -56,10 +55,11 @@ class Assembly:
         assembler.build(self._base_path)
 
     def save(self, path: Path | None = None):
-        """
-        Save the assembly and added part to JSON files.
+        """Save the assembly and added part to JSON files.
+
         Args:
-            path: The location where the assembly is stored. A directory for each part will be created in this path.
+            path: The location where the assembly is stored.
+                A directory for each part will be created in this path.
         """
 
         if path is None:
@@ -100,8 +100,8 @@ class Assembly:
             raise ValueError(msg)
 
     def add(self, part: CycadPart):
-        """
-        This adds a part into the assembly.
+        """This adds a part into the assembly.
+
         Once the part has been added to the assembler it can no longer be moved around or eddited.
 
         Args:
@@ -112,11 +112,10 @@ class Assembly:
         part.assembly = self
 
     def export(self) -> dict:
-        """
-        This creates a dict of the assembly, used to make the json.
+        """This creates a dict of the assembly, used to make the JSON.
 
         Returns:
-            dict: this is the dict that will be used to form a json decoded in assembly.
+            This is the dict that will be used to form a json decoded in assembly.
         """
         list_out = []
         for item in self.pieces:
@@ -134,8 +133,8 @@ class Assembly:
         return dict_out
 
     def rotateFreezeTop(self, part: CycadPart):
-        """
-        This method will hold the front and the left while holding the top where it currently is.
+        """This method will hold the front and the left while holding the top where it currently is.
+
         Args:
             part: This is the part that will be rotated.
         """
@@ -145,8 +144,8 @@ class Assembly:
         part.make_bounding_box()
 
     def rotateFreezeLeft(self, part: CycadPart):
-        """
-        This method will rotate the top and front while holding the left where it currently is.
+        """This method will rotate the top and front while holding the left where it currently is.
+
         Args:
             part: This is the part that will be rotated.
         """
@@ -156,8 +155,8 @@ class Assembly:
         part.make_bounding_box()
 
     def rotateFreezeFront(self, part: CycadPart):
-        """
-        This method will rotate the left and top while holding the front where it currently is.
+        """This method will rotate the left and top while holding the front where it currently is.
+
         Args:
             part: This is the part that will be rotated.
         """

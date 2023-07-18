@@ -439,7 +439,6 @@ class CycadPart(Location):
             engine_config: Configuration passed on to the PartEngine. It is engine specific.
         """
 
-        part_files = {}
         _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
             part_engine = Simple2D(name=self.part_no, path=self._base_path, config=engine_config)
@@ -457,5 +456,4 @@ class CycadPart(Location):
             msg = f"engine: {engine} is not one of Simple2D, OpenSCAD, Preview3D or FreeCAD."
             raise ValueError(msg)
 
-        part_engine.build()
-        return part_files
+        return part_engine.build()
