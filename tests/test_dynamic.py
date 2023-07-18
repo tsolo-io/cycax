@@ -1,4 +1,4 @@
-from cycax.cycad import Assembly, Cuboid, Print3D, SheetMetal
+from cycax.cycad import Assembly, Print3D, SheetMetal
 
 # Test that the entire system works together
 

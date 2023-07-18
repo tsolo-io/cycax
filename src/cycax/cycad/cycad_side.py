@@ -13,13 +13,12 @@ class CycadSide:
         pos: tuple[float, float],
         diameter: float,
         depth: float = None,
-        external_subtract=False,
+        external_subtract: bool=False,
     ):
-        """
-        This will insert a whole given the relatice details, into the correct side.
+        """This will insert a whole given the relatice details, into the correct side.
 
         Args:
-            pos : this is a tupple that contains the (x, y) coordinates of the object.
+            pos: this is a tupple that contains the (x, y) coordinates of the object.
             diameter: The diameter of the hole.
             depth: How deep to drill the hole, if not specified will drill the hole all the way through.
             external_subtract: This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False. When set to True the hole will not be drilled into the main object.
@@ -45,8 +44,7 @@ class CycadSide:
         sink: float = 0,
         center: bool = False,
     ):
-        """
-        This box will insert a rectangle shape cut out into the object.
+        """This box will insert a rectangle shape cut out into the object.
 
         Args:
             pos: The (x, y) coordinates of the box.
@@ -106,7 +104,7 @@ class CycadSide:
         width: float,
         depth: float = None,
         horizontal: bool = True,
-        external_subtract=False,
+        external_subtract: bool =False,
     ):
         """
         This allows a slot cut out to be cut into the specified side.

@@ -49,4 +49,16 @@ class PartEngine:
 
     def build(self):
         msg = "The build method needs to be implimented for this engine."
-        raise NotImplimentedError(msg)
+        raise NotImplementedError(msg)
+
+    def file_list(self, files: list, engine: str, score: int) -> list:
+        """Generate a list of artefacts/files."""
+        model_files = []
+        for _file in files:
+            filepath = _file["file"]
+            if filepath.exists():
+                _file["type"] = filepath.suffix.strip(".").upper()
+                _file["engine"] = engine
+                _file["score"] = score
+                model_files.append(_file)
+        return model_files

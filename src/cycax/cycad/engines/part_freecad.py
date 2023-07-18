@@ -6,19 +6,11 @@ from pathlib import Path
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.utils import check_source_hash
+from cycax.cycad.location import TOP
 
 
 class PartEngineFreeCAD(PartEngine):
     def build(self) -> dict:
-        model_files = {}
-
-        _files = [
-            self._base_path / self.name / f"{self.name}-FreeCAD.stl",
-            self._base_path / self.name / f"{self.name}-perspectiveAll.png",
-            self._base_path / self.name / f"{self.name}-perspective.dxf",
-            self._base_path / self.name / f"{self.name}-perspectiveTop.png",
-        ]
-
         fcstd_file = self._base_path / self.name / f"{self.name}.FCStd"
         if check_source_hash(self._json_file, fcstd_file):
             app_bin = self.get_appimage("FreeCAD")
@@ -28,7 +20,6 @@ class PartEngineFreeCAD(PartEngine):
 
             environment = dict(os.environ)
             environment.update({"CYCAX_JSON": self._json_file, "CYCAX_CWD": self._base_path})
-            print("Environment:", environment)
             result = subprocess.run(
                 [app_bin, freecad_py],
                 capture_output=True,
@@ -43,5 +34,12 @@ class PartEngineFreeCAD(PartEngine):
             if result.stderr:
                 logging.error("FreeCAD: %s", result.stderr)
 
-        # raise AssertionError()
-        return model_files
+        _files = [
+            {"file": self._base_path / self.name / f"{self.name}-FreeCAD.stl"},
+            {"file": self._base_path / self.name / f"{self.name}-perspectiveAll.png"},
+            {"file": self._base_path / self.name / f"{self.name}-perspective.dxf", "side": TOP},
+            {"file": self._base_path / self.name / f"{self.name}-perspectiveTop.png", "side": TOP},
+            {"file": self._base_path / self.name / f"{self.name}.FCStd", "description": "FreeCAD primary source file."},
+        ]
+
+        return self.file_list(files=_files, engine="FreeCAD", score=5)
