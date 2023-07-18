@@ -68,7 +68,7 @@ class EngineFreecad:
             z = feature["z"]
         pos_vec = (x, y, z)
 
-        pos_vec = self._move_cube(feature, pos_vec)
+        pos_vec = self._move_cube(feature, pos_vec, center=feature["center"])
         pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
         length = feature["x_size"]
         width = feature["y_size"]
@@ -117,12 +117,14 @@ class EngineFreecad:
         elif feature["side"] in [TOP, BOTTOM]:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(30, 0, 0))
 
-        elif feature["side"] in [LEFT, RIGHT]:
+        elif feature["side"] == LEFT:
             nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
+        elif feature["side"] == RIGHT:
+            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 270, 0))
 
         return nut
 
-    def _move_cube(self, features: dict, pos_vec):
+    def _move_cube(self, features: dict, pos_vec, center=False):
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
@@ -134,16 +136,19 @@ class EngineFreecad:
         """
 
         angles = [0, 0, 0]
-        if features["side"] is not None:
-            angles = features["side"]
-            angles = {
-                TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
-                BACK: [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
-                BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                RIGHT: [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
-            }[angles]
+        if center == False:
+            if features["side"] is not None:
+                angles = features["side"]
+                angles = {
+                    TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
+                    BACK: [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
+                    BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                    FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                    LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                    RIGHT: [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
+                }[angles]
+        else:
+            angles = [pos_vec[0], pos_vec[1], pos_vec[2]]
 
         return angles
 

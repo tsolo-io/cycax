@@ -24,7 +24,7 @@ class PartEngineOpenSCAD(PartEngine):
             lookup: this will be the dictionary that contains the details about the cube so that is can be encoded in scad.
 
         """
-        res = self._move_cube(lookup)
+        res = self._move_cube(lookup, center=lookup["center"])
         center = ""
         if lookup["center"] is True:
             center = ", center=true"
@@ -89,7 +89,7 @@ class PartEngineOpenSCAD(PartEngine):
         res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
 
-    def _move_cube(self, features: dict) -> str:
+    def _move_cube(self, features: dict, center:bool =False) -> str:
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
@@ -98,16 +98,17 @@ class PartEngineOpenSCAD(PartEngine):
         """
 
         angles = [0, 0, 0]
-        if features["side"] is not None:
-            angles = features["side"]
-            angles = {
-                TOP: [0, 0, -features["z_size"]],
-                BACK: [-features["y_size"], 0, 0],
-                BOTTOM: [0, 0, 0],
-                FRONT: [0, 0, 0],
-                LEFT: [0, 0, 0],
-                RIGHT: [0, -features["x_size"], 0],
-            }[angles]
+        if center==False:
+            if features["side"] is not None:
+                angles = features["side"]
+                angles = {
+                    TOP: [0, 0, -features["z_size"]],
+                    BACK: [0, -features["y_size"], 0],
+                    BOTTOM: [0, 0, 0],
+                    FRONT: [0, 0, 0],
+                    LEFT: [0, 0, 0],
+                    RIGHT: [-features["x_size"], 0, 0],
+                }[angles]
 
         output = "translate([{x}, {y}, {z}])".format(
             x=angles[0] + features["x"], y=angles[1] + features["y"], z=angles[2] + features["z"]
