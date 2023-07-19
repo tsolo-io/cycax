@@ -70,7 +70,7 @@ class CycadSide:
             center=center,
         )
 
-    def nut(self, pos: tuple[float, float], nut_type: float = 3.0, depth: float = None, sink: float = 0.0, vertical: bool=True):
+    def nut(self, pos: tuple[float, float], nut_type: str = "M3", depth: float = None, sink: float = 0.0, vertical: bool=True):
         """
         This method allows a nut cut out to be cut into a specified side.
         Args:
