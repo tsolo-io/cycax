@@ -13,7 +13,7 @@ class CycadSide:
         pos: tuple[float, float],
         diameter: float,
         depth: float = None,
-        external_subtract = False,
+        external_subtract: bool = False,
     ):
         """
         This will insert a whole given the relatice details, into the correct side.
@@ -99,7 +99,7 @@ class CycadSide:
         width: float,
         depth: float = None,
         horizontal: bool = True,
-        external_subtract = False,
+        external_subtract: bool = False,
     ):
         """
         This allows a slot cut out to be cut into the specified side.
