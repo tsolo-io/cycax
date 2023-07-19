@@ -1,6 +1,6 @@
 from cycax.cycad import Assembly, SheetMetal
 
-# Tests that with mulitple roations the expected outcome is still achieved
+# Tests that with multiple roations the expected outcome is still achieved
 
 
 def test_rotate():
