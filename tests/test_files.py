@@ -42,7 +42,7 @@ def test_render_assembly_openscad(tmp_path):
     assert len(tuple(tmp_path.glob("*"))) == 0, "Test directory should be empty"
     assembly = Assembly("assembly_test")
     parts = {}
-    for part in ["partA", "partB", "partC", "partD", "partE", "partF"]:
+    for part in ["part_A", "part-B", "partC", "partD", "partE", "partF"]:
         mypart = SheetMetal(x_size=2, y_size=2, z_size=2, part_no=part)
         assembly.add(mypart)
         parts[part] = mypart
@@ -53,9 +53,10 @@ def test_render_assembly_openscad(tmp_path):
     assert len(tuple(tmp_path.glob("*"))) > len(parts.keys()), "Expect a directory per part and files for Assembly"
     check_files(tmp_path, "assembly_test", ["json", "scad"])
     for part in parts.keys():
-        part_expected_path = tmp_path / part.strip().replace("-", "_").lower()
+        part_name_slug = part.strip().replace("-", "_").lower()
+        part_expected_path = tmp_path / part_name_slug
         assert part_expected_path.is_dir(), "Directory for part should exists"
-        check_files(part_expected_path, part.strip().replace("-", "_").lower(), ["json", "scad", "stl"])
+        check_files(part_expected_path, part_name_slug, ["json", "scad", "stl"])
 
 
 def test_render_part_freecad(tmp_path):
