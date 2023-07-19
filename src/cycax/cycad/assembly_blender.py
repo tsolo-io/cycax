@@ -18,9 +18,9 @@ class AssemblyBlender:
     def __init__(self, part_no: str) -> None:
         self.part_no = part_no
         self._base_path = Path(".")
-        self.parts = []
+        self.parts = {}
 
-    def _fetch_part(self, part: str):
+    def fetch_part(self, part: str):
         """
         Retrieves the part that will be imported and possitioned.
 
@@ -30,16 +30,16 @@ class AssemblyBlender:
         stl_file = self._base_path / part / f"{part}.stl"
         if not stl_file.exists():
             logging.warning("Referencing a file that does not exists. File name %s", stl_file)
-        bpy.ops.import_mesh.stl(filepath=stl_file)
+        bpy.ops.import_mesh.stl(filepath=str(stl_file))
         for obj in bpy.context.selected_objects:
             if part in self.parts:
                 obj.name = f"{part}_{self.parts[part] + 1}"
                 self.parts[part] = self.parts[part] + 1
             else:
                 obj.name = f"{part}_{1}"
-                self.part[part] = 1
+                self.parts[part] = 1
 
-    def _swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
+    def swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
 
         while rot != 0:
@@ -49,7 +49,7 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def _swap_xz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
+    def swap_xz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the front"""
         while rot != 0:
             max_x = rotmax[0]
@@ -58,7 +58,7 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def _swap_yz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
+    def swap_yz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the left"""
         while rot != 0:
             max_z = rotmax[2]
@@ -67,7 +67,7 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def _move(self, rotmax: tuple, position: tuple, rotate: tuple):
+    def move(self, rotmax: tuple, position: tuple, rotate: tuple):
         """
         Computes the moving and rotating of the stl to the desired location.
 
@@ -80,15 +80,15 @@ class AssemblyBlender:
         for item in rotate:
             if item["axis"] == "x":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="X")
-                working = self._swap_yz_(rotation, 1, rotmax)
+                working = self.swap_yz_(rotation, 1, rotmax)
 
             if item["axis"] == "y":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Y")
-                working = self._swap_xz_(rotation, 1, rotmax)
+                working = self.swap_xz_(rotation, 1, rotmax)
 
             if item["axis"] == "z":
                 bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Z")
-                working = self._swap_xy_(rotation, 1, rotmax)
+                working = self.swap_xy_(rotation, 1, rotmax)
 
             rotation = working[0]
             rotmax = working[1]
@@ -97,7 +97,7 @@ class AssemblyBlender:
             value=(rotation[0] + position[0], rotation[1] + position[1], rotation[2] + position[2])
         )
 
-    def _colour(self, colour: str, part: str) -> str:
+    def colour(self, colour: str, part: str) -> str:
         """
         Gives the colour.
         Args:
@@ -121,9 +121,11 @@ class AssemblyBlender:
         data = json.loads(json_file.read_text())
 
         for action in data["parts"]:
-            self._fetch_part(action["part_no"])
-            self._move(action["rotmax"], action["position"], action["rotate"])
-            self._colour(action["colour"], action["part_no"])
+            self.fetch_part(action["part_no"])
+            self.move(action["rotmax"], action["position"], action["rotate"])
+            self.colour(action["colour"], action["part_no"])
 
         logging.info("Saving the .blend file.")
-        bpy.ops.wm.save_as_mainfile(filepath=self._base_path)
+        save_file = str(self._base_path / "blender")
+        bpy.ops.wm.save_as_mainfile(filepath=save_file)
+        #bpy.ops.wm.save_mainfile()

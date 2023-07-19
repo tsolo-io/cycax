@@ -10,6 +10,8 @@ from cycax.cycad.features import nut_specifications
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
+
+
 class PartEngineFreeCAD(PartEngine):
     def build(self) -> dict:
         model_files = {}
@@ -17,9 +19,12 @@ class PartEngineFreeCAD(PartEngine):
 
         logging.error("Use freeCAD %s", app_bin)
         freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
+        
+        nut_specifications_json = self._base_path / "nut_specifications.json"
+        json.dump(nut_specifications, nut_specifications_json.open("w+"))
 
         environment = dict(os.environ)
-        environment.update({"CYCAX_JSON": self._json_file, "CYCAX_CWD": self._base_path})
+        environment.update({"CYCAX_JSON": self._json_file, "CYCAX_CWD": self._base_path, "NUT_SPECIFICATIONS_JSON": nut_specifications_json})
         print("Environment:", environment)
         result = subprocess.run(
             [app_bin, freecad_py],

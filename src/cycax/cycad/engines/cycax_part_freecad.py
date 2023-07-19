@@ -31,7 +31,6 @@ FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
 
-
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a json passed to it. The json will contain specific information of the object.
 
@@ -58,7 +57,7 @@ class EngineFreecad:
             z = feature["z"]
         pos_vec = (x, y, z)
 
-        pos_vec = self._move_cube(feature, pos_vec)
+        pos_vec = self._move_cube(feature, pos_vec, center=feature["center"])
         pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
         length = feature["x_size"]
         width = feature["y_size"]
@@ -98,21 +97,37 @@ class EngineFreecad:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
         """
 
-        hex = self._calc_hex(depth=0, diameter=3)
+
+        hex = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
         nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
-
-        if feature["side"] in [FRONT, BACK]:
-            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 30, 270))
-
-        elif feature["side"] in [TOP, BOTTOM]:
-            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(30, 0, 0))
-
-        elif feature["side"] in [LEFT, RIGHT]:
-            nut.Placement = App.Placement(Vector(feature["x"], feature["y"], feature["z"]), App.Rotation(0, 90, 0))
+        
+        side = feature["side"] 
+        x = feature["x"]
+        y = feature["y"]
+        z = feature["z"]
+        
+        if feature["vertical"] ==True:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 30))
+           
+        
+        
+        if side == FRONT:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
+        elif side == BACK:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90))
+        elif side == TOP:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
+        elif side == BOTTOM:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
+        elif side == LEFT:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
+        elif side == RIGHT:
+            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
+    
 
         return nut
 
-    def _move_cube(self, features: dict, pos_vec):
+    def _move_cube(self, features: dict, pos_vec, center=False):
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
@@ -124,16 +139,19 @@ class EngineFreecad:
         """
 
         angles = [0, 0, 0]
-        if features["side"] is not None:
-            angles = features["side"]
-            angles = {
-                TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
-                BACK: [pos_vec[0] - features["y_size"], pos_vec[1], pos_vec[2]],
-                BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                RIGHT: [pos_vec[0], pos_vec[1] - features["x_size"], pos_vec[2]],
-            }[angles]
+        if center == False:
+            if features["side"] is not None:
+                angles = features["side"]
+                angles = {
+                    TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
+                    BACK: [pos_vec[0] , pos_vec[1]- features["y_size"], pos_vec[2]],
+                    BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                    FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                    LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
+                    RIGHT: [pos_vec[0]- features["x_size"], pos_vec[1], pos_vec[2]],
+                }[angles]
+        else:
+            angles = [pos_vec[0], pos_vec[1], pos_vec[2]]
 
         return angles
 
@@ -158,12 +176,18 @@ class EngineFreecad:
             x = move["x"]
             y = move["y"]
             z = move["z"]
-        if side in [FRONT, BACK]:
+        if side == FRONT:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
-        elif side in [TOP, BOTTOM]:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0))
-        elif side in [LEFT, RIGHT]:
+        elif side == BACK:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90))
+        elif side == TOP:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
+        elif side == BOTTOM:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
+        elif side == LEFT:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
+        elif side == RIGHT:
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
         return cyl
 
     def render_to_png(self, target_path: Path):
@@ -370,6 +394,11 @@ class EngineFreecad:
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
+
+nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
+with open(nut_specifications_json) as file:
+    nut_specifications = json.load(file)
+
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
 engine.build(Path(json_file))

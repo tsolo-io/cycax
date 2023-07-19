@@ -54,14 +54,14 @@ class Fan(Cuboid):
         end_y = self.hole_y + self.diameter / 2 - self.hole_diameter / 2
         for working_x in [start_x, end_x]:
             for working_y in [start_y, end_y]:
-                self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=2, external_only=True)
+                self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=self.hole_depth, external_subtract=True)
                 self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=self.z_size)
 
     def externa(self):
         """
         This method will cut a large hole in the SheetMetal for the fan.
         """
-        self.top.hole(pos=[self.hole_x, self.hole_y], diameter=self.diameter, depth=2, external_only=True)
+        self.top.hole(pos=[self.hole_x, self.hole_y], diameter=self.diameter, depth=self.hole_depth, external_subtract=True)
 
     def interna(self):
         """
@@ -76,17 +76,17 @@ class Fan(Cuboid):
         while start_y < self.diameter / 2 + self.hole_y - 8:
             self.top.slot(
                 pos=[start_x, start_y],
-                width=self.diameter,
-                length=4,
+                length=self.diameter,
+                width=4,
                 depth=self.hole_depth,
-                external_only=True,
+                external_subtract=True,
             )
             self.top.slot(
                 pos=[start_x, finish_y],
-                width=self.diameter,
-                length=4,
+                length=self.diameter,
+                width=4,
                 depth=self.hole_depth,
-                external_only=True,
+                external_subtract=True,
             )
             start_y = start_y + spaces + 4
             finish_y = finish_y - spaces - 4
@@ -95,18 +95,18 @@ class Fan(Cuboid):
                 self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
                 self.hole_y + self.diameter / 2 - self.hole_diameter / 2,
             ],
-            width=self.diameter - 2 * self.hole_diameter - 4,
-            length=4,
+            length=self.diameter - 2 * self.hole_diameter - 4,
+            width=4,
             depth=self.hole_depth,
-            external_only=True,
+            external_subtract=True,
         )
         self.top.slot(
             pos=[
                 self.hole_x - self.diameter / 2 + self.hole_diameter + 2,
                 self.hole_y - self.diameter / 2 + self.hole_diameter / 2,
             ],
-            width=self.diameter - 2 * self.hole_diameter - 4,
-            length=4,
+            length=self.diameter - 2 * self.hole_diameter - 4,
+            width=4,
             depth=self.hole_depth,
-            external_only=True,
+            external_subtract=True,
         )

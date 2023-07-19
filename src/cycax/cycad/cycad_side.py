@@ -13,8 +13,7 @@ class CycadSide:
         pos: tuple[float, float],
         diameter: float,
         depth: float = None,
-        inner: bool = True,
-        external_only: bool = False,
+        external_subtract: bool = False,
     ):
         """
         This will insert a whole given the relatice details, into the correct side.
@@ -23,8 +22,7 @@ class CycadSide:
             pos : this is a tupple that contains the (x, y) coordinates of the object.
             diameter: The diameter of the hole.
             depth: How deep to drill the hole, if not specified will drill the hole all the way through.
-            inner: This is specified that the hole is internal and will not be coppied onto other surface. Defaults to True.
-            external_only: This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False.
+            external_subtract: This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False. When set to True the hole will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0)
@@ -35,8 +33,7 @@ class CycadSide:
             side=self.name,
             diameter=diameter,
             depth=_depth,
-            inner=inner,
-            external_only=external_only,
+            external_subtract=external_subtract,
         )
 
     def box(
@@ -73,7 +70,7 @@ class CycadSide:
             center=center,
         )
 
-    def nut(self, pos: tuple[float, float], nut_type: float = 3.0, depth: float = None, sink: float = 0.0):
+    def nut(self, pos: tuple[float, float], nut_type: str = "M3", depth: float = None, sink: float = 0.0, vertical: bool=True):
         """
         This method allows a nut cut out to be cut into a specified side.
         Args:
@@ -81,6 +78,7 @@ class CycadSide:
             nut_type: The type of nut to be cut. This is used to create the diameter of the nut but will be developed in later versions. Defaults to 3.0.
             depth: How deep to make the nut cut out. If it is not specified the nut cut out will be drilled all the way through. Defaults to None.
             sink: The nut cut out can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            vertical: This will be set to False if you want the flat side rather than the point side down.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=sink)
@@ -91,6 +89,7 @@ class CycadSide:
             z=_location_tupple[2],
             nut_type=nut_type,
             depth=_depth,
+            vertical=vertical
         )
 
     def slot(
@@ -100,8 +99,7 @@ class CycadSide:
         width: float,
         depth: float = None,
         horizontal: bool = True,
-        inner: bool = True,
-        external_only: bool = False,
+        external_subtract: bool = False,
     ):
         """
         This allows a slot cut out to be cut into the specified side.
@@ -111,11 +109,12 @@ class CycadSide:
             width: The width of the slot as viewed from the specified side.
             depth: The depth of the slot as viewed from the specified side. If not specified it will cut the slot all the way through the surface. Defaults to None.
             horizontal: Slots can either run verticall or horizontally. Defaults to horizontal.
-            inner: This is specified that the slot is internal and will not be coppied onto other surface. Defaults to True.
-            external_only: This is specified that the slot will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False.
+            external_subtract: This is specified that the slot will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False. When set to True the slot will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0.0)
+        if horizontal==False:
+            length, width = width, length
         _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_slot(
             x=_location_tupple[0],
@@ -126,8 +125,7 @@ class CycadSide:
             y_size=_box_dimentions[1],
             z_size=_box_dimentions[2],
             horizontal=horizontal,
-            inner=inner,
-            external_only=external_only,
+            external_subtract=external_subtract,
         )
 
     def _depth_check(self, val: float):
@@ -177,6 +175,7 @@ class CycadSide:
 class LeftSide(CycadSide):
     name = "LEFT"
 
+
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
         """
         location is calculated for the (x, y) plane using two values and a side.
@@ -206,8 +205,8 @@ class LeftSide(CycadSide):
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
         """
         x_size = depth
-        y_size = width
-        z_size = length
+        y_size = length
+        z_size = width
 
         return x_size, y_size, z_size
 
@@ -275,8 +274,8 @@ class RightSide(CycadSide):
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
         """
         x_size = depth
-        y_size = width
-        z_size = length
+        y_size = length
+        z_size = width
 
         return x_size, y_size, z_size
 
@@ -329,8 +328,8 @@ class TopSide(CycadSide):
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
         """
-        x_size = width
-        y_size = length
+        x_size = length
+        y_size = width
         z_size = depth
 
         return x_size, y_size, z_size
@@ -384,8 +383,8 @@ class BottomSide(CycadSide):
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
         """
-        x_size = width
-        y_size = length
+        x_size = length
+        y_size = width
         z_size = depth
 
         return x_size, y_size, z_size
@@ -439,9 +438,9 @@ class FrontSide(CycadSide):
         Returns:
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
         """
-        x_size = width
+        x_size = length
         y_size = depth
-        z_size = length
+        z_size = width
 
         return x_size, y_size, z_size
 
@@ -496,9 +495,9 @@ class BackSide(CycadSide):
             tuple: This will be the exact (x_size, y_size, z_size) of the box.
         """
 
-        x_size = width
+        x_size = length
         y_size = depth
-        z_size = length
+        z_size = width
 
         return x_size, y_size, z_size
 
