@@ -236,7 +236,7 @@ class LeftSide(CycadSide):
             return val
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeLeft(self._parent)
+        self._parent.assembly.rotate_freeze_left(self._parent)
 
 
 class RightSide(CycadSide):
@@ -291,7 +291,7 @@ class RightSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeLeft(self._parent)
+        self._parent.assembly.rotate_freeze_left(self._parent)
 
 
 class TopSide(CycadSide):
@@ -346,7 +346,7 @@ class TopSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeTop(self._parent)
+        self._parent.assembly.rotate_freeze_top(self._parent)
 
 
 class BottomSide(CycadSide):
@@ -401,7 +401,7 @@ class BottomSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeTop(self._parent)
+        self._parent.assembly.rotate_freeze_top(self._parent)
 
 
 class FrontSide(CycadSide):
@@ -456,7 +456,7 @@ class FrontSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeFront(self._parent)
+        self._parent.assembly.rotate_freeze_front(self._parent)
 
 
 class BackSide(CycadSide):
@@ -513,4 +513,4 @@ class BackSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeFront(self._parent)
+        self._parent.assembly.rotate_freeze_front(self._parent)

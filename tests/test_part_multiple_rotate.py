@@ -29,40 +29,40 @@ def test_rotate():
     assembly.add(mypart9)
 
     # Test that a part is rotated multiple times.
-    assembly.rotateFreezeLeft(mypart1)
-    assembly.rotateFreezeFront(mypart1)
-    assembly.rotateFreezeTop(mypart1)
-    assembly.rotateFreezeLeft(mypart1)
-    assembly.rotateFreezeLeft(mypart1)
+    assembly.rotate_freeze_left(mypart1)
+    assembly.rotate_freeze_front(mypart1)
+    assembly.rotate_freeze_top(mypart1)
+    assembly.rotate_freeze_left(mypart1)
+    assembly.rotate_freeze_left(mypart1)
 
-    assembly.rotateFreezeLeft(mypart2)
-    assembly.rotateFreezeFront(mypart2)
-    assembly.rotateFreezeTop(mypart2)
+    assembly.rotate_freeze_left(mypart2)
+    assembly.rotate_freeze_front(mypart2)
+    assembly.rotate_freeze_top(mypart2)
 
-    assembly.rotateFreezeLeft(mypart3)
-    assembly.rotateFreezeFront(mypart3)
+    assembly.rotate_freeze_left(mypart3)
+    assembly.rotate_freeze_front(mypart3)
 
-    assembly.rotateFreezeFront(mypart4)
-    assembly.rotateFreezeLeft(mypart4)
+    assembly.rotate_freeze_front(mypart4)
+    assembly.rotate_freeze_left(mypart4)
 
-    assembly.rotateFreezeTop(mypart5)
-    assembly.rotateFreezeFront(mypart5)
+    assembly.rotate_freeze_top(mypart5)
+    assembly.rotate_freeze_front(mypart5)
 
-    assembly.rotateFreezeFront(mypart6)
-    assembly.rotateFreezeTop(mypart6)
+    assembly.rotate_freeze_front(mypart6)
+    assembly.rotate_freeze_top(mypart6)
 
-    assembly.rotateFreezeLeft(mypart7)
-    assembly.rotateFreezeTop(mypart7)
+    assembly.rotate_freeze_left(mypart7)
+    assembly.rotate_freeze_top(mypart7)
 
-    assembly.rotateFreezeTop(mypart8)
-    assembly.rotateFreezeLeft(mypart8)
+    assembly.rotate_freeze_top(mypart8)
+    assembly.rotate_freeze_left(mypart8)
 
-    assembly.rotateFreezeLeft(mypart9)
-    assembly.rotateFreezeFront(mypart9)
-    assembly.rotateFreezeTop(mypart9)
-    assembly.rotateFreezeLeft(mypart9)
-    assembly.rotateFreezeFront(mypart9)
-    assembly.rotateFreezeTop(mypart9)
+    assembly.rotate_freeze_left(mypart9)
+    assembly.rotate_freeze_front(mypart9)
+    assembly.rotate_freeze_top(mypart9)
+    assembly.rotate_freeze_left(mypart9)
+    assembly.rotate_freeze_front(mypart9)
+    assembly.rotate_freeze_top(mypart9)
 
     assembly_def = assembly.export()
     assert assembly_def["parts"][0]["rotate"] == [
