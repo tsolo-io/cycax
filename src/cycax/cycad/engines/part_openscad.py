@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import subprocess
-from pathlib import Path
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.features import nut_specifications
@@ -21,7 +20,7 @@ class PartEngineOpenSCAD(PartEngine):
         This method will return the string that will have the scad for a cube.
 
         Args:
-            lookup: this will be the dictionary that contains the details about the cube so that is can be encoded in scad.
+            lookup: this will be the dictionary that contains the details about the cube.
 
         """
         res = self._move_cube(lookup, center=lookup["center"])
@@ -89,16 +88,16 @@ class PartEngineOpenSCAD(PartEngine):
         res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
 
-    def _move_cube(self, features: dict, center:bool =False) -> str:
+    def _move_cube(self, features: dict, center: bool = False) -> str:
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
         Args:
-            features: This is the dictionary that contains the deatails of where the cube must be places and its details.
+            features: This is the dictionary that contains the deatail of where the cube must be places and its details.
         """
 
         angles = [0, 0, 0]
-        if center==False:
+        if center is False:
             if features["side"] is not None:
                 angles = features["side"]
                 angles = {
@@ -116,11 +115,9 @@ class PartEngineOpenSCAD(PartEngine):
 
         return output
 
-    def _rotate(self, side: str, vertical:bool=False) -> str:
+    def _rotate(self, side: str, vertical: bool = False) -> str:
         """
         This will rotate the object and return the scad necessary.
-
-        ???Would it make sense to also have a dictionary here similar to location swap methods???
 
         Args:
             side : this is the side as retrieved form the dictionary.
@@ -133,9 +130,9 @@ class PartEngineOpenSCAD(PartEngine):
             LEFT: "rotate([0, 90, 0])rotate([0, 0, 30])",
             RIGHT: "rotate([0, 270, 0])rotate([0, 0, 30])",
         }[side]
-            
-        if vertical == True:
-            side2 =  "rotate([0, 0, 30])"
+
+        if vertical is True:
+            side2 = "rotate([0, 0, 30])"
             side = side + side2
 
         return side
@@ -219,8 +216,6 @@ class PartEngineOpenSCAD(PartEngine):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
-        !!!For this method to work properly it will be necessary to add a JSON, STL and SCAD file into the working repository.!!!
-
          Raises:
             ValueError: if incorrect part_name is provided.
         """
@@ -280,7 +275,6 @@ class PartEngineOpenSCAD(PartEngine):
         """Calls OpenSCAD to create a STL for the part.
 
         Depending on the complexity of the object it can take long to compute.
-        It prints out some messages to the terminal so that the impatient user will hopefully wait. Similar to many windows request.
 
         Raises:
             ValueError: If incorrect part_name is provided.

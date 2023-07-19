@@ -1,7 +1,6 @@
 import copy
 import json
 import logging
-import os
 from pathlib import Path
 
 from cycax.cycad.beveled_edge import BeveledEdge
@@ -112,9 +111,9 @@ class CycadPart(Location):
         side: str,
         diameter: float,
         depth: float,
-        external_subtract: bool=False,
+        external_subtract: bool = False,
     ):
-        """!!!!!THIS METHOD WILL ONLY WORK IF WE ARE MAKING HOLES IN THE CENTRE OF A CUBIC OBJECT, NEED TO RETHINK LOGIC!!!!!!
+        """
         If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
         Args:
             x: Position of feature on X-axis.
@@ -142,7 +141,7 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
         horizontal: bool = True,
-        external_subtract: bool = False
+        external_subtract: bool = False,
     ):
         """This method will insert a slot into a CycadPart.
 
@@ -178,7 +177,7 @@ class CycadPart(Location):
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool=True):
+    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
         """This method will insert a nut into a CycadPart.
 
         Args:
@@ -214,7 +213,7 @@ class CycadPart(Location):
             x_size : The size of x of rectangle.
             y_size : The size of y of rectangle.
             z_size : The size of z of rectangle.
-            center : This can be overridden if you would like to have the location of the cut out specified from its center.
+            center : This can be overridden if you would like object centered at origin.
         """
 
         temp_rect = RectangleCutOut(
@@ -433,7 +432,8 @@ class CycadPart(Location):
         )
 
     def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
-        """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
+        """This class will render the necessary diagrams when called with the following methods.
+        It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
         Args:
             engine: Name of the engine to use.
             engine_config: Configuration passed on to the PartEngine. It is engine specific.

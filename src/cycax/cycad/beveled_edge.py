@@ -1,6 +1,3 @@
-from cycax.cycad.features import Holes, RectangleCutOut
-
-
 class BeveledEdge:
     """This class will store data relating to the rounding of edges on a cube.
 

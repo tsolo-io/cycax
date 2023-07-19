@@ -1,12 +1,10 @@
 import json
 import logging
 import os
-from pathlib import Path
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, PathPatch, Polygon, Rectangle, Wedge
-from matplotlib.path import Path
+from matplotlib.patches import Circle, Rectangle
 
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
@@ -57,7 +55,8 @@ class Simple2D:
             return {"color": "blue", "edgecolor": "blue", "alpha": 0.6}
 
     def bounding_box(self, feature: dict):
-        """This method will update the bounding box of a feature when called. It is also used to update other information with regards to the plane of the odject that is affected by the side.
+        """This method will update the bounding box of a feature when called.
+        It is also used to update other information with about the plane of the odject that is affected by the side.
 
         Args:
             feature: this is the dictionary that contains the details of the object being produced.
@@ -77,7 +76,7 @@ class Simple2D:
             RIGHT: "diameter",
         }[self.hole_sink]
 
-    def _hole(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def _hole(self, ax: mpl.axes._axes.Axes, feature: dict):
         """This method will draw a hole on the plot if the given hole reaches the side which it is drawing.
 
         Args:
@@ -93,8 +92,9 @@ class Simple2D:
                 Circle((feature["x"], feature["y"]), feature["diameter"] / 2, **self._get_feature_style(feature))
             )
 
-    def _box(self, ax: matplotlib.axes._axes.Axes, feature: dict):
-        """This method will draw a box on the plot if the given cube reaches the side which it is drawing. It uses a dict to figure out the dimentions of the box it is drawing.
+    def _box(self, ax: mpl.axes._axes.Axes, feature: dict):
+        """This method will draw a box on the plot if the given cube reaches the side which it is drawing.
+        It uses a dict to figure out the dimentions of the box it is drawing.
 
         Args:
             ax: this is the axes onto which the object will be drawn.
@@ -127,7 +127,7 @@ class Simple2D:
             width = feature[width]
             ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self._get_feature_style(feature)))
 
-    def figure_feature(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def figure_feature(self, ax: mpl.axes._axes.Axes, feature: dict):
         """This method will coordingte the decoding of the dictionary.
 
         Args:
@@ -141,7 +141,7 @@ class Simple2D:
             self._hole(ax, feature)
 
     def build(self):
-        """This method will coordinate the drawing and saving of the figure that is being decoded from the provided json."""
+        """This method will coordinate the drawing of the figure that is being decoded from the provided json."""
         in_name = "{cwd}/{name}/{name}.json".format(cwd=os.getcwd(), name=self.name)
         with open(in_name) as f:
             data = json.load(f)

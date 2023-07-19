@@ -8,7 +8,8 @@ class Fan(Cuboid):
         width: Width of the fan. This will be used to create the fan's square bounding box.
         depth: The depth of the fan, used to make the bounding box.
         part_no: The specific part number of the fan.
-        internal: This is a boolean to establish whether the fan is external or internal. If the fan is internal slots will be cut out and if it is external a big hole will be cut.
+        internal: This is a boolean to establish whether the fan is external or internal.
+            If the fan is internal slots will be cut out and if it is external a big hole will be cut.
         hole_depth: The depth of the material the fan will be set to cut out. This is automated for 2mm steel.
         hole_diameter: The diamter of the securing holes of the fan. This is automated to 3mm.
     """
@@ -35,7 +36,8 @@ class Fan(Cuboid):
 
     def calculate(self):
         """
-        This method will be called within the init method and based on whether the specfied fan is external or internal it will call the relevant method.
+        This method will be called within the init method.
+        Based on whether the specfied fan is external or internal it will call the relevant method.
         """
         if self.internal:
             self.interna()
@@ -54,18 +56,26 @@ class Fan(Cuboid):
         end_y = self.hole_y + self.diameter / 2 - self.hole_diameter / 2
         for working_x in [start_x, end_x]:
             for working_y in [start_y, end_y]:
-                self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=self.hole_depth, external_subtract=True)
+                self.top.hole(
+                    pos=[working_x, working_y],
+                    diameter=self.hole_diameter,
+                    depth=self.hole_depth,
+                    external_subtract=True,
+                )
                 self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=self.z_size)
 
     def externa(self):
         """
         This method will cut a large hole in the SheetMetal for the fan.
         """
-        self.top.hole(pos=[self.hole_x, self.hole_y], diameter=self.diameter, depth=self.hole_depth, external_subtract=True)
+        self.top.hole(
+            pos=[self.hole_x, self.hole_y], diameter=self.diameter, depth=self.hole_depth, external_subtract=True
+        )
 
     def interna(self):
         """
-        This method will cut multiple slots into the SheetMetal surface to make gaps that will allow the internal fan to circulate the air.
+        This method will cut multiple slots into the SheetMetal surface.
+        The gaps will allow the internal fan to circulate the air.
         """
         slot_area = self.diameter - 16
         slots = int((slot_area) / 8)

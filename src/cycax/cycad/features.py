@@ -9,7 +9,9 @@ class Holes(Location):
         x : The location of x along the x axis.
         y : The location of y along the y axis.
         z : The location of z along the z axis.
-        side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        side : The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         diameter : Diameter of the hole.
         depth : depth of the hole.
 
@@ -49,7 +51,9 @@ class RectangleCutOut(Location):
         x : The location of x along the x axis.
         y : The location of y along the y axis.
         z : The location of z along the z axis.
-        side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        side : The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         x_size : x_size of the rectangle.
         y_size : y_size of the rectangle.
         z_size : z_size of the rectangle.
@@ -151,14 +155,16 @@ class NutCutOut(Location):
         x : The location of x along the x axis.
         y : The location of y along the y axis.
         z : The location of z along the z axis.
-        side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        side : The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         nut_type : Type of nut to be inserted.
         depth : depth of the rectangle.
-        vertical: this is a bool that will be set to False if you want the flat side down. 
+        vertical: this is a bool that will be set to False if you want the flat side down.
 
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool=True):
+    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type.upper()
         self.depth = depth
@@ -166,10 +172,10 @@ class NutCutOut(Location):
 
     def export(self) -> dict:
         """
-        This will create a dictionary of the nut that can be used for the json.
-nut
-        Returns:
-            dict: this will return a dictionary.
+                This will create a dictionary of the nut that can be used for the json.
+        nut
+                Returns:
+                    dict: this will return a dictionary.
 
         """
         dict_nut = {}

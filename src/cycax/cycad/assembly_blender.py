@@ -8,7 +8,7 @@ import bpy
 
 class AssemblyBlender:
     """
-     This class will use the STLs that have been printed and import them to a Blender file that will move them around to their correct location.
+    This class will use the STLs that have been printed and assemble them in a Blender file.
 
     Args:
         part_no: This is the part number of the complex part that is being assembled.
@@ -112,7 +112,7 @@ class AssemblyBlender:
 
     def build(self, path: Path | None = None):
         """
-        Decodes the provided json and move the object around as required, making a new blender file which will use imported stl.
+        Decodes the provided json and move the object around as required, creating new file which will use imported stl.
         """
         if path is not None:
             self._base_path = path
@@ -128,4 +128,4 @@ class AssemblyBlender:
         logging.info("Saving the .blend file.")
         save_file = str(self._base_path / "blender")
         bpy.ops.wm.save_as_mainfile(filepath=save_file)
-        #bpy.ops.wm.save_mainfile()
+        # bpy.ops.wm.save_mainfile()

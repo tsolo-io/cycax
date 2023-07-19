@@ -49,9 +49,10 @@ class Assembly:
         if engine.lower() == "openscad":
             assembler = AssemblyOpenSCAD(self.part_no)
         elif engine.lower() == "blender":
-            assembler= AssemblyBlender(self.part_no)
+            assembler = AssemblyBlender(self.part_no)
         else:
-            msg = f"Engine {assembler} is not one of the recognized engines for assebling parts. Choose one of OpenSCAD (default) or Blender."
+            msg = f"""Engine {assembler} is not one of the recognized engines for assebling parts.
+                Choose one of OpenSCAD (default) or Blender."""
             raise ValueError(msg)
         assembler.build(self._base_path)
 
@@ -59,7 +60,8 @@ class Assembly:
         """
         Save the assembly and added part to JSON files.
         Args:
-            path: The location where the assembly is stored. A directory for each part will be created in this path.
+            path: The location where the assembly is stored.
+                A directory for each part will be created in this path.
         """
 
         if path is None:
@@ -77,7 +79,8 @@ class Assembly:
         data_filename.write_text(json.dumps(data))
 
     def merge(self, part1: CycadPart, part2: CycadPart):
-        """This method will be used to merge 2 parts together whcich have identical sizes but different features.
+        """This method will be used to merge 2 parts together
+        which have identical sizes but different features.
 
         Args:
             part1: this part will receive the features present on part2.
@@ -133,7 +136,7 @@ class Assembly:
         dict_out["parts"] = list_out
         return dict_out
 
-    def rotateFreezeTop(self, part: CycadPart):
+    def rotate_freeze_top(self, part: CycadPart):
         """
         This method will hold the front and the left while holding the top where it currently is.
         Args:
@@ -144,7 +147,7 @@ class Assembly:
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
 
-    def rotateFreezeLeft(self, part: CycadPart):
+    def rotate_freeze_left(self, part: CycadPart):
         """
         This method will rotate the top and front while holding the left where it currently is.
         Args:
@@ -155,7 +158,7 @@ class Assembly:
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
 
-    def rotateFreezeFront(self, part: CycadPart):
+    def rotate_freeze_front(self, part: CycadPart):
         """
         This method will rotate the left and top while holding the front where it currently is.
         Args:
@@ -168,11 +171,13 @@ class Assembly:
 
     def level(self, partside1: CycadSide, partside2: CycadSide):
         """
-        level takes the plane of part 2 specified and moves part 1 so that its specified side has a plane equal to part 2.
-        part1.front part2.back will gve part 1 and part 2 a front and back which are on the same plane. It moves part1.
+        level takes the plane of part2 specified and moves part1 so that its specified side
+        has a plane equal to part2.
+            level(part1.front part2.back)
+        will gve part1 and part2 a front and back which are on the same plane. It moves part1.
         Args:
             partside1:This is the CycadSide that will be moved to match the plane of the other part.
-            partside2: This is the Cycadside which will dictate the plane used to as a reference to move part1.
+            partside2: This is the Cycadside which will be the reference when moving part1.
         Raises:
             ValueError: if the side present in CycadSide does not match one of the expected side.
         """
@@ -207,7 +212,8 @@ class Assembly:
 
     def _final_place_(self, part):
         """
-        This class should be private. It is used to move the move_holes to their final location before they are subtracted from the other part.
+        It is used to move the move_holes to their final location before they are subtracted from
+        the other part.
         """
         for hole_i, hole in enumerate(part.move_holes):
             temp_hole = copy.deepcopy(hole)
@@ -245,9 +251,9 @@ class Assembly:
 
         if part2.final_location is not True:
             self._final_place_(part2)
-        Holes = part2.move_holes
+        holes = part2.move_holes
 
-        for hole in Holes:
+        for hole in holes:
             if side == TOP:
                 if hole.z == part1.bounding_box[TOP]:
                     hole.side = TOP

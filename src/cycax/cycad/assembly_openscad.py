@@ -5,7 +5,7 @@ from pathlib import Path
 
 class AssemblyOpenSCAD:
     """
-     This class will use the STLs that have been printed and import them to a OpenSCAD file that will move them around to their correct location.
+    This class will use the STLs that have been printed and assemblt them in an OpenSCAD file.
 
     Args:
         part_no: This is the part number of the complex part that is being assembled.
@@ -103,7 +103,7 @@ class AssemblyOpenSCAD:
 
     def build(self, path: Path | None = None):
         """
-        Decodes the provided json and move the object around as required, making a new openSCAD which will use imported stl.
+        Decodes the provided json and assemble the object, creating an openSCAD file which will use imported stl.
         """
         if path is not None:
             self._base_path = path

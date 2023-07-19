@@ -10,7 +10,6 @@
 import json
 import logging
 import os
-import sys
 from math import sqrt
 from pathlib import Path
 
@@ -30,6 +29,7 @@ BOTTOM = "BOTTOM"
 FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
+
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a json passed to it. The json will contain specific information of the object.
@@ -97,20 +97,17 @@ class EngineFreecad:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
         """
 
-
         hex = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
         nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
-        
-        side = feature["side"] 
+
+        side = feature["side"]
         x = feature["x"]
         y = feature["y"]
         z = feature["z"]
-        
-        if feature["vertical"] ==True:
+
+        if feature["vertical"] is True:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 30))
-           
-        
-        
+
         if side == FRONT:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
         elif side == BACK:
@@ -123,7 +120,6 @@ class EngineFreecad:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
         elif side == RIGHT:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
-    
 
         return nut
 
@@ -132,23 +128,23 @@ class EngineFreecad:
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
         Args:
-            features: This is the dictionary that contains the deatails of where the cube must be places and its details.
+            features: This is the dictionary that contains the deatails of where the cube must be placed.
             pos_vec(list): where part is positioned.
 
         Returns:
         """
 
         angles = [0, 0, 0]
-        if center == False:
+        if center is False:
             if features["side"] is not None:
                 angles = features["side"]
                 angles = {
                     TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
-                    BACK: [pos_vec[0] , pos_vec[1]- features["y_size"], pos_vec[2]],
+                    BACK: [pos_vec[0], pos_vec[1] - features["y_size"], pos_vec[2]],
                     BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
                     FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
                     LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                    RIGHT: [pos_vec[0]- features["x_size"], pos_vec[1], pos_vec[2]],
+                    RIGHT: [pos_vec[0] - features["x_size"], pos_vec[1], pos_vec[2]],
                 }[angles]
         else:
             angles = [pos_vec[0], pos_vec[1], pos_vec[2]]
