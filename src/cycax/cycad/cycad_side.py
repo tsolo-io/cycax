@@ -71,7 +71,7 @@ class CycadSide:
     def nut(
         self,
         pos: tuple[float, float],
-        nut_type: float = 3.0,
+        nut_type: str = "M3",
         depth: float = None,
         sink: float = 0.0,
         vertical: bool = True,

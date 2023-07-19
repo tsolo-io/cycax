@@ -402,5 +402,10 @@ class EngineFreecad:
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
+nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
+with open(nut_specifications_json) as file:
+    nut_specifications = json.load(file)
+
+logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
 engine.build(Path(json_file))

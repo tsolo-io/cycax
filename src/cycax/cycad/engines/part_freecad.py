@@ -19,7 +19,7 @@ class PartEngineFreeCAD(PartEngine):
             freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
 
             environment = dict(os.environ)
-            environment.update({"CYCAX_JSON": self._json_file, "CYCAX_CWD": self._base_path})
+            environment.update({"CYCAX_JSON": self._json_file, "CYCAX_CWD": self._base_path, "NUT_SPECIFICATIONS_JSON": nut_specifications_json})
             result = subprocess.run(
                 [app_bin, freecad_py],
                 capture_output=True,
