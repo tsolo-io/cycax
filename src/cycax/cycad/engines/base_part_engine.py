@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 
 class PartEngine:
@@ -13,7 +14,7 @@ class PartEngine:
         config: Engine specific configuration.
     """
 
-    def __init__(self, name, path: Path = None, config: dict = None):
+    def __init__(self, name, path: Optional[Path] = None, config: Optional[dict] = None):
         self._base_path = None
         self._json_file = None
         self.name = name

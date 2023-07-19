@@ -3,6 +3,7 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
@@ -23,14 +24,14 @@ class Assembly:
         self.part_no = part_no.strip().replace("-", "_").lower()
         self.pieces = []
         self._base_path = Path(".")
-        self._part_files = defaultdict(dict)
+        self._part_files = defaultdict(list)
 
     def render(
         self,
         engine: str = "OpenSCAD",
-        engine_config: dict = None,
+        engine_config: Optional[dict] = None,
         part_engine: str = "OpenSCAD",
-        part_engine_config: dict = None,
+        part_engine_config: Optional[dict] = None,
     ):
         """Run the assembly and produce output files.
 
@@ -42,7 +43,7 @@ class Assembly:
         """
         for part in self.pieces:
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
-            self._part_files[part.part_no].update(data_files)
+            self._part_files[part.part_no] = data_files
 
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":

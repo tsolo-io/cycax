@@ -13,6 +13,7 @@ import os
 import sys
 from math import sqrt
 from pathlib import Path
+from typing import Optional
 
 import importDXF
 
@@ -164,7 +165,7 @@ class EngineFreecad:
         return angles
 
     def hole(
-        self, feature: dict = None, depth: float = None, radius: float = None, move: dict = None, side: str = None
+        self, feature: Optional[dict] = None, depth: Optional[float] = None, radius: Optional[float] = None, move: Optional[dict] = None, side: Optional[str] = None
     ):
         """This method will be used for cutting a cylindical hole into a surface.
 
@@ -402,9 +403,9 @@ class EngineFreecad:
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
-with open(nut_specifications_json) as file:
-    nut_specifications = json.load(file)
+# nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
+# with open(nut_specifications_json) as file:
+#     nut_specifications = json.load(file)
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))

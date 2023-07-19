@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class CycadSide:
     def __init__(self, parent):
         self._parent = parent
@@ -12,7 +15,7 @@ class CycadSide:
         self,
         pos: tuple[float, float],
         diameter: float,
-        depth: float = None,
+        depth: Optional[float] = None,
         external_subtract: bool = False,
     ):
         """This will insert a whole given the relatice details, into the correct side.
@@ -40,7 +43,7 @@ class CycadSide:
         pos: tuple[float, float],
         length: float,
         width: float,
-        depth: float = None,
+        depth: Optional[float] = None,
         sink: float = 0,
         center: bool = False,
     ):
@@ -72,7 +75,7 @@ class CycadSide:
         self,
         pos: tuple[float, float],
         nut_type: str = "M3",
-        depth: float = None,
+        depth: Optional[float] = None,
         sink: float = 0.0,
         vertical: bool = True,
     ):
@@ -102,7 +105,7 @@ class CycadSide:
         pos: tuple[float, float],
         length: float,
         width: float,
-        depth: float = None,
+        depth: Optional[float] = None,
         horizontal: bool = True,
         external_subtract: bool = False,
     ):

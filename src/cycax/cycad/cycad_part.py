@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import Optional
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
@@ -243,7 +244,7 @@ class CycadPart(Location):
             "BACK": self.y_max,
         }
 
-    def move(self, x: float = None, y: float = None, z: float = None):
+    def move(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
         """This method will be used for moving the part.
 
         Args:
@@ -273,7 +274,7 @@ class CycadPart(Location):
 
         self.make_bounding_box()
 
-    def at(self, x: float = None, y: float = None, z: float = None):
+    def at(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
         """Place part at the exact provided coordinates.
 
         Args:
@@ -432,7 +433,7 @@ class CycadPart(Location):
             )
         )
 
-    def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
+    def render(self, engine: str = "Preview3D", engine_config: Optional[dict] = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods. It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
         Args:
             engine: Name of the engine to use.
