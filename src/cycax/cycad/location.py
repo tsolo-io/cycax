@@ -1,4 +1,6 @@
 # global location variables
+from typing import Optional
+
 LEFT = "LEFT"
 RIGHT = "RIGHT"
 TOP = "TOP"
@@ -102,7 +104,7 @@ class Location:
 
         return rotmax
 
-    def move(self, x: float = None, y: float = None, z: float = None):
+    def move(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
         """This move can be used to translate objects based on the provided arguments.
         Args:
             x: the value to which x needs to be moved.
@@ -116,7 +118,7 @@ class Location:
         if z is not None:
             self.z = self.z + z
 
-    def at(self, x: float = None, y: float = None, z: float = None):
+    def at(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
         """This move can be used to translate objects based on the provided arguments.
         Args:
             x: the value to which x needs to be moved to on the axis.

@@ -3,6 +3,7 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
@@ -28,9 +29,9 @@ class Assembly:
     def render(
         self,
         engine: str = "OpenSCAD",
-        engine_config: dict = None,
+        engine_config: Optional[dict] = None,
         part_engine: str = "OpenSCAD",
-        part_engine_config: dict = None,
+        part_engine_config: Optional[dict] = None,
     ):
         """
         This class is used to control the assembly of the object and does a few checks to determine its status.
