@@ -13,6 +13,7 @@ import os
 import sys
 from math import sqrt
 from pathlib import Path
+from typing import Optional
 
 import importDXF
 
@@ -30,6 +31,18 @@ BOTTOM = "BOTTOM"
 FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
+
+nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
+    "M3": {
+        "diameter": 6.01,
+        "thickness": 2.4,
+    },
+    "M6": {
+        "diameter": 11.05,
+        "thickness": 5.2,
+    },
+}
+
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a json passed to it. The json will contain specific information of the object.
@@ -97,20 +110,17 @@ class EngineFreecad:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
         """
 
-
         hex = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
         nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
-        
-        side = feature["side"] 
+
+        side = feature["side"]
         x = feature["x"]
         y = feature["y"]
         z = feature["z"]
-        
-        if feature["vertical"] ==True:
+
+        if feature["vertical"] is True:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 30))
-           
-        
-        
+
         if side == FRONT:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
         elif side == BACK:
@@ -123,7 +133,6 @@ class EngineFreecad:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
         elif side == RIGHT:
             nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
-    
 
         return nut
 
@@ -139,16 +148,16 @@ class EngineFreecad:
         """
 
         angles = [0, 0, 0]
-        if center == False:
+        if center is False:
             if features["side"] is not None:
                 angles = features["side"]
                 angles = {
                     TOP: [pos_vec[0], pos_vec[1], pos_vec[2] - features["z_size"]],
-                    BACK: [pos_vec[0] , pos_vec[1]- features["y_size"], pos_vec[2]],
+                    BACK: [pos_vec[0], pos_vec[1] - features["y_size"], pos_vec[2]],
                     BOTTOM: [pos_vec[0], pos_vec[1], pos_vec[2]],
                     FRONT: [pos_vec[0], pos_vec[1], pos_vec[2]],
                     LEFT: [pos_vec[0], pos_vec[1], pos_vec[2]],
-                    RIGHT: [pos_vec[0]- features["x_size"], pos_vec[1], pos_vec[2]],
+                    RIGHT: [pos_vec[0] - features["x_size"], pos_vec[1], pos_vec[2]],
                 }[angles]
         else:
             angles = [pos_vec[0], pos_vec[1], pos_vec[2]]
@@ -156,7 +165,7 @@ class EngineFreecad:
         return angles
 
     def hole(
-        self, feature: dict = None, depth: float = None, radius: float = None, move: dict = None, side: str = None
+        self, feature: Optional[dict] = None, depth: Optional[float] = None, radius: Optional[float] = None, move: Optional[dict] = None, side: Optional[str] = None
     ):
         """This method will be used for cutting a cylindical hole into a surface.
 
@@ -394,10 +403,9 @@ class EngineFreecad:
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-
-nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
-with open(nut_specifications_json) as file:
-    nut_specifications = json.load(file)
+# nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
+# with open(nut_specifications_json) as file:
+#     nut_specifications = json.load(file)
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))

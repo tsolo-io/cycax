@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class CycadSide:
     def __init__(self, parent):
         self._parent = parent
@@ -12,14 +15,13 @@ class CycadSide:
         self,
         pos: tuple[float, float],
         diameter: float,
-        depth: float = None,
+        depth: Optional[float] = None,
         external_subtract: bool = False,
     ):
-        """
-        This will insert a whole given the relatice details, into the correct side.
+        """This will insert a whole given the relatice details, into the correct side.
 
         Args:
-            pos : this is a tupple that contains the (x, y) coordinates of the object.
+            pos: this is a tupple that contains the (x, y) coordinates of the object.
             diameter: The diameter of the hole.
             depth: How deep to drill the hole, if not specified will drill the hole all the way through.
             external_subtract: This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False. When set to True the hole will not be drilled into the main object.
@@ -41,12 +43,11 @@ class CycadSide:
         pos: tuple[float, float],
         length: float,
         width: float,
-        depth: float = None,
+        depth: Optional[float] = None,
         sink: float = 0,
         center: bool = False,
     ):
-        """
-        This box will insert a rectangle shape cut out into the object.
+        """This box will insert a rectangle shape cut out into the object.
 
         Args:
             pos: The (x, y) coordinates of the box.
@@ -70,7 +71,14 @@ class CycadSide:
             center=center,
         )
 
-    def nut(self, pos: tuple[float, float], nut_type: str = "M3", depth: float = None, sink: float = 0.0, vertical: bool=True):
+    def nut(
+        self,
+        pos: tuple[float, float],
+        nut_type: str = "M3",
+        depth: Optional[float] = None,
+        sink: float = 0.0,
+        vertical: bool = True,
+    ):
         """
         This method allows a nut cut out to be cut into a specified side.
         Args:
@@ -89,7 +97,7 @@ class CycadSide:
             z=_location_tupple[2],
             nut_type=nut_type,
             depth=_depth,
-            vertical=vertical
+            vertical=vertical,
         )
 
     def slot(
@@ -97,7 +105,7 @@ class CycadSide:
         pos: tuple[float, float],
         length: float,
         width: float,
-        depth: float = None,
+        depth: Optional[float] = None,
         horizontal: bool = True,
         external_subtract: bool = False,
     ):
@@ -113,7 +121,7 @@ class CycadSide:
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0.0)
-        if horizontal==False:
+        if horizontal is False:
             length, width = width, length
         _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_slot(
@@ -174,7 +182,6 @@ class CycadSide:
 
 class LeftSide(CycadSide):
     name = "LEFT"
-
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
         """

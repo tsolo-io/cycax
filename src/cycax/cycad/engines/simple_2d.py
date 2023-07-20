@@ -1,9 +1,9 @@
 import json
 import logging
-import os
 from pathlib import Path
+from typing import Optional
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, PathPatch, Polygon, Rectangle, Wedge
 from matplotlib.path import Path
@@ -24,7 +24,7 @@ class Simple2D(PartEngine):
 
     """
 
-    def __init__(self, name: str, path: Path = None, config: dict = None):
+    def __init__(self, name: str, path: Path = None, config: Optional[dict] = None):
         super().__init__(name, path, config)
 
         self.side = "TOP"
@@ -82,7 +82,7 @@ class Simple2D(PartEngine):
             RIGHT: "diameter",
         }[self.hole_sink]
 
-    def _hole(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def _hole(self, ax: mpl.axes._axes.Axes, feature: dict):
         """This method will draw a hole on the plot if the given hole reaches the side which it is drawing.
 
         Args:
@@ -98,7 +98,7 @@ class Simple2D(PartEngine):
                 Circle((feature["x"], feature["y"]), feature["diameter"] / 2, **self._get_feature_style(feature))
             )
 
-    def _box(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def _box(self, ax: mpl.axes._axes.Axes, feature: dict):
         """This method will draw a box on the plot if the given cube reaches the side which it is drawing. It uses a dict to figure out the dimentions of the box it is drawing.
 
         Args:
@@ -132,7 +132,7 @@ class Simple2D(PartEngine):
             width = feature[width]
             ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self._get_feature_style(feature)))
 
-    def figure_feature(self, ax: matplotlib.axes._axes.Axes, feature: dict):
+    def figure_feature(self, ax: mpl.axes._axes.Axes, feature: dict):
         """This method will coordingte the decoding of the dictionary.
 
         Args:

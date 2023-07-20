@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import subprocess
 from pathlib import Path
 
@@ -48,7 +47,7 @@ class PartEngineOpenSCAD(PartEngine):
         This method will return the string that will have the scad for a hole.
 
         Args:
-            lookup : This will be a dictionary containing the necessary information about the hole.
+            lookup: This will be a dictionary containing the necessary information about the hole.
 
         """
         tempdiam = lookup["diameter"] / 2
@@ -63,7 +62,7 @@ class PartEngineOpenSCAD(PartEngine):
         This method will return the string that will have the scad for a nut cut out.
 
         Args:
-            lookup : This will be a dictionary containing the necessary information about the nut.
+            lookup: This will be a dictionary containing the necessary information about the nut.
 
         """
         res = []
@@ -85,12 +84,12 @@ class PartEngineOpenSCAD(PartEngine):
         This will move the object around and return the scad necessary.
 
         Args:
-            lookup : This will be a dictionary containing the necessary information about the hole.
+            lookup: This will be a dictionary containing the necessary information about the hole.
         """
         res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
 
-    def _move_cube(self, features: dict, center:bool =False) -> str:
+    def _move_cube(self, features: dict, center: bool = False) -> str:
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
@@ -99,7 +98,7 @@ class PartEngineOpenSCAD(PartEngine):
         """
 
         angles = [0, 0, 0]
-        if center==False:
+        if center is False:
             if features["side"] is not None:
                 angles = features["side"]
                 angles = {
@@ -117,14 +116,14 @@ class PartEngineOpenSCAD(PartEngine):
 
         return output
 
-    def _rotate(self, side: str, vertical:bool=False) -> str:
+    def _rotate(self, side: str, vertical: bool = False) -> str:
         """
         This will rotate the object and return the scad necessary.
 
         ???Would it make sense to also have a dictionary here similar to location swap methods???
 
         Args:
-            side : this is the side as retrieved form the dictionary.
+            side: this is the side as retrieved form the dictionary.
         """
         side = {
             TOP: "rotate([0, 180, 0])",
@@ -134,9 +133,9 @@ class PartEngineOpenSCAD(PartEngine):
             LEFT: "rotate([0, 90, 0])rotate([0, 0, 30])",
             RIGHT: "rotate([0, 270, 0])rotate([0, 0, 30])",
         }[side]
-            
-        if vertical == True:
-            side2 =  "rotate([0, 0, 30])"
+
+        if vertical is True:
+            side2 = "rotate([0, 0, 30])"
             side = side + side2
 
         return side
@@ -178,7 +177,7 @@ class PartEngineOpenSCAD(PartEngine):
             features: This is the dictionary that contains the details of the beveled edge.
 
         Returns:
-            str: returns string of the beveled edge.
+            String of beveled edges.
         """
         if features["edge_type"] == "round":
             rotate = self._rotate(features["side"])
@@ -231,6 +230,14 @@ class PartEngineOpenSCAD(PartEngine):
         ):  # TODO: Follow this, surely it should be `if stl in config:` or. `if self.config.get('stl'):`
             if check_source_hash(scad_file, stl_file):
                 self.build_stl(scad_file, stl_file)
+
+        _files = [
+            {"file": self._base_path / self.name / f"{self.name}.scad"},
+            {"file": self._base_path / self.name / f"{self.name}.stl"},
+            {"file": self._base_path / self.name / f"{self.name}.openscad.stl"},
+        ]
+
+        return self.file_list(files=_files, engine="OpenSCAD", score=3)
 
     def build_scad(self, json_file: Path, scad_file: Path):
         """

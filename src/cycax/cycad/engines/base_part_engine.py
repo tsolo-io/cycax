@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 
 class PartEngine:
@@ -13,7 +14,7 @@ class PartEngine:
         config: Engine specific configuration.
     """
 
-    def __init__(self, name, path: Path = None, config: dict = None):
+    def __init__(self, name, path: Optional[Path] = None, config: Optional[dict] = None):
         self._base_path = None
         self._json_file = None
         self.name = name
@@ -49,4 +50,16 @@ class PartEngine:
 
     def build(self):
         msg = "The build method needs to be implimented for this engine."
-        raise NotImplimentedError(msg)
+        raise NotImplementedError(msg)
+
+    def file_list(self, files: list, engine: str, score: int) -> list:
+        """Generate a list of artefacts/files."""
+        model_files = []
+        for _file in files:
+            filepath = _file["file"]
+            if filepath.exists():
+                _file["type"] = filepath.suffix.strip(".").upper()
+                _file["engine"] = engine
+                _file["score"] = score
+                model_files.append(_file)
+        return model_files

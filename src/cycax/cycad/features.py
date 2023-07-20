@@ -3,7 +3,7 @@ from cycax.cycad.location import Location
 
 class Holes(Location):
     """This class will store data on holes. A whole will be a cylinider cut into an odject.
-        This class will initialize a hole at the desired location.
+    This class will initialize a hole at the desired location.
 
     Args:
         x : The location of x along the x axis.
@@ -21,12 +21,10 @@ class Holes(Location):
         self.depth = depth
 
     def export(self) -> dict:
-        """
-        This will create a dictionary of the hole that can be used for the json.
+        """This will create a dictionary of the hole that can be used for the json.
 
         Returns:
-            dict: this will return a dictionary.
-
+            this will return a dictionary.
         """
 
         dict_hole = {}
@@ -54,7 +52,6 @@ class RectangleCutOut(Location):
         y_size : y_size of the rectangle.
         z_size : z_size of the rectangle.
         center : This can be over ridden to instead specify the rectangle's location from its center.
-
     """
 
     def __init__(
@@ -75,12 +72,10 @@ class RectangleCutOut(Location):
         self.center = center
 
     def export(self) -> dict:
-        """
-        This will create a dictionary of the rectangle cut out that can be used for the json.
+        """This will create a dictionary of the rectangle cut out that can be used for the json.
 
         Returns:
-            dict: this will return a dictionary.
-
+            This will return a dictionary.
         """
         dict_cube = {}
         dict_cube["name"] = "cube"
@@ -154,20 +149,18 @@ class NutCutOut(Location):
         side : The side of the odject that this location refers to. This will be used to specify from which side a feature should be inserted into another object. This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         nut_type : Type of nut to be inserted.
         depth : depth of the rectangle.
-        vertical: this is a bool that will be set to False if you want the flat side down. 
-
+        vertical: this is a bool that will be set to False if you want the flat side down.
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool=True):
+    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type.upper()
         self.depth = depth
         self.vertical = vertical
 
     def export(self) -> dict:
-        """
-        This will create a dictionary of the nut that can be used for the json.
-nut
+        """This will create a dictionary of the nut that can be used for the json.
+
         Returns:
             dict: this will return a dictionary.
 

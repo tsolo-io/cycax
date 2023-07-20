@@ -128,4 +128,4 @@ class AssemblyBlender:
         logging.info("Saving the .blend file.")
         save_file = str(self._base_path / "blender")
         bpy.ops.wm.save_as_mainfile(filepath=save_file)
-        #bpy.ops.wm.save_mainfile()
+        # bpy.ops.wm.save_mainfile()
