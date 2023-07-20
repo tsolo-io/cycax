@@ -9,8 +9,8 @@ class PartEngine:
     Attributes:
         name: Name of the part.
         path: The path where the assembly is stored.
-        Default to current working directory.
-        The part is stored in a directory matching it name in this path.
+            Default to current working directory.
+            The part is stored in a directory matching it name in this path.
         config: Engine specific configuration.
     """
 
@@ -50,4 +50,16 @@ class PartEngine:
 
     def build(self):
         msg = "The build method needs to be implimented for this engine."
-        raise NotImplimentedError(msg)
+        raise NotImplementedError(msg)
+
+    def file_list(self, files: list, engine: str, score: int) -> list:
+        """Generate a list of artefacts/files."""
+        model_files = []
+        for _file in files:
+            filepath = _file["file"]
+            if filepath.exists():
+                _file["type"] = filepath.suffix.strip(".").upper()
+                _file["engine"] = engine
+                _file["score"] = score
+                model_files.append(_file)
+        return model_files

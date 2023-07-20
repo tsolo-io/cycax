@@ -1,6 +1,6 @@
 from cycax.cycad import Assembly, Print3D
 
-# Tests the marging of a part.
+# Tests the merging of a part.
 
 
 def test_merge():

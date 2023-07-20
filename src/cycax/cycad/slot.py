@@ -9,16 +9,16 @@ class Slot:
 
     This class will initialize a slot in the desired location.
 
-    Args:
-        x : The location of x along the x axis.
-        y : The location of y along the y axis.
-        z : The location of z along the z axis.
-        side : The side of the odject that this location refers to.
-        This will be used to specify from which side a feature should be inserted into another object.
-        This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-        x_size : The location of x_size of slot.
-        y_size : The location of y_size of slot.
-        z_size : The location of z_size of slot.
+    Attributes:
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        x_size: The location of x_size of slot.
+        y_size: The location of y_size of slot.
+        z_size: The location of z_size of slot.
         horizontal: This can be overridden it you need a verticle slot.
 
     """
@@ -53,11 +53,10 @@ class Slot:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-            This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
             max_y: This is the maximium value of the object on the y axis.
-            This is used as a metric to move the value once swapped back into the quadrant it came from.
-            In this manner if performs bot a rotate and a translate back to its original quadrant.
-
+                This is used as a metric to move the value once swapped back into the quadrant it came from.
+                In this manner if performs bot a rotate and a translate back to its original quadrant.
         """
         self.hole_left.swap_xy(rot=rot, max_y=max_y)
         self.hole_right.swap_xy(rot=rot, max_y=max_y)
@@ -68,11 +67,10 @@ class Slot:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-            This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
             max_x: This is the maximium value of the object on the x axis.
-            This is used as a metric to move the value once swapped back into the quadrant it came from.
-            In this manner if performs bot a rotate and a translate back to its original quadrant.
-
+                This is used as a metric to move the value once swapped back into the quadrant it came from.
+                In this manner if performs bot a rotate and a translate back to its original quadrant.
         """
         self.hole_left.swap_xz(rot=rot, max_x=max_x)
         self.hole_right.swap_xz(rot=rot, max_x=max_x)
@@ -83,11 +81,10 @@ class Slot:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-            This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
             max_z: This is the maximium value of the object on the z axis.
-            This is used as a metric to move the value once swapped back into the quadrant it came from.
-            In this manner if performs bot a rotate and a translate back to its original quadrant.
-
+                This is used as a metric to move the value once swapped back into the quadrant it came from.
+                In this manner if performs bot a rotate and a translate back to its original quadrant.
         """
         self.hole_left.swap_yz(rot=rot, max_z=max_z)
         self.hole_right.swap_yz(rot=rot, max_z=max_z)

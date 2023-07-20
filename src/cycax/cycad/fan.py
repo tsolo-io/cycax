@@ -9,7 +9,7 @@ class Fan(Cuboid):
         depth: The depth of the fan, used to make the bounding box.
         part_no: The specific part number of the fan.
         internal: This is a boolean to establish whether the fan is external or internal.
-        If the fan is internal slots will be cut out and if it is external a big hole will be cut.
+            If the fan is internal slots will be cut out and if it is external a big hole will be cut.
         hole_depth: The depth of the material the fan will be set to cut out. This is automated for 2mm steel.
         hole_diameter: The diamter of the securing holes of the fan. This is automated to 3mm.
     """

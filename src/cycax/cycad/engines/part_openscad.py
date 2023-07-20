@@ -1,9 +1,10 @@
 import json
 import logging
-import os
 import subprocess
+from pathlib import Path
 
 from cycax.cycad.engines.base_part_engine import PartEngine
+from cycax.cycad.engines.utils import check_source_hash
 from cycax.cycad.features import nut_specifications
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
@@ -46,7 +47,7 @@ class PartEngineOpenSCAD(PartEngine):
         This method will return the string that will have the scad for a hole.
 
         Args:
-            lookup : This will be a dictionary containing the necessary information about the hole.
+            lookup: This will be a dictionary containing the necessary information about the hole.
 
         """
         tempdiam = lookup["diameter"] / 2
@@ -61,7 +62,7 @@ class PartEngineOpenSCAD(PartEngine):
         This method will return the string that will have the scad for a nut cut out.
 
         Args:
-            lookup : This will be a dictionary containing the necessary information about the nut.
+            lookup: This will be a dictionary containing the necessary information about the nut.
 
         """
         res = []
@@ -83,7 +84,7 @@ class PartEngineOpenSCAD(PartEngine):
         This will move the object around and return the scad necessary.
 
         Args:
-            lookup : This will be a dictionary containing the necessary information about the hole.
+            lookup: This will be a dictionary containing the necessary information about the hole.
         """
         res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
@@ -120,7 +121,7 @@ class PartEngineOpenSCAD(PartEngine):
         This will rotate the object and return the scad necessary.
 
         Args:
-            side : this is the side as retrieved form the dictionary.
+            side: this is the side as retrieved form the dictionary.
         """
         side = {
             TOP: "rotate([0, 180, 0])",
@@ -174,7 +175,7 @@ class PartEngineOpenSCAD(PartEngine):
             features: This is the dictionary that contains the details of the beveled edge.
 
         Returns:
-            str: returns string of the beveled edge.
+            String of beveled edges.
         """
         if features["edge_type"] == "round":
             rotate = self._rotate(features["side"])
@@ -213,6 +214,30 @@ class PartEngineOpenSCAD(PartEngine):
         return res
 
     def build(self):
+        """Create the output files for the part."""
+
+        name = self.name
+        json_file = self._json_file
+        scad_file = self._base_path / name / f"{name}.scad"
+        # stl_file = self._base_path / name / f"{name}.openscad.stl" # TODO: use a filename that has reference to engine.
+        stl_file = self._base_path / name / f"{name}.stl"
+        if check_source_hash(json_file, scad_file):
+            self.build_scad(json_file, scad_file)
+        if (
+            "stl" not in self.config
+        ):  # TODO: Follow this, surely it should be `if stl in config:` or. `if self.config.get('stl'):`
+            if check_source_hash(scad_file, stl_file):
+                self.build_stl(scad_file, stl_file)
+
+        _files = [
+            {"file": self._base_path / self.name / f"{self.name}.scad"},
+            {"file": self._base_path / self.name / f"{self.name}.stl"},
+            {"file": self._base_path / self.name / f"{self.name}.openscad.stl"},
+        ]
+
+        return self.file_list(files=_files, engine="OpenSCAD", score=3)
+
+    def build_scad(self, json_file: Path, scad_file: Path):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
@@ -220,16 +245,7 @@ class PartEngineOpenSCAD(PartEngine):
             ValueError: if incorrect part_name is provided.
         """
 
-        out_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.name)
-        scad_file = open(out_name, "w")
-        in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.name)
-
-        if not os.path.exists(in_name):
-            msg = f"the part name {self.name} does not map to a JSON file at {in_name}."
-            raise ValueError(msg)
-
-        with open(in_name) as f:
-            data = json.load(f)
+        data = json.loads(json_file.read_text())
 
         output = []
         dif = 0
@@ -258,37 +274,30 @@ class PartEngineOpenSCAD(PartEngine):
             i = i + 1
             output.append("}")
 
-        for out in output:
-            if type(out) == list:
-                for small in out:
-                    scad_file.write(small)
-                    scad_file.write("\n")
-            else:
-                scad_file.write(out)
-                scad_file.write("\n")
+        with scad_file.open("w+") as fh:
+            for out in output:
+                if type(out) == list:
+                    for small in out:
+                        fh.write(small)
+                        fh.write("\n")
+                else:
+                    fh.write(out)
+                    fh.write("\n")
 
-        scad_file.close()
-        if "stl" not in self.config:
-            self.build_stl()
-
-    def build_stl(self):
+    def build_stl(self, scad_file, stl_file):
         """Calls OpenSCAD to create a STL for the part.
 
         Depending on the complexity of the object it can take long to compute.
+        It prints out some messages to the terminal so that the impatient user will hopefully wait.
+        Similar to many windows request.
 
         Raises:
             ValueError: If incorrect part_name is provided.
 
         """
-        in_name = "{cwd}/{data}/{data}.scad".format(cwd=self._base_path, data=self.name)
-        out_stl_name = "{cwd}/{data}/{data}.stl".format(cwd=self._base_path, data=self.name)
-        if not os.path.exists(in_name):
-            msg = f"The part name {self.name} does not map to a SCAD file at {in_name}."
-            raise ValueError(msg)
-
         app_bin = self.get_appimage("OpenSCAD")
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!! using %s", app_bin)
-        result = subprocess.run([app_bin, "-o", out_stl_name, in_name], capture_output=True, text=True)
+        result = subprocess.run([app_bin, "-o", stl_file, scad_file], capture_output=True, text=True)
 
         if result.stdout:
             logging.info("OpenSCAD: %s", result.stdout)

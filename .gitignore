@@ -164,3 +164,5 @@ docs/site/
 *.whl
 *.tar.gz
 *.json
+#__about__.py
+#src/cycax/__about__.py

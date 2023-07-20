@@ -33,6 +33,17 @@ FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
 
+nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
+    "M3": {
+        "diameter": 6.01,
+        "thickness": 2.4,
+    },
+    "M6": {
+        "diameter": 11.05,
+        "thickness": 5.2,
+    },
+}
+
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a JSON passed to it.
@@ -156,7 +167,12 @@ class EngineFreecad:
         return angles
 
     def hole(
-        self, feature: Optional[dict] = None, depth: Optional[float] = None, radius: Optional[float] = None, move: Optional[dict] = None, side: Optional[str] = None
+        self,
+        feature: Optional[dict] = None,
+        depth: Optional[float] = None,
+        radius: Optional[float] = None,
+        move: Optional[dict] = None,
+        side: Optional[str] = None,
     ):
         """This method will be used for cutting a cylindical hole into a surface.
 
@@ -393,10 +409,9 @@ class EngineFreecad:
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-
-nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
-with open(nut_specifications_json) as file:
-    nut_specifications = json.load(file)
+# nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
+# with open(nut_specifications_json) as file:
+#     nut_specifications = json.load(file)
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
