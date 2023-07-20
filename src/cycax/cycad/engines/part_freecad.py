@@ -28,7 +28,6 @@ class PartEngineFreeCAD(PartEngine):
                 "NUT_SPECIFICATIONS_JSON": nut_specifications_json,
             }
         )
-        print("Environment:", environment)
         result = subprocess.run(
             [app_bin, freecad_py],
             capture_output=True,

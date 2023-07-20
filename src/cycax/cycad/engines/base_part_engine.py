@@ -8,8 +8,8 @@ class PartEngine:
     Attributes:
         name: Name of the part.
         path: The path where the assembly is stored.
-              Default to current working directory.
-              The part is stored in a directory matching it name in this path.
+        Default to current working directory.
+        The part is stored in a directory matching it name in this path.
         config: Engine specific configuration.
     """
 

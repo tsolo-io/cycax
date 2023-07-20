@@ -69,7 +69,7 @@ class AssemblyBlender:
 
     def move(self, rotmax: tuple, position: tuple, rotate: tuple):
         """
-        Computes the moving and rotating of the stl to the desired location.
+        Computes the moving and rotating of the STL to the desired location.
 
         Args:
             rotmax: This is the tuple that contains the original (x,y,z) location.
@@ -112,7 +112,7 @@ class AssemblyBlender:
 
     def build(self, path: Path | None = None):
         """
-        Decodes the provided json and move the object around as required, creating new file which will use imported stl.
+        Decodes the provided JSON and move the object around as required, creating new file which will use imported STL.
         """
         if path is not None:
             self._base_path = path

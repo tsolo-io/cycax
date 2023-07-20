@@ -17,8 +17,8 @@ class Location:
         y : The location of y along the y axis.
         z : The location of z along the z axis.
         side : The side of the odject that this location refers to.
-            This will be used to specify from which side a feature should be inserted into another object.
-            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        This will be used to specify from which side a feature should be inserted into another object.
+        This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
     """
 
     def __init__(self, x: float, y: float, z: float, side: str):
@@ -35,8 +35,8 @@ class Location:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-                This allows for it to be easier to move the objsect 180.
-                As you will not need to call the method twice.
+            This allows for it to be easier to move the objsect 180.
+            As you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
@@ -59,8 +59,8 @@ class Location:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-                This allows for it to be easier to move the objsect 180.
-                As you will not need to call the method twice.
+            This allows for it to be easier to move the objsect 180.
+            As you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
@@ -83,8 +83,8 @@ class Location:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-                This allows for it to be easier to move the objsect 180.
-                As you will not need to call the method twice.
+            This allows for it to be easier to move the objsect 180.
+            As you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:

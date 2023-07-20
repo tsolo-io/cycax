@@ -334,10 +334,10 @@ class CycadPart(Location):
 
     def save(self, path: Path | None = None):
         """
-        This takes the provided part and will create its dictionary and export it to a json
+        This takes the provided part and will create its dictionary and export it to a JSON
         Args:
             path: Base path for storing part information.
-                  A directory with the part_no will be created in this path.
+            A directory with the part_no will be created in this path.
         """
         if path is None:
             path = Path(".")
@@ -433,7 +433,7 @@ class CycadPart(Location):
 
     def render(self, engine: str = "Preview3D", engine_config: dict = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods.
-        It is invoked int CycadPart and can be called: CycadPart.render.pyplot(left).
+        It is invoked by CycadPart and can be called: CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
         Args:
             engine: Name of the engine to use.
             engine_config: Configuration passed on to the PartEngine. It is engine specific.

@@ -93,7 +93,7 @@ class PartEngineOpenSCAD(PartEngine):
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
         Args:
-            features: This is the dictionary that contains the deatail of where the cube must be places and its details.
+            features: This is the dictionary that contains the detail of where the cube must be places and its details.
         """
 
         angles = [0, 0, 0]
@@ -216,7 +216,7 @@ class PartEngineOpenSCAD(PartEngine):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
-         Raises:
+        Raises:
             ValueError: if incorrect part_name is provided.
         """
 
@@ -225,7 +225,7 @@ class PartEngineOpenSCAD(PartEngine):
         in_name = "{cwd}/{data}/{data}.json".format(cwd=self._base_path, data=self.name)
 
         if not os.path.exists(in_name):
-            msg = f"the part name {self.name} does not map to a json file at {in_name}."
+            msg = f"the part name {self.name} does not map to a JSON file at {in_name}."
             raise ValueError(msg)
 
         with open(in_name) as f:

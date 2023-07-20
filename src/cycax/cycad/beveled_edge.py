@@ -31,10 +31,10 @@ class BeveledEdge:
 
     def export(self) -> dict:
         """
-        This will create a dictionary of the rectangle cut out that can be used for the json.
+        This will create a dictionary of the rectangle cut out that can be used for the JSON.
 
         Returns:
-            dict: this will return a dictionary.
+            this will return a dictionary.
 
         """
         dict_edge = {}

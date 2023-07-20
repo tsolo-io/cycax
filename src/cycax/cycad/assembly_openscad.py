@@ -58,7 +58,7 @@ class AssemblyOpenSCAD:
 
     def _move(self, rotmax: tuple, position: tuple, rotate: tuple) -> str:
         """
-        Computes the moving and rotating of the stl to the desired location.
+        Computes the moving and rotating of the STL to the desired location.
 
         Args:
             rotmax: This is the tuple that contains the original (x,y,z) location.
@@ -103,7 +103,7 @@ class AssemblyOpenSCAD:
 
     def build(self, path: Path | None = None):
         """
-        Decodes the provided json and assemble the object, creating an openSCAD file which will use imported stl.
+        Decodes the provided JSON and assemble the object, creating an openSCAD file which will use imported STL .
         """
         if path is not None:
             self._base_path = path

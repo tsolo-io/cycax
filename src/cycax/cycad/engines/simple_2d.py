@@ -17,7 +17,7 @@ class Simple2D:
     """This is a class that will be used to draw pyplots of various views of a 3D object.
 
     Args:
-        name: This is the name of the json file that needs to be decoded.
+        name: This is the name of the JSON file that needs to be decoded.
         side: Thi argument will suggest which side of the object the view is of.
 
     """
@@ -141,7 +141,7 @@ class Simple2D:
             self._hole(ax, feature)
 
     def build(self):
-        """This method will coordinate the drawing of the figure that is being decoded from the provided json."""
+        """This method will coordinate the drawing of the figure that is being decoded from the provided JSON."""
         in_name = "{cwd}/{name}/{name}.json".format(cwd=os.getcwd(), name=self.name)
         with open(in_name) as f:
             data = json.load(f)

@@ -61,7 +61,7 @@ class Assembly:
         Save the assembly and added part to JSON files.
         Args:
             path: The location where the assembly is stored.
-                A directory for each part will be created in this path.
+            A directory for each part will be created in this path.
         """
 
         if path is None:
@@ -116,10 +116,10 @@ class Assembly:
 
     def export(self) -> dict:
         """
-        This creates a dict of the assembly, used to make the json.
+        This creates a dict of the assembly, used to make the JSON.
 
         Returns:
-            dict: this is the dict that will be used to form a json decoded in assembly.
+            dict: this is the dict that will be used to form a JSON decoded in assembly.
         """
         list_out = []
         for item in self.pieces:
@@ -173,11 +173,11 @@ class Assembly:
         """
         level takes the plane of part2 specified and moves part1 so that its specified side
         has a plane equal to part2.
-            level(part1.front part2.back)
+        level(part1.front part2.back)
         will gve part1 and part2 a front and back which are on the same plane. It moves part1.
         Args:
             partside1:This is the CycadSide that will be moved to match the plane of the other part.
-            partside2: This is the Cycadside which will be the reference when moving part1.
+            partside2: This is the CycadSide which will be the reference when moving part1.
         Raises:
             ValueError: if the side present in CycadSide does not match one of the expected side.
         """
