@@ -1,6 +1,6 @@
 from cycax.cycad import Assembly, Print3D
 
-# Tests the move method and cardinal_possition methods of a part.
+# Tests the move method and cardinal_position methods of a part.
 
 
 def test_move():

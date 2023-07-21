@@ -3,17 +3,17 @@ from cycax.cycad.location import Location
 
 class Holes(Location):
     """This class will store data on holes. A whole will be a cylinider cut into an odject.
-        This class will initialize a hole at the desired location.
+    This class will initialize a hole at the desired location.
 
     Args:
-        x : The location of x along the x axis.
-        y : The location of y along the y axis.
-        z : The location of z along the z axis.
-        side : The side of the odject that this location refers to.
-        This will be used to specify from which side a feature should be inserted into another object.
-        This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-        diameter : Diameter of the hole.
-        depth : depth of the hole.
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        diameter: Diameter of the hole.
+        depth: depth of the hole.
 
     """
 
@@ -23,12 +23,10 @@ class Holes(Location):
         self.depth = depth
 
     def export(self) -> dict:
-        """
-        This will create a dictionary of the hole that can be used for the JSON.
+        """This will create a dictionary of the hole that can be used for the JSON.
 
         Returns:
-            dict: this will return a dictionary.
-
+            this will return a dictionary.
         """
 
         dict_hole = {}
@@ -48,17 +46,16 @@ class RectangleCutOut(Location):
     This class will initialize a Rectangle Cut Out at the desired location.
 
     Args:
-        x : The location of x along the x axis.
-        y : The location of y along the y axis.
-        z : The location of z along the z axis.
-        side : The side of the odject that this location refers to.
-        This will be used to specify from which side a feature should be inserted into another object.
-        This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-        x_size : x_size of the rectangle.
-        y_size : y_size of the rectangle.
-        z_size : z_size of the rectangle.
-        center : This can be over ridden to instead specify the rectangle's location from its center.
-
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        x_size: x_size of the rectangle.
+        y_size: y_size of the rectangle.
+        z_size: z_size of the rectangle.
+        center: This can be over ridden to instead specify the rectangle's location from its center.
     """
 
     def __init__(
@@ -79,12 +76,10 @@ class RectangleCutOut(Location):
         self.center = center
 
     def export(self) -> dict:
-        """
-        This will create a dictionary of the rectangle cut out that can be used for the JSON.
+        """This will create a dictionary of the rectangle cut out that can be used for the JSON.
 
         Returns:
-            dict: this will return a dictionary.
-
+            This will return a dictionary.
         """
         dict_cube = {}
         dict_cube["name"] = "cube"
@@ -152,16 +147,15 @@ class NutCutOut(Location):
     This class will initialize a Nut Cut Out at the desired location.
 
     Args:
-        x : The location of x along the x axis.
-        y : The location of y along the y axis.
-        z : The location of z along the z axis.
-        side : The side of the odject that this location refers to.
-        This will be used to specify from which side a feature should be inserted into another object.
-        This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-        nut_type : Type of nut to be inserted.
-        depth : depth of the rectangle.
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        nut_type: Type of nut to be inserted.
+        depth: depth of the rectangle.
         vertical: this is a bool that will be set to False if you want the flat side down.
-
     """
 
     def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
@@ -171,12 +165,10 @@ class NutCutOut(Location):
         self.vertical = vertical
 
     def export(self) -> dict:
-        """
-        This will create a dictionary of the nut that can be used for the JSON.
+        """This will create a dictionary of the nut that can be used for the JSON.
 
         Returns:
             this will return a dictionary.
-
         """
         dict_nut = {}
         for key, value in vars(self).items():

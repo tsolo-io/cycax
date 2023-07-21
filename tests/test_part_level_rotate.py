@@ -1,6 +1,6 @@
 from cycax.cycad import Assembly, SheetMetal
 
-# Test that if the part is leveled and rotated or rotated and then move the same assembly will be created.
+# Test that if the part is levelled and rotated or rotated and then move the same assembly will be created.
 
 
 def test_move_level():

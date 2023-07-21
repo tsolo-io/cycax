@@ -18,15 +18,14 @@ class CycadSide:
         depth: Optional[float] = None,
         external_subtract: bool = False,
     ):
-        """
-        This will insert a whole given the relatice details, into the correct side.
+        """This will insert a whole given the relatice details, into the correct side.
 
         Args:
-            pos : this is a tupple that contains the (x, y) coordinates of the object.
+            pos: this is a tupple that contains the (x, y) coordinates of the object.
             diameter: The diameter of the hole.
             depth: How deep to drill the hole, if not specified will drill the hole all the way through.
             external_subtract: This is specified that the hole will only be tranferred onto other surfaces.
-            When set to True the hole will not be drilled into the main object.
+                When set to True the hole will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0)
@@ -49,8 +48,7 @@ class CycadSide:
         sink: float = 0,
         center: bool = False,
     ):
-        """
-        This box will insert a rectangle shape cut out into the object.
+        """This box will insert a rectangle shape cut out into the object.
 
         Args:
             pos: The (x, y) coordinates of the box.
@@ -87,9 +85,9 @@ class CycadSide:
         Args:
             pos: The (x,y) coordinates of the nut cut out.
             nut_type: The type of nut to be cut.
-            This is used to create the diameter of the nut but will be developed in later versions.
+                This is used to create the diameter of the nut but will be developed in later versions.
             depth: How deep to make the nut cut out.
-            If it is not specified the nut cut out will be drilled all the way through.
+                If it is not specified the nut cut out will be drilled all the way through.
             sink: The nut cut out can be sunk bellow the surface of the specified side to make a pocket.
             vertical: This will be set to False if you want the flat side rather than the point side down.
         """
@@ -121,10 +119,10 @@ class CycadSide:
             length: The length of the slot as viewed from the specified side.
             width: The width of the slot as viewed from the specified side.
             depth: The depth of the slot as viewed from the specified side.
-            If not specified it will cut the slot all the way through the surface.
+                If not specified it will cut the slot all the way through the surface.
             horizontal: Slots can either run verticall or horizontally. Defaults to horizontal.
             external_subtract: This is specified that the slot will only be tranferred onto other surfaces.
-            When set to True the slot will not be drilled into the main object.
+                When set to True the slot will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0.0)

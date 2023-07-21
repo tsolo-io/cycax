@@ -338,7 +338,7 @@ class CycadPart(Location):
         This takes the provided part and will create its dictionary and export it to a JSON
         Args:
             path: Base path for storing part information.
-            A directory with the part_no will be created in this path.
+                A directory with the part_no will be created in this path.
         """
         if path is None:
             path = Path(".")
@@ -435,19 +435,15 @@ class CycadPart(Location):
     def render(self, engine: str = "Preview3D", engine_config: Optional[dict] = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods.
         It is invoked by CycadPart and can be called: CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
+
         Args:
             engine: Name of the engine to use.
             engine_config: Configuration passed on to the PartEngine. It is engine specific.
         """
 
-        part_files = {}
         _eng_lower = engine.lower()
         if _eng_lower == "simple2d":
-            if "side" in engine_config:
-                side = engine_config["side"]
-            else:
-                side = "TOP"
-            part_engine = Simple2D(name=self.part_no, side=side)
+            part_engine = Simple2D(name=self.part_no, path=self._base_path, config=engine_config)
 
         elif _eng_lower == "openscad":
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
@@ -462,5 +458,4 @@ class CycadPart(Location):
             msg = f"engine: {engine} is not one of Simple2D, OpenSCAD, Preview3D or FreeCAD."
             raise ValueError(msg)
 
-        part_engine.build()
-        return part_files
+        return part_engine.build()
