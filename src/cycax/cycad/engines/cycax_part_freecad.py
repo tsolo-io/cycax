@@ -112,7 +112,7 @@ class EngineFreecad:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
         """
 
-        hexigon = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
+        hexigon = self._calc_hex(depth=0, diameter=feature["diameter"])
         nut = hexigon.extrude(App.Vector(0, 0, feature["depth"]))
 
         side = feature["side"]

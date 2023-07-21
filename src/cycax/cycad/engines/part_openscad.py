@@ -5,7 +5,6 @@ from pathlib import Path
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.utils import check_source_hash
-from cycax.cycad.features import nut_specifications
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
@@ -68,7 +67,7 @@ class PartEngineOpenSCAD(PartEngine):
         res = []
         res.append(self._translate(lookup))
         res.append(self._rotate(lookup["side"], vertical=lookup["vertical"]))
-        radius = nut_specifications[lookup["nut_type"]]["diameter"] / 2
+        radius = lookup["diameter"] / 2
         res.append("cylinder(r={rad}, h={deep}, $fn=6);".format(rad=radius, deep=lookup["depth"]))
 
         return res

@@ -161,6 +161,8 @@ class NutCutOut(Location):
     def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type.upper()
+        self.diameter = nut_specifications[self.nut_type]["diameter"]
+        self.thickness = nut_specifications[self.nut_type]["thickness"]
         self.depth = depth
         self.vertical = vertical
 
