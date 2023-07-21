@@ -17,7 +17,7 @@ class Assembly:
     This Assembly class will take multiple different cycad parts and combine them together to form complex parts.
 
     Attributes:
-        part_no: this is the destinct part number that the conplex part will have.
+        part_no: this is the destinct part number that the complex part will have.
     """
 
     def __init__(self, part_no: str):
@@ -118,7 +118,7 @@ class Assembly:
         """This creates a dict of the assembly, used to make the JSON.
 
         Returns:
-            This is the dict that will be used to form a json decoded in assembly.
+            This is the dict that will be used to form a JSON decoded in assembly.
         """
         list_out = []
         for item in self.pieces:
