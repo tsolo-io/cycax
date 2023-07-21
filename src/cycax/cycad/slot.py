@@ -47,4 +47,3 @@ class Slot:
             self.rectangle = RectangleCutOut(
                 side=side, x=x - x_size / 2, y=y + x_size / 2, z=z, x_size=x_size, y_size=y_size - x_size, z_size=z_size
             )
-            

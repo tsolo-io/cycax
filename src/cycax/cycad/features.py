@@ -88,13 +88,16 @@ class RectangleCutOut(Location):
             dict_cube[key] = value
         return dict_cube
 
-    def swap_xy(self, rot: float, rotmax: list):
+    def swap_xy(self, rot: float, rotmax: list) -> list:
         """
         This will rotate slot while holding top where it is. It overides the method present in the location super.
 
         Args:
             rot: the number of times to perfor the swap.
-            max_y: the maximum value of y used for the swap.
+            rotmax: the maximum values for the swap.
+
+        Returns:
+            New location of relevant max of (x,y,z). useful when doing repeated swaps.
         """
         rotmax = super().swap_xy(rot=rot, rotmax=rotmax)
         while rot > 0:
@@ -102,12 +105,15 @@ class RectangleCutOut(Location):
             rot = rot - 1
         return rotmax
 
-    def swap_xz(self, rot: float, rotmax: list):
+    def swap_xz(self, rot: float, rotmax: list) -> list:
         """This will rotate slot while holding front where it is. It overides the method present in the location super.
 
         Args:
             rot: the number of times to perfor the swap.
-            max_x: the maximum value of x used for the swap.
+            rotmax: the maximum values for the swap.
+
+        Returns:
+            New location of relevant max of (x,y,z). useful when doing repeated swaps.
         """
         rotmax = super().swap_xz(rot=rot, rotmax=rotmax)
         while rot > 0:
@@ -115,12 +121,15 @@ class RectangleCutOut(Location):
             rot = rot - 1
         return rotmax
 
-    def swap_yz(self, rot: float, rotmax: list):
+    def swap_yz(self, rot: float, rotmax: list) -> list:
         """This will rotate slot while holding left where it is. It overides the method present in the location super.
 
         Args:
             rot: the number of times to perfor the swap.
-            max_z: the maximum value of z used for the swap.
+            rotmax: the maximum values for the swap.
+
+        Returns:
+            New location of relevant max of (x,y,z). useful when doing repeated swaps.
         """
         rotmax = super().swap_yz(rot=rot, rotmax=rotmax)
         while rot > 0:
@@ -129,7 +138,9 @@ class RectangleCutOut(Location):
         return rotmax
 
 
-nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
+nut_specifications: dict[
+    str, dict[str, float]
+] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
     "M3": {
         "diameter": 6.01,
         "thickness": 2.4,
