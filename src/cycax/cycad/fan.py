@@ -23,14 +23,15 @@ class Fan(Cuboid):
         hole_depth: float = 2.0,
         hole_diameter: float = 3.0,
     ):
-        super().__init__(part_no=part_no, x_size=width, y_size=width, z_size=depth)
         self.border = 1
         self.diameter = width - 2 * self.border
-        self.internal = internal
+        self.internal_fan = internal
         self.hole_x = width / 2
         self.hole_y = width / 2
         self.hole_depth = hole_depth
         self.hole_diameter = hole_diameter
+
+        super().__init__(part_no=part_no, x_size=width, y_size=width, z_size=depth)
 
         self.definition()
 
@@ -39,7 +40,7 @@ class Fan(Cuboid):
         This method will be called within the init method.
         Based on whether the specfied fan is external or internal it will call the relevant method.
         """
-        if self.internal:
+        if self.internal_fan is True:
             self.internal()
         else:
             self.external()

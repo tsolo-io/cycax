@@ -88,7 +88,7 @@ class RectangleCutOut(Location):
             dict_cube[key] = value
         return dict_cube
 
-    def swap_xy(self, rot: float, max_y: float):
+    def swap_xy(self, rot: float, rotmax: list):
         """
         This will rotate slot while holding top where it is. It overides the method present in the location super.
 
@@ -96,34 +96,37 @@ class RectangleCutOut(Location):
             rot: the number of times to perfor the swap.
             max_y: the maximum value of y used for the swap.
         """
-        super().swap_xy(rot=rot, max_y=max_y)
+        rotmax = super().swap_xy(rot=rot, rotmax=rotmax)
         while rot > 0:
             self.x_size, self.y_size = self.y_size, self.x_size
             rot = rot - 1
+        return rotmax
 
-    def swap_xz(self, rot: float, max_x: float):
+    def swap_xz(self, rot: float, rotmax: list):
         """This will rotate slot while holding front where it is. It overides the method present in the location super.
 
         Args:
             rot: the number of times to perfor the swap.
             max_x: the maximum value of x used for the swap.
         """
-        super().swap_xz(rot=rot, max_x=max_x)
+        rotmax = super().swap_xz(rot=rot, rotmax=rotmax)
         while rot > 0:
             self.x_size, self.z_size = self.z_size, self.x_size
             rot = rot - 1
+        return rotmax
 
-    def swap_yz(self, rot: float, max_z: float):
+    def swap_yz(self, rot: float, rotmax: list):
         """This will rotate slot while holding left where it is. It overides the method present in the location super.
 
         Args:
             rot: the number of times to perfor the swap.
             max_z: the maximum value of z used for the swap.
         """
-        super().swap_yz(rot=rot, max_z=max_z)
+        rotmax = super().swap_yz(rot=rot, rotmax=rotmax)
         while rot > 0:
             self.y_size, self.z_size = self.z_size, self.y_size
             rot = rot - 1
+        return rotmax
 
 
 nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
