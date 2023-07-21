@@ -241,7 +241,7 @@ class EngineFreecad:
         """
         for obj in active_doc.Objects:
             if obj.ViewObject.Visibility:
-                filename = f"{target_path}-FreeCAD.stl"
+                filename = f"{target_path}.stl"
                 obj.Shape.exportStl(filename)
 
     def _beveled_edge_cube(self, length: float, depth: float, side: str, move: dict):
