@@ -22,7 +22,6 @@ class Simple2D(PartEngine):
         name: This is the name of the json file that needs to be decoded.
 
     """
-
     def __init__(self, name: str, path: Optional[Path] = None, config: Optional[dict] = None):
         super().__init__(name, path, config)
 

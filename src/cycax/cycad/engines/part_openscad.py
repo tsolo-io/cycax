@@ -239,7 +239,6 @@ class PartEngineOpenSCAD(PartEngine):
     def build_scad(self, json_file: Path, scad_file: Path):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
-
         Raises:
             ValueError: if incorrect part_name is provided.
         """
