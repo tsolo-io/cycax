@@ -10,11 +10,12 @@
 import json
 import logging
 import os
-import sys
 from math import sqrt
 from pathlib import Path
 from typing import Optional
 
+import FreeCAD as App
+import FreeCADGui
 import importDXF
 
 # import QtGui
@@ -45,7 +46,8 @@ nut_specifications = {  # This is a global variable that will be used to cut the
 
 
 class EngineFreecad:
-    """This class will be used in FreeCAD to decode a json passed to it. The json will contain specific information of the object.
+    """This class will be used in FreeCAD to decode a JSON passed to it.
+    The JSON will contain specific information of the object.
 
     Args:
         base_path: the path where the outputs need to be stored.
@@ -78,7 +80,7 @@ class EngineFreecad:
         return Part.makeBox(length, width, depth, pos)
 
     def _calc_hex(self, depth: float, diameter: float):
-        """This method will be used to find out where the points of the hexigon are located and then drawing a 2D hexigon.
+        """This method will be used to find out where the points of the hexigon are located and then drawing a hexigon.
 
         Args:
             depth: this is the depth of the hexigon.
@@ -110,8 +112,8 @@ class EngineFreecad:
             feature: this is a dict containing the necessary details of the hexigon like its size and location.
         """
 
-        hex = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
-        nut = hex.extrude(App.Vector(0, 0, feature["depth"]))
+        hexigon = self._calc_hex(depth=0, diameter=nut_specifications[feature["nut_type"]]["diameter"])
+        nut = hexigon.extrude(App.Vector(0, 0, feature["depth"]))
 
         side = feature["side"]
         x = feature["x"]
@@ -141,7 +143,7 @@ class EngineFreecad:
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
         Args:
-            features: This is the dictionary that contains the deatails of where the cube must be places and its details.
+            features: This is the dictionary that contains the deatails of where the cube must be placed.
             pos_vec(list): where part is positioned.
 
         Returns:
@@ -165,7 +167,12 @@ class EngineFreecad:
         return angles
 
     def hole(
-        self, feature: Optional[dict] = None, depth: Optional[float] = None, radius: Optional[float] = None, move: Optional[dict] = None, side: Optional[str] = None
+        self,
+        feature: Optional[dict] = None,
+        depth: Optional[float] = None,
+        radius: Optional[float] = None,
+        move: Optional[dict] = None,
+        side: Optional[str] = None,
     ):
         """This method will be used for cutting a cylindical hole into a surface.
 
@@ -174,7 +181,6 @@ class EngineFreecad:
         """
         pos_vec = Vector(0, 0, 0)
         if feature is not None:
-            print(feature)
             cyl = Part.makeCylinder(feature["diameter"] / 2, feature["depth"], pos_vec)
             side = feature["side"]
             x = feature["x"]
@@ -228,7 +234,7 @@ class EngineFreecad:
         importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
 
     def render_to_stl(self, active_doc: App.Document, target_path: Path):
-        """This method will be used for creating a stl of an object currently in view.
+        """This method will be used for creating a STL of an object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
             target_path: The Path the png needs to be saved under.
@@ -353,15 +359,15 @@ class EngineFreecad:
         This is the main working class for decoding the FreeCAD
 
         Args:
-            in_name: the path where the json is stored under.
+            in_name: the path where the JSON is stored under.
         """
 
         definition = json.loads(in_name.read_text())
 
         name = definition["name"]
         cut_features = []
-        if FreeCAD.ActiveDocument:
-            FreeCAD.closeDocument(name)
+        if App.ActiveDocument:
+            App.closeDocument(name)
         doc = App.newDocument(name)
         for data in definition["features"]:
             if data["type"] == "add":

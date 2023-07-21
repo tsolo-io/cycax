@@ -9,7 +9,7 @@ class Slot:
 
     This class will initialize a slot in the desired location.
 
-    Args:
+    Attributes:
         x: The location of x along the x axis.
         y: The location of y along the y axis.
         z: The location of z along the z axis.
@@ -57,7 +57,6 @@ class Slot:
             max_y: This is the maximium value of the object on the y axis.
                 This is used as a metric to move the value once swapped back into the quadrant it came from.
                 In this manner if performs bot a rotate and a translate back to its original quadrant.
-
         """
         self.hole_left.swap_xy(rot=rot, max_y=max_y)
         self.hole_right.swap_xy(rot=rot, max_y=max_y)
@@ -72,7 +71,6 @@ class Slot:
             max_x: This is the maximium value of the object on the x axis.
                 This is used as a metric to move the value once swapped back into the quadrant it came from.
                 In this manner if performs bot a rotate and a translate back to its original quadrant.
-
         """
         self.hole_left.swap_xz(rot=rot, max_x=max_x)
         self.hole_right.swap_xz(rot=rot, max_x=max_x)
@@ -87,7 +85,6 @@ class Slot:
             max_z: This is the maximium value of the object on the z axis.
                 This is used as a metric to move the value once swapped back into the quadrant it came from.
                 In this manner if performs bot a rotate and a translate back to its original quadrant.
-
         """
         self.hole_left.swap_yz(rot=rot, max_z=max_z)
         self.hole_right.swap_yz(rot=rot, max_z=max_z)

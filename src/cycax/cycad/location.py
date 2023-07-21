@@ -37,7 +37,8 @@ class Location:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+                This allows for it to be easier to move the objsect 180.
+                As you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
@@ -60,7 +61,8 @@ class Location:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+                This allows for it to be easier to move the objsect 180.
+                As you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
@@ -83,7 +85,8 @@ class Location:
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
-                This allows for it to be easier to move the objsect 180. as you will not need to call the method twice.
+                This allows for it to be easier to move the objsect 180.
+                As you will not need to call the method twice.
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:

@@ -24,7 +24,8 @@ class CycadSide:
             pos: this is a tupple that contains the (x, y) coordinates of the object.
             diameter: The diameter of the hole.
             depth: How deep to drill the hole, if not specified will drill the hole all the way through.
-            external_subtract: This is specified that the hole will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False. When set to True the hole will not be drilled into the main object.
+            external_subtract: This is specified that the hole will only be tranferred onto other surfaces.
+                When set to True the hole will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0)
@@ -83,9 +84,11 @@ class CycadSide:
         This method allows a nut cut out to be cut into a specified side.
         Args:
             pos: The (x,y) coordinates of the nut cut out.
-            nut_type: The type of nut to be cut. This is used to create the diameter of the nut but will be developed in later versions. Defaults to 3.0.
-            depth: How deep to make the nut cut out. If it is not specified the nut cut out will be drilled all the way through. Defaults to None.
-            sink: The nut cut out can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
+            nut_type: The type of nut to be cut.
+                This is used to create the diameter of the nut but will be developed in later versions.
+            depth: How deep to make the nut cut out.
+                If it is not specified the nut cut out will be drilled all the way through.
+            sink: The nut cut out can be sunk bellow the surface of the specified side to make a pocket.
             vertical: This will be set to False if you want the flat side rather than the point side down.
         """
         _depth = self._depth_check(depth)
@@ -115,9 +118,11 @@ class CycadSide:
             pos: The (x,y) coordinates of the slot cut out.
             length: The length of the slot as viewed from the specified side.
             width: The width of the slot as viewed from the specified side.
-            depth: The depth of the slot as viewed from the specified side. If not specified it will cut the slot all the way through the surface. Defaults to None.
+            depth: The depth of the slot as viewed from the specified side.
+                If not specified it will cut the slot all the way through the surface.
             horizontal: Slots can either run verticall or horizontally. Defaults to horizontal.
-            external_subtract: This is specified that the slot will only be tranferred onto other surfaces and will not be drilled into main object. Defaults to False. When set to True the slot will not be drilled into the main object.
+            external_subtract: This is specified that the slot will only be tranferred onto other surfaces.
+                When set to True the slot will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=0.0)
@@ -202,7 +207,7 @@ class LeftSide(CycadSide):
         return temp_x, temp_y, temp_z
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """ "This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
+        """This method, given the necessary values, will figure out what the exact dimensions of the box.
         Args:
             width: This is how wide the box must be.
             length: This is how long the box must be.
@@ -232,7 +237,7 @@ class LeftSide(CycadSide):
             return val
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeLeft(self._parent)
+        self._parent.assembly.rotate_freeze_left(self._parent)
 
 
 class RightSide(CycadSide):
@@ -271,7 +276,7 @@ class RightSide(CycadSide):
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
+        """This method, given the necessary values, will figure out what the exact dimensions of the box.
         Args:
             width: This is how wide the box must be.
             length: This is how long the box must be.
@@ -287,7 +292,7 @@ class RightSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeLeft(self._parent)
+        self._parent.assembly.rotate_freeze_left(self._parent)
 
 
 class TopSide(CycadSide):
@@ -326,7 +331,7 @@ class TopSide(CycadSide):
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
+        """This method, given the necessary values, will figure out what the exact dimensions of the box.
         Args:
             width: This is how wide the box must be.
             length: This is how long the box must be.
@@ -342,7 +347,7 @@ class TopSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeTop(self._parent)
+        self._parent.assembly.rotate_freeze_top(self._parent)
 
 
 class BottomSide(CycadSide):
@@ -381,7 +386,7 @@ class BottomSide(CycadSide):
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
+        """This method, given the necessary values, will figure out what the exact dimensions of the box.
         Args:
             width: This is how wide the box must be.
             length: This is how long the box must be.
@@ -397,7 +402,7 @@ class BottomSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeTop(self._parent)
+        self._parent.assembly.rotate_freeze_top(self._parent)
 
 
 class FrontSide(CycadSide):
@@ -436,7 +441,7 @@ class FrontSide(CycadSide):
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
+        """This method, given the necessary values, will figure out what the exact dimensions of the box.
         Args:
             width: This is how wide the box must be.
             length: This is how long the box must be.
@@ -452,7 +457,7 @@ class FrontSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeFront(self._parent)
+        self._parent.assembly.rotate_freeze_front(self._parent)
 
 
 class BackSide(CycadSide):
@@ -491,7 +496,7 @@ class BackSide(CycadSide):
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box that is being calculated is.
+        """This method, given the necessary values, will figure out what the exact dimensions of the box.
 
         Args:
             width: This is how wide the box must be.
@@ -509,4 +514,4 @@ class BackSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotateFreezeFront(self._parent)
+        self._parent.assembly.rotate_freeze_front(self._parent)

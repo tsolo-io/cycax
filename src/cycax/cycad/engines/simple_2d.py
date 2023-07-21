@@ -5,8 +5,7 @@ from typing import Optional
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, PathPatch, Polygon, Rectangle, Wedge
-from matplotlib.path import Path
+from matplotlib.patches import Circle, Rectangle
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
@@ -23,8 +22,7 @@ class Simple2D(PartEngine):
         name: This is the name of the json file that needs to be decoded.
 
     """
-
-    def __init__(self, name: str, path: Path = None, config: Optional[dict] = None):
+    def __init__(self, name: str, path: Optional[Path] = None, config: Optional[dict] = None):
         super().__init__(name, path, config)
 
         self.side = "TOP"
@@ -62,7 +60,8 @@ class Simple2D(PartEngine):
             return {"color": "blue", "edgecolor": "blue", "alpha": 0.6}
 
     def bounding_box(self, feature: dict):
-        """This method will update the bounding box of a feature when called. It is also used to update other information with regards to the plane of the odject that is affected by the side.
+        """This method will update the bounding box of a feature when called.
+        It is also used to update other information with about the plane of the odject that is affected by the side.
 
         Args:
             feature: this is the dictionary that contains the details of the object being produced.
@@ -99,7 +98,8 @@ class Simple2D(PartEngine):
             )
 
     def _box(self, ax: mpl.axes._axes.Axes, feature: dict):
-        """This method will draw a box on the plot if the given cube reaches the side which it is drawing. It uses a dict to figure out the dimentions of the box it is drawing.
+        """This method will draw a box on the plot if the given cube reaches the side which it is drawing.
+        It uses a dict to figure out the dimentions of the box it is drawing.
 
         Args:
             ax: this is the axes onto which the object will be drawn.
@@ -146,7 +146,7 @@ class Simple2D(PartEngine):
             self._hole(ax, feature)
 
     def build(self):
-        """This method will coordinate the drawing and saving of the figure that is being decoded from the provided json."""
+        """This method will coordinate the drawing of the figure that is being decoded from the provided JSON."""
         in_name = self._json_file
         with open(in_name) as f:
             data = json.load(f)
