@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import subprocess
@@ -19,6 +18,7 @@ class PartEngineFreeCAD(PartEngine):
 
             logging.error("Use freeCAD %s", app_bin)
             freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
+
 
             nut_specifications_json = self._base_path / "nut_specifications.json"
             json.dump(nut_specifications, nut_specifications_json.open("w+"))
