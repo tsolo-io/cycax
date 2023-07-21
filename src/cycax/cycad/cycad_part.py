@@ -378,11 +378,7 @@ class CycadPart(Location):
         list_part.append(dict_piece)
         for item in self.features:
             ret = item.export()
-            if type(ret) != dict:
-                for part in ret:
-                    list_part.append(part)
-            else:
-                list_part.append(ret)
+            list_part.append(ret)
         dict_out = {}
         dict_out["name"] = self.part_no
         dict_out["features"] = list_part
