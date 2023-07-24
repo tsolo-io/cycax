@@ -102,6 +102,27 @@ class CycadSide:
             depth=_depth,
             vertical=vertical,
         )
+    def sphere(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere cut out to be cut into a specified side.
+        Args:
+            pos: The (x,y) coordinates of the nut cut out.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        _location_tupple = self._location_calc(pos=pos, sink=sink)
+        self._parent.make_sphere(
+            side=self.name,
+            x=_location_tupple[0],
+            y=_location_tupple[1],
+            z=_location_tupple[2],
+            diameter=diameter,
+        )
 
     def slot(
         self,
