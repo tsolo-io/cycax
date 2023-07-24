@@ -126,7 +126,11 @@ class CycadSide:
             center: The box can be specified from the center of the box.
         """
         _depth = self._depth_check(depth)
-        _location_tupple = self._location_calc(pos=pos, sink=sink, length = length, width = width)
+        if center is True:
+            _location_tupple = self._location_calc(pos=pos, sink=sink, length = 0.0, width = 0.0)
+        else:
+            _location_tupple = self._location_calc(pos=pos, sink=sink, length = length, width = width)
+        
         _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_rectangle(
             side=self.name,
