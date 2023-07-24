@@ -194,7 +194,7 @@ class CycadPart(Location):
         self.features.append(temp_nut)
 
     def make_sphere(self, side: str, x: float, y: float, z: float, diameter: float):
-        """This method will insert a nut into a CycadPart.
+        """This method will insert a sphere into a CycadPart.
 
         Args:
             x: Position of feature on X-axis.

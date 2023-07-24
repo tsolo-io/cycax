@@ -179,7 +179,7 @@ class CycadSide:
         """
         This method allows a sphere cut out to be cut into a specified side.
         Args:
-            pos: The (x,y) coordinates of the nut cut out.
+            pos: The (x,y) coordinates of the sphere cut out.
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """

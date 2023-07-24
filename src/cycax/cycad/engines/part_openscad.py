@@ -77,7 +77,7 @@ class PartEngineOpenSCAD(PartEngine):
         This method will return the string that will have the scad for a sphere cut out.
 
         Args:
-            lookup: This will be a dictionary containing the necessary information about the nut.
+            lookup: This will be a dictionary containing the necessary information about the sphere.
 
         """
         res = []
