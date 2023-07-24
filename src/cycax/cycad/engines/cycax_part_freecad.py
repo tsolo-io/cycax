@@ -130,15 +130,15 @@ class EngineFreecad:
         elif side == BACK:
             rotation2 = App.Rotation(Vector(1, 0, 0), 90)
         elif side == TOP:
-            rotation2 =  App.Rotation(Vector(0, 1, 0), 180)
+            rotation2 = App.Rotation(Vector(0, 1, 0), 180)
         elif side == BOTTOM:
-            rotation2 =App.Rotation(Vector(0, 1, 0), 0)
+            rotation2 = App.Rotation(Vector(0, 1, 0), 0)
         elif side == LEFT:
             rotation2 = App.Rotation(Vector(0, 1, 0), 90)
         elif side == RIGHT:
             rotation2 = App.Rotation(Vector(0, 1, 0), 270)
 
-        nut.Placement = App.Placement(Vector(x, y, z), rotation2*rotation1)
+        nut.Placement = App.Placement(Vector(x, y, z), rotation2 * rotation1)
 
         return nut
 
