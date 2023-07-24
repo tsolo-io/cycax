@@ -400,7 +400,7 @@ class EngineFreecad:
                 elif data["name"] == "cube":
                     cut_features.append(self.cube(data))
                 elif data["name"] == "sphere":
-                    cut_features.append(self.sphere(data))
+                    solid = solid.cut(self.sphere(data))
                 elif data["name"] == "nut":
                     cut_features.append(self.cut_nut(data))
 

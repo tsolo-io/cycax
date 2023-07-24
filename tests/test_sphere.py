@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import hashlib
 from pathlib import Path
 
@@ -41,4 +40,4 @@ def test_sphere(tmp_path):
     assert hash_value_scad == "31952d1282ed60f4e767a861f9aa03cf47a109cc1a67dd96916e0017367f7ecc"
 
     hash_value_freecad_stl = hex_code(sphere_path=sphere_loc, filename="testing_sphere.stl")
-    assert hash_value_freecad_stl == "9616642e42e3e6dcd5939319f23727f79b2f56224dc360e3138a84359292b0cc"
+    assert hash_value_freecad_stl == "e426ee7d533aea2eaaf200cde2928f03944d5125c2475676289bc2e8c737bb35"
