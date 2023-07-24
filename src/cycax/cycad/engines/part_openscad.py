@@ -72,21 +72,6 @@ class PartEngineOpenSCAD(PartEngine):
 
         return res
 
-    def _decode_sphere(self, lookup: dict) -> str:
-        """
-        This method will return the string that will have the scad for a sphere cut out.
-
-        Args:
-            lookup: This will be a dictionary containing the necessary information about the nut.
-
-        """
-        res = []
-        res.append(self._translate(lookup))
-        radius = lookup["diameter"] / 2
-        res.append(f"sphere(r={radius}, $fn=64);")
-
-        return res
-
     def _decode_cut(self) -> str:
         """
         This method returns a simple OpenSCAD string neceseray to cut.
@@ -271,20 +256,17 @@ class PartEngineOpenSCAD(PartEngine):
             if action["name"] == "beveled_edge":
                 output.append(self.decode_beveled_edge(action))
 
-            elif action["name"] == "cube":
+            if action["name"] == "cube":
                 output.append(self._decode_cube(action))
 
-            elif action["name"] == "external":
+            if action["name"] == "external":
                 output.append(self._decode_external(self.name))
 
-            elif action["name"] == "hole":
+            if action["name"] == "hole":
                 output.append(self._decode_hole(action))
 
-            elif action["name"] == "nut":
+            if action["name"] == "nut":
                 output.append(self._decode_nut(action))
-
-            elif action["name"] == "sphere":
-                output.append(self._decode_sphere(action))
 
         i = 0
         while i < dif:
