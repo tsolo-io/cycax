@@ -79,6 +79,21 @@ class EngineFreecad:
         depth = feature["z_size"]
         return Part.makeBox(length, width, depth, pos)
 
+    def sphere(self, feature: dict):
+        """This method will draw a sphere when given a dict that contains the necessary dimentions
+
+        Args:
+            feature: This is the dict that contains the necessary details of the sphere to be cut out.
+        """
+        x = feature["x"]
+        y = feature["y"]
+        z = feature["z"]
+        pos_vec = (x, y, z)
+        radius = feature["diameter"] / 2
+
+        pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
+        return Part.makeSphere(radius, pos)
+
     def _calc_hex(self, depth: float, diameter: float):
         """This method will be used to find out where the points of the hexigon are located and then drawing a hexigon.
 
@@ -384,6 +399,8 @@ class EngineFreecad:
                     solid = self.decode_beveled_edge(data, solid)
                 elif data["name"] == "cube":
                     cut_features.append(self.cube(data))
+                elif data["name"] == "sphere":
+                    cut_features.append(self.sphere(data))
                 elif data["name"] == "nut":
                     cut_features.append(self.cut_nut(data))
 
