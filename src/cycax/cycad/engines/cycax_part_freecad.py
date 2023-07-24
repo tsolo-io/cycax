@@ -121,9 +121,9 @@ class EngineFreecad:
         z = feature["z"]
 
         if feature["vertical"] is True:
-            rotation1 = App.Rotation(Vector(0, 0, 1), 30)
-        else:
             rotation1 = App.Rotation(Vector(0, 0, 1), 0)
+        else:
+            rotation1 = App.Rotation(Vector(0, 0, 1), 30)
 
         if side == FRONT:
             rotation2 = App.Rotation(Vector(1, 0, 0), 270)
