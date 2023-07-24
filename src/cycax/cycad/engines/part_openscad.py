@@ -71,7 +71,7 @@ class PartEngineOpenSCAD(PartEngine):
         res.append("cylinder(r={rad}, h={deep}, $fn=6);".format(rad=radius, deep=lookup["depth"]))
 
         return res
-    
+
     def _decode_sphere(self, lookup: dict) -> str:
         """
         This method will return the string that will have the scad for a sphere cut out.
@@ -83,7 +83,7 @@ class PartEngineOpenSCAD(PartEngine):
         res = []
         res.append(self._translate(lookup))
         radius = lookup["diameter"] / 2
-        res.append("sphere(r={rad}, $fn=64);".format(rad=radius))
+        res.append(f"sphere(r={radius}, $fn=64);")
 
         return res
 
@@ -282,7 +282,7 @@ class PartEngineOpenSCAD(PartEngine):
 
             elif action["name"] == "nut":
                 output.append(self._decode_nut(action))
-            
+
             elif action["name"] == "sphere":
                 output.append(self._decode_sphere(action))
 

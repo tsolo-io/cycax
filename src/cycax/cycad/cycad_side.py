@@ -102,6 +102,7 @@ class CycadSide:
             depth=_depth,
             vertical=vertical,
         )
+
     def sphere(
         self,
         pos: tuple[float, float],

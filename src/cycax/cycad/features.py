@@ -192,7 +192,7 @@ class NutCutOut(Location):
         dict_nut["type"] = "cut"
 
         return dict_nut
-    
+
 
 class SphereCutOut(Location):
     """
