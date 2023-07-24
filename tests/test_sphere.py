@@ -34,10 +34,10 @@ def test_sphere(tmp_path):
     sphere_cube(sphere_loc)
 
     hash_value_json = hex_code(sphere_path=sphere_loc, filename="testing_sphere.json")
-    assert hash_value_json == "858423461f59456c8bbea67cb0903243bf03561e90f377e73c86ecb20fe56b00"
+    assert hash_value_json == "e0b35d005866ffa3ba5e26792df851ef3ce99470e363667f974d1bb9d8f410b0"
 
     hash_value_scad = hex_code(sphere_path=sphere_loc, filename="testing_sphere.scad")
-    assert hash_value_scad == "31952d1282ed60f4e767a861f9aa03cf47a109cc1a67dd96916e0017367f7ecc"
+    assert hash_value_scad == "e2e9bd90687c806b16591a6c9741f840c13edfca7cdf62d4416b562ef1df2a65"
 
     hash_value_freecad_stl = hex_code(sphere_path=sphere_loc, filename="testing_sphere.stl")
-    assert hash_value_freecad_stl == "e426ee7d533aea2eaaf200cde2928f03944d5125c2475676289bc2e8c737bb35"
+    assert hash_value_freecad_stl == "e6af4da27e13425a9a0b2870a69fdd25f0d2188891ab03518d72aef0b6523045"

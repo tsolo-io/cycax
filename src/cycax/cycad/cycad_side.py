@@ -126,7 +126,7 @@ class CycadSide:
             center: The box can be specified from the center of the box.
         """
         _depth = self._depth_check(depth)
-        _location_tupple = self._location_calc(pos=pos, sink=sink)
+        _location_tupple = self._location_calc(pos=pos, sink=sink, length = length, width = width)
         _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_rectangle(
             side=self.name,
@@ -179,7 +179,7 @@ class CycadSide:
         """
         This method allows a sphere cut out to be cut into a specified side.
         Args:
-            pos: The (x,y) coordinates of the sphere cut out.
+            pos: The (x,y) coordinates of the  cut out.
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
@@ -234,9 +234,9 @@ class CycadSide:
 class LeftSide(CycadSide):
     name = LEFT
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
         temp_x = self._parent.x_min + sink
-        temp_y = pos[0]
+        temp_y = self._parent.y_max - pos[0] - length
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
@@ -259,10 +259,10 @@ class LeftSide(CycadSide):
 class RightSide(CycadSide):
     name = RIGHT
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - sink
-        temp_y = pos[0]
-        temp_z = pos[1]
+        temp_y = pos[1]
+        temp_z = pos[0]
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
@@ -284,7 +284,7 @@ class RightSide(CycadSide):
 class TopSide(CycadSide):
     name = TOP
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = pos[1]
         temp_z = self._parent.z_max - sink
@@ -309,9 +309,9 @@ class TopSide(CycadSide):
 class BottomSide(CycadSide):
     name = BOTTOM
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
         temp_x = pos[0]
-        temp_y = pos[1]
+        temp_y = self._parent.y_max -pos[1] - width
         temp_z = self._parent.z_min + sink
         return temp_x, temp_y, temp_z
 
@@ -334,7 +334,7 @@ class BottomSide(CycadSide):
 class FrontSide(CycadSide):
     name = FRONT
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_min + sink
         temp_z = pos[1]
@@ -359,8 +359,8 @@ class FrontSide(CycadSide):
 class BackSide(CycadSide):
     name = BACK
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        temp_x = pos[0]
+    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
+        temp_x = self._parent.x_max - pos[0] - length
         temp_y = self._parent.y_max - sink
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
