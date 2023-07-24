@@ -1,5 +1,7 @@
 from typing import Optional
 
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
+
 
 class CycadSide:
     def __init__(self, parent):
@@ -10,6 +12,71 @@ class CycadSide:
 
     def __repr__(self):
         return "Side: " + self.name
+
+    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+        """Location is calculated for the (x, y) plane using two values and a side.
+
+        Args:
+            pos: (x, y) location of an object which is used to find the location with the side.
+            sink: The object can be sunk bellow the surface of the specified side to make a pocket.
+
+        Returns:
+            The (x, y, z) location of an object.
+        """
+        raise ValueError("_location_calc is Not implimented on" + self.name)
+
+    def _depth_check(self, val: float = None):
+        """Determine the depth of a feature.
+
+        Args:
+            val: Depth of object.
+
+        Raises:
+            ValueError: The side specidfied does not have a depth check method.
+        """
+        raise ValueError("_depth_check is Not implimented on" + self.name)
+
+    def _rotate(self):
+        """Rotate the part by 90 degress by keeping selected side on the same plain."""
+        msg = "_rotate should be defined for each side."
+        raise NotImplementedError(msg)
+
+    def rotate(self, angle: float = 90):
+        """Rotate the part by keeping the selected side on the same plain.
+
+        Rotation is counter clock wise. Negative angles are converted to poistive.
+
+        Args:
+            angle: The angle in degress that the part will be rotates on.
+
+        """
+        if self._parent.assembly is None:
+            # TODO: Think about which exception should be raised, maybe even a custom one.
+            msg = "Not part of an assembly"
+            raise ValueError(msg)
+
+        if angle % 90 != 0:
+            # TODO: Think about which exception should be raised, maybe even a custom one.
+            msg = "Can only rotate in multiples of 90 degrees"
+            raise ValueError(msg)
+
+        while angle < 0:
+            # Change the angle to a positive number.
+            angle = 360 + angle
+
+        for _n in range(int(angle / 90)):
+            self._rotate()
+
+    @property
+    def opposite(self):
+        return {
+            TOP: self._parent.bottom,
+            BOTTOM: self._parent.top,
+            LEFT: self._parent.right,
+            RIGHT: self._parent.left,
+            FRONT: self._parent.back,
+            BACK: self._parent.front,
+        }[self.name]
 
     def hole(
         self,
@@ -54,9 +121,9 @@ class CycadSide:
             pos: The (x, y) coordinates of the box.
             length: The length of the box as viewed from the specified side.
             width: The width of the box as viewed from the specified side.
-            depth: The depth of the box, if not specified will drill all the way through th box. Defaults to None.
-            sink: The box can be sunk bellow the surface of the specified side to make a plocket. Defaults to 0.
-            center: The box can be specified from the ceter of the box. Defaults to False.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
         """
         _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=sink)
@@ -120,7 +187,7 @@ class CycadSide:
             width: The width of the slot as viewed from the specified side.
             depth: The depth of the slot as viewed from the specified side.
                 If not specified it will cut the slot all the way through the surface.
-            horizontal: Slots can either run verticall or horizontally. Defaults to horizontal.
+            horizontal: Slots can either run verticall or horizontally.
             external_subtract: This is specified that the slot will only be tranferred onto other surfaces.
                 When set to True the slot will not be drilled into the main object.
         """
@@ -141,96 +208,23 @@ class CycadSide:
             external_subtract=external_subtract,
         )
 
-    def _depth_check(self, val: float):
-        """
-        This is used to check the depth of an object. This method is just used for error catching.
-
-        Args:
-            val: Depth of object.
-
-        Raises:
-            ValueError: The side specidfied does not have a depth check method.
-        """
-        raise ValueError("_depth_check is Not implimented on" + self.name)
-
-    def _rotate(self):
-        """Rotate the part by 90 degress by keeping selected side on the same plain."""
-        msg = "_rotate should be defined for each side."
-        raise NotImplementedError(msg)
-
-    def rotate(self, angle: float = 90):
-        """Rotate the part by keeping the selected side on the same plain.
-
-        Rotation is counter clock wise. Negative angles are converted to poistive.
-
-        Args:
-            angle: The angle in degress that the part will be rotates on.
-
-        """
-        if self._parent.assembly is None:
-            # TODO: Think about which exception should be raised, maybe even a custom one.
-            msg = "Not part of an assembly"
-            raise ValueError(msg)
-
-        if angle % 90 != 0:
-            # TODO: Think about which exception should be raised, maybe even a custom one.
-            msg = "Can only rotate in multiples of 90 degrees"
-            raise ValueError(msg)
-
-        while angle < 0:
-            # Change the angle to a positive number.
-            angle = 360 + angle
-
-        for _n in range(int(angle / 90)):
-            self._rotate()
-
 
 class LeftSide(CycadSide):
-    name = "LEFT"
+    name = LEFT
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        """
-        location is calculated for the (x, y) plane using two values and a side.
-
-        Args:
-            pos: (x, y) location of an object which is used to find the location with the side.
-            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
-
-        Returns:
-            tuple[float, float, float]: (x, y, z) location of an object.
-        """
-
         temp_x = self._parent.x_min + sink
         temp_y = pos[0]
         temp_z = pos[1]
-
         return temp_x, temp_y, temp_z
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box.
-        Args:
-            width: This is how wide the box must be.
-            length: This is how long the box must be.
-            depth: This is the depth of the box.
-
-        Returns:
-            tuple: This will be the exact (x_size, y_size, z_size) of the box.
-        """
         x_size = depth
         y_size = length
         z_size = width
-
         return x_size, y_size, z_size
 
-    def _depth_check(self, val: float) -> float:
-        """
-        This method is used so that objects can penetrate through the entire object.
-        Args:
-            val: Depth as specified by the user.
-
-        Returns:
-            float: Depth of the ocjet or depth specified by the user.
-        """
+    def _depth_check(self, val: float = None) -> float:
         if val is None:
             return self._parent.x_size
         else:
@@ -241,54 +235,24 @@ class LeftSide(CycadSide):
 
 
 class RightSide(CycadSide):
-    name = "RIGHT"
+    name = RIGHT
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        """
-        location is calculated for the (x, y) plane using two values and a side.
-
-        Args:
-            pos: (x, y) location of an object which is used to find the location with the side.
-            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
-
-        Returns:
-            tuple[float, float, float]: (x, y, z) location of an object.
-        """
-
         temp_x = self._parent.x_max - sink
         temp_y = pos[0]
         temp_z = pos[1]
-
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
-        """
-        This method is used so that objects can penetrate through the entire object.
-        Args:
-            val: Depth as specified by the user.
-
-        Returns:
-            float: Depth of the ocjet or depth specified by the user.
-        """
         if val is None:
             return self._parent.x_size
         else:
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box.
-        Args:
-            width: This is how wide the box must be.
-            length: This is how long the box must be.
-            depth: This is the depth of the box.
-
-        Returns:
-            tuple: This will be the exact (x_size, y_size, z_size) of the box.
-        """
         x_size = depth
         y_size = length
         z_size = width
-
         return x_size, y_size, z_size
 
     def _rotate(self):
@@ -296,54 +260,24 @@ class RightSide(CycadSide):
 
 
 class TopSide(CycadSide):
-    name = "TOP"
+    name = TOP
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        """
-        location is calculated for the (x, y) plane using two values and a side.
-
-        Args:
-            pos: (x, y) location of an object which is used to find the location with the side.
-            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
-
-        Returns:
-            tuple[float, float, float]: (x, y, z) location of an object.
-        """
-
         temp_x = pos[0]
         temp_y = pos[1]
         temp_z = self._parent.z_max - sink
-
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
-        """
-        This method is used so that objects can penetrate through the entire object.
-        Args:
-            val: Depth as specified by the user.
-
-        Returns:
-            float: Depth of the ocjet or depth specified by the user.
-        """
         if val is None:
             return self._parent.z_size
         else:
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box.
-        Args:
-            width: This is how wide the box must be.
-            length: This is how long the box must be.
-            depth: This is the depth of the box.
-
-        Returns:
-            tuple: This will be the exact (x_size, y_size, z_size) of the box.
-        """
         x_size = length
         y_size = width
         z_size = depth
-
         return x_size, y_size, z_size
 
     def _rotate(self):
@@ -351,54 +285,24 @@ class TopSide(CycadSide):
 
 
 class BottomSide(CycadSide):
-    name = "BOTTOM"
+    name = BOTTOM
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        """
-        location is calculated for the (x, y) plane using two values and a side.
-
-        Args:
-            pos: (x, y) location of an object which is used to find the location with the side.
-            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
-
-        Returns:
-            tuple[float, float, float]: (x, y, z) location of an object.
-        """
-
         temp_x = pos[0]
         temp_y = pos[1]
         temp_z = self._parent.z_min + sink
-
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
-        """
-        This method is used so that objects can penetrate through the entire object.
-        Args:
-            val: Depth as specified by the user.
-
-        Returns:
-            float: Depth of the ocjet or depth specified by the user.
-        """
         if val is None:
             return self._parent.z_size
         else:
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box.
-        Args:
-            width: This is how wide the box must be.
-            length: This is how long the box must be.
-            depth: This is the depth of the box.
-
-        Returns:
-            tuple: This will be the exact (x_size, y_size, z_size) of the box.
-        """
         x_size = length
         y_size = width
         z_size = depth
-
         return x_size, y_size, z_size
 
     def _rotate(self):
@@ -406,54 +310,24 @@ class BottomSide(CycadSide):
 
 
 class FrontSide(CycadSide):
-    name = "FRONT"
+    name = FRONT
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        """
-        location is calculated for the (x, y) plane using two values and a side.
-
-        Args:
-            pos: (x, y) location of an object which is used to find the location with the side.
-            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
-
-        Returns:
-            tuple[float, float, float]: (x, y, z) location of an object.
-        """
-
         temp_x = pos[0]
         temp_y = self._parent.y_min + sink
         temp_z = pos[1]
-
         return temp_x, temp_y, temp_z
 
-    def _depth_check(self, val: float) -> float:
-        """
-        This method is used so that objects can penetrate through the entire object.
-        Args:
-            val: Depth as specified by the user.
-
-        Returns:
-            float: Depth of the ocjet or depth specified by the user.
-        """
+    def _depth_check(self, val: float = None) -> float:
         if val is None:
             return self._parent.y_size
         else:
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box.
-        Args:
-            width: This is how wide the box must be.
-            length: This is how long the box must be.
-            depth: This is the depth of the box.
-
-        Returns:
-            tuple: This will be the exact (x_size, y_size, z_size) of the box.
-        """
         x_size = length
         y_size = depth
         z_size = width
-
         return x_size, y_size, z_size
 
     def _rotate(self):
@@ -461,56 +335,24 @@ class FrontSide(CycadSide):
 
 
 class BackSide(CycadSide):
-    name = "BACK"
+    name = BACK
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        """
-        location is calculated for the (x, y) plane using two values and a side.
-
-        Args:
-            pos: (x, y) location of an object which is used to find the location with the side.
-            sink: The object can be sunk bellow the surface of the specified side to make a pocket. Defaults to 0.0.
-
-        Returns:
-            tuple[float, float, float]: (x, y, z) location of an object.
-        """
-
         temp_x = pos[0]
         temp_y = self._parent.y_max - sink
         temp_z = pos[1]
-
         return temp_x, temp_y, temp_z
 
-    def _depth_check(self, val: float) -> float:
-        """
-        This method is used so that objects can penetrate through the entire object.
-        Args:
-            val: Depth as specified by the user.
-
-        Returns:
-            float: Depth of the ocjet or depth specified by the user.
-        """
+    def _depth_check(self, val: float = None) -> float:
         if val is None:
             return self._parent.y_size
         else:
             return val
 
     def _box_size_calc(self, width: float, length: float, depth: float) -> tuple[float, float, float]:
-        """This method, given the necessary values, will figure out what the exact dimensions of the box.
-
-        Args:
-            width: This is how wide the box must be.
-            length: This is how long the box must be.
-            depth: This is the depth of the box.
-
-        Returns:
-            tuple: This will be the exact (x_size, y_size, z_size) of the box.
-        """
-
         x_size = length
         y_size = depth
         z_size = width
-
         return x_size, y_size, z_size
 
     def _rotate(self):
