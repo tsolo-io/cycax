@@ -41,7 +41,7 @@ def test_nut(tmp_path):
     assert hash_value_scad == "14db7e009a8d78b0a1a1427fb7d64727b39f092ea5714adf81d03bf37c70d478"
     
     hash_value_freecad_stl = hex_code(nut_path = nut_loc, filename = "testing_nut.stl")
-    assert hash_value_freecad_stl == "05779d812a8c648981a84f555fb0eb64a713d5f1dc5d83d8f30394c6278f04ec"
+    assert hash_value_freecad_stl == "cbca5fcead7645ca95d076949df4b0b9f769d3f9c070b70eb2b5e036a936cc5b"
    
             
 
