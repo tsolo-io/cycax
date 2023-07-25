@@ -167,16 +167,19 @@ class NutCutOut(Location):
             This will be used to specify from which side a feature should be inserted into another object.
             This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         nut_type: Type of nut to be inserted.
-        depth: depth of the rectangle.
+        depth: depth of the nut.
         vertical: this is a bool that will be set to False if you want the flat side down.
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
+    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float=None, vertical: bool = True):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type.upper()
         self.diameter = nut_specifications[self.nut_type]["diameter"]
         self.thickness = nut_specifications[self.nut_type]["thickness"]
-        self.depth = depth
+        if depth is None:
+            self.depth=self.thickness
+        else:
+            self.depth = depth
         self.vertical = vertical
 
     def export(self) -> dict:

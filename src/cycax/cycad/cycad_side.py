@@ -158,11 +158,11 @@ class CycadSide:
             nut_type: The type of nut to be cut.
                 This is used to create the diameter of the nut but will be developed in later versions.
             depth: How deep to make the nut cut out.
-                If it is not specified the nut cut out will be drilled all the way through.
+                If it is not specified the nut cut out will be assumed the thickness of the nut.
             sink: The nut cut out can be sunk bellow the surface of the specified side to make a pocket.
             vertical: This will be set to False if you want the flat side rather than the point side down.
         """
-        _depth = self._depth_check(depth)
+        # _depth = self._depth_check(depth)
         _location_tupple = self._location_calc(pos=pos, sink=sink)
         self._parent.make_nut(
             side=self.name,
@@ -170,7 +170,7 @@ class CycadSide:
             y=_location_tupple[1],
             z=_location_tupple[2],
             nut_type=nut_type,
-            depth=_depth,
+            depth=depth,
             vertical=vertical,
         )
 
@@ -265,8 +265,8 @@ class RightSide(CycadSide):
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - sink
-        temp_y = pos[1]
-        temp_z = pos[0]
+        temp_y = pos[0]
+        temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
