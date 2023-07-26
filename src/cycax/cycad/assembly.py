@@ -29,9 +29,9 @@ class Assembly:
     def render(
         self,
         engine: str = "OpenSCAD",
-        engine_config: Optional[dict] = None,
+        engine_config: dict | None = None,
         part_engine: str = "OpenSCAD",
-        part_engine_config: Optional[dict] = None,
+        part_engine_config: dict | None = None,
     ):
         """Run the assembly and produce output files.
 

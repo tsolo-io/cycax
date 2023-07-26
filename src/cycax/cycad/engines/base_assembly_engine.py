@@ -12,7 +12,7 @@ class AssemblyEngine:
         config: Engine specific configuration.
     """
 
-    def __init__(self, name, path: Optional[Path] = None, config: Optional[dict] = None):
+    def __init__(self, name, path: Path | None = None, config: dict | None = None):
         self._base_path = None
         self._json_file = None
         self.name = name

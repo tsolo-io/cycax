@@ -83,7 +83,7 @@ class CycadSide:
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
-        depth: Optional[float] = None,
+        depth: float | None = None,
         external_subtract: bool = False,
     ):
         """This will insert a whole given the relatice details, into the correct side.
@@ -113,7 +113,7 @@ class CycadSide:
         pos: tuple[float, float],
         length: float,
         width: float,
-        depth: Optional[float] = None,
+        depth: float | None = None,
         sink: float = 0,
         center: bool = False,
     ):
@@ -129,10 +129,10 @@ class CycadSide:
         """
         _depth = self._depth_check(depth)
         if center is True:
-            _location_tupple = self._location_calc(pos=pos, sink=sink, length = 0.0, width = 0.0)
+            _location_tupple = self._location_calc(pos=pos, sink=sink, length=0.0, width=0.0)
         else:
-            _location_tupple = self._location_calc(pos=pos, sink=sink, length = length, width = width)
-        
+            _location_tupple = self._location_calc(pos=pos, sink=sink, length=length, width=width)
+
         _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_rectangle(
             side=self.name,
@@ -149,7 +149,7 @@ class CycadSide:
         self,
         pos: tuple[float, float],
         nut_type: str = "M3",
-        depth: Optional[float] = None,
+        depth: float | None = None,
         sink: float = 0.0,
         vertical: bool = True,
     ):
@@ -203,7 +203,7 @@ class CycadSide:
         pos: tuple[float, float],
         length: float,
         width: float,
-        depth: Optional[float] = None,
+        depth: float | None = None,
         horizontal: bool = True,
         external_subtract: bool = False,
     ):
@@ -240,7 +240,9 @@ class CycadSide:
 class LeftSide(CycadSide):
     name = LEFT
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         temp_x = self._parent.x_min + sink
         temp_y = self._parent.y_max - pos[0] - length
         temp_z = pos[1]
@@ -265,7 +267,9 @@ class LeftSide(CycadSide):
 class RightSide(CycadSide):
     name = RIGHT
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - sink
         temp_y = pos[0]
         temp_z = pos[1]
@@ -290,7 +294,9 @@ class RightSide(CycadSide):
 class TopSide(CycadSide):
     name = TOP
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = pos[1]
         temp_z = self._parent.z_max - sink
@@ -315,9 +321,11 @@ class TopSide(CycadSide):
 class BottomSide(CycadSide):
     name = BOTTOM
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         temp_x = pos[0]
-        temp_y = self._parent.y_max -pos[1] - width
+        temp_y = self._parent.y_max - pos[1] - width
         temp_z = self._parent.z_min + sink
         return temp_x, temp_y, temp_z
 
@@ -340,7 +348,9 @@ class BottomSide(CycadSide):
 class FrontSide(CycadSide):
     name = FRONT
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_min + sink
         temp_z = pos[1]
@@ -365,7 +375,9 @@ class FrontSide(CycadSide):
 class BackSide(CycadSide):
     name = BACK
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0, length:float=0.0, width:float=0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - pos[0] - length
         temp_y = self._parent.y_max - sink
         temp_z = pos[1]

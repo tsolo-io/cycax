@@ -178,7 +178,9 @@ class CycadPart(Location):
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float=None, vertical: bool = True):
+    def make_nut(
+        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, vertical: bool = True
+    ):
         """This method will insert a nut into a CycadPart.
 
         Args:
@@ -256,7 +258,7 @@ class CycadPart(Location):
             "BACK": self.y_max,
         }
 
-    def move(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def move(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """This method will be used for moving the part.
 
         Args:
@@ -286,7 +288,7 @@ class CycadPart(Location):
 
         self.make_bounding_box()
 
-    def at(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Place part at the exact provided coordinates.
 
         Args:
@@ -419,7 +421,9 @@ class CycadPart(Location):
             }[side]
             edge.append(side)
         assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
-        assert edge_type == "round" or edge_type == "chamfer", "You need to specify the edge type as either round or chamfer."
+        assert (
+            edge_type == "round" or edge_type == "chamfer"
+        ), "You need to specify the edge type as either round or chamfer."
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]
@@ -442,7 +446,7 @@ class CycadPart(Location):
             )
         )
 
-    def render(self, engine: str = "Preview3D", engine_config: Optional[dict] = None) -> dict:
+    def render(self, engine: str = "Preview3D", engine_config: dict | None = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods.
         It is invoked by CycadPart and can be called: CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
 
@@ -463,7 +467,7 @@ class CycadPart(Location):
 
         elif _eng_lower == "freecad":
             if engine_config is None:
-                engine_config={'out_formats':"PNG: ALL, STL: None, DXF: TOP"}
+                engine_config = {"out_formats": "PNG: ALL, STL: None, DXF: TOP"}
                 print(type(engine_config))
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
 

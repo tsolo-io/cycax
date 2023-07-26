@@ -19,7 +19,7 @@ class PartEngineFreeCAD(PartEngine):
             logging.error("Use freeCAD %s", app_bin)
             freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
 
-            config_csv = self.config['out_formats']
+            config_csv = self.config["out_formats"]
             print(config_csv)
 
             environment = dict(os.environ)

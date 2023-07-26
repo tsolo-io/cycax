@@ -188,11 +188,11 @@ class EngineFreecad:
 
     def hole(
         self,
-        feature: Optional[dict] = None,
-        depth: Optional[float] = None,
-        radius: Optional[float] = None,
-        move: Optional[dict] = None,
-        side: Optional[str] = None,
+        feature: dict | None = None,
+        depth: float | None = None,
+        radius: float | None = None,
+        move: dict | None = None,
+        side: str | None = None,
     ):
         """This method will be used for cutting a cylindical hole into a surface.
 
@@ -225,13 +225,12 @@ class EngineFreecad:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
         return cyl
 
-
-    def render_to_png(self, view: str|None = None):
+    def render_to_png(self, view: str | None = None):
         """Used to create a png of the desired side.
-        
+
         Args:
             view: The side of the object the png will be produced from.
-            
+
         """
         active_doc = FreeCADGui.activeDocument()
         view = view.upper()
@@ -248,7 +247,7 @@ class EngineFreecad:
 
     def change_view(self, active_doc, side: str):
         """This will change the gui view to show the specified side."""
-        
+
         match side:
             case "TOP":
                 active_doc.activeView().viewTop()
@@ -267,8 +266,7 @@ class EngineFreecad:
             case "ALL":
                 active_doc.activeView().viewAxometric()
 
-
-    def render_to_dxf(self, view: str|None = None):
+    def render_to_dxf(self, view: str | None = None):
         """This method will be used for creating a dxf of the object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
@@ -456,7 +454,7 @@ class EngineFreecad:
             ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
             out_format = ftype.upper()
             match out_format:
-                case "PNG": 
+                case "PNG":
                     engine.render_to_png(view=fview)
                 case "DXF":
                     engine.render_to_dxf(view=fview)
