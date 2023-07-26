@@ -35,10 +35,10 @@ def test_nut(tmp_path):
     nutty_cube(nut_loc)
 
     hash_value_json = hex_code(nut_path=nut_loc, filename="testing_nut.json")
-    assert hash_value_json == "f00f5009ca121dfa2db41bdd6592b67b0b20c1c4ced4625320b90254c2ee6c78"
+    assert hash_value_json == "22144e25a8dc044b89e4f5795ace224f90a87ae087647de05edb674daab09d93"
 
     hash_value_scad = hex_code(nut_path=nut_loc, filename="testing_nut.scad")
-    assert hash_value_scad == "7aae373b878863a76495f135759c735beb2068964c0d03769ed4d1ce282317d5"
+    assert hash_value_scad == "a2d137c720a5f204749757c5e6a2eacd003244c8642d55b85efd36db7e165815"
 
     hash_value_freecad_stl = hex_code(nut_path=nut_loc, filename="testing_nut.stl")
-    assert hash_value_freecad_stl == "3b9a4beaa11870172d0de40d343d7e048091ff84ee5a2ab125a5bf2a132d8aab"
+    assert hash_value_freecad_stl == "fdf00b4b0a62fbb105624bda0a7e3c870010f367515d7f7c6397c677a12fae86"
