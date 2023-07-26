@@ -5,7 +5,7 @@ from tests.shared import hex_code_check
 from cycax.cycad import Print3D
 
 
-def sphere_cube(tmp_path):
+def sphere_cube(tmp_path: Path):
     cube = Print3D(x_size=11, y_size=11, z_size=11, part_no="testing_sphere")
 
     for side in (cube.left, cube.right, cube.top, cube.bottom, cube.front, cube.back):
@@ -15,7 +15,7 @@ def sphere_cube(tmp_path):
     cube.render("freecad")
     cube.render("preview3d")
 
-def test_sphere(tmp_path):
+def test_sphere(tmp_path: Path):
 
     sphere_cube(tmp_path)
 

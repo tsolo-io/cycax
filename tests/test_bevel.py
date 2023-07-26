@@ -7,7 +7,7 @@ from itertools import combinations
 
 
 
-def fancy_edge(tmp_path, edge_type:str, part_no:str):
+def fancy_edge(tmp_path: Path, edge_type:str, part_no:str):
     sheet = SheetMetal(x_size=100, y_size=200, z_size=50, part_no=part_no)
 
     edges = combinations(("LEFT", "RIGHT", "FRONT", "BACK", "TOP", "BOTTOM"), 2)
@@ -26,7 +26,7 @@ def fancy_edge(tmp_path, edge_type:str, part_no:str):
     sheet.render("freecad")
 
 
-def test_edge(tmp_path):
+def test_edge(tmp_path: Path):
     #This test checks that the two designs of beveled edges are being produced as they should.
 
     fancy_edge(tmp_path, edge_type="round", part_no="sheet_round")

@@ -7,7 +7,7 @@ from cycax.cycad.fan import Fan
 from tests.shared import hex_code_check
 
 
-def fans(tmp_path):
+def fans(tmp_path: Path):
     face = SheetMetal(part_no="face", x_size=50, y_size=100, z_size=2)
     fan_face = Fan(width=50, depth=10, part_no="fan_face", internal=True, hole_depth=2.0, hole_diameter=3.0)
 
@@ -24,7 +24,7 @@ def fans(tmp_path):
     face.render("preview3d")
 
 
-def test_fans(tmp_path):
+def test_fans(tmp_path: Path):
     #This test checks that the fan is being produced as it should.
 
     fans(tmp_path)

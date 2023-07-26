@@ -5,7 +5,7 @@ from cycax.cycad import Print3D
 from tests.shared import hex_code_check
 
 
-def nutty_cube(tmp_path):
+def nutty_cube(tmp_path: Path):
     cube = Print3D(x_size=11, y_size=11, z_size=11, part_no="testing_nut")
 
     for side in (cube.left, cube.right, cube.top, cube.bottom, cube.front, cube.back):
@@ -16,7 +16,7 @@ def nutty_cube(tmp_path):
     cube.render("preview3d")
 
 
-def test_nut(tmp_path):
+def test_nut(tmp_path: Path):
     #This test will check that the nut is still being produced as it should.
 
     nutty_cube(tmp_path)
