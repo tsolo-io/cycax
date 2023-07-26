@@ -141,13 +141,20 @@ class RectangleCutOut(Location):
 nut_specifications: dict[
     str, dict[str, float]
 ] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
-    "M3": {
+    "MISO3": {
         "diameter": 6.01,
         "thickness": 2.4,
+        "side_to_side": 5.4,
     },
-    "M6": {
+    "M3": {
+        "diameter": 6.2,
+        "thickness": 2.5,
+        "side_to_side": 5.5,
+    },
+    "MISO6": {
         "diameter": 11.05,
         "thickness": 5.2,
+        "side_to_side": 10,
     },
 }
 
@@ -176,6 +183,7 @@ class NutCutOut(Location):
         self.nut_type = nut_type.upper()
         self.diameter = nut_specifications[self.nut_type]["diameter"]
         self.thickness = nut_specifications[self.nut_type]["thickness"]
+        self.side_to_side = nut_specifications[self.nut_type]["side_to_side"]
         if depth is None:
             self.depth=self.thickness
         else:

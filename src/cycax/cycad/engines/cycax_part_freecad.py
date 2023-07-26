@@ -55,6 +55,7 @@ class EngineFreecad:
 
     def __init__(self, base_path: Path):
         self._base_path = base_path
+        self.filepath = ""
 
     def cube(self, feature: dict):
         """This method will draw a cube when given a dict that contains the necessary dimentions
@@ -224,43 +225,73 @@ class EngineFreecad:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
         return cyl
 
-    def render_to_png(self, target_path: Path):
-        """This method will be used for creating a png of 2 specific views of the object.
+
+    def render_to_png(self, view: str|None = None):
+        """Used to create a png of the desired side.
+        
         Args:
-            target_path: The Path the png needs to be saved under.
+            view: The side of the object the png will be produced from.
+            
         """
         active_doc = FreeCADGui.activeDocument()
-        target_image_file = f"{target_path}-perspectiveAll.png"
+        view = view.upper()
+
+        if view is None:
+            view = "ALL"
+
+        self.change_view(active_doc=active_doc, side=view)
         FreeCADGui.SendMsgToActiveView("ViewFit")
-        active_doc.activeView().viewAxometric()
-        active_doc.activeView().fitAll()
-        active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
-        target_image_file = f"{target_path}-perspectiveTop.png"
-        FreeCADGui.SendMsgToActiveView("ViewFit")
-        active_doc.activeView().viewTop()
+
+        target_image_file = f"{self.filepath}-perspective{view}.png"
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-    def render_to_dxf(self, active_doc: App.Document, target_path: Path):
-        """This method will be used for creating a pdxf of the object currently in view.
+    def change_view(self, active_doc, side: str):
+        """This will change the gui view to show the specified side."""
+        
+        match side:
+            case "TOP":
+                active_doc.activeView().viewTop()
+            case "BACK":
+                active_doc.activeView().viewRear()
+            case "REAR":
+                active_doc.activeView().viewRear()
+            case "BOTTOM":
+                active_doc.activeView().viewBottom()
+            case "FRONT":
+                active_doc.activeView().viewFront()
+            case "LEFT":
+                active_doc.activeView().viewLeft()
+            case "RIGHT":
+                active_doc.activeView().viewRight()
+            case "ALL":
+                active_doc.activeView().viewAxometric()
+
+
+    def render_to_dxf(self, view: str|None = None):
+        """This method will be used for creating a dxf of the object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
-            target_path: The Path the png needs to be saved under.
         """
+        view = view.upper()
+        active_doc = FreeCADGui.activeDocument()
+        if view is None:
+            view = "TOP"
+        self.change_view(active_doc=active_doc, side=view)
+        FreeCADGui.SendMsgToActiveView("ViewFit")
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
 
-        importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
+        importDXF.export(__objs__, str(f"{self.filepath}-perspective{view}.dxf"))
 
-    def render_to_stl(self, active_doc: App.Document, target_path: Path):
+    def render_to_stl(self, active_doc: App.Document):
         """This method will be used for creating a STL of an object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
-            target_path: The Path the png needs to be saved under.
         """
         for obj in active_doc.Objects:
             if obj.ViewObject.Visibility:
-                filename = f"{target_path}.stl"
+                filename = f"{self.filepath}.stl"
                 obj.Shape.exportStl(filename)
 
     def _beveled_edge_cube(self, length: float, depth: float, side: str, move: dict):
@@ -373,12 +404,13 @@ class EngineFreecad:
 
         return res
 
-    def build(self, in_name: Path):
+    def build(self, in_name: Path, outformats):
         """
         This is the main working class for decoding the FreeCAD
 
         Args:
-            in_name: the path where the JSON is stored under.
+            in_name: The path where the JSON is stored under.
+            outformats: The path to a csv containing views.
         """
 
         definition = json.loads(in_name.read_text())
@@ -418,22 +450,26 @@ class EngineFreecad:
         FreeCADGui.activeDocument().activeView().viewTop()
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        filepath = f"{self._base_path}/{name}/{name}"
-        doc.saveCopy(str(f"{filepath}.FCStd"))
-        self.render_to_png(Path(filepath))
-        self.render_to_dxf(doc, Path(filepath))
-        self.render_to_stl(doc, Path(filepath))
+        self.filepath = f"{self._base_path}/{name}/{name}"
+        doc.saveCopy(str(f"{self.filepath}.FCStd"))
+        for out_choice in outformats.lower().split(","):
+            ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
+            out_format = ftype.upper()
+            match out_format:
+                case "PNG": 
+                    engine.render_to_png(view=fview)
+                case "DXF":
+                    engine.render_to_dxf(view=fview)
+                case "STL":
+                    engine.render_to_stl(doc)
         App.closeDocument(name)
-
         QtGui.QApplication.quit()
 
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-# nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
-# with open(nut_specifications_json) as file:
-#     nut_specifications = json.load(file)
+file_to_produce = os.getenv("CYCAX_OUT_FORMATS")
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
-engine.build(Path(json_file))
+engine.build(Path(json_file), file_to_produce.replace(" ", ""))

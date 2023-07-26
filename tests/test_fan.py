@@ -45,13 +45,13 @@ def test_fans(tmp_path):
     fans(fan_loc)
 
     hash_value_fan_face_json = hex_code(fan_path=fan_loc, filename="fan_face", ext=".json")
-    assert hash_value_fan_face_json == "f35f4e190dddca585ba682fe51b59d67593a872006dc1acdf846fe5656162600"
+    assert hash_value_fan_face_json == "213b3ecfdceaac78c23769b81f3851398089108d449e9feb09e602343dab0d24"
 
     hash_value_face_json = hex_code(fan_path=fan_loc, filename="face", ext=".json")
-    assert hash_value_face_json == "9831e01b4a94f87d758873c3bdcab28fc9d0a6035ca3861b0bdd99943660acb4"
+    assert hash_value_face_json == "db70922e5e252705acffa479746feda80776681ba0d1a166c2713e6ba8c491ef"
 
     hash_value_face_scad = hex_code(fan_path=fan_loc, filename="face", ext=".scad")
-    assert hash_value_face_scad == "ab7e3b361b402855028548790e4246de753c4f7d011222cb05aeec400534d828"
+    assert hash_value_face_scad == "7867ac6c33eccceb5d2fdc42cf4b41aadc3a46bdf79e6834d60ca3c87d26c34e"
 
     hash_value_face_stl = hex_code(fan_path=fan_loc, filename="face", ext=".stl")
     assert hash_value_face_stl == "1a01f17b378a6e7c9abc54ce8680480ff5ded289bc9880f7192ac119785e0755"

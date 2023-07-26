@@ -82,6 +82,7 @@ class CycadSide:
         self,
         pos: tuple[float, float],
         diameter: float,
+        sink: float = 0.0,
         depth: Optional[float] = None,
         external_subtract: bool = False,
     ):
@@ -91,11 +92,12 @@ class CycadSide:
             pos: this is a tupple that contains the (x, y) coordinates of the object.
             diameter: The diameter of the hole.
             depth: How deep to drill the hole, if not specified will drill the hole all the way through.
+            sink: The hole can be sunk bellow the surface of the specified side to make a pocket.
             external_subtract: This is specified that the hole will only be tranferred onto other surfaces.
                 When set to True the hole will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
-        _location_tupple = self._location_calc(pos=pos, sink=0)
+        _location_tupple = self._location_calc(pos=pos, sink=sink)
         self._parent.make_hole(
             x=_location_tupple[0],
             y=_location_tupple[1],
