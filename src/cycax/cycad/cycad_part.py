@@ -421,9 +421,7 @@ class CycadPart(Location):
             }[side]
             edge.append(side)
         assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
-        assert (
-            edge_type in ["round", "chamfer"]
-        ), "You need to specify the edge type as either round or chamfer."
+        assert edge_type in ["round", "chamfer"], "You need to specify the edge type as either round or chamfer."
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]

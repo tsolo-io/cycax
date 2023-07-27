@@ -138,9 +138,6 @@ class RectangleCutOut(Location):
         return rotmax
 
 
-
-
-
 class NutCutOut(Location):
     """
     Class for holding the data for nut cut outs.
