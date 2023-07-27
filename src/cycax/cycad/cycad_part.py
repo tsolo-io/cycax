@@ -465,7 +465,8 @@ class CycadPart(Location):
 
         elif _eng_lower == "freecad":
             if engine_config is None:
-                engine_config = {"out_formats": "PNG: ALL, STL: None, DXF: TOP"}
+                engine_config = {}
+                engine_config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
                 print(type(engine_config))
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
 

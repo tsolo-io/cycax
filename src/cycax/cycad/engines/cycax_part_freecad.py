@@ -33,17 +33,6 @@ FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
 
-nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
-    "M3": {
-        "diameter": 6.01,
-        "thickness": 2.4,
-    },
-    "M6": {
-        "diameter": 11.05,
-        "thickness": 5.2,
-    },
-}
-
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a JSON passed to it.
@@ -233,22 +222,25 @@ class EngineFreecad:
 
         """
         active_doc = FreeCADGui.activeDocument()
-        view = view.upper()
-
-        if view is None:
-            view = "ALL"
-
-        self.change_view(active_doc=active_doc, side=view)
+        view = self.change_view(active_doc=active_doc, side=view, default="ALL")
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        target_image_file = f"{self.filepath}-perspective{view}.png"
+        target_image_file = f"{self.filepath}-{view}.png"
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-    def change_view(self, active_doc, side: str):
-        """This will change the gui view to show the specified side."""
+    def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str = None):
+        """This will change the gui view to show the specified side.
+        Args:
+            active_doc: Freecad active doc.
+            side: The side the view is from.
+            default: The default side for that view.
+        """
 
-        match side:
+        if side is None:
+            side = default
+
+        match side.upper().strip():
             case "TOP":
                 active_doc.activeView().viewTop()
             case "BACK":
@@ -265,22 +257,23 @@ class EngineFreecad:
                 active_doc.activeView().viewRight()
             case "ALL":
                 active_doc.activeView().viewAxometric()
+            case _:
+                msg = f"side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT BACK OR ALL."
+                raise ValueError(msg)
+        return side
 
     def render_to_dxf(self, view: str | None = None):
         """This method will be used for creating a dxf of the object currently in view.
         Args:
-            active_doc: The active FreeCAD Gui
+            view: The side from which to produce the output file.
         """
-        view = view.upper()
         active_doc = FreeCADGui.activeDocument()
-        if view is None:
-            view = "TOP"
-        self.change_view(active_doc=active_doc, side=view)
+        view = self.change_view(active_doc=active_doc, side=view, default="TOP")
         FreeCADGui.SendMsgToActiveView("ViewFit")
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
 
-        importDXF.export(__objs__, str(f"{self.filepath}-perspective{view}.dxf"))
+        importDXF.export(__objs__, str(f"{self.filepath}-{view}.dxf"))
 
     def render_to_stl(self, active_doc: App.Document):
         """This method will be used for creating a STL of an object currently in view.
@@ -402,13 +395,13 @@ class EngineFreecad:
 
         return res
 
-    def build(self, in_name: Path, outformats):
+    def build(self, in_name: Path, outformats: str):
         """
         This is the main working class for decoding the FreeCAD
 
         Args:
             in_name: The path where the JSON is stored under.
-            outformats: The path to a csv containing views.
+            outformats: CSV containing views..
         """
 
         definition = json.loads(in_name.read_text())
@@ -431,6 +424,7 @@ class EngineFreecad:
                     cut_features.append(self.cube(data))
                 elif data["name"] == "sphere":
                     solid = solid.cut(self.sphere(data))
+                    # This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
                 elif data["name"] == "nut":
                     cut_features.append(self.cut_nut(data))
 
@@ -448,11 +442,11 @@ class EngineFreecad:
         FreeCADGui.activeDocument().activeView().viewTop()
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        self.filepath = f"{self._base_path}/{name}/{name}"
+        self.filepath = self._base_path / name / name
         doc.saveCopy(str(f"{self.filepath}.FCStd"))
         for out_choice in outformats.lower().split(","):
             ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
-            out_format = ftype.upper()
+            out_format = ftype.upper().strip()
             match out_format:
                 case "PNG":
                     engine.render_to_png(view=fview)
@@ -460,14 +454,18 @@ class EngineFreecad:
                     engine.render_to_dxf(view=fview)
                 case "STL":
                     engine.render_to_stl(doc)
+                case _:
+                    msg = f"file_type: {out_format} is not one of PNG, DXF or STL."
+                    raise ValueError(msg)
         App.closeDocument(name)
         QtGui.QApplication.quit()
 
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-file_to_produce = os.getenv("CYCAX_OUT_FORMATS")
+files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
-engine.build(Path(json_file), file_to_produce.replace(" ", ""))
+
+engine.build(Path(json_file), files_to_produce.replace(" ", ""))
