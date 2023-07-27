@@ -33,17 +33,6 @@ FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
 
-nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
-    "M3": {
-        "diameter": 6.01,
-        "thickness": 2.4,
-    },
-    "M6": {
-        "diameter": 11.05,
-        "thickness": 5.2,
-    },
-}
-
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a JSON passed to it.
@@ -225,9 +214,7 @@ class EngineFreecad:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
         return cyl
 
-
-
-    def render_to_png(self, view: Optional[str] = None):
+    def render_to_png(self, view: str | None = None):
         """Used to create a png of the desired side.
 
         Args:
@@ -235,8 +222,6 @@ class EngineFreecad:
 
         """
         active_doc = FreeCADGui.activeDocument()
-        view = view.upper().strip()
-
         view = self.change_view(active_doc=active_doc, side=view, default="ALL")
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
@@ -244,8 +229,7 @@ class EngineFreecad:
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-
-    def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str=None):
+    def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str = None):
         """This will change the gui view to show the specified side.
         Args:
             active_doc: Freecad active doc.
@@ -256,7 +240,7 @@ class EngineFreecad:
         if side is None:
             side = default
 
-        match side:
+        match side.upper().strip():
             case "TOP":
                 active_doc.activeView().viewTop()
             case "BACK":
@@ -278,13 +262,11 @@ class EngineFreecad:
                 raise ValueError(msg)
         return side
 
-
-    def render_to_dxf(self, view: Optional[str] = None):
+    def render_to_dxf(self, view: str | None = None):
         """This method will be used for creating a dxf of the object currently in view.
         Args:
             view: The side from which to produce the output file.
         """
-        view = view.upper().strip()
         active_doc = FreeCADGui.activeDocument()
         view = self.change_view(active_doc=active_doc, side=view, default="TOP")
         FreeCADGui.SendMsgToActiveView("ViewFit")
@@ -441,8 +423,8 @@ class EngineFreecad:
                 elif data["name"] == "cube":
                     cut_features.append(self.cube(data))
                 elif data["name"] == "sphere":
-                    solid = solid.cut(self.sphere(data)) 
-                    #This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
+                    solid = solid.cut(self.sphere(data))
+                    # This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
                 elif data["name"] == "nut":
                     cut_features.append(self.cut_nut(data))
 
@@ -487,4 +469,3 @@ logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
 
 engine.build(Path(json_file), files_to_produce.replace(" ", ""))
-

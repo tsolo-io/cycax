@@ -138,9 +138,6 @@ class RectangleCutOut(Location):
         return rotmax
 
 
-
-
-
 class NutCutOut(Location):
     """
     Class for holding the data for nut cut outs.
@@ -159,7 +156,6 @@ class NutCutOut(Location):
         depth: depth of the nut.
         vertical: this is a bool that will be set to False if you want the flat side down.
     """
-
 
     nut_specifications: dict[
         str, dict[str, float]

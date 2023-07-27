@@ -421,9 +421,7 @@ class CycadPart(Location):
             }[side]
             edge.append(side)
         assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
-        assert (
-            edge_type in ["round", "chamfer"]
-        ), "You need to specify the edge type as either round or chamfer."
+        assert edge_type in ["round", "chamfer"], "You need to specify the edge type as either round or chamfer."
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]
@@ -468,7 +466,7 @@ class CycadPart(Location):
         elif _eng_lower == "freecad":
             if engine_config is None:
                 engine_config = {}
-                engine_config['out_formats'] = [('png', 'ALL'), ('STL',), ('DXF', TOP)]
+                engine_config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
                 print(type(engine_config))
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
 
