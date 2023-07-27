@@ -1,44 +1,43 @@
-#!/usr/bin/env python3
 import hashlib
 from pathlib import Path
 
 from cycax.cycad import Print3D
+from tests.shared import hex_code_check
 
 
-def nutty_cube(nut_path):
+def nutty_cube(tmp_path: Path):
     cube = Print3D(x_size=11, y_size=11, z_size=11, part_no="testing_nut")
 
     for side in (cube.left, cube.right, cube.top, cube.bottom, cube.front, cube.back):
         side.nut(pos=[7, 7], nut_type="M3", depth=2)  # Coordinates based on center of the Nut.
 
-    nut_path.mkdir()
-
-    cube.save(nut_path)
+    cube.save(tmp_path)
     cube.render("freecad")
     cube.render("preview3d")
 
 
-def hex_code(nut_path, filename: str):
-    """Test save on assembly and parts."""
+def test_nut(tmp_path: Path):
+    # This test will check that the nut is still being produced as it should.
 
-    filename = nut_path / "testing_nut" / filename
+    nutty_cube(tmp_path)
 
-    content = filename.read_text()
-    hash_value_file = hashlib.sha256(content.encode("UTF-8")).hexdigest()
+    hex_code_check(
+        tmp_path=tmp_path,
+        filename="testing_nut",
+        ext=".json",
+        hex_code="22144e25a8dc044b89e4f5795ace224f90a87ae087647de05edb674daab09d93",
+    )
 
-    return hash_value_file
+    hex_code_check(
+        tmp_path=tmp_path,
+        filename="testing_nut",
+        ext=".scad",
+        hex_code="a2d137c720a5f204749757c5e6a2eacd003244c8642d55b85efd36db7e165815",
+    )
 
-
-def test_nut(tmp_path):
-    nut_loc = tmp_path / "nut"
-
-    nutty_cube(nut_loc)
-
-    hash_value_json = hex_code(nut_path=nut_loc, filename="testing_nut.json")
-    assert hash_value_json == "f00f5009ca121dfa2db41bdd6592b67b0b20c1c4ced4625320b90254c2ee6c78"
-
-    hash_value_scad = hex_code(nut_path=nut_loc, filename="testing_nut.scad")
-    assert hash_value_scad == "7aae373b878863a76495f135759c735beb2068964c0d03769ed4d1ce282317d5"
-
-    hash_value_freecad_stl = hex_code(nut_path=nut_loc, filename="testing_nut.stl")
-    assert hash_value_freecad_stl == "3b9a4beaa11870172d0de40d343d7e048091ff84ee5a2ab125a5bf2a132d8aab"
+    hex_code_check(
+        tmp_path=tmp_path,
+        filename="testing_nut",
+        ext=".stl",
+        hex_code="fdf00b4b0a62fbb105624bda0a7e3c870010f367515d7f7c6397c677a12fae86",
+    )

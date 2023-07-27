@@ -138,18 +138,7 @@ class RectangleCutOut(Location):
         return rotmax
 
 
-nut_specifications: dict[
-    str, dict[str, float]
-] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
-    "M3": {
-        "diameter": 6.01,
-        "thickness": 2.4,
-    },
-    "M6": {
-        "diameter": 11.05,
-        "thickness": 5.2,
-    },
-}
+
 
 
 class NutCutOut(Location):
@@ -171,13 +160,35 @@ class NutCutOut(Location):
         vertical: this is a bool that will be set to False if you want the flat side down.
     """
 
+
+    nut_specifications: dict[
+        str, dict[str, float]
+    ] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
+        "M3ISO": {
+            "diameter": 6.01,
+            "thickness": 2.4,
+            "side_to_side": 5.4,
+        },
+        "M3": {
+            "diameter": 6.2,
+            "thickness": 2.5,
+            "side_to_side": 5.5,
+        },
+        "M6ISO": {
+            "diameter": 11.05,
+            "thickness": 5.2,
+            "side_to_side": 10,
+        },
+    }
+
     def __init__(
         self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, vertical: bool = True
     ):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type.upper()
-        self.diameter = nut_specifications[self.nut_type]["diameter"]
-        self.thickness = nut_specifications[self.nut_type]["thickness"]
+        self.diameter = NutCutOut.nut_specifications[self.nut_type]["diameter"]
+        self.thickness = NutCutOut.nut_specifications[self.nut_type]["thickness"]
+        self.side_to_side = NutCutOut.nut_specifications[self.nut_type]["side_to_side"]
         if depth is None:
             self.depth = self.thickness
         else:

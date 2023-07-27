@@ -23,7 +23,7 @@ class Simple2D(PartEngine):
 
     """
 
-    def __init__(self, name: str, path: Optional[Path] = None, config: Optional[dict] = None):
+    def __init__(self, name: str, path: Path | None = None, config: dict | None = None):
         super().__init__(name, path, config)
 
         self.side = "TOP"

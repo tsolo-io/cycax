@@ -188,11 +188,11 @@ class EngineFreecad:
 
     def hole(
         self,
-        feature: Optional[dict] = None,
-        depth: Optional[float] = None,
-        radius: Optional[float] = None,
-        move: Optional[dict] = None,
-        side: Optional[str] = None,
+        feature: dict | None = None,
+        depth: float | None = None,
+        radius: float | None = None,
+        move: dict | None = None,
+        side: str | None = None,
     ):
         """This method will be used for cutting a cylindical hole into a surface.
 
@@ -226,12 +226,13 @@ class EngineFreecad:
         return cyl
 
 
+
     def render_to_png(self, view: Optional[str] = None):
         """Used to create a png of the desired side.
-        
+
         Args:
             view: The side of the object the png will be produced from.
-            
+
         """
         active_doc = FreeCADGui.activeDocument()
         view = view.upper().strip()
@@ -242,6 +243,7 @@ class EngineFreecad:
         target_image_file = f"{self.filepath}-{view}.png"
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
+
 
     def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str=None):
         """This will change the gui view to show the specified side.
@@ -464,7 +466,7 @@ class EngineFreecad:
             ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
             out_format = ftype.upper().strip()
             match out_format:
-                case "PNG": 
+                case "PNG":
                     engine.render_to_png(view=fview)
                 case "DXF":
                     engine.render_to_dxf(view=fview)
@@ -483,4 +485,6 @@ files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
+
 engine.build(Path(json_file), files_to_produce.replace(" ", ""))
+

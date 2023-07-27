@@ -258,7 +258,7 @@ class CycadPart(Location):
             "BACK": self.y_max,
         }
 
-    def move(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def move(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """This method will be used for moving the part.
 
         Args:
@@ -288,7 +288,7 @@ class CycadPart(Location):
 
         self.make_bounding_box()
 
-    def at(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Place part at the exact provided coordinates.
 
         Args:
@@ -421,6 +421,9 @@ class CycadPart(Location):
             }[side]
             edge.append(side)
         assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
+        assert (
+            edge_type in ["round", "chamfer"]
+        ), "You need to specify the edge type as either round or chamfer."
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]
@@ -443,7 +446,7 @@ class CycadPart(Location):
             )
         )
 
-    def render(self, engine: str = "Preview3D", engine_config: Optional[dict] = None) -> dict:
+    def render(self, engine: str = "Preview3D", engine_config: dict | None = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods.
         It is invoked by CycadPart and can be called: CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
 
