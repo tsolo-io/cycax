@@ -226,7 +226,7 @@ class EngineFreecad:
         return cyl
 
 
-    def render_to_png(self, view: str|None = None):
+    def render_to_png(self, view: Optional[str] = None):
         """Used to create a png of the desired side.
         
         Args:
@@ -242,7 +242,7 @@ class EngineFreecad:
         self.change_view(active_doc=active_doc, side=view)
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        target_image_file = f"{self.filepath}-perspective{view}.png"
+        target_image_file = f"{self.filepath}-{view}.png"
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
@@ -266,9 +266,12 @@ class EngineFreecad:
                 active_doc.activeView().viewRight()
             case "ALL":
                 active_doc.activeView().viewAxometric()
+            case _:
+                msg = f"side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT BACK OR ALL."
+                raise ValueError(msg)
 
 
-    def render_to_dxf(self, view: str|None = None):
+    def render_to_dxf(self, view: Optional[str] = None):
         """This method will be used for creating a dxf of the object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
@@ -282,7 +285,7 @@ class EngineFreecad:
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
 
-        importDXF.export(__objs__, str(f"{self.filepath}-perspective{view}.dxf"))
+        importDXF.export(__objs__, str(f"{self.filepath}-{view}.dxf"))
 
     def render_to_stl(self, active_doc: App.Document):
         """This method will be used for creating a STL of an object currently in view.
@@ -462,14 +465,17 @@ class EngineFreecad:
                     engine.render_to_dxf(view=fview)
                 case "STL":
                     engine.render_to_stl(doc)
+                case _:
+                    msg = f"file_type: {out_format} is not one of PNG, DXF or STL."
+                    raise ValueError(msg)
         App.closeDocument(name)
         QtGui.QApplication.quit()
 
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-file_to_produce = os.getenv("CYCAX_OUT_FORMATS")
+files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
-engine.build(Path(json_file), file_to_produce.replace(" ", ""))
+engine.build(Path(json_file), files_to_produce.replace(" ", ""))
