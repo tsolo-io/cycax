@@ -274,6 +274,7 @@ class EngineFreecad:
         __objs__.append(active_doc.getObject("Shape"))
 
         importDXF.export(__objs__, str(f"{self.filepath}-{view}.dxf"))
+        
 
     def render_to_stl(self, active_doc: App.Document):
         """This method will be used for creating a STL of an object currently in view.
@@ -443,7 +444,7 @@ class EngineFreecad:
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
         self.filepath = self._base_path / name / name
-        doc.saveCopy(str(f"{self.filepath}.FCStd"))
+        doc.saveCopy(f"{self.filepath}.FCStd")
         for out_choice in outformats.lower().split(","):
             ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
             out_format = ftype.upper().strip()
