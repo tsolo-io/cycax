@@ -234,21 +234,26 @@ class EngineFreecad:
             
         """
         active_doc = FreeCADGui.activeDocument()
-        view = view.upper()
+        view = view.upper().strip()
 
-        if view is None:
-            view = "ALL"
-
-        self.change_view(active_doc=active_doc, side=view)
+        view = self.change_view(active_doc=active_doc, side=view, default="ALL")
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
         target_image_file = f"{self.filepath}-{view}.png"
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-    def change_view(self, active_doc, side: str):
-        """This will change the gui view to show the specified side."""
-        
+    def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str=None):
+        """This will change the gui view to show the specified side.
+        Args:
+            active_doc: Freecad active doc.
+            side: The side the view is from.
+            default: The default side for that view.
+        """
+
+        if side is None:
+            side = default
+
         match side:
             case "TOP":
                 active_doc.activeView().viewTop()
@@ -269,18 +274,17 @@ class EngineFreecad:
             case _:
                 msg = f"side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT BACK OR ALL."
                 raise ValueError(msg)
+        return side
 
 
     def render_to_dxf(self, view: Optional[str] = None):
         """This method will be used for creating a dxf of the object currently in view.
         Args:
-            active_doc: The active FreeCAD Gui
+            view: The side from which to produce the output file.
         """
-        view = view.upper()
+        view = view.upper().strip()
         active_doc = FreeCADGui.activeDocument()
-        if view is None:
-            view = "TOP"
-        self.change_view(active_doc=active_doc, side=view)
+        view = self.change_view(active_doc=active_doc, side=view, default="TOP")
         FreeCADGui.SendMsgToActiveView("ViewFit")
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
@@ -407,13 +411,13 @@ class EngineFreecad:
 
         return res
 
-    def build(self, in_name: Path, outformats):
+    def build(self, in_name: Path, outformats: str):
         """
         This is the main working class for decoding the FreeCAD
 
         Args:
             in_name: The path where the JSON is stored under.
-            outformats: The path to a csv containing views.
+            outformats: csv containing views..
         """
 
         definition = json.loads(in_name.read_text())
@@ -453,11 +457,11 @@ class EngineFreecad:
         FreeCADGui.activeDocument().activeView().viewTop()
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        self.filepath = f"{self._base_path}/{name}/{name}"
+        self.filepath = self._base_path / name / name
         doc.saveCopy(str(f"{self.filepath}.FCStd"))
         for out_choice in outformats.lower().split(","):
             ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
-            out_format = ftype.upper()
+            out_format = ftype.upper().strip()
             match out_format:
                 case "PNG": 
                     engine.render_to_png(view=fview)

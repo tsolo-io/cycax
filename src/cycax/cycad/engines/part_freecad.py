@@ -20,7 +20,7 @@ class PartEngineFreeCAD(PartEngine):
             freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
 
             out_formats_set = set()
-            for file_format in self.confg.get('out_formats', []):
+            for file_format in self.config.get('out_formats', []):
                 out_formats_set.add(":".join(file_format[:2]))
 
             environment = dict(os.environ)
