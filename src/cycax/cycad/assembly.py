@@ -146,6 +146,7 @@ class Assembly:
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
 
+
     def rotate_freeze_left(self, part: CycadPart):
         """This method will rotate the top and front while holding the left where it currently is.
 
@@ -156,6 +157,7 @@ class Assembly:
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
+
 
     def rotate_freeze_front(self, part: CycadPart):
         """This method will rotate the left and top while holding the front where it currently is.
