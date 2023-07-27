@@ -1,0 +1,22 @@
+
+*** These modified files were found in JOE when it aborted on Thu Jul 27 10:37:11 2023
+*** JOE was aborted because the terminal closed
+
+*** File '(Unnamed)'
+Makefile
+make
+Makefile
+Makefile
+Makefile
+/home/helen/tsolo/cycax/.git/MERGE_MSG
+/home/helen/tsolo/cycax/.git/MERGE_MSG
+/home/helen/tsolo/cycax/.git/MERGE_MSG
+/home/helen/tsolo/cycax/.git/MERGE_MSG
+/home/helen/tsolo/server-chassis/.git/MERGE_MSG
+/home/helen/tsolo/cycax/.git/MERGE_MSG
+
+*** File '* Startup Log *'
+Processing '/etc/joe/editorrc'...
+Processing '/etc/joe/ftyperc'...
+Finished processing /etc/joe/ftyperc
+Finished processing /etc/joe/editorrc
