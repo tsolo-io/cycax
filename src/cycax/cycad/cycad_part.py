@@ -178,7 +178,9 @@ class CycadPart(Location):
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float=None, vertical: bool = True):
+    def make_nut(
+        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, vertical: bool = True
+    ):
         """This method will insert a nut into a CycadPart.
 
         Args:
@@ -462,8 +464,8 @@ class CycadPart(Location):
 
         elif _eng_lower == "freecad":
             if engine_config is None:
-                engine_config={}
-                engine_config['out_formats'] = [('png', 'ALL'), ('STL',), ('DXF',TOP)]
+                engine_config = {}
+                engine_config['out_formats'] = [('png', 'ALL'), ('STL',), ('DXF', TOP)]
                 print(type(engine_config))
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
 

@@ -417,7 +417,7 @@ class EngineFreecad:
 
         Args:
             in_name: The path where the JSON is stored under.
-            outformats: csv containing views..
+            outformats: CSV containing views..
         """
 
         definition = json.loads(in_name.read_text())
@@ -439,7 +439,8 @@ class EngineFreecad:
                 elif data["name"] == "cube":
                     cut_features.append(self.cube(data))
                 elif data["name"] == "sphere":
-                    solid = solid.cut(self.sphere(data))
+                    solid = solid.cut(self.sphere(data)) 
+                    #This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
                 elif data["name"] == "nut":
                     cut_features.append(self.cut_nut(data))
 
