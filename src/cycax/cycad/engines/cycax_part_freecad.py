@@ -262,13 +262,13 @@ class EngineFreecad:
                 raise ValueError(msg)
         return side
 
-    def render_to_dxf(self, view: str | None = None):
+    def render_to_dxf(self, active_doc: App.Document, view: str | None = None):
         """This method will be used for creating a dxf of the object currently in view.
         Args:
             view: The side from which to produce the output file.
         """
-        active_doc = FreeCADGui.activeDocument()
-        view = self.change_view(active_doc=active_doc, side=view, default="TOP")
+        view_doc = FreeCADGui.activeDocument()
+        view = self.change_view(active_doc=view_doc, side=view, default="TOP")
         FreeCADGui.SendMsgToActiveView("ViewFit")
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
@@ -452,9 +452,9 @@ class EngineFreecad:
                 case "PNG":
                     engine.render_to_png(view=fview)
                 case "DXF":
-                    engine.render_to_dxf(view=fview)
+                    engine.render_to_dxf(view=fview, active_doc=doc)
                 case "STL":
-                    engine.render_to_stl(doc)
+                    engine.render_to_stl(active_doc=doc)
                 case _:
                     msg = f"file_type: {out_format} is not one of PNG, DXF or STL."
                     raise ValueError(msg)
