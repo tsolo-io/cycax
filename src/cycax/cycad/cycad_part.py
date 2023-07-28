@@ -9,7 +9,7 @@ from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, Ri
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut
+from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -178,7 +178,9 @@ class CycadPart(Location):
             self.features.append(temp_slot.hole_right)
             self.features.append(temp_slot.rectangle)
 
-    def make_nut(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
+    def make_nut(
+        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, vertical: bool = True
+    ):
         """This method will insert a nut into a CycadPart.
 
         Args:
@@ -192,6 +194,19 @@ class CycadPart(Location):
         """
         temp_nut = NutCutOut(side=side, x=x, y=y, z=z, nut_type=nut_type, depth=depth, vertical=vertical)
         self.features.append(temp_nut)
+
+    def make_sphere(self, side: str, x: float, y: float, z: float, diameter: float):
+        """This method will insert a sphere into a CycadPart.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the hole will be made in.
+            diameter: The Diameter of the sphere.
+        """
+        temp_sphere = SphereCutOut(side=side, x=x, y=y, z=z, diameter=diameter)
+        self.features.append(temp_sphere)
 
     def make_rectangle(
         self,
@@ -243,7 +258,7 @@ class CycadPart(Location):
             "BACK": self.y_max,
         }
 
-    def move(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def move(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """This method will be used for moving the part.
 
         Args:
@@ -273,7 +288,7 @@ class CycadPart(Location):
 
         self.make_bounding_box()
 
-    def at(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Place part at the exact provided coordinates.
 
         Args:
@@ -378,11 +393,7 @@ class CycadPart(Location):
         list_part.append(dict_piece)
         for item in self.features:
             ret = item.export()
-            if type(ret) != dict:
-                for part in ret:
-                    list_part.append(part)
-            else:
-                list_part.append(ret)
+            list_part.append(ret)
         dict_out = {}
         dict_out["name"] = self.part_no
         dict_out["features"] = list_part
@@ -410,6 +421,7 @@ class CycadPart(Location):
             }[side]
             edge.append(side)
         assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
+        assert edge_type in ["round", "chamfer"], "You need to specify the edge type as either round or chamfer."
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]
@@ -432,7 +444,7 @@ class CycadPart(Location):
             )
         )
 
-    def render(self, engine: str = "Preview3D", engine_config: Optional[dict] = None) -> dict:
+    def render(self, engine: str = "Preview3D", engine_config: dict | None = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods.
         It is invoked by CycadPart and can be called: CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
 
@@ -452,6 +464,9 @@ class CycadPart(Location):
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config={"stl": False})
 
         elif _eng_lower == "freecad":
+            if engine_config is None:
+                engine_config = {}
+                engine_config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
 
         else:

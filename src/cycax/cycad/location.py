@@ -104,7 +104,7 @@ class Location:
 
         return rotmax
 
-    def move(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def move(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """This move can be used to translate objects based on the provided arguments.
 
         Args:
@@ -119,7 +119,7 @@ class Location:
         if z is not None:
             self.z = self.z + z
 
-    def at(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None):
+    def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """This move can be used to translate objects based on the provided arguments.
 
         Args:

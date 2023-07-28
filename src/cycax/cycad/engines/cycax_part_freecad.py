@@ -33,17 +33,6 @@ FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
 
-nut_specifications = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
-    "M3": {
-        "diameter": 6.01,
-        "thickness": 2.4,
-    },
-    "M6": {
-        "diameter": 11.05,
-        "thickness": 5.2,
-    },
-}
-
 
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a JSON passed to it.
@@ -55,6 +44,7 @@ class EngineFreecad:
 
     def __init__(self, base_path: Path):
         self._base_path = base_path
+        self.filepath = ""
 
     def cube(self, feature: dict):
         """This method will draw a cube when given a dict that contains the necessary dimentions
@@ -78,6 +68,21 @@ class EngineFreecad:
         width = feature["y_size"]
         depth = feature["z_size"]
         return Part.makeBox(length, width, depth, pos)
+
+    def sphere(self, feature: dict):
+        """This method will draw a sphere when given a dict that contains the necessary dimentions
+
+        Args:
+            feature: This is the dict that contains the necessary details of the sphere to be cut out.
+        """
+        x = feature["x"]
+        y = feature["y"]
+        z = feature["z"]
+        pos_vec = (x, y, z)
+        radius = feature["diameter"] / 2
+
+        pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
+        return Part.makeSphere(radius, pos)
 
     def _calc_hex(self, depth: float, diameter: float):
         """This method will be used to find out where the points of the hexigon are located and then drawing a hexigon.
@@ -121,20 +126,24 @@ class EngineFreecad:
         z = feature["z"]
 
         if feature["vertical"] is True:
-            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 30))
+            rotation1 = App.Rotation(Vector(0, 0, 1), 0)
+        else:
+            rotation1 = App.Rotation(Vector(0, 0, 1), 30)
 
         if side == FRONT:
-            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
+            rotation2 = App.Rotation(Vector(1, 0, 0), 270)
         elif side == BACK:
-            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90))
+            rotation2 = App.Rotation(Vector(1, 0, 0), 90)
         elif side == TOP:
-            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
+            rotation2 = App.Rotation(Vector(0, 1, 0), 180)
         elif side == BOTTOM:
-            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
+            rotation2 = App.Rotation(Vector(0, 1, 0), 0)
         elif side == LEFT:
-            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
+            rotation2 = App.Rotation(Vector(0, 1, 0), 90)
         elif side == RIGHT:
-            nut.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
+            rotation2 = App.Rotation(Vector(0, 1, 0), 270)
+
+        nut.Placement = App.Placement(Vector(x, y, z), rotation2 * rotation1)
 
         return nut
 
@@ -168,11 +177,11 @@ class EngineFreecad:
 
     def hole(
         self,
-        feature: Optional[dict] = None,
-        depth: Optional[float] = None,
-        radius: Optional[float] = None,
-        move: Optional[dict] = None,
-        side: Optional[str] = None,
+        feature: dict | None = None,
+        depth: float | None = None,
+        radius: float | None = None,
+        move: dict | None = None,
+        side: str | None = None,
     ):
         """This method will be used for cutting a cylindical hole into a surface.
 
@@ -205,43 +214,76 @@ class EngineFreecad:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
         return cyl
 
-    def render_to_png(self, target_path: Path):
-        """This method will be used for creating a png of 2 specific views of the object.
+    def render_to_png(self, view: str | None = None):
+        """Used to create a png of the desired side.
+
         Args:
-            target_path: The Path the png needs to be saved under.
+            view: The side of the object the png will be produced from.
+
         """
         active_doc = FreeCADGui.activeDocument()
-        target_image_file = f"{target_path}-perspectiveAll.png"
+        view = self.change_view(active_doc=active_doc, side=view, default="ALL")
         FreeCADGui.SendMsgToActiveView("ViewFit")
-        active_doc.activeView().viewAxometric()
-        active_doc.activeView().fitAll()
-        active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
-        target_image_file = f"{target_path}-perspectiveTop.png"
-        FreeCADGui.SendMsgToActiveView("ViewFit")
-        active_doc.activeView().viewTop()
+
+        target_image_file = f"{self.filepath}-{view}.png"
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-    def render_to_dxf(self, active_doc: App.Document, target_path: Path):
-        """This method will be used for creating a pdxf of the object currently in view.
+    def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str = None):
+        """This will change the gui view to show the specified side.
         Args:
-            active_doc: The active FreeCAD Gui
-            target_path: The Path the png needs to be saved under.
+            active_doc: Freecad active doc.
+            side: The side the view is from.
+            default: The default side for that view.
         """
+
+        if side is None:
+            side = default
+
+        match side.upper().strip():
+            case "TOP":
+                active_doc.activeView().viewTop()
+            case "BACK":
+                active_doc.activeView().viewRear()
+            case "REAR":
+                active_doc.activeView().viewRear()
+            case "BOTTOM":
+                active_doc.activeView().viewBottom()
+            case "FRONT":
+                active_doc.activeView().viewFront()
+            case "LEFT":
+                active_doc.activeView().viewLeft()
+            case "RIGHT":
+                active_doc.activeView().viewRight()
+            case "ALL":
+                active_doc.activeView().viewAxometric()
+            case _:
+                msg = f"side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT BACK OR ALL."
+                raise ValueError(msg)
+        return side
+
+    def render_to_dxf(self, active_doc: App.Document, view: str | None = None):
+        """This method will be used for creating a dxf of the object currently in view.
+        Args:
+            view: The side from which to produce the output file.
+        """
+        view_doc = FreeCADGui.activeDocument()
+        view = self.change_view(active_doc=view_doc, side=view, default="TOP")
+        FreeCADGui.SendMsgToActiveView("ViewFit")
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
 
-        importDXF.export(__objs__, str(f"{target_path}-perspective.dxf"))
+        importDXF.export(__objs__, str(f"{self.filepath}-{view}.dxf"))
+        
 
-    def render_to_stl(self, active_doc: App.Document, target_path: Path):
+    def render_to_stl(self, active_doc: App.Document):
         """This method will be used for creating a STL of an object currently in view.
         Args:
             active_doc: The active FreeCAD Gui
-            target_path: The Path the png needs to be saved under.
         """
         for obj in active_doc.Objects:
             if obj.ViewObject.Visibility:
-                filename = f"{target_path}.stl"
+                filename = f"{self.filepath}.stl"
                 obj.Shape.exportStl(filename)
 
     def _beveled_edge_cube(self, length: float, depth: float, side: str, move: dict):
@@ -354,12 +396,13 @@ class EngineFreecad:
 
         return res
 
-    def build(self, in_name: Path):
+    def build(self, in_name: Path, outformats: str):
         """
         This is the main working class for decoding the FreeCAD
 
         Args:
-            in_name: the path where the JSON is stored under.
+            in_name: The path where the JSON is stored under.
+            outformats: CSV containing views..
         """
 
         definition = json.loads(in_name.read_text())
@@ -380,6 +423,9 @@ class EngineFreecad:
                     solid = self.decode_beveled_edge(data, solid)
                 elif data["name"] == "cube":
                     cut_features.append(self.cube(data))
+                elif data["name"] == "sphere":
+                    solid = solid.cut(self.sphere(data))
+                    # This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
                 elif data["name"] == "nut":
                     cut_features.append(self.cut_nut(data))
 
@@ -397,22 +443,30 @@ class EngineFreecad:
         FreeCADGui.activeDocument().activeView().viewTop()
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        filepath = f"{self._base_path}/{name}/{name}"
-        doc.saveCopy(str(f"{filepath}.FCStd"))
-        self.render_to_png(Path(filepath))
-        self.render_to_dxf(doc, Path(filepath))
-        self.render_to_stl(doc, Path(filepath))
+        self.filepath = self._base_path / name / name
+        doc.saveCopy(f"{self.filepath}.FCStd")
+        for out_choice in outformats.lower().split(","):
+            ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
+            out_format = ftype.upper().strip()
+            match out_format:
+                case "PNG":
+                    engine.render_to_png(view=fview)
+                case "DXF":
+                    engine.render_to_dxf(view=fview, active_doc=doc)
+                case "STL":
+                    engine.render_to_stl(active_doc=doc)
+                case _:
+                    msg = f"file_type: {out_format} is not one of PNG, DXF or STL."
+                    raise ValueError(msg)
         App.closeDocument(name)
-
         QtGui.QApplication.quit()
 
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-# nut_specifications_json = os.getenv("NUT_SPECIFICATIONS_JSON")
-# with open(nut_specifications_json) as file:
-#     nut_specifications = json.load(file)
+files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
 
 logging.error(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
-engine.build(Path(json_file))
+
+engine.build(Path(json_file), files_to_produce.replace(" ", ""))

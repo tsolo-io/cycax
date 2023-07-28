@@ -138,25 +138,10 @@ class RectangleCutOut(Location):
         return rotmax
 
 
-nut_specifications: dict[
-    str, dict[str, float]
-] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
-    "M3": {
-        "diameter": 6.01,
-        "thickness": 2.4,
-    },
-    "M6": {
-        "diameter": 11.05,
-        "thickness": 5.2,
-    },
-}
-
-
 class NutCutOut(Location):
     """
     Class for holding the data for nut cut outs.
     The nut cut outs will allow us to hold nuts in 3D printed plastic.
-    There will be more nut information added in version 2.
 
     This class will initialize a Nut Cut Out at the desired location.
 
@@ -168,16 +153,42 @@ class NutCutOut(Location):
             This will be used to specify from which side a feature should be inserted into another object.
             This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         nut_type: Type of nut to be inserted.
-        depth: depth of the rectangle.
+        depth: depth of the nut.
         vertical: this is a bool that will be set to False if you want the flat side down.
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, nut_type: str, depth: float, vertical: bool = True):
+    nut_specifications: dict[
+        str, dict[str, float]
+    ] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
+        "M3ISO": {
+            "diameter": 6.01,
+            "thickness": 2.4,
+            "side_to_side": 5.4,
+        },
+        "M3": {
+            "diameter": 6.2,
+            "thickness": 2.5,
+            "side_to_side": 5.5,
+        },
+        "M6ISO": {
+            "diameter": 11.05,
+            "thickness": 5.2,
+            "side_to_side": 10,
+        },
+    }
+
+    def __init__(
+        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, vertical: bool = True
+    ):
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type.upper()
-        self.diameter = nut_specifications[self.nut_type]["diameter"]
-        self.thickness = nut_specifications[self.nut_type]["thickness"]
-        self.depth = depth
+        self.diameter = NutCutOut.nut_specifications[self.nut_type]["diameter"]
+        self.thickness = NutCutOut.nut_specifications[self.nut_type]["thickness"]
+        self.side_to_side = NutCutOut.nut_specifications[self.nut_type]["side_to_side"]
+        if depth is None:
+            self.depth = self.thickness
+        else:
+            self.depth = depth
         self.vertical = vertical
 
     def export(self) -> dict:
@@ -193,3 +204,38 @@ class NutCutOut(Location):
         dict_nut["type"] = "cut"
 
         return dict_nut
+
+
+class SphereCutOut(Location):
+    """
+    Class for holding the data for sphere cut outs.
+
+    This class will initialize a Sphere Cut Out at the desired location.
+
+    Args:
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        diameter: diameter of the sphere.
+    """
+
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float):
+        Location.__init__(self, x, y, z, side)
+        self.diameter = diameter
+
+    def export(self) -> dict:
+        """This will create a dictionary of the sphere that can be used for the JSON.
+
+        Returns:
+            this will return a dictionary.
+        """
+        dict_sphere = {}
+        for key, value in vars(self).items():
+            dict_sphere[key] = value
+        dict_sphere["name"] = "sphere"
+        dict_sphere["type"] = "cut"
+
+        return dict_sphere
