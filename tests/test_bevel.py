@@ -1,4 +1,3 @@
-import hashlib
 from itertools import combinations
 from pathlib import Path
 

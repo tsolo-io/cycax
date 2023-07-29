@@ -6,7 +6,7 @@ from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 sides = (LEFT, RIGHT, TOP, BOTTOM, FRONT, BACK)
 
 
-def test_opposite(tmp_path):
+def test_opposite():
     """Test that the opposite function of sides work."""
 
     mypart = SheetMetal(x_size=20, y_size=20, z_size=20, part_no="chunk-of-iron")

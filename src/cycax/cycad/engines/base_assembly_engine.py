@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 
 class AssemblyEngine:
@@ -33,4 +32,4 @@ class AssemblyEngine:
 
     def build(self):
         msg = "The build method needs to be implimented for this engine."
-        raise NotImplimentedError(msg)
+        raise NotImplementedError(msg)

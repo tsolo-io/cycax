@@ -1,5 +1,3 @@
-from typing import Optional
-
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 

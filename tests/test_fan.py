@@ -1,8 +1,7 @@
-import hashlib
 from pathlib import Path
 
 from cycax.cycad.assembly import Assembly
-from cycax.cycad.cuboid import Cuboid, SheetMetal
+from cycax.cycad.cuboid import SheetMetal
 from cycax.cycad.fan import Fan
 from tests.shared import hex_code_check
 

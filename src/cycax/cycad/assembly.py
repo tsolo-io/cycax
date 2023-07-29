@@ -3,7 +3,6 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
 
 from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
