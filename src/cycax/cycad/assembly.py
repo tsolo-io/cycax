@@ -46,7 +46,7 @@ class Assembly:
 
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":
-            assembler = AssemblyOpenSCAD(self.part_no)
+            assembler = AssemblyOpenSCAD(self.part_no, config=engine_config)
         elif engine.lower() == "blender":
             assembler = AssemblyBlender(self.part_no)
         else:

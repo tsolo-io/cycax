@@ -7,14 +7,16 @@ class AssemblyOpenSCAD:
     """
     This class will use the STLs that have been printed and assemblt them in an OpenSCAD file.
 
-    Args:
+    Attributes:
         part_no: This is the part number of the complex part that is being assembled.
+        config: Configuration for the OpenSCAD assembly engine.
 
     """
 
-    def __init__(self, part_no: str) -> None:
+    def __init__(self, part_no: str, config: dict = None) -> None:
         self.part_no = part_no
         self._base_path = Path(".")
+        self._config = {} if config is None else config
 
     def _fetch_part(self, part: str) -> str:
         """
