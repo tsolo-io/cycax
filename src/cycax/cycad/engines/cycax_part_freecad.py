@@ -146,7 +146,7 @@ class EngineFreecad:
 
         return nut
 
-    def _move_cube(self, features: dict, pos_vec, center=False):
+    def _move_cube(self, features: dict, pos_vec, *, center=False):
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 

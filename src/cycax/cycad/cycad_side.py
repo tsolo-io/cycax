@@ -23,7 +23,7 @@ class CycadSide:
         """
         raise ValueError("_location_calc is Not implimented on" + self.name)
 
-    def _depth_check(self, val: float = None):
+    def _depth_check(self, val: float = None) -> float:
         """Determine the depth of a feature.
 
         Args:
@@ -82,6 +82,7 @@ class CycadSide:
         diameter: float,
         sink: float = 0.0,
         depth: float | None = None,
+        *,
         external_subtract: bool = False,
     ):
         """This will insert a whole given the relatice details, into the correct side.
@@ -113,6 +114,7 @@ class CycadSide:
         width: float,
         depth: float | None = None,
         sink: float = 0,
+        *,
         center: bool = False,
     ):
         """This box will insert a rectangle shape cut out into the object.
@@ -149,6 +151,7 @@ class CycadSide:
         nut_type: str = "M3",
         depth: float | None = None,
         sink: float = 0.0,
+        *,
         vertical: bool = True,
     ):
         """
@@ -202,6 +205,7 @@ class CycadSide:
         length: float,
         width: float,
         depth: float | None = None,
+        *,
         horizontal: bool = True,
         external_subtract: bool = False,
     ):

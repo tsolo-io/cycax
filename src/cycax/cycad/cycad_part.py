@@ -111,6 +111,7 @@ class CycadPart(Location):
         side: str,
         diameter: float,
         depth: float,
+        *,
         external_subtract: bool = False,
     ):
         """
@@ -140,6 +141,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
+        *,
         horizontal: bool = True,
         external_subtract: bool = False,
     ):
@@ -178,7 +180,7 @@ class CycadPart(Location):
             self.features.append(temp_slot.rectangle)
 
     def make_nut(
-        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, vertical: bool = True
+        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, *, vertical: bool = True
     ):
         """This method will insert a nut into a CycadPart.
 
@@ -216,6 +218,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
+        *,
         center=False,
     ):
         """This method will cut a block out of the CycadPart.
