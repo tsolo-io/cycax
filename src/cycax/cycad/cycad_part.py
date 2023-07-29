@@ -70,7 +70,7 @@ class CycadPart(Location):
         self.final_location = False
         self.poligon = poligon
         self.colour = colour
-        self.label: set[str] = set()
+        self.labels: set[str] = set()
         self._files = {}
         self.definition()
         self.assembly = None
@@ -180,7 +180,15 @@ class CycadPart(Location):
             self.features.append(temp_slot.rectangle)
 
     def make_nut(
-        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, *, vertical: bool = True
+        self,
+        side: str,
+        x: float,
+        y: float,
+        z: float,
+        nut_type: str,
+        depth: float | None = None,
+        *,
+        vertical: bool = True,
     ):
         """This method will insert a nut into a CycadPart.
 

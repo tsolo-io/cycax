@@ -2,6 +2,8 @@ from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
 class CycadSide:
+    name = ""
+
     def __init__(self, parent):
         self._parent = parent
 

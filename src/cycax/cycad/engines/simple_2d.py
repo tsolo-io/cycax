@@ -68,7 +68,7 @@ class Simple2D(PartEngine):
         """
         self.boundin_box[TOP] = self.boundin_box[TOP] + feature["z_size"]
         self.boundin_box[RIGHT] = self.boundin_box[RIGHT] + feature["x_size"]
-        self.boundin_box[BACK]: self.boundin_box[BACK] + feature["y_size"]
+        self.boundin_box[BACK] = self.boundin_box[BACK] + feature["y_size"]
         self.plane = self.side
         self.hole_sink = self.side
         self.plane = {TOP: z, BACK: y, BOTTOM: z, FRONT: y, LEFT: x, RIGHT: x}[self.plane]
