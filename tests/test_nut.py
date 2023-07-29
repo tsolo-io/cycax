@@ -8,7 +8,7 @@ def nutty_cube(tmp_path: Path):
     cube = Print3D(x_size=11, y_size=11, z_size=11, part_no="testing_nut")
 
     for side in (cube.left, cube.right, cube.top, cube.bottom, cube.front, cube.back):
-        side.nut(pos=[7, 7], nut_type="M3", depth=2)  # Coordinates based on center of the Nut.
+        side.nut(pos=(7.0, 7.0), nut_type="M3", depth=2)  # Coordinates based on center of the Nut.
 
     cube.save(tmp_path)
     cube.render("freecad")
