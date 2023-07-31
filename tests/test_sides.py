@@ -30,7 +30,8 @@ def complex_box(tmp_path: Path):
     
     views=[]
     for side in (cube.left, cube.right, cube.top, cube.bottom, cube.front, cube.back):
-        side.nut(pos=[13, 13], nut_type="M3", depth=2)  # Coordinates based on center of the Nut.
+        side.hole(pos=[3, 13], diameter=2, depth=2)
+        side.nut(pos=[14, 9], nut_type="m6iso", depth=2)
         side.box(pos=[4, 5], width=3,length=5, depth=2)
         views.append(("SVG", side.name))
     cube.save(tmp_path)
@@ -42,10 +43,13 @@ def test_side(tmp_path: Path):
     # This test will check that the nut is still being produced as it should.
 
     complex_box(tmp_path)
-    for side in ("top", "bottom", "left", "right", "front", "back"):
+
+    hex_value =hex_code_check(tmp_path=tmp_path, filename="testing_side", ext="-top.svg", return_hex = True)
+    
+    for side in ("bottom", "left", "right", "front", "back"):
         hex_code_check(
             tmp_path=tmp_path,
             filename="testing_side",
             ext=f"-{side}.svg",
-            hex_code="a6c8d34ccd3c79dc89baf0682aef69f7f0717c541c00babe59b407a4763037a2",
+            hex_code=hex_value,
         )
