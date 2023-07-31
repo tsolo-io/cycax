@@ -23,6 +23,7 @@ class Slot:
 
     """
 
+    # TODO: Class docstring and order of init attributes do not match. The docstring looks more sensible.
     def __init__(
         self,
         side: str,
@@ -32,6 +33,7 @@ class Slot:
         x: float,
         y: float,
         z: float,
+        *,
         horizontal: bool = True,
     ):
         if horizontal:

@@ -1,6 +1,4 @@
 # global location variables
-from typing import Optional
-
 LEFT = "LEFT"
 RIGHT = "RIGHT"
 TOP = "TOP"
@@ -8,6 +6,8 @@ BOTTOM = "BOTTOM"
 FRONT = "FRONT"
 BACK = "BACK"
 REAR = "BACK"
+
+SIDES = (LEFT, RIGHT, TOP, BOTTOM, FRONT, BACK)
 
 
 class Location:

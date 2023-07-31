@@ -103,7 +103,7 @@ class PartEngineOpenSCAD(PartEngine):
         res = "translate([{x:}, {y:}, {z:}])".format(**lookup)
         return res
 
-    def _move_cube(self, features: dict, center: bool = False) -> str:
+    def _move_cube(self, features: dict, *, center: bool = False) -> str:
         """
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
@@ -130,7 +130,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return output
 
-    def _rotate(self, side: str, vertical: bool = False) -> str:
+    def _rotate(self, side: str, *, vertical: bool = False) -> str:
         """
         This will rotate the object and return the scad necessary.
 
@@ -152,7 +152,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return side
 
-    def _beveled_edge_cube(self, size: float, depth: float, side: str, center: bool = False, rotate: bool = False):
+    def _beveled_edge_cube(self, size: float, depth: float, side: str, *, center: bool = False, rotate: bool = False):
         """
         Helper method for decode_beveled-Edge.
 
@@ -300,7 +300,7 @@ class PartEngineOpenSCAD(PartEngine):
                     fh.write(out)
                     fh.write("\n")
 
-    def build_stl(self, scad_file, stl_file):
+    def build_stl(self, scad_file: Path, stl_file: Path):
         """Calls OpenSCAD to create a STL for the part.
 
         Depending on the complexity of the object it can take long to compute.

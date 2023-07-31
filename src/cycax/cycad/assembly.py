@@ -3,7 +3,6 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
 
 from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
@@ -47,7 +46,7 @@ class Assembly:
 
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":
-            assembler = AssemblyOpenSCAD(self.part_no)
+            assembler = AssemblyOpenSCAD(self.part_no, config=engine_config)
         elif engine.lower() == "blender":
             assembler = AssemblyBlender(self.part_no)
         else:

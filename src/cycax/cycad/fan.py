@@ -19,6 +19,7 @@ class Fan(Cuboid):
         width: float,
         depth: float,
         part_no: str,
+        *,
         internal: bool = True,
         hole_depth: float = 2.0,
         hole_diameter: float = 3.0,

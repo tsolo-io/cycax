@@ -2,7 +2,6 @@ import copy
 import json
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
@@ -71,7 +70,7 @@ class CycadPart(Location):
         self.final_location = False
         self.poligon = poligon
         self.colour = colour
-        self.label: set[str] = set()
+        self.labels: set[str] = set()
         self._files = {}
         self.definition()
         self.assembly = None
@@ -112,6 +111,7 @@ class CycadPart(Location):
         side: str,
         diameter: float,
         depth: float,
+        *,
         external_subtract: bool = False,
     ):
         """
@@ -141,6 +141,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
+        *,
         horizontal: bool = True,
         external_subtract: bool = False,
     ):
@@ -179,7 +180,15 @@ class CycadPart(Location):
             self.features.append(temp_slot.rectangle)
 
     def make_nut(
-        self, side: str, x: float, y: float, z: float, nut_type: str, depth: float = None, vertical: bool = True
+        self,
+        side: str,
+        x: float,
+        y: float,
+        z: float,
+        nut_type: str,
+        depth: float | None = None,
+        *,
+        vertical: bool = True,
     ):
         """This method will insert a nut into a CycadPart.
 
@@ -217,6 +226,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
+        *,
         center=False,
     ):
         """This method will cut a block out of the CycadPart.
@@ -411,15 +421,16 @@ class CycadPart(Location):
         edge = []
         self.make_bounding_box()
         for side in [side1, side2]:
-            side = {
-                TOP: "z",
-                BACK: "y",
-                BOTTOM: "z",
-                FRONT: "y",
-                LEFT: "x",
-                RIGHT: "x",
-            }[side]
-            edge.append(side)
+            edge.append(
+                {
+                    TOP: "z",
+                    BACK: "y",
+                    BOTTOM: "z",
+                    FRONT: "y",
+                    LEFT: "x",
+                    RIGHT: "x",
+                }[side]
+            )
         assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
         assert edge_type in ["round", "chamfer"], "You need to specify the edge type as either round or chamfer."
         if "x" not in edge:
