@@ -2,7 +2,7 @@ import hashlib
 from pathlib import Path
 
 
-def hex_code_check(tmp_path: Path, filename: str, ext: str, hex_code: str = "", return_hex=False):
+def hex_code_check(tmp_path: Path, filename: str, ext: str, hex_code: str = "", return_hex=False, does_not_equal = False):
     """This method is used to produce hash codes of the desired files."""
 
     filename = tmp_path / filename / f"{filename}{ext}"
@@ -13,5 +13,8 @@ def hex_code_check(tmp_path: Path, filename: str, ext: str, hex_code: str = "", 
     if return_hex:
         return hash_value_file
     else:
-        assert hash_value_file == hex_code
+        if does_not_equal:
+            assert hash_value_file != hex_code
+        else:
+           assert hash_value_file == hex_code 
         return ""
