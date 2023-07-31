@@ -32,7 +32,7 @@ def complex_box(tmp_path: Path):
     for side in (cube.left, cube.right, cube.top, cube.bottom, cube.front, cube.back):
         side.hole(pos=[3, 13], diameter=2, depth=2)
         side.nut(pos=[14, 9], nut_type="m6iso", depth=2)
-        side.box(pos=[4, 5], width=3,length=5, depth=2)
+        side.box(pos=[4, 5], width=3,length=5, depth=1)
         views.append(("SVG", side.name))
     cube.save(tmp_path)
     cube.render("freecad", engine_config = {"out_formats": views})
