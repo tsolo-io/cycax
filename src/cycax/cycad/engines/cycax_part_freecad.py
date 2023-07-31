@@ -16,6 +16,7 @@ from pathlib import Path
 import FreeCAD as App
 import FreeCADGui
 import importDXF
+import importSVG
 
 # import QtGui
 import Part
@@ -264,6 +265,7 @@ class EngineFreecad:
     def render_to_dxf(self, active_doc: App.Document, view: str | None = None):
         """This method will be used for creating a dxf of the object currently in view.
         Args:
+            active_doc: The FreeCAD document.
             view: The side from which to produce the output file.
         """
         view_doc = FreeCADGui.activeDocument()
@@ -274,10 +276,24 @@ class EngineFreecad:
 
         importDXF.export(__objs__, str(f"{self.filepath}-{view}.dxf"))
 
+    def render_to_svg(self, active_doc: App.Document, view: str | None = None):
+        """This method will be used for creating a svg of the object currently in view.
+        Args:
+            active_doc: The FreeCAD document.
+            view: The side from which to produce the output file.
+        """
+        view_doc = FreeCADGui.activeDocument()
+        view = self.change_view(active_doc=view_doc, side=view, default="TOP")
+        FreeCADGui.SendMsgToActiveView("ViewFit")
+        __objs__ = []
+        __objs__.append(active_doc.getObject("Shape"))
+
+        importSVG.export(__objs__, str(f"{self.filepath}-{view}.svg"))
+
     def render_to_stl(self, active_doc: App.Document):
         """This method will be used for creating a STL of an object currently in view.
         Args:
-            active_doc: The active FreeCAD Gui
+            active_doc: The FreeCAD document.
         """
         for obj in active_doc.Objects:
             if obj.ViewObject.Visibility:
@@ -451,6 +467,8 @@ class EngineFreecad:
                     engine.render_to_png(view=fview)
                 case "DXF":
                     engine.render_to_dxf(view=fview, active_doc=doc)
+                case "SVG":
+                    engine.render_to_svg(view=fview, active_doc=doc)
                 case "STL":
                     engine.render_to_stl(active_doc=doc)
                 case _:
