@@ -40,7 +40,7 @@ def complex_box(tmp_path: Path):
 
 
 def test_side(tmp_path: Path):
-    # This test will check that the nut is still being produced as it should.
+    # This test will check that the sides are all identical when the same action is performed on each side.
 
     complex_box(tmp_path)
 
