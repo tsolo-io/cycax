@@ -25,7 +25,7 @@ class CycadSide:
         """
         raise ValueError("_location_calc is Not implimented on" + self.name)
 
-    def _depth_check(self, val: float = None) -> float:
+    def _depth_check(self, val: float | None = None) -> float:
         """Determine the depth of a feature.
 
         Args:
@@ -258,7 +258,7 @@ class LeftSide(CycadSide):
         z_size = width
         return x_size, y_size, z_size
 
-    def _depth_check(self, val: float = None) -> float:
+    def _depth_check(self, val: float | None = None) -> float:
         if val is None:
             return self._parent.x_size
         else:
@@ -360,7 +360,7 @@ class FrontSide(CycadSide):
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
-    def _depth_check(self, val: float = None) -> float:
+    def _depth_check(self, val: float | None = None) -> float:
         if val is None:
             return self._parent.y_size
         else:
@@ -387,7 +387,7 @@ class BackSide(CycadSide):
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
-    def _depth_check(self, val: float = None) -> float:
+    def _depth_check(self, val: float | None = None) -> float:
         if val is None:
             return self._parent.y_size
         else:

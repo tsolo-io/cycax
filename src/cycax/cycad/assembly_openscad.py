@@ -13,7 +13,7 @@ class AssemblyOpenSCAD:
 
     """
 
-    def __init__(self, part_no: str, config: dict = None) -> None:
+    def __init__(self, part_no: str, config: dict | None = None) -> None:
         self.part_no = part_no
         self._base_path = Path(".")
         self._config = {} if config is None else config

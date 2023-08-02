@@ -229,7 +229,7 @@ class EngineFreecad:
         active_doc.activeView().fitAll()
         active_doc.activeView().saveImage(str(target_image_file), 2000, 1800, "White")
 
-    def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str = None):
+    def change_view(self, active_doc: FreeCADGui.activeDocument, side: str, default: str | None = None):
         """This will change the gui view to show the specified side.
         Args:
             active_doc: Freecad active doc.
