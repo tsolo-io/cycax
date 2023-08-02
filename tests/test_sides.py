@@ -1,10 +1,10 @@
 # Tests for functionality on part sides.
 
 from pathlib import Path
-from cycax.cycad import Print3D
-from tests.shared import hex_code_check
-from cycax.cycad import SheetMetal
+
+from cycax.cycad import Print3D, SheetMetal
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
+from tests.shared import hex_code_check
 
 
 def test_sides():
@@ -25,17 +25,18 @@ def test_opposite():
     assert mypart.top.opposite == mypart.bottom
     assert mypart.front.opposite == mypart.back
 
+
 def complex_box(tmp_path: Path):
     cube = Print3D(x_size=20, y_size=20, z_size=20, part_no="testing_side")
-    
-    views=[]
+
+    views = []
     for side in (cube.left, cube.right, cube.top, cube.bottom, cube.front, cube.back):
         side.hole(pos=[3, 13], diameter=2, depth=2)
         side.nut(pos=[14, 9], nut_type="m6iso", depth=2)
-        side.box(pos=[4, 5], width=3,length=5, depth=1)
+        side.box(pos=[4, 5], width=3, length=5, depth=1)
         views.append(("SVG", side.name))
     cube.save(tmp_path)
-    cube.render("freecad", engine_config = {"out_formats": views})
+    cube.render("freecad", engine_config={"out_formats": views})
     cube.render("preview3d")
 
 
@@ -44,8 +45,8 @@ def test_side(tmp_path: Path):
 
     complex_box(tmp_path)
 
-    hex_value =hex_code_check(tmp_path=tmp_path, filename="testing_side", ext="-top.svg", return_hex = True)
-    
+    hex_value = hex_code_check(tmp_path=tmp_path, filename="testing_side", ext="-top.svg", return_hex=True)
+
     for side in ("bottom", "left", "right", "front", "back"):
         hex_code_check(
             tmp_path=tmp_path,

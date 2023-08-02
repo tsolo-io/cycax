@@ -27,12 +27,12 @@ def test_sphere(tmp_path: Path):
     # )
 
     # TODO: Reinstate this test but compare the contents not the hash.
-    #hex_code_check(
+    # hex_code_check(
     #    tmp_path=tmp_path,
     #    filename="testing_sphere",
     #    ext=".scad",
     #    hex_code="e2e9bd90687c806b16591a6c9741f840c13edfca7cdf62d4416b562ef1df2a65",
-    #)
+    # )
 
     hex_code_check(
         tmp_path=tmp_path,

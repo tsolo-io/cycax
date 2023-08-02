@@ -237,10 +237,9 @@ class PartEngineOpenSCAD(PartEngine):
         stl_file = self._base_path / name / f"{name}.stl"
         if check_source_hash(json_file, scad_file):
             self.build_scad(json_file, scad_file)
-        if self.config.get('stl'):
+        if self.config.get("stl"):
             if check_source_hash(scad_file, stl_file):
                 self.build_stl(scad_file, stl_file)
-
 
         _files = [
             {"file": self._base_path / self.name / f"{self.name}.scad"},
