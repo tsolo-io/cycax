@@ -469,6 +469,8 @@ class CycadPart(Location):
             part_engine = Simple2D(name=self.part_no, path=self._base_path, config=engine_config)
 
         elif _eng_lower == "openscad":
+            if not engine_config:
+                engine_config = {"stl": True}
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
 
         elif _eng_lower == "preview3d":
