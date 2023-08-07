@@ -14,16 +14,15 @@ from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
-    """This will be the class that specifies certain details with regards to the CycadPart.
-    This class will initialize a CycadPart at the desired location.
+    """Define a Part in CyCAd.
 
     Args:
-        x : The location of x along the x axis.
-        y : The location of y along the y axis.
-        z : The location of z along the z axis.
-        x_size : The size of x.
-        y_size : The size of y.
-        z_size : The siez of z.
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        x_size: The size along the x axis.
+        y_size: The size along the y axis.
+        z_size: The siez along the z axis.
         part_no : The unique name that will be given to a type of parts.
         poligon: currently only cube availabe.
         colour: colour of the part.
@@ -84,8 +83,8 @@ class CycadPart(Location):
         This method will use the 3D model provided in the path rather than the object drawn.
 
         Args:
-            file_type: this is the extenstion name of the file.
-            file_path: this is the path to the file.
+            file_type: The file type.
+            file_path: The path to the file.
         """
         f_type = str(file_type).upper().strip()
         self._files[f_type] = file_path
@@ -487,3 +486,51 @@ class CycadPart(Location):
             raise ValueError(msg)
 
         return part_engine.build()
+
+    def level(
+        self,
+        *,
+        left: LeftSide = None,
+        right: RightSide = None,
+        front: FrontSide = None,
+        back: BackSide = None,
+        top: TopSide = None,
+        bottom: BottomSide = None,
+        subtract: bool = False,
+    ):
+        """A short hand level method for part.
+
+        This method can only be used if the CycaxPart was added to an Assembly.
+        The method to replace multiple calls to assembly.level and assembly.subtract for a part.
+
+        # TODO: Fill in docstring.
+
+        """
+
+        # TODO: Raise a custom error.
+        assert self.assembly
+
+        if left is not None:
+            self.assembly.level(self.left, left)
+            if subtract:
+                self.assembly.subtract(left, self)
+        if right is not None:
+            self.assembly.level(self.right, right)
+            if subtract:
+                self.assembly.subtract(right, self)
+        if front is not None:
+            self.assembly.level(self.front, front)
+            if subtract:
+                self.assembly.subtract(front, self)
+        if back is not None:
+            self.assembly.level(self.back, back)
+            if subtract:
+                self.assembly.subtract(back, self)
+        if top is not None:
+            self.assembly.level(self.top, top)
+            if subtract:
+                self.assembly.subtract(top, self)
+        if bottom is not None:
+            self.assembly.level(self.bottom, bottom)
+            if subtract:
+                self.assembly.subtract(bottom, self)
