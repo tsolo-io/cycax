@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 
 import bpy
+import matplotlib.colors as mcolors
 
 
 class AssemblyBlender:
@@ -43,8 +44,8 @@ class AssemblyBlender:
         """Used to help rotate the object on the spot while freezing the top"""
 
         while rot != 0:
-            max_y = rotmax[1]
-            rotation[0], rotation[1] = max_y - rotation[1], rotation[0]
+            max_x = rotmax[0]
+            rotation[0], rotation[1] = rotation[1], max_x - rotation[0]
             rotmax[0], rotmax[1] = rotmax[1], rotmax[0]
             rot = rot - 1
         return rotation, rotmax
@@ -52,8 +53,8 @@ class AssemblyBlender:
     def swap_xz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the front"""
         while rot != 0:
-            max_x = rotmax[0]
-            rotation[0], rotation[2] = rotation[2], max_x - rotation[0]
+            max_z = rotmax[2]
+            rotation[0], rotation[2] = max_z - rotation[2], rotation[0]
             rotmax[0], rotmax[2] = rotmax[2], rotmax[0]
             rot = rot - 1
         return rotation, rotmax
@@ -61,8 +62,8 @@ class AssemblyBlender:
     def swap_yz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the left"""
         while rot != 0:
-            max_z = rotmax[2]
-            rotation[1], rotation[2] = max_z - rotation[2], rotation[1]
+            max_y = rotmax[1]
+            rotation[1], rotation[2] = rotation[2], max_y - rotation[1]
             rotmax[2], rotmax[1] = rotmax[1], rotmax[2]
             rot = rot - 1
         return rotation, rotmax
@@ -79,16 +80,17 @@ class AssemblyBlender:
         rotation = [0, 0, 0]
         for item in rotate:
             if item["axis"] == "x":
-                bpy.ops.transform.rotate(value=math.radians(90), orient_axis="X")
-                working = self.swap_yz_(rotation, 1, rotmax)
+                bpy.ops.transform.rotate(value=math.radians(360 - 90), orient_axis="X")
+                working = self.swap_yz_(rotation, 3, rotmax)
+            # blender does clockwise instead of anticlockwise rotations as we would expect in openscad.
 
             if item["axis"] == "y":
-                bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Y")
-                working = self.swap_xz_(rotation, 1, rotmax)
+                bpy.ops.transform.rotate(value=math.radians(360 - 90), orient_axis="Y")
+                working = self.swap_xz_(rotation, 3, rotmax)
 
             if item["axis"] == "z":
-                bpy.ops.transform.rotate(value=math.radians(90), orient_axis="Z")
-                working = self.swap_xy_(rotation, 1, rotmax)
+                bpy.ops.transform.rotate(value=math.radians(360 - 90), orient_axis="Z")
+                working = self.swap_xy_(rotation, 3, rotmax)
 
             rotation = working[0]
             rotmax = working[1]
@@ -105,8 +107,9 @@ class AssemblyBlender:
         """
         working_part = f"{part}_{self.parts[part]}"
         template_object = bpy.data.objects.get(working_part)
+        colour_rgb = mcolors.to_rgb(colour)
         matcolour = bpy.data.materials.new(colour)
-        matcolour.diffuse_color = (0, 1, 0, 0.8)
+        matcolour.diffuse_color = (colour_rgb[0], colour_rgb[1], colour_rgb[2], 0.8)
 
         template_object.active_material = matcolour
 
@@ -126,6 +129,6 @@ class AssemblyBlender:
             self.colour(action["colour"], action["part_no"])
 
         logging.info("Saving the .blend file.")
-        save_file = str(self._base_path / "blender")
+        save_file = str(self._base_path / f"{self.part_no}.blend")
         bpy.ops.wm.save_as_mainfile(filepath=save_file)
         # bpy.ops.wm.save_mainfile()
