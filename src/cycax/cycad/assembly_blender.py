@@ -4,8 +4,7 @@ import math
 from pathlib import Path
 
 import bpy
-
-from cycax.cycad.colour_to_rgb import colour_to_rgb
+import matplotlib.colors as mcolors
 
 
 class AssemblyBlender:
@@ -108,9 +107,9 @@ class AssemblyBlender:
         """
         working_part = f"{part}_{self.parts[part]}"
         template_object = bpy.data.objects.get(working_part)
-        colour_rgb = colour_to_rgb[colour.upper()]
+        colour_rgb = mcolors.to_rgb(colour)
         matcolour = bpy.data.materials.new(colour)
-        matcolour.diffuse_color = (colour_rgb[0] / 255, colour_rgb[1] / 255, colour_rgb[2] / 255, 0.8)
+        matcolour.diffuse_color = (colour_rgb[0], colour_rgb[1], colour_rgb[2], 0.8)
 
         template_object.active_material = matcolour
 

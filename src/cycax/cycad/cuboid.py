@@ -43,7 +43,7 @@ class SheetMetal(Cuboid):
     """
 
     def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float = 2.0):
-        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="grey")
+        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="gray")
 
 
 class Print3D(Cuboid):
