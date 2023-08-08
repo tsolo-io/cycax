@@ -498,39 +498,71 @@ class CycadPart(Location):
         bottom: BottomSide = None,
         subtract: bool = False,
     ):
-        """A short hand level method for part.
+        """
+        A short hand level method for part.
 
         This method can only be used if the CycaxPart was added to an Assembly.
         The method to replace multiple calls to assembly.level and assembly.subtract for a part.
 
-        # TODO: Fill in docstring.
+        Args:
+            left: Side to lign the left side up with.
+            right: Side to lign the right side up with
+            front: Side to lign the front up with.
+            back: Side to lign the back up with.
+            top: Side to lign the top up with.
+            bottom: Side to lign the bottom up wtih
+            subtract: if subtrace is set to True 
+                it will transfer the holes from one part to the other.
 
+        Raises:
+            ValueError: When both left and right side is give.
+            ValueError: When both left and right side is give.
+            ValueError: When both front and back side is give.
+            ValueError: When both front and back side is give.
+            ValueError: When both top and bottom side is give.
+            ValueError: When both top and bottom side is give.
         """
-
-        # TODO: Raise a custom error.
-        assert self.assembly
+        assert self.assembly, "The assembly has not been specified for this cycad part."
 
         if left is not None:
+            if right is not None:
+                msg = "You cannot use left and right, it is unclear where to lign up the part."
+                raise ValueError(msg)
             self.assembly.level(self.left, left)
             if subtract:
                 self.assembly.subtract(left, self)
         if right is not None:
+            if left is not None:
+                msg = "You cannot use left and right, it is unclear where to lign up the part."
+                raise ValueError(msg)
             self.assembly.level(self.right, right)
             if subtract:
                 self.assembly.subtract(right, self)
         if front is not None:
+            if back is not None:
+                msg = "You cannot use front and back, it is unclear where to lign up the part."
+                raise ValueError(msg)
             self.assembly.level(self.front, front)
             if subtract:
                 self.assembly.subtract(front, self)
         if back is not None:
+            if front is not None:
+                msg = "You cannot use front and back, it is unclear where to lign up the part."
+                raise ValueError(msg)
             self.assembly.level(self.back, back)
             if subtract:
                 self.assembly.subtract(back, self)
         if top is not None:
+            if bottom is not None:
+                msg = "You cannot use top and bottom, it is unclear where to lign up the part."
+                raise ValueError(msg)
             self.assembly.level(self.top, top)
             if subtract:
                 self.assembly.subtract(top, self)
         if bottom is not None:
+            if top is not None:
+                msg = "You cannot use top and bottom, it is unclear where to lign up the part."
+                raise ValueError(msg)
             self.assembly.level(self.bottom, bottom)
             if subtract:
                 self.assembly.subtract(bottom, self)
