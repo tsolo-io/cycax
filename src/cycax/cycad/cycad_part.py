@@ -528,13 +528,13 @@ class CycadPart(Location):
         assert self.assembly, "The assembly has not been specified for this cycad part."
 
         level_tasks = []
-        if left is not None:
-            if right is not None:
+        if front is not None:
+            if back is not None:
                 msg = " "
                 raise ValueError(msg)
-            level_tasks.append((self.left, left))
-        elif right is not None:
-            level_tasks.append((self.right, right))
+            level_tasks.append((self.front, front))
+        elif back is not None:
+            level_tasks.append((self.back, back))
 
         if top is not None:
             if bottom is not None:
@@ -544,13 +544,13 @@ class CycadPart(Location):
         elif bottom is not None:
             level_tasks.append((self.bottom, bottom))
 
-        if front is not None:
-            if back is not None:
+        if left is not None:
+            if right is not None:
                 msg = " "
                 raise ValueError(msg)
-            level_tasks.append((self.front, front))
-        elif back is not None:
-            level_tasks.append((self.back, back))
+            level_tasks.append((self.left, left))
+        elif right is not None:
+            level_tasks.append((self.right, right))
 
         print(f"{level_tasks=}")
 
