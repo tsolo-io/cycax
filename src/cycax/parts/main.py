@@ -1,6 +1,7 @@
 from pathlib import Path
-from cycax.cycad.fan import Fan80x80x25
+
 from cycax.cycad import Assembly, SheetMetal
+from cycax.parts.fan import Fan80x80x25
 
 
 def build_fan80(*, internal: bool):
@@ -18,11 +19,11 @@ def build_fan80(*, internal: bool):
     assembly.subtract(plate.bottom, fan)
     for part in (fan, plate):
         part.save(path=Path("./reports"))
-        part.render(engine="openscad")
         part.render(engine="simple2d")
-        part.render(engine="freecad")
+        # part.render(engine="openscad")
+        # part.render(engine="freecad")
 
 
 if __name__ == "__main__":
     for internal in (True, False):
-        build_fan80(internal=True)
+        build_fan80(internal=internal)

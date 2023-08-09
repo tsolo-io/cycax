@@ -13,6 +13,7 @@ def hex_code_check(tmp_path: Path, filename: str, ext: str, hex_code: str = "", 
     if return_hex:
         return hash_value_file
     else:
+        print(f"Got {hash_value_file} expect {hex_code}")
         if equal:
             assert hash_value_file == hex_code
         else:
