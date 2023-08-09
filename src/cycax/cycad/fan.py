@@ -66,7 +66,7 @@ class Fan(Cuboid):
                 )
                 self.top.hole(pos=[working_x, working_y], diameter=self.hole_diameter, depth=self.z_size)
 
-    def external(self):
+    def internal(self):
         """
         This method will cut a large hole in the SheetMetal for the fan.
         """
@@ -74,7 +74,7 @@ class Fan(Cuboid):
             pos=[self.hole_x, self.hole_y], diameter=self.diameter, depth=self.hole_depth, external_subtract=True
         )
 
-    def internal(self):
+    def external(self):
         """
         This method will cut multiple slots into the SheetMetal surface.
         The gaps will allow the internal fan to circulate the air.
@@ -121,4 +121,16 @@ class Fan(Cuboid):
             width=4,
             depth=self.hole_depth,
             external_subtract=True,
+        )
+
+
+class Fan80x80x25(Fan):
+    def __init__(self, internal=False):
+        super().__init__(
+            width=80,
+            depth=25,
+            part_no="fan_80x80x25",
+            internal=internal,
+            hole_depth=None,
+            hole_diameter=3.0,
         )

@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cycax.cycad.beveled_edge import BeveledEdge
-from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide, CycadSide
+from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
@@ -514,7 +514,7 @@ class CycadPart(Location):
             back: Side to lign the back up with.
             top: Side to lign the top up with.
             bottom: Side to lign the bottom up wtih
-            subtract: if subtrace is set to True 
+            subtract: if subtrace is set to True
                 it will transfer the holes from one part to the other.
 
         Raises:
@@ -530,25 +530,27 @@ class CycadPart(Location):
         level_tasks = []
         if left is not None:
             if right is not None:
-                raise ValueError(" ")
+                msg = " "
+                raise ValueError(msg)
             level_tasks.append((self.left, left))
         elif right is not None:
             level_tasks.append((self.right, right))
 
         if top is not None:
             if bottom is not None:
-                raise ValueError(" ")
+                msg = " "
+                raise ValueError(msg)
             level_tasks.append((self.top, top))
         elif bottom is not None:
             level_tasks.append((self.bottom, bottom))
 
         if front is not None:
             if back is not None:
-                raise ValueError(" ")
+                msg = " "
+                raise ValueError(msg)
             level_tasks.append((self.front, front))
         elif back is not None:
             level_tasks.append((self.back, back))
-
 
         print(f"{level_tasks=}")
 
@@ -559,7 +561,6 @@ class CycadPart(Location):
         for my_side, other_side in level_tasks:
             print(f"subtract {my_side=} {other_side=}")
             self.assembly.subtract(other_side, self)
-
 
         # if left is not None:
         #     if right is not None:
