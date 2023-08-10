@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cycax.cycad.beveled_edge import BeveledEdge
-from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
+from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
@@ -14,16 +14,15 @@ from cycax.cycad.slot import Slot
 
 
 class CycadPart(Location):
-    """This will be the class that specifies certain details with regards to the CycadPart.
-    This class will initialize a CycadPart at the desired location.
+    """Define a Part in CyCAd.
 
     Args:
-        x : The location of x along the x axis.
-        y : The location of y along the y axis.
-        z : The location of z along the z axis.
-        x_size : The size of x.
-        y_size : The size of y.
-        z_size : The siez of z.
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        x_size: The size along the x axis.
+        y_size: The size along the y axis.
+        z_size: The siez along the z axis.
         part_no : The unique name that will be given to a type of parts.
         poligon: currently only cube availabe.
         colour: colour of the part.
@@ -84,8 +83,8 @@ class CycadPart(Location):
         This method will use the 3D model provided in the path rather than the object drawn.
 
         Args:
-            file_type: this is the extenstion name of the file.
-            file_path: this is the path to the file.
+            file_type: The file type.
+            file_path: The path to the file.
         """
         f_type = str(file_type).upper().strip()
         self._files[f_type] = file_path
@@ -487,3 +486,72 @@ class CycadPart(Location):
             raise ValueError(msg)
 
         return part_engine.build()
+
+    def get_side(self, side_name: str) -> CycadSide:
+        return getattr(self, side_name.lower())
+
+    def level(
+        self,
+        *,
+        left: LeftSide = None,
+        right: RightSide = None,
+        front: FrontSide = None,
+        back: BackSide = None,
+        top: TopSide = None,
+        bottom: BottomSide = None,
+        subtract: bool = False,
+    ):
+        """
+        A short hand level method for part.
+
+        This method can only be used if the CycaxPart was added to an Assembly.
+        The method to replace multiple calls to assembly.level and assembly.subtract for a part.
+
+        Args:
+            left: Side to lign the left side up with.
+            right: Side to lign the right side up with
+            front: Side to lign the front up with.
+            back: Side to lign the back up with.
+            top: Side to lign the top up with.
+            bottom: Side to lign the bottom up wtih
+            subtract: if subtrace is set to True
+                it will transfer the holes from one part to the other.
+
+        Raises:
+            ValueError: When both left and right side is give.
+            ValueError: When both front and back side is give.
+            ValueError: When both top and bottom side is give.
+        """
+        assert self.assembly, "The assembly has not been specified for this cycad part."
+
+        level_tasks = []
+        if left is not None:
+            if right is not None:
+                msg = " "
+                raise ValueError(msg)
+            level_tasks.append((self.left, left))
+        elif right is not None:
+            level_tasks.append((self.right, right))
+
+        if top is not None:
+            if bottom is not None:
+                msg = " "
+                raise ValueError(msg)
+            level_tasks.append((self.top, top))
+        elif bottom is not None:
+            level_tasks.append((self.bottom, bottom))
+
+        if front is not None:
+            if back is not None:
+                msg = " "
+                raise ValueError(msg)
+            level_tasks.append((self.front, front))
+        elif back is not None:
+            level_tasks.append((self.back, back))
+
+        for my_side, other_side in level_tasks:
+            self.assembly.level(my_side, other_side)
+
+        if subtract:
+            for my_side, other_side in level_tasks:
+                self.assembly.subtract(other_side, self)

@@ -213,7 +213,8 @@ class Assembly:
         It is used to move the move_holes to their final location before they are subtracted from
         the other part.
         """
-        for hole_i, hole in enumerate(part.move_holes):
+        out_holes = []
+        for hole in part.move_holes:
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
             for rot in part.rotate:
@@ -229,8 +230,8 @@ class Assembly:
                 temp_hole.move(y=part.position[1])
             if part.position[2] != 0:
                 temp_hole.move(z=part.position[2])
-            part.move_holes[hole_i] = temp_hole
-        part.final_location = True
+            out_holes.append(temp_hole)
+        return out_holes
 
     def subtract(self, partside1: CycadSide, part2: CycadPart):
         """
@@ -246,10 +247,10 @@ class Assembly:
         """
         part1 = partside1._parent
         side = partside1.name
+        print(part2.position)
+        print(part1.position)
 
-        if part2.final_location is not True:
-            self._final_place_(part2)
-        holes = part2.move_holes
+        holes = self._final_place_(part2)
 
         for hole in holes:
             if side == TOP:

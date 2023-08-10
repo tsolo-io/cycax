@@ -7,6 +7,12 @@ build:
 	hatch build
 
 test:
+	hatch run test-not-slow
+
+test-all:
+	hatch run test
+
+test-ci:
 	hatch run cov
 
 format:
@@ -17,3 +23,6 @@ docs:
 
 docs-serve:
 	hatch run docs:serve
+
+parts:
+	hatch run python ./src/cycax/parts/main.py
