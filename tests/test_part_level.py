@@ -92,15 +92,9 @@ def sides(name: str) -> tuple:
         part_no="part-test_side_front",
     )
 
-    conn_front_bottom_left = Connect()
-    conn_front_bottom_right = Connect()
     conn_front_top_left = Connect()
-    conn_front_top_right = Connect()
 
-    assembly.add(conn_front_bottom_left)
-    assembly.add(conn_front_bottom_right)
     assembly.add(conn_front_top_left)
-    assembly.add(conn_front_top_right)
     assembly.add(side_left)
     assembly.add(side_right)
     assembly.add(side_top)
@@ -134,10 +128,7 @@ def sides(name: str) -> tuple:
         side_top,
         side_bottom,
         side_front,
-        conn_front_bottom_left,
-        conn_front_bottom_right,
         conn_front_top_left,
-        conn_front_top_right,
     )
 
 
@@ -171,10 +162,7 @@ def test_level_subtract_order(tmp_path: Path):
         side_top,
         side_bottom,
         side_front,
-        conn_front_bottom_left,
-        conn_front_bottom_right,
         conn_front_top_left,
-        conn_front_top_right,
     ) = sides(name)
 
     conn_front_top_left.level(
@@ -195,10 +183,7 @@ def test_level_subtract_order(tmp_path: Path):
             side_top,
             side_bottom,
             side_front,
-            conn_front_bottom_left,
-            conn_front_bottom_right,
             conn_front_top_left,
-            conn_front_top_right,
         ) = sides(name)
         for side in order_test:
             if side == FRONT:
