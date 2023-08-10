@@ -213,7 +213,7 @@ class Assembly:
         It is used to move the move_holes to their final location before they are subtracted from
         the other part.
         """
-        out_holes=[]
+        out_holes = []
         for hole in part.move_holes:
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
@@ -249,7 +249,7 @@ class Assembly:
         side = partside1.name
         print(part2.position)
         print(part1.position)
-         
+
         holes = self._final_place_(part2)
 
         for hole in holes:
