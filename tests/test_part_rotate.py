@@ -1,3 +1,5 @@
+import pytest
+
 from cycax.cycad import Assembly, SheetMetal
 
 # Tests the rotation of a part.
@@ -47,11 +49,11 @@ def test_new_rotate():
     assembly.add(mypart4)
 
     # Test that a part is rotated multiple times.
-    mypart1.rotate("yyyy")
+    mypart1.rotate("xxxx")
     for _count in range(0, 4):
         assembly.rotate_freeze_left(mypart2)
 
-    mypart3.rotate("xyxxyzzyx")
+    mypart3.rotate("yxyyxzzxy")
     assembly.rotate_freeze_front(mypart4)
     assembly.rotate_freeze_left(mypart4)
     assembly.rotate_freeze_front(mypart4)
@@ -66,6 +68,9 @@ def test_new_rotate():
 
     assert assembly_def["parts"][0]["rotate"] == assembly_def["parts"][1]["rotate"]
     assert assembly_def["parts"][2]["rotate"] == assembly_def["parts"][3]["rotate"]
+    
+    with pytest.raises(Exception):
+        mypart3.rotate("abc")
 
 
 def test_rotate_side():

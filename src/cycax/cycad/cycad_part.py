@@ -570,9 +570,9 @@ class CycadPart(Location):
         for action in actions:
             match action:
                 case "x":
-                    self.assembly.rotate_freeze_front(self)
-                case "y":
                     self.assembly.rotate_freeze_left(self)
+                case "y":
+                    self.assembly.rotate_freeze_front(self)
                 case "z":
                     self.assembly.rotate_freeze_top(self)
                 case _:
