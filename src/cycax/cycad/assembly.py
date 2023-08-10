@@ -124,7 +124,7 @@ class Assembly:
             dict_part = {
                 "part_no": item.part_no,
                 "position": item.position,
-                "rotate": item.rotate,
+                "rotate": item.rotation,
                 "rotmax": [item.x_size, item.y_size, item.z_size],
                 "colour": item.colour,
             }
@@ -140,7 +140,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append({"axis": "z", "angle": 90})
+        part.rotation.append({"axis": "z", "angle": 90})
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
@@ -151,7 +151,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append({"axis": "x", "angle": 90})
+        part.rotation.append({"axis": "x", "angle": 90})
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
@@ -162,7 +162,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append({"axis": "y", "angle": 90})
+        part.rotation.append({"axis": "y", "angle": 90})
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()
@@ -217,7 +217,7 @@ class Assembly:
         for hole in part.move_holes:
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
-            for rot in part.rotate:
+            for rot in part.rotation:
                 if rot["axis"] == "x":
                     rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
                 elif rot["axis"] == "y":

@@ -65,7 +65,7 @@ class CycadPart(Location):
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
         self.position = [0, 0, 0]
-        self.rotate = []
+        self.rotation = []
         self.final_location = False
         self.poligon = poligon
         self.colour = colour
@@ -338,7 +338,7 @@ class CycadPart(Location):
         if self.position[2] != 0:
             hole.move(z=-self.position[2])
 
-        working_rotate = copy.deepcopy(self.rotate)
+        working_rotate = copy.deepcopy(self.rotation)
         rotation = [self.x_max - self.x_min, self.y_max - self.y_min, self.z_max - self.z_min]
         while len(working_rotate) > 0:
             rot = working_rotate.pop()
@@ -555,3 +555,27 @@ class CycadPart(Location):
         if subtract:
             for my_side, other_side in level_tasks:
                 self.assembly.subtract(other_side, self)
+
+    def rotate(self, actions: str):
+        """
+        This can be used to rotate a part in the assembly as follows:
+        CycadPart.rotate("xxyzyy")
+        This is: 2 rotate_freeze_front, rotate_freeze_left, rotate_freeze_top, 2 rotate_freeze_left.
+        Args:
+            actions: This is a string specifying rotations.
+
+        Raises:
+            ValueError: When the given actions contains a strign that is non x, y, or z.
+        """
+        for action in actions:
+            match action:
+                case "x":
+                    self.assembly.rotate_freeze_front(self)
+                case "y":
+                    self.assembly.rotate_freeze_left(self)
+                case "z":
+                    self.assembly.rotate_freeze_top(self)
+                case _:
+                    msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
+                            {action} is not one of the permissable actions."""
+                    raise ValueError(msg)
