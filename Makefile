@@ -7,6 +7,12 @@ build:
 	hatch build
 
 test:
+	hatch run test-not-slow
+
+test-all:
+	hatch run test
+
+test-ci:
 	hatch run cov
 
 format:

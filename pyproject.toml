@@ -39,8 +39,9 @@ dependencies = [
   "matplotlib"
 ]
 [tool.hatch.envs.default.scripts]
+test-not-slow = "pytest -m \"not slow\" {args:tests}"
 test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest --junitxml=reports/tests.xml {args:tests}"
+test-cov = "coverage run -m pytest -m \"not ci_exclude\" --junitxml=reports/tests.xml {args:tests}"
 cov-report = [
   "- coverage combine",
   "coverage report",
@@ -164,4 +165,10 @@ exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+]
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "ci_exclude: marks tests as not to run on CI (deselect with '-m \"not ci_exclude\"')",
+    "serial",
 ]
