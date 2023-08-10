@@ -1,6 +1,8 @@
 import itertools
-import pytest
+import json
 from pathlib import Path
+
+import pytest
 
 from cycax.cycad import Assembly, Cuboid, SheetMetal
 from cycax.cycad.location import FRONT, LEFT, SIDES, TOP
@@ -135,29 +137,68 @@ def sides(name: str) -> tuple:
     )
 
 
-def get_hashes(name, tmp_path, assembly) -> list:
+def get_cycax_json_hash(filename: Path) -> str:
+    """
+    Return a consistent string representation of the JSON object.
+
+    Name is removed.
+    Features are sorted.
+    Data is UnJSON.
+    """
+    data = json.loads(filename.read_text())
+    data["name"] = ""
+    features = []
+    for feature in data.get("features", []):
+        # Make each feature a string (JSON) so we can sort them.
+        features.append(json.dumps(feature))
+    new_data = data
+    features.sort()
+    new_data["features"] = features
+    # UnJSON the string so it is shorter, human readable.
+    # Not parseable but it helps to spot the issue.
+    # Alternative would be to use the smart dict compare in pytest
+    # and not return string here.
+    content = json.dumps(new_data).replace("\\", "").replace('"', "").replace(": ", ":")
+    return content
+
+
+def get_hashes(name: str, tmp_path: Path, assembly, *, slow: bool = False) -> list:
     assemb_path = tmp_path / name
     assemb_path.mkdir()
     assembly.save(path=assemb_path)
-    assembly.render(part_engine="freecad")
-
     hash_map = {}
-    for filename in assemb_path.glob("*/*.stl"):
-        file_hash = get_file_hash(filename)
-        pname = filename.name.split("_")[-1]
-        print(f"{pname=} {file_hash=} {filename=}")
-        hash_map[pname] = file_hash
+    if slow:
+        assembly.render(part_engine="freecad")
+
+        for filename in assemb_path.glob("*/*.stl"):
+            pname = filename.name.split("_")[-1]
+            file_hash = get_file_hash(filename)
+            print(f"{pname=} {file_hash=} {filename=}")
+            hash_map[pname] = file_hash
+    else:
+        for filename in assemb_path.glob("*/*.json"):
+            pname = filename.name.split("_")[-1]
+            file_hash = get_cycax_json_hash(filename)
+            print(f"{pname=} {file_hash=} {filename=}")
+            hash_map[pname] = file_hash
 
     hash_list = []
     for key in sorted(hash_map.keys()):
         hash_list.append((key, hash_map[key]))
-
     print(assemb_path, hash_list)
     return hash_list
 
 
 @pytest.mark.slow
+def test_level_subtract_order_slow(tmp_path: Path):
+    build_test_case(tmp_path=tmp_path, slow=True)
+
+
 def test_level_subtract_order(tmp_path: Path):
+    build_test_case(tmp_path=tmp_path, slow=False)
+
+
+def build_test_case(*, tmp_path, slow: bool):
     name = "case_ref"
     (
         assembly,
@@ -183,7 +224,7 @@ def test_level_subtract_order(tmp_path: Path):
         subtract=True,
     )
 
-    hashes_ref = get_hashes(name, tmp_path, assembly)
+    hashes_ref = get_hashes(name, tmp_path, assembly, slow=slow)
 
     for order_test in itertools.permutations([FRONT, TOP, LEFT]):
         name = "case_{}-{}-{}".format(*order_test)
@@ -219,7 +260,7 @@ def test_level_subtract_order(tmp_path: Path):
                 assembly.subtract(side_left.right, conn_front_top_left)
                 assembly.subtract(side_left.right, conn_front_bottom_left)
 
-        hashes_test = get_hashes(name, tmp_path, assembly)
+        hashes_test = get_hashes(name, tmp_path, assembly, slow=slow)
         print("Compare  REF:", hashes_ref)
         print("Compare TEST:", hashes_test)
         assert hashes_ref == hashes_test, "Compare the hashes for the two assemblies."
