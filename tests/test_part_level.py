@@ -93,8 +93,10 @@ def sides(name: str) -> tuple:
     )
 
     conn_front_top_left = Connect()
+    conn_front_bottom_left = Connect()
 
     assembly.add(conn_front_top_left)
+    assembly.add(conn_front_bottom_left)
     assembly.add(side_left)
     assembly.add(side_right)
     assembly.add(side_top)
@@ -129,6 +131,7 @@ def sides(name: str) -> tuple:
         side_bottom,
         side_front,
         conn_front_top_left,
+        conn_front_bottom_left,
     )
 
 
@@ -136,12 +139,13 @@ def get_hashes(name, tmp_path, assembly) -> list:
     assemb_path = tmp_path / name
     assemb_path.mkdir()
     assembly.save(path=assemb_path)
-    assembly.render()
+    assembly.render(part_engine="freecad")
 
     hash_map = {}
     for filename in assemb_path.glob("*/*.stl"):
         file_hash = get_file_hash(filename)
         pname = filename.name.split("_")[-1]
+        print(f"{pname=} {file_hash=} {filename=}")
         hash_map[pname] = file_hash
 
     hash_list = []
@@ -163,11 +167,18 @@ def test_level_subtract_order(tmp_path: Path):
         side_bottom,
         side_front,
         conn_front_top_left,
+        conn_front_bottom_left,
     ) = sides(name)
 
     conn_front_top_left.level(
         front=side_front.back,
         top=side_top.bottom,
+        left=side_left.right,
+        subtract=True,
+    )
+    conn_front_bottom_left.level(
+        front=side_front.back,
+        bottom=side_bottom.top,
         left=side_left.right,
         subtract=True,
     )
@@ -184,26 +195,31 @@ def test_level_subtract_order(tmp_path: Path):
             side_bottom,
             side_front,
             conn_front_top_left,
+            conn_front_bottom_left,
         ) = sides(name)
         for side in order_test:
             if side == FRONT:
                 assembly.level(conn_front_top_left.front, side_front.back)
+                assembly.level(conn_front_bottom_left.front, side_front.back)
             if side == TOP:
                 assembly.level(conn_front_top_left.top, side_top.bottom)
+                assembly.level(conn_front_bottom_left.bottom, side_bottom.top)
             if side == LEFT:
                 assembly.level(conn_front_top_left.left, side_left.right)
+                assembly.level(conn_front_bottom_left.left, side_left.right)
 
         for side in order_test:
             if side == FRONT:
                 assembly.subtract(side_front.back, conn_front_top_left)
+                assembly.subtract(side_front.back, conn_front_bottom_left)
             if side == TOP:
                 assembly.subtract(side_top.bottom, conn_front_top_left)
+                assembly.subtract(side_bottom.top, conn_front_bottom_left)
             if side == LEFT:
                 assembly.subtract(side_left.right, conn_front_top_left)
+                assembly.subtract(side_left.right, conn_front_bottom_left)
 
         hashes_test = get_hashes(name, tmp_path, assembly)
         print("Compare  REF:", hashes_ref)
         print("Compare TEST:", hashes_test)
         assert hashes_ref == hashes_test, "Compare the hashes for the two assemblies."
-
-    assert False
