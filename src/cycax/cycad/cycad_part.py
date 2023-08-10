@@ -519,10 +519,7 @@ class CycadPart(Location):
 
         Raises:
             ValueError: When both left and right side is give.
-            ValueError: When both left and right side is give.
             ValueError: When both front and back side is give.
-            ValueError: When both front and back side is give.
-            ValueError: When both top and bottom side is give.
             ValueError: When both top and bottom side is give.
         """
         assert self.assembly, "The assembly has not been specified for this cycad part."
@@ -551,7 +548,6 @@ class CycadPart(Location):
             level_tasks.append((self.front, front))
         elif back is not None:
             level_tasks.append((self.back, back))
-        print(f"{level_tasks=}")
 
         for my_side, other_side in level_tasks:
             self.assembly.level(my_side, other_side)
