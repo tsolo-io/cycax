@@ -114,4 +114,3 @@ def test_level_new():
         assert top_side_dict == top_side_fancy_dict, "Subtract on level does not result in the same output."
         
         assert right_side_dict == right_side_fancy_dict, "Subtract on level does not result in the same output."
-

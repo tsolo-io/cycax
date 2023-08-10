@@ -556,9 +556,10 @@ class CycadPart(Location):
             print(f"level {my_side=} {other_side=}")
             self.assembly.level(my_side, other_side)
 
-        for my_side, other_side in level_tasks:
-            print(f"subtract {my_side=} {other_side=}")
-            self.assembly.subtract(other_side, self)
+        if subtract:
+            for my_side, other_side in level_tasks:
+                print(f"subtract {my_side=} {other_side=}")
+                self.assembly.subtract(other_side, self)
 
 
         # if left is not None:
