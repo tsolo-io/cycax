@@ -17,3 +17,6 @@ docs:
 
 docs-serve:
 	hatch run docs:serve
+
+parts:
+	hatch run python ./src/cycax/parts/main.py

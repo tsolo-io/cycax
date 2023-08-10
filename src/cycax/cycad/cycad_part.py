@@ -551,7 +551,6 @@ class CycadPart(Location):
             level_tasks.append((self.front, front))
         elif back is not None:
             level_tasks.append((self.back, back))
-
         print(f"{level_tasks=}")
 
         for my_side, other_side in level_tasks:
