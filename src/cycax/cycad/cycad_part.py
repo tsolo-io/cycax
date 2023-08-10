@@ -528,13 +528,13 @@ class CycadPart(Location):
         assert self.assembly, "The assembly has not been specified for this cycad part."
 
         level_tasks = []
-        if front is not None:
-            if back is not None:
+        if left is not None:
+            if right is not None:
                 msg = " "
                 raise ValueError(msg)
-            level_tasks.append((self.front, front))
-        elif back is not None:
-            level_tasks.append((self.back, back))
+            level_tasks.append((self.left, left))
+        elif right is not None:
+            level_tasks.append((self.right, right))
 
         if top is not None:
             if bottom is not None:
@@ -544,65 +544,18 @@ class CycadPart(Location):
         elif bottom is not None:
             level_tasks.append((self.bottom, bottom))
 
-        if left is not None:
-            if right is not None:
+        if front is not None:
+            if back is not None:
                 msg = " "
                 raise ValueError(msg)
-            level_tasks.append((self.left, left))
-        elif right is not None:
-            level_tasks.append((self.right, right))
-
+            level_tasks.append((self.front, front))
+        elif back is not None:
+            level_tasks.append((self.back, back))
         print(f"{level_tasks=}")
 
         for my_side, other_side in level_tasks:
-            print(f"level {my_side=} {other_side=}")
             self.assembly.level(my_side, other_side)
 
-        for my_side, other_side in level_tasks:
-            print(f"subtract {my_side=} {other_side=}")
-            self.assembly.subtract(other_side, self)
-
-        # if left is not None:
-        #     if right is not None:
-        #         msg = "You cannot use left and right, it is unclear where to lign up the part."
-        #         raise ValueError(msg)
-        #     self.assembly.level(self.left, left)
-        #     if subtract:
-        #         self.assembly.subtract(left, self)
-        # if right is not None:
-        #     if left is not None:
-        #         msg = "You cannot use left and right, it is unclear where to lign up the part."
-        #         raise ValueError(msg)
-        #     self.assembly.level(self.right, right)
-        #     if subtract:
-        #         self.assembly.subtract(right, self)
-
-        # if front is not None:
-        #     if back is not None:
-        #         msg = "You cannot use front and back, it is unclear where to lign up the part."
-        #         raise ValueError(msg)
-        #     self.assembly.level(self.front, front)
-        #     if subtract:
-        #         self.assembly.subtract(front, self)
-        # if back is not None:
-        #     if front is not None:
-        #         msg = "You cannot use front and back, it is unclear where to lign up the part."
-        #         raise ValueError(msg)
-        #     self.assembly.level(self.back, back)
-        #     if subtract:
-        #         self.assembly.subtract(back, self)
-
-        # if top is not None:
-        #     if bottom is not None:
-        #         msg = "You cannot use top and bottom, it is unclear where to lign up the part."
-        #         raise ValueError(msg)
-        #     self.assembly.level(self.top, top)
-        #     if subtract:
-        #         self.assembly.subtract(top, self)
-        # if bottom is not None:
-        #     if top is not None:
-        #         msg = "You cannot use top and bottom, it is unclear where to lign up the part."
-        #         raise ValueError(msg)
-        #     self.assembly.level(self.bottom, bottom)
-        #     if subtract:
-        #         self.assembly.subtract(bottom, self)
+        if subtract:
+            for my_side, other_side in level_tasks:
+                self.assembly.subtract(other_side, self)
