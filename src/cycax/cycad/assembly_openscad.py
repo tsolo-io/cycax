@@ -8,13 +8,13 @@ class AssemblyOpenSCAD:
     This class will use the STLs that have been printed and assemblt them in an OpenSCAD file.
 
     Attributes:
-        part_no: This is the part number of the complex part that is being assembled.
+        name: This is the part number of the complex part that is being assembled.
         config: Configuration for the OpenSCAD assembly engine.
 
     """
 
-    def __init__(self, part_no: str, config: dict | None = None) -> None:
-        self.part_no = part_no
+    def __init__(self, name: str, config: dict | None = None) -> None:
+        self.name = name
         self._base_path = Path(".")
         self._config = {} if config is None else config
 
@@ -110,7 +110,7 @@ class AssemblyOpenSCAD:
         if path is not None:
             self._base_path = path
 
-        json_file = self._base_path / f"{self.part_no}.json"
+        json_file = self._base_path / f"{self.name}.json"
         data = json.loads(json_file.read_text())
 
         output = []
@@ -119,7 +119,7 @@ class AssemblyOpenSCAD:
             output.append(self._colour(action["colour"]))
             output.append(self._fetch_part(action["part_no"]))
 
-        scad_file = self._base_path / f"{self.part_no}.scad"
+        scad_file = self._base_path / f"{self.name}.scad"
         with scad_file.open("w") as scad_fh:
             for out in output:
                 scad_fh.write(out)

@@ -43,6 +43,7 @@ class CycadPart(Location):
         colour: str = "orange",
     ):
         super().__init__(x, y, z, side)
+        self._name: str = ""
         self.left = LeftSide(self)
         self.right = RightSide(self)
         self.top = TopSide(self)
@@ -486,6 +487,37 @@ class CycadPart(Location):
             raise ValueError(msg)
 
         return part_engine.build()
+
+    def get_name(self, default: str = None):
+        """Return the part name, if the part has not been named generate a name.
+
+        The part name (or ID) is distict from the part_no or part number.
+        Each instance of the part has a unique name, but is still the same type of part as the
+        parts with the same part number.
+        Parts could override this method to define a specialised part numbering scheme.
+
+        Args:
+            default: A possible name for this part if the part has not been names.
+                And if it is not being used by another part.
+        """
+
+        if not self._name:
+            # I am name-less.
+            used_names = self.assembly.parts.keys()
+            if default and default not in used_names:
+                # Check if we have a default name and that it has not been used.
+                self._name = default
+
+            sequence_n = 0
+
+            while True:
+                sequence_n += 1
+                suggested_name = f"{self.part_no}_{sequence_n}"
+                if suggested_name not in used_names:
+                    self._name = suggested_name
+                    break
+
+        return self._name
 
     def get_side(self, side_name: str) -> CycadSide:
         return getattr(self, side_name.lower())
