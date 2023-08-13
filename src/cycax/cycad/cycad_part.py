@@ -497,7 +497,7 @@ class CycadPart(Location):
         Parts could override this method to define a specialised part numbering scheme.
 
         Args:
-            default: A possible name for this part if the part has not been names.
+            default: A possible name for this part if the part has not been named.
                 And if it is not being used by another part.
         """
 
