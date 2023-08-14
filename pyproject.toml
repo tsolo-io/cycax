@@ -39,7 +39,7 @@ dependencies = [
   "matplotlib"
 ]
 [tool.hatch.envs.default.scripts]
-test-not-slow = "pytest -m \"not slow\" {args:tests}"
+test-not-slow = "pytest -m \"not slow\" --exitfirst {args:tests}"
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest -m \"not ci_exclude\" --junitxml=reports/tests.xml {args:tests}"
 cov-report = [

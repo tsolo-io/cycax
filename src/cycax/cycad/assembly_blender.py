@@ -13,12 +13,12 @@ class AssemblyBlender:
     This class will use the STLs that have been printed and assemble them in a Blender file.
 
     Args:
-        part_no: This is the part number of the complex part that is being assembled.
+        name: This is the part number of the complex part that is being assembled.
 
     """
 
-    def __init__(self, part_no: str) -> None:
-        self.part_no = part_no
+    def __init__(self, name: str) -> None:
+        self.name = name
         self._base_path = Path(".")
         self.parts = {}
 
@@ -121,7 +121,7 @@ class AssemblyBlender:
         if path is not None:
             self._base_path = path
 
-        json_file = self._base_path / f"{self.part_no}.json"
+        json_file = self._base_path / f"{self.name}.json"
         data = json.loads(json_file.read_text())
 
         for action in data["parts"]:
@@ -130,6 +130,6 @@ class AssemblyBlender:
             self.colour(action["colour"], action["part_no"])
 
         logging.info("Saving the .blend file.")
-        save_file = str(self._base_path / f"{self.part_no}.blend")
+        save_file = str(self._base_path / f"{self.name}.blend")
         bpy.ops.wm.save_as_mainfile(filepath=save_file)
         # bpy.ops.wm.save_mainfile()

@@ -68,7 +68,7 @@ def test_new_rotate():
 
     assert assembly_def["parts"][0]["rotate"] == assembly_def["parts"][1]["rotate"]
     assert assembly_def["parts"][2]["rotate"] == assembly_def["parts"][3]["rotate"]
-    
+
     with pytest.raises(Exception):
         mypart3.rotate("abc")
 

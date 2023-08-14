@@ -24,5 +24,8 @@ docs:
 docs-serve:
 	hatch run docs:serve
 
+docs-open:
+	xdg-open ./docs/site/index.html
+
 parts:
 	hatch run python ./src/cycax/parts/main.py
