@@ -53,7 +53,7 @@ def test_new_rotate():
     for _count in range(0, 4):
         assembly.rotate_freeze_left(mypart2)
 
-    mypart3.rotate("yxyyxzzxy")
+    mypart3.rotate("yXyyxZzxy")
     assembly.rotate_freeze_front(mypart4)
     assembly.rotate_freeze_left(mypart4)
     assembly.rotate_freeze_front(mypart4)
