@@ -593,6 +593,7 @@ class CycadPart(Location):
         This can be used to rotate a part in the assembly as follows:
         CycadPart.rotate("xxyzyy")
         This is: 2 rotate_freeze_front, rotate_freeze_left, rotate_freeze_top, 2 rotate_freeze_left.
+        Where rotate_freeze_ results in one 90degrees counter clock wise rotations around the specified axis.
         Args:
             actions: This is a string specifying rotations.
 
@@ -600,7 +601,7 @@ class CycadPart(Location):
             ValueError: When the given actions contains a strign that is non x, y, or z.
         """
         for action in actions:
-            match action:
+            match action.lower():
                 case "x":
                     self.assembly.rotate_freeze_left(self)
                 case "y":
