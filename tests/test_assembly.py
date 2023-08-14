@@ -13,3 +13,7 @@ def test_part_names():
     parts = assembly.get_parts_by_no("test_part")
     assert mypart1 in parts, "Part1 is in parts list."
     assert mypart2 in parts, "Part2 is in parts list."
+    mypart3 = SheetMetal(x_size=2, y_size=2, z_size=2, part_no="test_part")
+    assembly.add(mypart3, "top")
+    assert list(assembly.parts.keys()) == ["test_part_1", "test_part_2", "top"], "The parts names are correct."
+    assert mypart3 is assembly.get_part("top"), "The same part is return when accessed through get_part."
