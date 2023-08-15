@@ -508,14 +508,15 @@ class CycadPart(Location):
                 # Check if we have a default name and that it has not been used.
                 self._name = default
 
-            sequence_n = 0
+            else:
+                sequence_n = 0
 
-            while True:
-                sequence_n += 1
-                suggested_name = f"{self.part_no}_{sequence_n}"
-                if suggested_name not in used_names:
-                    self._name = suggested_name
-                    break
+                while True:
+                    sequence_n += 1
+                    suggested_name = f"{self.part_no}_{sequence_n}"
+                    if suggested_name not in used_names:
+                        self._name = suggested_name
+                        break
 
         return self._name
 
