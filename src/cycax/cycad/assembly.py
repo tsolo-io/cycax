@@ -16,12 +16,12 @@ class Assembly:
     This Assembly class will take multiple different cycad parts and combine them together to form complex parts.
 
     Attributes:
-        part_no: this is the destinct part number that the complex part will have.
+        name: this is the destinct part number that the complex part will have.
     """
 
-    def __init__(self, part_no: str):
-        self.part_no = part_no.strip().replace("-", "_").lower()
-        self.pieces = []
+    def __init__(self, name: str):
+        self.name = name.strip().replace("-", "_").lower()
+        self.parts = {}
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
 
@@ -40,15 +40,15 @@ class Assembly:
             part_engine: The engine to use for part creation.
             part_engine_config: Additional config to pass to the part engine.
         """
-        for part in self.pieces:
+        for part in self.parts.values():
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
             self._part_files[part.part_no] = data_files
 
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":
-            assembler = AssemblyOpenSCAD(self.part_no, config=engine_config)
+            assembler = AssemblyOpenSCAD(self.name, config=engine_config)
         elif engine.lower() == "blender":
-            assembler = AssemblyBlender(self.part_no)
+            assembler = AssemblyBlender(self.name)
         else:
             msg = f"""Engine {assembler} is not one of the recognized engines for assebling parts.
                 Choose one of OpenSCAD (default) or Blender."""
@@ -69,12 +69,12 @@ class Assembly:
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
 
-        for item in self.pieces:
+        for item in self.parts.values():
             item.save(path)
 
         self._base_path = path
         data = self.export()
-        data_filename = path / f"{self.part_no}.json"
+        data_filename = path / f"{self.name}.json"
         data_filename.write_text(json.dumps(data))
 
     def merge(self, part1: CycadPart, part2: CycadPart):
@@ -101,17 +101,55 @@ class Assembly:
             msg = f"merging {part1} and {part2} but they are not of the same size."
             raise ValueError(msg)
 
-    def add(self, part: CycadPart):
+    def add(self, part: CycadPart, suggested_name: str = None) -> str:
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be moved around or eddited.
 
         Args:
             part: this in the part that will be added to the assembly.
+            suggested_name: A proposal for a part name, if a part with such a name exists then a name will be generated.
+
+        Returns:
+            The name of the part.
         """
 
-        self.pieces.append(part)
         part.assembly = self
+        part_name = part.get_name(suggested_name)
+        if part_name in self.parts:
+            msg = f"Part with name/id {part_name} already in parts catalogue."
+            raise KeyError(msg)
+        self.parts[part_name] = part
+        return part_name
+
+    def get_part(self, name: str) -> CycadPart:
+        """Get a part from the assembly based on part name.
+
+        Args:
+            name: The name or ID of a part.
+
+        Returns:
+            A matching part.
+
+        Raises:
+            KeyError: is raised when we cannot find the part with the given name.
+        """
+        return self.parts[name]
+
+    def get_parts_by_no(self, part_no: str) -> list[CycadPart]:
+        """Get all the part of a type, same part_no.
+
+        Args:
+            part_no: The part_no of the parts we are looking for.
+
+        Returns:
+            The part with the given part_no.
+        """
+        parts = []
+        for part in self.parts.values():
+            if part.part_no == part_no:
+                parts.append(part)
+        return parts
 
     def export(self) -> dict:
         """This creates a dict of the assembly, used to make the JSON.
@@ -120,17 +158,17 @@ class Assembly:
             This is the dict that will be used to form a JSON decoded in assembly.
         """
         list_out = []
-        for item in self.pieces:
+        for item in self.parts.values():
             dict_part = {
                 "part_no": item.part_no,
                 "position": item.position,
-                "rotate": item.rotate,
+                "rotate": item.rotation,
                 "rotmax": [item.x_size, item.y_size, item.z_size],
                 "colour": item.colour,
             }
             list_out.append(dict_part)
         dict_out = {}
-        dict_out["name"] = self.part_no
+        dict_out["name"] = self.name
         dict_out["parts"] = list_out
         return dict_out
 
@@ -140,7 +178,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append({"axis": "z", "angle": 90})
+        part.rotation.append({"axis": "z", "angle": 90})
         part.x_max, part.y_max = part.y_max, part.x_max
         part.x_min, part.y_min = part.y_min, part.x_min
         part.make_bounding_box()
@@ -151,7 +189,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append({"axis": "x", "angle": 90})
+        part.rotation.append({"axis": "x", "angle": 90})
         part.y_max, part.z_max = part.z_max, part.y_max
         part.y_min, part.z_min = part.z_min, part.y_min
         part.make_bounding_box()
@@ -162,7 +200,7 @@ class Assembly:
         Args:
             part: This is the part that will be rotated.
         """
-        part.rotate.append({"axis": "y", "angle": 90})
+        part.rotation.append({"axis": "y", "angle": 90})
         part.x_max, part.z_max = part.z_max, part.x_max
         part.x_min, part.z_min = part.z_min, part.x_min
         part.make_bounding_box()
@@ -217,7 +255,7 @@ class Assembly:
         for hole in part.move_holes:
             temp_hole = copy.deepcopy(hole)
             rotation = [part.x_size, part.y_size, part.z_size]
-            for rot in part.rotate:
+            for rot in part.rotation:
                 if rot["axis"] == "x":
                     rotation = temp_hole.swap_yz(rot=1, rotmax=rotation)
                 elif rot["axis"] == "y":
@@ -247,8 +285,6 @@ class Assembly:
         """
         part1 = partside1._parent
         side = partside1.name
-        print(part2.position)
-        print(part1.position)
 
         holes = self._final_place_(part2)
 

@@ -43,6 +43,7 @@ class CycadPart(Location):
         colour: str = "orange",
     ):
         super().__init__(x, y, z, side)
+        self._name: str = ""
         self.left = LeftSide(self)
         self.right = RightSide(self)
         self.top = TopSide(self)
@@ -65,7 +66,7 @@ class CycadPart(Location):
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
         self.position = [0, 0, 0]
-        self.rotate = []
+        self.rotation = []
         self.final_location = False
         self.poligon = poligon
         self.colour = colour
@@ -338,7 +339,7 @@ class CycadPart(Location):
         if self.position[2] != 0:
             hole.move(z=-self.position[2])
 
-        working_rotate = copy.deepcopy(self.rotate)
+        working_rotate = copy.deepcopy(self.rotation)
         rotation = [self.x_max - self.x_min, self.y_max - self.y_min, self.z_max - self.z_min]
         while len(working_rotate) > 0:
             rot = working_rotate.pop()
@@ -487,6 +488,37 @@ class CycadPart(Location):
 
         return part_engine.build()
 
+    def get_name(self, default: str = None):
+        """Return the part name, if the part has not been named generate a name.
+
+        The part name (or ID) is distict from the part_no or part number.
+        Each instance of the part has a unique name, but is still the same type of part as the
+        parts with the same part number.
+        Parts could override this method to define a specialised part numbering scheme.
+
+        Args:
+            default: A possible name for this part if the part has not been named.
+                And if it is not being used by another part.
+        """
+
+        if not self._name:
+            # I am name-less.
+            used_names = self.assembly.parts.keys()
+            if default and default not in used_names:
+                # Check if we have a default name and that it has not been used.
+                self._name = default
+
+            sequence_n = 0
+
+            while True:
+                sequence_n += 1
+                suggested_name = f"{self.part_no}_{sequence_n}"
+                if suggested_name not in used_names:
+                    self._name = suggested_name
+                    break
+
+        return self._name
+
     def get_side(self, side_name: str) -> CycadSide:
         return getattr(self, side_name.lower())
 
@@ -555,3 +587,28 @@ class CycadPart(Location):
         if subtract:
             for my_side, other_side in level_tasks:
                 self.assembly.subtract(other_side, self)
+
+    def rotate(self, actions: str):
+        """
+        This can be used to rotate a part in the assembly as follows:
+        CycadPart.rotate("xxyzyy")
+        This is: 2 rotate_freeze_front, rotate_freeze_left, rotate_freeze_top, 2 rotate_freeze_left.
+        Where rotate_freeze_ results in one 90degrees counter clock wise rotations around the specified axis.
+        Args:
+            actions: This is a string specifying rotations.
+
+        Raises:
+            ValueError: When the given actions contains a strign that is non x, y, or z.
+        """
+        for action in actions:
+            match action.lower():
+                case "x":
+                    self.assembly.rotate_freeze_left(self)
+                case "y":
+                    self.assembly.rotate_freeze_front(self)
+                case "z":
+                    self.assembly.rotate_freeze_top(self)
+                case _:
+                    msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
+                            {action} is not one of the permissable actions."""
+                    raise ValueError(msg)
