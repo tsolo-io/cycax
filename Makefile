@@ -18,7 +18,7 @@ test-ci:
 format:
 	hatch run lint:fmt
 
-selling:
+spelling:
 	hatch run lint:spell
 
 docs:
