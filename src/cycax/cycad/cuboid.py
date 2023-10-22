@@ -26,7 +26,7 @@ class Cuboid(CycadPart):
             y_size=y_size,
             z_size=z_size,
             colour=colour,
-            poligon="cube",
+            polygon="cube",
         )  # initializes the cuboid to (0,0,0)
 
 
@@ -38,7 +38,7 @@ class SheetMetal(Cuboid):
     Args:
         x_size : The size of x.
         y_size : The size of y.
-        z_size : The siez of z.
+        z_size : The size of z.
         part_no : The unique name that will be given to a type of parts.
     """
 
@@ -54,7 +54,7 @@ class Print3D(Cuboid):
     Args:
         x_size : The size of x.
         y_size : The size of y.
-        z_size : The siez of z.
+        z_size : The size of z.
         part_no : The unique name that will be given to a type of parts.
     """
 

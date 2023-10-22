@@ -38,7 +38,7 @@ class Holes(Location):
 
 
 class RectangleCutOut(Location):
-    """This class can be used for cutting a hole that is not round but rather of the definied parameters.
+    """This class can be used for cutting a hole that is not round but rather of the defined parameters.
 
     This class is a hole that is not round.
     The location refers to its bottom left hand corner.
@@ -91,10 +91,10 @@ class RectangleCutOut(Location):
 
     def swap_xy(self, rot: float, rotmax: list) -> list:
         """
-        This will rotate slot while holding top where it is. It overides the method present in the location super.
+        This will rotate slot while holding top where it is. It overrides the method present in the location super.
 
         Args:
-            rot: the number of times to perfor the swap.
+            rot: the number of times to perform the swap.
             rotmax: the maximum values for the swap.
 
         Returns:
@@ -107,10 +107,10 @@ class RectangleCutOut(Location):
         return rotmax
 
     def swap_xz(self, rot: float, rotmax: list) -> list:
-        """This will rotate slot while holding front where it is. It overides the method present in the location super.
+        """This will rotate slot while holding front where it is. It overrides the method present in the location super.
 
         Args:
-            rot: the number of times to perfor the swap.
+            rot: the number of times to perform the swap.
             rotmax: the maximum values for the swap.
 
         Returns:
@@ -123,10 +123,10 @@ class RectangleCutOut(Location):
         return rotmax
 
     def swap_yz(self, rot: float, rotmax: list) -> list:
-        """This will rotate slot while holding left where it is. It overides the method present in the location super.
+        """This will rotate slot while holding left where it is. It overrides the method present in the location super.
 
         Args:
-            rot: the number of times to perfor the swap.
+            rot: the number of times to perform the swap.
             rotmax: the maximum values for the swap.
 
         Returns:

@@ -47,7 +47,7 @@ class EngineFreecad:
         self.filepath = ""
 
     def cube(self, feature: dict):
-        """This method will draw a cube when given a dict that contains the necessary dimentions
+        """This method will draw a cube when given a dict that contains the necessary dimensions
 
         Args:
             feature: This is the dict that contains the necessary details of the cube to be cut out.
@@ -70,7 +70,7 @@ class EngineFreecad:
         return Part.makeBox(length, width, depth, pos)
 
     def sphere(self, feature: dict):
-        """This method will draw a sphere when given a dict that contains the necessary dimentions
+        """This method will draw a sphere when given a dict that contains the necessary dimensions
 
         Args:
             feature: This is the dict that contains the necessary details of the sphere to be cut out.
@@ -183,7 +183,7 @@ class EngineFreecad:
         move: dict | None = None,
         side: str | None = None,
     ):
-        """This method will be used for cutting a cylindical hole into a surface.
+        """This method will be used for cutting a cylindrical hole into a surface.
 
         Args:
             feature: This is the dictionary that contains the deatails of where the hole must be placed and its details.

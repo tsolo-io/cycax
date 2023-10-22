@@ -33,7 +33,7 @@ class Location:
         return f"x={self.x} y={self.y} z={self.z} side={self.side}"
 
     def swap_xy(self, rot: float, rotmax: list) -> list:
-        """Rotate while holding the top where it currenly is.
+        """Rotate while holding the top where it currently is.
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
@@ -42,7 +42,7 @@ class Location:
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
-            New dimentions of the object.
+            New dimensions of the object.
         """
 
         while rot > 0:
@@ -57,7 +57,7 @@ class Location:
         return rotmax
 
     def swap_xz(self, rot: float, rotmax: list) -> list:
-        """Rotate while holding the front where it currenly is.
+        """Rotate while holding the front where it currently is.
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
@@ -66,7 +66,7 @@ class Location:
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
-            New dimentions of the object.
+            New dimensions of the object.
         """
 
         while rot > 0:
@@ -81,7 +81,7 @@ class Location:
         return rotmax
 
     def swap_yz(self, rot: float, rotmax: list) -> list:
-        """Rotate while holding the left where it currenly is.
+        """Rotate while holding the left where it currently is.
 
         Args:
             rot: This will specify the number of times the swap is to be performed.
@@ -90,7 +90,7 @@ class Location:
             rotmax: This is the dimetntions of the object that is being rotated.
 
         Returns:
-            New dimentions of the object.
+            New dimensions of the object.
         """
 
         while rot > 0:
