@@ -2,7 +2,7 @@ from cycax.cycad.cuboid import Cuboid
 
 
 class Fan(Cuboid):
-    """This class will initializa a fan cut out in the sheet metal specified.
+    """This class will initialize a fan cut out in the sheet metal specified.
 
     Args:
         size: Width of the fan. This will be used to create the fan's square bounding box.
@@ -11,7 +11,7 @@ class Fan(Cuboid):
         internal: This is a boolean to establish whether the fan is external or internal.
             If the fan is external slots will be cut out and if it is internal a big hole will be cut.
         hole_depth: The depth of the material the fan will be set to cut out.
-        hole_diameter: The diamter of the securing holes of the fan.
+        hole_diameter: The diameter of the securing holes of the fan.
         side_pad: Add extra material on the sides to ensure the structure is sound. Lessens air flow.
     """
 
@@ -34,7 +34,7 @@ class Fan(Cuboid):
         self.hole_depth = hole_depth
         self.hole_diameter = hole_diameter
         # hole_from_edge - The distance the center of mounting holes is from the edge.
-        # Normaly 4mm but we can be more specific for fan sizes we know.
+        # Normally 4mm but we can be more specific for fan sizes we know.
         self.hole_from_edge = {80: 4.25}.get(size, 4)
         self.side_pad = side_pad
 
@@ -45,7 +45,7 @@ class Fan(Cuboid):
     def definition(self):
         """
         This method will be called within the init method.
-        Based on whether the specfied fan is external or internal it will call the relevant method.
+        Based on whether the specified fan is external or internal it will call the relevant method.
         """
         self.top.hole(pos=(self.center, self.center), diameter=self.diameter, depth=2)
         self.bottom.hole(pos=(self.center, self.center), diameter=self.diameter, depth=2)

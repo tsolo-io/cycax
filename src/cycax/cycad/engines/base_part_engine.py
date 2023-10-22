@@ -17,7 +17,7 @@ class PartEngine:
         self._base_path = None
         self._json_file = None
         self.name = name
-        self.part_no = name  # TODO: Depricate self.part_no
+        self.part_no = name  # TODO: Deprecate self.part_no
         self.config = dict(config or {})
         self.set_path(path)
 
@@ -42,13 +42,13 @@ class PartEngine:
                 logging.error("No path %s", path)
                 break
             for appimg in path.glob(f"{name}*.AppImage"):
-                # Very simple implimentation to get tests to pass on CI.
+                # Very simple implementation to get tests to pass on CI.
                 # TODO: Sort the Appimages and to get the latest.
                 appimage = appimg
         return appimage
 
     def build(self):
-        msg = "The build method needs to be implimented for this engine."
+        msg = "The build method needs to be implemented for this engine."
         raise NotImplementedError(msg)
 
     def file_list(self, files: list, engine: str, score: int) -> list:
