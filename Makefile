@@ -18,6 +18,9 @@ test-ci:
 format:
 	hatch run lint:fmt
 
+spelling:
+	hatch run lint:spell
+
 docs:
 	hatch run docs:build
 

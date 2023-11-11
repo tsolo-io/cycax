@@ -33,7 +33,7 @@ class Simple2D(PartEngine):
         self.plane = ""
         self.hole_sink = ""
 
-        self.boundin_box = {
+        self.bounding_box = {
             BOTTOM: 0,
             TOP: 0,
             LEFT: 0,
@@ -66,9 +66,9 @@ class Simple2D(PartEngine):
         Args:
             feature: this is the dictionary that contains the details of the object being produced.
         """
-        self.boundin_box[TOP] = self.boundin_box[TOP] + feature["z_size"]
-        self.boundin_box[RIGHT] = self.boundin_box[RIGHT] + feature["x_size"]
-        self.boundin_box[BACK] = self.boundin_box[BACK] + feature["y_size"]
+        self.bounding_box[TOP] = self.bounding_box[TOP] + feature["z_size"]
+        self.bounding_box[RIGHT] = self.bounding_box[RIGHT] + feature["x_size"]
+        self.bounding_box[BACK] = self.bounding_box[BACK] + feature["y_size"]
         self.plane = self.side
         self.hole_sink = self.side
         self.plane = {TOP: z, BACK: y, BOTTOM: z, FRONT: y, LEFT: x, RIGHT: x}[self.plane]
@@ -89,9 +89,9 @@ class Simple2D(PartEngine):
             feature: this is the dictionary of the object that is being plotted.
         """
         if (
-            feature[self.plane] == self.boundin_box[self.side]
-            or feature[self.plane] + feature[self.hole_sink] == self.boundin_box[self.side]
-            or feature[self.plane] - feature[self.hole_sink] == self.boundin_box[self.side]
+            feature[self.plane] == self.bounding_box[self.side]
+            or feature[self.plane] + feature[self.hole_sink] == self.bounding_box[self.side]
+            or feature[self.plane] - feature[self.hole_sink] == self.bounding_box[self.side]
         ):
             ax.add_patch(
                 Circle((feature["x"], feature["y"]), feature["diameter"] / 2, **self._get_feature_style(feature))
@@ -99,16 +99,16 @@ class Simple2D(PartEngine):
 
     def _box(self, ax: mpl.axes._axes.Axes, feature: dict):
         """This method will draw a box on the plot if the given cube reaches the side which it is drawing.
-        It uses a dict to figure out the dimentions of the box it is drawing.
+        It uses a dict to figure out the dimensions of the box it is drawing.
 
         Args:
             ax: this is the axes onto which the object will be drawn.
             feature: this is the dictionary of the object that is being plotted.
         """
         if (
-            feature[self.plane] == self.boundin_box[self.side]
-            or feature[self.plane] + feature[self.plane + "_size"] == self.boundin_box[self.side]
-            or feature[self.plane] - feature[self.plane + "_size"] == self.boundin_box[self.side]
+            feature[self.plane] == self.bounding_box[self.side]
+            or feature[self.plane] + feature[self.plane + "_size"] == self.bounding_box[self.side]
+            or feature[self.plane] - feature[self.plane + "_size"] == self.bounding_box[self.side]
         ):
             length = self.side
             length = {

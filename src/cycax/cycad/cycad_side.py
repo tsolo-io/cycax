@@ -23,7 +23,7 @@ class CycadSide:
         Returns:
             The (x, y, z) location of an object.
         """
-        raise ValueError("_location_calc is Not implimented on" + self.name)
+        raise ValueError("_location_calc is Not implemented on" + self.name)
 
     def _depth_check(self, val: float | None = None) -> float:
         """Determine the depth of a feature.
@@ -34,20 +34,20 @@ class CycadSide:
         Raises:
             ValueError: The side specidfied does not have a depth check method.
         """
-        raise ValueError("_depth_check is Not implimented on" + self.name)
+        raise ValueError("_depth_check is Not implemented on" + self.name)
 
     def _rotate(self):
-        """Rotate the part by 90 degress by keeping selected side on the same plain."""
+        """Rotate the part by 90 degrees by keeping selected side on the same plain."""
         msg = "_rotate should be defined for each side."
         raise NotImplementedError(msg)
 
     def rotate(self, angle: float = 90):
         """Rotate the part by keeping the selected side on the same plain.
 
-        Rotation is counter clock wise. Negative angles are converted to poistive.
+        Rotation is counter clock wise. Negative angles are converted to positive.
 
         Args:
-            angle: The angle in degress that the part will be rotates on.
+            angle: The angle in degrees that the part will be rotates on.
 
         """
         if self._parent.assembly is None:
@@ -90,19 +90,19 @@ class CycadSide:
         """This will insert a whole given the relatice details, into the correct side.
 
         Args:
-            pos: this is a tupple that contains the (x, y) coordinates of the object.
+            pos: this is a tuple that contains the (x, y) coordinates of the object.
             diameter: The diameter of the hole.
             depth: How deep to drill the hole, if not specified will drill the hole all the way through.
             sink: The hole can be sunk bellow the surface of the specified side to make a pocket.
-            external_subtract: This is specified that the hole will only be tranferred onto other surfaces.
+            external_subtract: This is specified that the hole will only be transferred onto other surfaces.
                 When set to True the hole will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
-        _location_tupple = self._location_calc(pos=pos, sink=sink)
+        _location_tuple = self._location_calc(pos=pos, sink=sink)
         self._parent.make_hole(
-            x=_location_tupple[0],
-            y=_location_tupple[1],
-            z=_location_tupple[2],
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
             side=self.name,
             diameter=diameter,
             depth=_depth,
@@ -131,19 +131,19 @@ class CycadSide:
         """
         _depth = self._depth_check(depth)
         if center is True:
-            _location_tupple = self._location_calc(pos=pos, sink=sink, length=0.0, width=0.0)
+            _location_tuple = self._location_calc(pos=pos, sink=sink, length=0.0, width=0.0)
         else:
-            _location_tupple = self._location_calc(pos=pos, sink=sink, length=length, width=width)
+            _location_tuple = self._location_calc(pos=pos, sink=sink, length=length, width=width)
 
-        _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
+        _box_dimensions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_rectangle(
             side=self.name,
-            x=_location_tupple[0],
-            y=_location_tupple[1],
-            z=_location_tupple[2],
-            x_size=_box_dimentions[0],
-            y_size=_box_dimentions[1],
-            z_size=_box_dimentions[2],
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
+            x_size=_box_dimensions[0],
+            y_size=_box_dimensions[1],
+            z_size=_box_dimensions[2],
             center=center,
         )
 
@@ -168,12 +168,12 @@ class CycadSide:
             vertical: This will be set to False if you want the flat side rather than the point side down.
         """
         # _depth = self._depth_check(depth)
-        _location_tupple = self._location_calc(pos=pos, sink=sink)
+        _location_tuple = self._location_calc(pos=pos, sink=sink)
         self._parent.make_nut(
             side=self.name,
-            x=_location_tupple[0],
-            y=_location_tupple[1],
-            z=_location_tupple[2],
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
             nut_type=nut_type,
             depth=depth,
             vertical=vertical,
@@ -192,12 +192,12 @@ class CycadSide:
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
-        _location_tupple = self._location_calc(pos=pos, sink=sink)
+        _location_tuple = self._location_calc(pos=pos, sink=sink)
         self._parent.make_sphere(
             side=self.name,
-            x=_location_tupple[0],
-            y=_location_tupple[1],
-            z=_location_tupple[2],
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
             diameter=diameter,
         )
 
@@ -219,23 +219,23 @@ class CycadSide:
             width: The width of the slot as viewed from the specified side.
             depth: The depth of the slot as viewed from the specified side.
                 If not specified it will cut the slot all the way through the surface.
-            horizontal: Slots can either run verticall or horizontally.
-            external_subtract: This is specified that the slot will only be tranferred onto other surfaces.
+            horizontal: Slots can either run vertical or horizontally.
+            external_subtract: This is specified that the slot will only be transferred onto other surfaces.
                 When set to True the slot will not be drilled into the main object.
         """
         _depth = self._depth_check(depth)
-        _location_tupple = self._location_calc(pos=pos, sink=0.0)
+        _location_tuple = self._location_calc(pos=pos, sink=0.0)
         if horizontal is False:
             length, width = width, length
-        _box_dimentions = self._box_size_calc(width=width, length=length, depth=_depth)
+        _box_dimensions = self._box_size_calc(width=width, length=length, depth=_depth)
         self._parent.make_slot(
-            x=_location_tupple[0],
-            y=_location_tupple[1],
-            z=_location_tupple[2],
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
             side=self.name,
-            x_size=_box_dimentions[0],
-            y_size=_box_dimentions[1],
-            z_size=_box_dimentions[2],
+            x_size=_box_dimensions[0],
+            y_size=_box_dimensions[1],
+            z_size=_box_dimensions[2],
             horizontal=horizontal,
             external_subtract=external_subtract,
         )

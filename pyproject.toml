@@ -71,6 +71,7 @@ dependencies = [
   "black>=23.7.0",
   "mypy>=1.0.0",
   "ruff>=0.0.243",
+  "typos"
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/cycax tests}"
@@ -78,6 +79,7 @@ style = [
   "ruff {args:.}",
   "black --check --diff {args:.}",
 ]
+spell = "typos {args:.}"
 fmt = [
   "black {args:.}",
   "ruff --fix {args:.}",

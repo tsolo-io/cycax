@@ -22,9 +22,9 @@ class CycadPart(Location):
         z: The location of z along the z axis.
         x_size: The size along the x axis.
         y_size: The size along the y axis.
-        z_size: The siez along the z axis.
+        z_size: The size along the z axis.
         part_no : The unique name that will be given to a type of parts.
-        poligon: currently only cube availabe.
+        polygon: currently only cube available.
         colour: colour of the part.
 
     """
@@ -39,7 +39,7 @@ class CycadPart(Location):
         x_size: float,
         y_size: float,
         z_size: float,
-        poligon: str,
+        polygon: str,
         colour: str = "orange",
     ):
         super().__init__(x, y, z, side)
@@ -68,7 +68,7 @@ class CycadPart(Location):
         self.position = [0, 0, 0]
         self.rotation = []
         self.final_location = False
-        self.poligon = poligon
+        self.polygon = polygon
         self.colour = colour
         self.labels: set[str] = set()
         self._files = {}
@@ -154,8 +154,8 @@ class CycadPart(Location):
             side: The side of the part the hole will be made in.
             x_size : The size of x of slot.
             y_size : The size of y of slot.
-            z_size : The siez of z of slot.
-            horizontal : This can be overridden if it is preferred to have a verticle slot.
+            z_size : The size of z of slot.
+            horizontal : This can be overridden if it is preferred to have a vertical slot.
             external_subtract: This is to specify that the slot should only be cut into other surfaces and not itself.
         """
 
@@ -274,7 +274,7 @@ class CycadPart(Location):
         Args:
             x: the amount the object should be moved by along the x axis.
             y: the amount the object should be moved by along the y axis.
-            z: the amound the object should be moved by along the z axis
+            z: the amount the object should be moved by along the z axis
 
 
         """
@@ -386,7 +386,7 @@ class CycadPart(Location):
         """
 
         dict_piece = {
-            "name": self.poligon,
+            "name": self.polygon,
             "type": "add",
             "side": self.side,
             "x": self.x,
@@ -416,7 +416,7 @@ class CycadPart(Location):
             edge_type: round or chamfer.
             side1: side on edge.
             side2: side on edge.
-            size: The radius of a round when rounding or the lenght of a chamfer.
+            size: The radius of a round when rounding or the length of a chamfer.
         """
         edge = []
         self.make_bounding_box()
@@ -546,7 +546,7 @@ class CycadPart(Location):
             front: Side to lign the front up with.
             back: Side to lign the back up with.
             top: Side to lign the top up with.
-            bottom: Side to lign the bottom up wtih
+            bottom: Side to lign the bottom up with
             subtract: if subtrace is set to True
                 it will transfer the holes from one part to the other.
 
@@ -599,7 +599,7 @@ class CycadPart(Location):
             actions: This is a string specifying rotations.
 
         Raises:
-            ValueError: When the given actions contains a strign that is non x, y, or z.
+            ValueError: When the given actions contains a string that is non x, y, or z.
         """
         for action in actions:
             match action.lower():

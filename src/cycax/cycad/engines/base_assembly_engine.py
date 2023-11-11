@@ -15,7 +15,7 @@ class AssemblyEngine:
         self._base_path = None
         self._json_file = None
         self.name = name
-        self.part_no = name  # TODO: Depricate self.part_no
+        self.part_no = name  # TODO: Deprecate self.part_no
         self.config = dict(config or {})
         self.set_path(path)
 
@@ -31,5 +31,5 @@ class AssemblyEngine:
             raise FileNotFoundError(self._json_file)
 
     def build(self):
-        msg = "The build method needs to be implimented for this engine."
+        msg = "The build method needs to be implemented for this engine."
         raise NotImplementedError(msg)

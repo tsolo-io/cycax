@@ -9,7 +9,7 @@ def load_file_hash(filename: Path) -> str:
         filename: The file who's stored hash we need to retrieve.
 
     Returns:
-        The SHA265 hash in hexadesimal format of the contents of the previouse version of filename.
+        The SHA265 hash in hexadesimal format of the contents of the previous version of filename.
     """
     hash_file = filename.parent / f".{filename.name}.hash"
     if hash_file.exists():
