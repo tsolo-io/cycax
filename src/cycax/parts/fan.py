@@ -87,7 +87,7 @@ class Fan(Cuboid):
         The gaps will allow the internal fan to circulate the air.
         """
 
-        slot_width = 6  # Size/width of the slot
+        slot_width = 5  # Size/width of the slot
         wall_width = 4  # Minimal material left between slots.
         start = self.hole_from_edge
         end = self.size - self.hole_from_edge
