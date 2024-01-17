@@ -1,15 +1,39 @@
 from cycax.cycad.location import Location
 
 
-class Holes(Location):
-    """This class will store data on holes. A whole will be a cylinider cut into an odject.
+class Feature(Location):
+    """The Parent class of all features,
+
+    """
+    def export(self) -> dict:
+        """Create a dictionary holding a representation of the feature.
+
+        Returns:
+            A serialised representation of the feature.
+
+        Raises:
+            AttributeError: When name or type is not defined on the feature.
+        """
+
+        dict_hole = {}
+        for key in ('name', 'type'):
+            getattr(self, key)  # Just get the attribute and let Python raise attribute error if it does not exists.
+
+        for key, value in vars(self).items():
+            if not key.startswith("_"):
+                dict_hole[key] = value
+
+        return dict_hole
+
+class Holes(Feature):
+    """This class will store data on holes. A hole is a cylinder cut into an object.
     This class will initialize a hole at the desired location.
 
     Args:
         x: The location of x along the x axis.
         y: The location of y along the y axis.
         z: The location of z along the z axis.
-        side: The side of the odject that this location refers to.
+        side: The side of the object that this location refers to.
             This will be used to specify from which side a feature should be inserted into another object.
             This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
         diameter: Diameter of the hole.
@@ -21,23 +45,11 @@ class Holes(Location):
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
         self.depth = depth
-
-    def export(self) -> dict:
-        """This will create a dictionary of the hole that can be used for the JSON.
-
-        Returns:
-            this will return a dictionary.
-        """
-
-        dict_hole = {}
-        dict_hole["name"] = "hole"
-        dict_hole["type"] = "cut"
-        for key, value in vars(self).items():
-            dict_hole[key] = value
-        return dict_hole
+        self.name  = "hole"
+        self.type = "cut"
 
 
-class RectangleCutOut(Location):
+class RectangleCutOut(Feature):
     """This class can be used for cutting a hole that is not round but rather of the defined parameters.
 
     This class is a hole that is not round.
@@ -75,19 +87,8 @@ class RectangleCutOut(Location):
         self.y_size = y_size
         self.z_size = z_size
         self.center = center
-
-    def export(self) -> dict:
-        """This will create a dictionary of the rectangle cut out that can be used for the JSON.
-
-        Returns:
-            This will return a dictionary.
-        """
-        dict_cube = {}
-        dict_cube["name"] = "cube"
-        dict_cube["type"] = "cut"
-        for key, value in vars(self).items():
-            dict_cube[key] = value
-        return dict_cube
+        self.name = "cube"
+        self.type = "cut"
 
     def swap_xy(self, rot: float, rotmax: list) -> list:
         """
@@ -139,7 +140,7 @@ class RectangleCutOut(Location):
         return rotmax
 
 
-class NutCutOut(Location):
+class NutCutOut(Feature):
     """
     Class for holding the data for nut cut outs.
     The nut cut outs will allow us to hold nuts in 3D printed plastic.
@@ -189,6 +190,8 @@ class NutCutOut(Location):
         *,
         vertical: bool = True,
     ):
+        self.name = "nut"
+        self.type = "cut"
         Location.__init__(self, x, y, z, side)
         self.nut_type = nut_type.upper()
         self.diameter = NutCutOut.nut_specifications[self.nut_type]["diameter"]
@@ -200,22 +203,8 @@ class NutCutOut(Location):
             self.depth = depth
         self.vertical = vertical
 
-    def export(self) -> dict:
-        """This will create a dictionary of the nut that can be used for the JSON.
 
-        Returns:
-            this will return a dictionary.
-        """
-        dict_nut = {}
-        for key, value in vars(self).items():
-            dict_nut[key] = value
-        dict_nut["name"] = "nut"
-        dict_nut["type"] = "cut"
-
-        return dict_nut
-
-
-class SphereCutOut(Location):
+class SphereCutOut(Feature):
     """
     Class for holding the data for sphere cut outs.
 
@@ -232,19 +221,7 @@ class SphereCutOut(Location):
     """
 
     def __init__(self, side: str, x: float, y: float, z: float, diameter: float):
+        self.name = "sphere"
+        self.type = "cut"
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
-
-    def export(self) -> dict:
-        """This will create a dictionary of the sphere that can be used for the JSON.
-
-        Returns:
-            this will return a dictionary.
-        """
-        dict_sphere = {}
-        for key, value in vars(self).items():
-            dict_sphere[key] = value
-        dict_sphere["name"] = "sphere"
-        dict_sphere["type"] = "cut"
-
-        return dict_sphere

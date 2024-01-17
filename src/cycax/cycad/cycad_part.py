@@ -169,7 +169,7 @@ class CycadPart(Location):
             z=z,
             horizontal=horizontal,
         )
-        # This will add it to the relevnt array
+        # This will add it to the relevant array
         if external_subtract:
             self.move_holes.append(temp_slot.hole_left)
             self.move_holes.append(temp_slot.hole_right)
@@ -361,6 +361,7 @@ class CycadPart(Location):
     def save(self, path: Path | None = None):
         """
         This takes the provided part and will create its dictionary and export it to a JSON
+
         Args:
             path: Base path for storing part information.
                 A directory with the part_no will be created in this path.
