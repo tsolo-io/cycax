@@ -14,7 +14,7 @@ class CycadSide:
         return "Side: " + self.name
 
     def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
-        """Location is calculated for the (x, y) plane using two values and a side.
+        """Location is calculated for the (x, y) plain using two values and a side.
 
         Args:
             pos: (x, y) location of an object which is used to find the location with the side.

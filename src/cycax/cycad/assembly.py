@@ -207,13 +207,15 @@ class Assembly:
 
     def level(self, partside1: CycadSide, partside2: CycadSide):
         """
-        level takes the plane of part2 specified and moves part1 so that its specified side
-        has a plane equal to part2.
-        level(part1.front part2.back)
-        will gve part1 and part2 a front and back which are on the same plane. It moves part1.
+        Alight the two sides onto the same plain.
+
+        Moves part1 so that its given side is on the same plain as the given
+        side of parts2. e.g. `level(part1.front part2.back)` will move part1
+        so that its front is on the same plain as the back of part2.
+
         Args:
-            partside1:This is the CycadSide that will be moved to match the plane of the other part.
-            partside2: This is the CycadSide which will be the reference when moving part1.
+            partside1:The CycadSide to be moved to match the plain of the other part.
+            partside2: The CycadSide used as reference when moving part1.
         Raises:
             ValueError: if the side present in CycadSide does not match one of the expected side.
         """
