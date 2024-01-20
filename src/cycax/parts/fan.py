@@ -87,7 +87,7 @@ class Fan(Cuboid):
         The gaps will allow the internal fan to circulate the air.
         """
 
-        slot_width = 4  # Size/width of the slot
+        slot_width = 5  # Size/width of the slot
         wall_width = 4  # Minimal material left between slots.
         start = self.hole_from_edge
         end = self.size - self.hole_from_edge
@@ -116,23 +116,24 @@ class Fan(Cuboid):
 
 
 class Fan80x80(Fan):
-    def __init__(self, *, thickness: int, internal: bool = False):
+    def __init__(self, *, thickness: int, side_pad: int = 0, internal: bool = False):
         print(f"Make FAN {thickness=} {internal=}")
         super().__init__(
             size=80,
             thickness=thickness,
             part_no=f"fan_80x80x{thickness}",
             internal=internal,
+            side_pad=side_pad,
             hole_depth=None,
             hole_diameter=3.0,
         )
 
 
 class Fan80x80x15(Fan80x80):
-    def __init__(self, internal=False):
+    def __init__(self, internal: bool = False):
         super().__init__(thickness=15, internal=internal)
 
 
 class Fan80x80x25(Fan80x80):
-    def __init__(self, internal=False):
-        super().__init__(thickness=25, internal=internal)
+    def __init__(self, side_pad: int = 0, internal: bool = False):
+        super().__init__(thickness=25, side_pad=side_pad, internal=internal)

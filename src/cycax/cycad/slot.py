@@ -5,7 +5,7 @@ class Slot:
     """A slot with parameters.
 
     To get a vertical slot enter the details in exactly the same manner to
-    the horizontle slot and then specify that horrizontal to False.
+    the horizontal slot and then specify that horizontal to False.
 
     This class will initialize a slot in the desired location.
 
@@ -19,7 +19,7 @@ class Slot:
         x_size: The location of x_size of slot.
         y_size: The location of y_size of slot.
         z_size: The location of z_size of slot.
-        horizontal: This can be overridden it you need a vertical slot.
+        horizontal: This can be overridden if you need a vertical slot.
 
     """
 

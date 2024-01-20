@@ -11,8 +11,7 @@ SIDES = (LEFT, RIGHT, TOP, BOTTOM, FRONT, BACK)
 
 
 class Location:
-    """This class will define the loation of an object in 3D space.
-    This class will initialize a location along the x, y, z axis.
+    """The location of an object in 3D space.
 
     Attributes:
         x: The location of x along the x axis.
