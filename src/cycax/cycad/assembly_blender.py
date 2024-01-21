@@ -1,4 +1,3 @@
-import json
 import logging
 import math
 from pathlib import Path
@@ -8,12 +7,10 @@ import matplotlib.colors as mcolors
 
 
 class AssemblyBlender:
-    """
-    This class will use the STLs that have been printed and assemble them in a Blender file.
+    """Assemble the parts into an Blender model.
 
     Args:
-        name: This is the part number of the complex part that is being assembled.
-
+        name: The part number of the complex part that is being assembled.
     """
 
     def __init__(self, name: str) -> None:
@@ -21,9 +18,8 @@ class AssemblyBlender:
         self._base_path = Path(".")
         self.parts = {}
 
-    def fetch_part(self, part: str):
-        """
-        Retrieves the part that will be imported and possitioned.
+    def _fetch_part(self, part: str):
+        """Retrieves the part that will be imported and possitioned.
 
         Args:
             part: this is the name of the part that will be imported.
@@ -40,9 +36,8 @@ class AssemblyBlender:
                 obj.name = f"{part}_{1}"
                 self.parts[part] = 1
 
-    def swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
+    def _swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the top"""
-
         while rot != 0:
             max_x = rotmax[0]
             rotation[0], rotation[1] = rotation[1], max_x - rotation[0]
@@ -50,7 +45,7 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def swap_xz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
+    def _swap_xz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the front"""
         while rot != 0:
             max_z = rotmax[2]
@@ -59,7 +54,7 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def swap_yz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
+    def _swap_yz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
         """Used to help rotate the object on the spot while freezing the left"""
         while rot != 0:
             max_y = rotmax[1]
@@ -68,9 +63,8 @@ class AssemblyBlender:
             rot = rot - 1
         return rotation, rotmax
 
-    def move(self, rotmax: tuple, position: tuple, rotate: tuple):
-        """
-        Computes the moving and rotating of the STL to the desired location.
+    def _move(self, rotmax: tuple, position: tuple, rotate: tuple):
+        """Computes the moving and rotating of the STL to the desired location.
 
         Args:
             rotmax: This is the tuple that contains the original (x,y,z) location.
@@ -81,16 +75,16 @@ class AssemblyBlender:
         for item in rotate:
             if item["axis"] == "x":
                 bpy.ops.transform.rotate(value=math.radians(360 - 90), orient_axis="X")
-                working = self.swap_yz_(rotation, 3, rotmax)
+                working = self._swap_yz_(rotation, 3, rotmax)
             # blender does clockwise instead of anticlockwise rotations as we would expect in openscad.
 
             if item["axis"] == "y":
                 bpy.ops.transform.rotate(value=math.radians(360 - 90), orient_axis="Y")
-                working = self.swap_xz_(rotation, 3, rotmax)
+                working = self._swap_xz_(rotation, 3, rotmax)
 
             if item["axis"] == "z":
                 bpy.ops.transform.rotate(value=math.radians(360 - 90), orient_axis="Z")
-                working = self.swap_xy_(rotation, 3, rotmax)
+                working = self._swap_xy_(rotation, 3, rotmax)
 
             rotation = working[0]
             rotmax = working[1]
@@ -99,11 +93,11 @@ class AssemblyBlender:
             value=(rotation[0] + position[0], rotation[1] + position[1], rotation[2] + position[2])
         )
 
-    def colour(self, colour: str, part: str) -> str:
-        """
-        Gives the colour.
+    def _colour(self, colour: str, part: str) -> str:
+        """Set the part colour.
+
         Args:
-            colour: Colour which the object will become.
+            colour: Colour which the part will become.
         """
         working_part = f"{part}_{self.parts[part]}"
         template_object = bpy.data.objects.get(working_part)
@@ -113,20 +107,16 @@ class AssemblyBlender:
 
         template_object.active_material = matcolour
 
+    def add(self, part_operation: dict):
+        """Add the part to the assembly."""
+        self._fetch_part(part_operation["part_no"])
+        self._move(part_operation["rotmax"], part_operation["position"], part_operation["rotate"])
+        self._colour(part_operation["colour"], part_operation["part_no"])
+
     def build(self, path: Path | None = None):
-        """
-        Decodes the provided JSON and move the object around as required, creating new file which will use imported STL.
-        """
+        """Create the assembly of the parts added."""
         if path is not None:
             self._base_path = path
-
-        json_file = self._base_path / f"{self.name}.json"
-        data = json.loads(json_file.read_text())
-
-        for action in data["parts"]:
-            self.fetch_part(action["part_no"])
-            self.move(action["rotmax"], action["position"], action["rotate"])
-            self.colour(action["colour"], action["part_no"])
 
         logging.info("Saving the .blend file.")
         save_file = str(self._base_path / f"{self.name}.blend")

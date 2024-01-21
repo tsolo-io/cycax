@@ -11,6 +11,25 @@ from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
+class AssemblyEngine:
+    # TODO: Move to own file to avoid circular dependancy
+    # TODO: Make this an ABC.
+    # TODO: Update assembly_blender and assembly_scad to inheret from here.
+
+    def __init__(self, name: str, config: dict | None = None) -> None:
+        self.name = name
+        self._base_path = Path(".")
+        self._config = {} if config is None else config
+    
+    def add(self, part_operation: dict):
+        """Add the part to the assembly."""
+        pass
+
+    def build(self, path: Path | None = None):
+        """Create the assembly of the parts added."""
+        pass
+
+
 class Assembly:
     """
     This Assembly class will take multiple different cycad parts and combine them together to form complex parts.
@@ -24,6 +43,18 @@ class Assembly:
         self.parts = {}
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
+
+    def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
+        logging.info("Calling to the assembler")
+        if engine.lower() == "openscad":
+            assembler = AssemblyOpenSCAD(self.name, config=engine_config)
+        elif engine.lower() == "blender":
+            assembler = AssemblyBlender(self.name)
+        else:
+            msg = f"""Engine {assembler} is not one of the recognized engines for assebling parts.
+                Choose one of OpenSCAD (default) or Blender."""
+            raise ValueError(msg)
+        return assembler
 
     def render(
         self,
@@ -40,19 +71,15 @@ class Assembly:
             part_engine: The engine to use for part creation.
             part_engine_config: Additional config to pass to the part engine.
         """
+        assembler = self._get_assembler(engine, engine_config)
+
         for part in self.parts.values():
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
             self._part_files[part.part_no] = data_files
 
-        logging.info("Calling to the assembler")
-        if engine.lower() == "openscad":
-            assembler = AssemblyOpenSCAD(self.name, config=engine_config)
-        elif engine.lower() == "blender":
-            assembler = AssemblyBlender(self.name)
-        else:
-            msg = f"""Engine {assembler} is not one of the recognized engines for assebling parts.
-                Choose one of OpenSCAD (default) or Blender."""
-            raise ValueError(msg)
+        data = self.export()
+        for action in data["parts"]:
+            assembler.add(action)
         assembler.build(self._base_path)
 
     def save(self, path: Path | None = None):
@@ -64,7 +91,7 @@ class Assembly:
         """
 
         if path is None:
-            path = Path(".")
+            path = self._base_path
         if not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)

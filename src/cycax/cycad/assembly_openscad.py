@@ -1,29 +1,26 @@
-import json
 import logging
 from pathlib import Path
 
 
 class AssemblyOpenSCAD:
-    """
-    This class will use the STLs that have been printed and assemblt them in an OpenSCAD file.
+    """Assemble the parts into an OpenSCAD model.
 
     Attributes:
-        name: This is the part number of the complex part that is being assembled.
+        name: The part number of the complex part that is being assembled.
         config: Configuration for the OpenSCAD assembly engine.
-
     """
 
     def __init__(self, name: str, config: dict | None = None) -> None:
         self.name = name
         self._base_path = Path(".")
         self._config = {} if config is None else config
+        self._scad_ops = []
 
     def _fetch_part(self, part: str) -> str:
-        """
-        Retrieves the part that will be imported and possitioned.
+        """Retrieves the STL file that represents part and possition it in the assembly.
 
         Args:
-            part: this is the name of the part that will be imported.
+            part: The name of the part to be imported.
         """
         stl_file = self._base_path / part / f"{part}.stl"
         if not stl_file.exists():
@@ -31,7 +28,7 @@ class AssemblyOpenSCAD:
         return f'import("{stl_file}");'
 
     def _swap_xy_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
-        """Used to help rotate the object on the spot while freezing the top"""
+        """Rotate the part on the spot while freezing the top."""
 
         while rot != 0:
             max_y = rotmax[1]
@@ -41,7 +38,7 @@ class AssemblyOpenSCAD:
         return rotation, rotmax
 
     def _swap_xz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
-        """Used to help rotate the object on the spot while freezing the front"""
+        """Rotate the part on the spot while freezing the front."""
         while rot != 0:
             max_x = rotmax[0]
             rotation[0], rotation[2] = rotation[2], max_x - rotation[0]
@@ -50,7 +47,7 @@ class AssemblyOpenSCAD:
         return rotation, rotmax
 
     def _swap_yz_(self, rotation: tuple, rot: float, rotmax: tuple) -> tuple:
-        """Used to help rotate the object on the spot while freezing the left"""
+        """Rotate the part on the spot while freezing the left."""
         while rot != 0:
             max_z = rotmax[2]
             rotation[1], rotation[2] = max_z - rotation[2], rotation[1]
@@ -96,31 +93,29 @@ class AssemblyOpenSCAD:
         return output
 
     def _colour(self, colour: str) -> str:
-        """
-        Gives the colour.
+        """Set the part colour.
+
         Args:
-            colour: Colour which the object will become.
+            colour: Colour which the part will become.
         """
         return f'color("{colour}")'
 
+    def add(self, part_operation: dict):
+        """Add the part to the assembly."""
+        self._scad_ops.append(
+            self._move(part_operation["rotmax"], part_operation["position"], part_operation["rotate"])
+        )
+        self._scad_ops.append(self._colour(part_operation["colour"]))
+        self._scad_ops.append(self._fetch_part(part_operation["part_no"]))
+
     def build(self, path: Path | None = None):
-        """
-        Decodes the provided JSON and assemble the object, creating an openSCAD file which will use imported STL .
-        """
+        """Create the assembly of the parts added."""
         if path is not None:
             self._base_path = path
 
-        json_file = self._base_path / f"{self.name}.json"
-        data = json.loads(json_file.read_text())
-
-        output = []
-        for action in data["parts"]:
-            output.append(self._move(action["rotmax"], action["position"], action["rotate"]))
-            output.append(self._colour(action["colour"]))
-            output.append(self._fetch_part(action["part_no"]))
-
+        assert self._scad_ops, "No SCAD operations defined. Please call add() on the AssemblyEngine"
         scad_file = self._base_path / f"{self.name}.scad"
         with scad_file.open("w") as scad_fh:
-            for out in output:
+            for out in self._scad_ops:
                 scad_fh.write(out)
                 scad_fh.write("\n")
