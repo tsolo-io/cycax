@@ -17,7 +17,7 @@ class AssemblyOpenSCAD:
         self._scad_ops = []
 
     def _fetch_part(self, part: str) -> str:
-        """Retrieves the STL file that represents part and possition it in the assembly.
+        """Retrieves the STL file that represents part and position it in the assembly.
 
         Args:
             part: The name of the part to be imported.

@@ -12,9 +12,9 @@ from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
 class AssemblyEngine:
-    # TODO: Move to own file to avoid circular dependancy
+    # TODO: Move to own file to avoid circular dependency
     # TODO: Make this an ABC.
-    # TODO: Update assembly_blender and assembly_scad to inheret from here.
+    # TODO: Update assembly_blender and assembly_scad to inherit from here.
 
     def __init__(self, name: str, config: dict | None = None) -> None:
         self.name = name
