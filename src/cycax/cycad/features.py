@@ -2,9 +2,8 @@ from cycax.cycad.location import Location
 
 
 class Feature(Location):
-    """The Parent class of all features,
+    """The Parent class of all features,"""
 
-    """
     def export(self) -> dict:
         """Create a dictionary holding a representation of the feature.
 
@@ -16,7 +15,7 @@ class Feature(Location):
         """
 
         dict_hole = {}
-        for key in ('name', 'type'):
+        for key in ("name", "type"):
             getattr(self, key)  # Just get the attribute and let Python raise attribute error if it does not exists.
 
         for key, value in vars(self).items():
@@ -24,6 +23,7 @@ class Feature(Location):
                 dict_hole[key] = value
 
         return dict_hole
+
 
 class Holes(Feature):
     """This class will store data on holes. A hole is a cylinder cut into an object.
@@ -45,7 +45,7 @@ class Holes(Feature):
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
         self.depth = depth
-        self.name  = "hole"
+        self.name = "hole"
         self.type = "cut"
 
 
