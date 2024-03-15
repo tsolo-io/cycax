@@ -72,6 +72,7 @@ class Assembly:
             part_engine_config: Additional config to pass to the part engine.
         """
         assembler = self._get_assembler(engine, engine_config)
+        assembler._base_path = self._base_path # HACK
 
         for part in self.parts.values():
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
