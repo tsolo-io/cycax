@@ -31,7 +31,6 @@ class Cuboid(CycadPart):
 
 
 class SheetMetal(Cuboid):
-
     """
     This class will initialize a sheetmetal part at the  location (0,0,0).
 
@@ -47,7 +46,6 @@ class SheetMetal(Cuboid):
 
 
 class Print3D(Cuboid):
-
     """
     This class will initialize a 3DPrint part at the  location (0,0,0).
 
