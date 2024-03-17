@@ -20,7 +20,7 @@ class AssemblyEngine:
         self.name = name
         self._base_path = Path(".")
         self._config = {} if config is None else config
-    
+
     def add(self, part_operation: dict):
         """Add the part to the assembly."""
         pass
