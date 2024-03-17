@@ -35,7 +35,7 @@ class PartEngineFreeCAD(PartEngine):
                 capture_output=True,
                 text=True,
                 env=environment,
-                shell=False,
+                shell=False, check=False,
             )
             # TODO: Read https://wiki.freecad.org/Start_up_and_Configuration and set logging and headless args.
 
