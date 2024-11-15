@@ -7,10 +7,10 @@
 # 1. Open the file up in FreeCAD and run as a Macro.
 # 2. Run from command line. ./FreeCAD.AppImage img.py
 #
-import os
-import time
 import json
 import logging
+import os
+import time
 from math import sqrt
 from pathlib import Path
 
@@ -207,29 +207,17 @@ class EngineFreecad:
             y = move["y"]
             z = move["z"]
         if side == FRONT:
-            cyl.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270)
-            )
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
         elif side == BACK:
-            cyl.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90)
-            )
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90))
         elif side == TOP:
-            cyl.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180)
-            )
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
         elif side == BOTTOM:
-            cyl.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0)
-            )
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
         elif side == LEFT:
-            cyl.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90)
-            )
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
         elif side == RIGHT:
-            cyl.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270)
-            )
+            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
         return cyl
 
     def render_to_png(self, view: str | None = None):
@@ -376,17 +364,11 @@ class EngineFreecad:
         z = move["z"]
 
         if side in [FRONT, BACK]:
-            rhombus.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270)
-            )
+            rhombus.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
         elif side in [TOP, BOTTOM]:
-            rhombus.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0)
-            )
+            rhombus.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 0, 1), 0))
         elif side in [LEFT, RIGHT]:
-            rhombus.Placement = App.Placement(
-                Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90)
-            )
+            rhombus.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
 
         return rhombus
 
@@ -398,13 +380,7 @@ class EngineFreecad:
             features: This is the dictionary that contains the details of the beveled edge.
         """
 
-        hypot = (
-            sqrt(
-                features["size"] * 2 * features["size"] * 2
-                + features["size"] * 2 * features["size"] * 2
-            )
-            / 3
-        )
+        hypot = sqrt(features["size"] * 2 * features["size"] * 2 + features["size"] * 2 * features["size"] * 2) / 3
         move_cutter_cyl = {"x": 0, "y": 0, "z": 0}
         move_cutter_rhombus = {"x": 0, "y": 0, "z": 0}
         move_cube = {"x": 0, "y": 0, "z": 0}
@@ -508,9 +484,7 @@ class EngineFreecad:
         doc.saveCopy(f"{self.filepath}.FCStd")
         logging.info("Part Saved")
         for out_choice in outformats.lower().split(","):
-            ftype, fview = (
-                out_choice.split(":") if ":" in out_choice else (out_choice, None)
-            )
+            ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
             out_format = ftype.upper().strip()
             match out_format:
                 case "PNG":
@@ -539,7 +513,6 @@ def get_next_job_path(jobs_path) -> dict:
         jobs_path: The directory with symlinks to parts to process.
 
     """
-    ret_dict = {}
     for jpath in sorted(jobs_path.iterdir()):
         if jpath.is_dir() and jpath.is_symlink():
             ret_path = jpath.readlink().expanduser().absolute()
@@ -557,9 +530,7 @@ def get_next_job_path(jobs_path) -> dict:
                     json_file_path,
                 )
         else:
-            logging.warning(
-                "The path %s is not a symlinked directory, not treated as a job.", jpath
-            )
+            logging.warning("The path %s is not a symlinked directory, not treated as a job.", jpath)
     return None
 
 
@@ -593,7 +564,10 @@ def main(freecad_jobs_path: Path):
                     running = control_file(freecad_jobs_path, "quit")
                     if not running:
                         break
-                    time.sleep(2)
+                    time.sleep(2)  # TODO: Change to a GUI sleep.
+                    # This sleep needs to be very short to not lock up the GUI,
+                    # but to short it adds load to the filesystem.
+                    # Should rather be a QtGui type sleep. An GUI base async sleep.
         else:
             logging.info("Got a job %s", job_paths)
             files_to_produce = "PNG,STL"
@@ -622,10 +596,3 @@ control_file(freecad_jobs_path, "quit", start=True)
 main(freecad_jobs_path)
 logging.info("End of application. Normal termination.")
 QtGui.QApplication.quit()
-# json_file = os.getenv("CYCAX_JSON")
-# out_dir = os.getenv("CYCAX_CWD")
-# files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
-#
-# logging.error(f"Json file {json_file} out dir = {out_dir}")
-# engine = EngineFreecad(Path(out_dir))
-# engine.build(Path(json_file), files_to_produce.replace(" ", ""))
