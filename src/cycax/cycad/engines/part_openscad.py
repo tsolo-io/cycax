@@ -168,15 +168,15 @@ class PartEngineOpenSCAD(PartEngine):
         else:
             center = ""
         if side in [TOP, BOTTOM]:
-            cube = "cube([{size}, {size}, {depth}] {center});".format(size=size, depth=depth, center=center)
+            cube = f"cube([{size}, {size}, {depth}] {center});"
             if rotate:
                 cube = f"rotate([0, 0, 45]){cube}"
         elif side in [FRONT, BACK]:
-            cube = "cube([{size}, {depth}, {size}] {center});".format(size=size, depth=depth, center=center)
+            cube = f"cube([{size}, {depth}, {size}] {center});"
             if rotate:
                 cube = f"rotate([0, 45, 0]){cube}"
         elif side in [LEFT, RIGHT]:
-            cube = "cube([{depth}, {size}, {size}] {center});".format(size=size, depth=depth, center=center)
+            cube = f"cube([{depth}, {size}, {size}] {center});"
             if rotate:
                 cube = f"rotate([45, 0, 0]){cube}"
         return cube
@@ -311,7 +311,7 @@ class PartEngineOpenSCAD(PartEngine):
         """
         app_bin = self.get_appimage("OpenSCAD")
         logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!! using %s", app_bin)
-        result = subprocess.run([app_bin, "-o", stl_file, scad_file], capture_output=True, text=True)
+        result = subprocess.run([app_bin, "-o", stl_file, scad_file], capture_output=True, text=True, check=False)
 
         if result.stdout:
             logging.info("OpenSCAD: %s", result.stdout)

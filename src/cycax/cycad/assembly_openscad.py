@@ -86,9 +86,7 @@ class AssemblyOpenSCAD:
             rotation = working[0]
             rotmax = working[1]
 
-        output = "translate([{x}, {y}, {z}])".format(
-            x=rotation[0] + float(position[0]), y=rotation[1] + float(position[1]), z=rotation[2] + float(position[2])
-        )
+        output = f"translate([{rotation[0] + float(position[0])}, {rotation[1] + float(position[1])}, {rotation[2] + float(position[2])}])"
         output = output + rotout
         return output
 
