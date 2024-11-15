@@ -20,6 +20,11 @@ class PartEngine:
         self.part_no = name  # TODO: Deprecate self.part_no
         self.config = dict(config or {})
         self.set_path(path)
+        self.check_part_init()
+
+    def check_part_init(self):
+        """Early hook for part classes to do custom checks."""
+        pass
 
     def set_path(self, path: Path):
         if path is None:

@@ -8,6 +8,7 @@ from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
+from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
@@ -32,10 +33,10 @@ class AssemblyEngine:
 
 class Assembly:
     """
-    This Assembly class will take multiple different cycad parts and combine them together to form complex parts.
+    The Assembly takes multiple CYCAD parts and combine them together to form a complex part.
 
     Attributes:
-        name: this is the destinct part number that the complex part will have.
+        name: The part number of the assembly.
     """
 
     def __init__(self, name: str):
@@ -78,10 +79,30 @@ class Assembly:
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
             self._part_files[part.part_no] = data_files
 
+        self.build(engine=assembler)
+
+    def build(self, engine: AssemblyEngine, part_engines: list[PartEngine]):
+        """Create the parts defined in the assembly and assemble.
+
+        Args:
+            engine: Instance of AssemblyEngine to use.
+            part_engines: The PartEngine to use on all parts.
+
+        Returns:
+            Files created by the assembly and parts.
+        """
+
+        engine._base_path = self._base_path  # HACK
+
+        for part_engine in part_engines:
+            for part in self.parts.values():
+                data_files = part.build(engine=part_engine)
+                self._part_files[part.part_no] = data_files
+
         data = self.export()
         for action in data["parts"]:
-            assembler.add(action)
-        assembler.build(self._base_path)
+            engine.add(action)
+        engine.build(self._base_path)
 
     def save(self, path: Path | None = None):
         """Save the assembly and added part to JSON files.

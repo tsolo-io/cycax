@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
+from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
@@ -487,7 +488,18 @@ class CycadPart(Location):
             msg = f"engine: {engine} is not one of Simple2D, OpenSCAD, Preview3D or FreeCAD."
             raise ValueError(msg)
 
-        return part_engine.build()
+        return self.build(part_engine)
+
+    def build(self, engine: PartEngine) -> list:
+        """Build the part with the given PartEngine.
+
+        Args:
+            engine: The instance of PartEngine to use.
+
+        Returns:
+            The list of files created when the PartEngine was called.
+        """
+        return engine.build()
 
     def get_name(self, default: str = None):
         """Return the part name, if the part has not been named generate a name.
