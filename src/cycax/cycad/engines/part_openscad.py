@@ -10,14 +10,14 @@ from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 class PartEngineOpenSCAD(PartEngine):
     """
-    Decode a JSON to a OpenSCAD file which can be rendered in openscad for 3D view.
+    Decode a JSON to a OpenSCAD file which can be rendered in OpenSCAD for 3D view.
     """
 
     dif = 0
 
     def _decode_cube(self, lookup: dict) -> str:
         """
-        This method will return the string that will have the scad for a cube.
+        This method will return the string that will have the OpenSCAD for a cube.
 
         Args:
             lookup: this will be the dictionary that contains the details about the cube.
@@ -58,7 +58,7 @@ class PartEngineOpenSCAD(PartEngine):
 
     def _decode_nut(self, lookup: dict) -> str:
         """
-        This method will return the string that will have the scad for a nut cut out.
+        This method will return the string that will have the OpenSCAD for a nut cut out.
 
         Args:
             lookup: This will be a dictionary containing the necessary information about the nut.
@@ -74,7 +74,7 @@ class PartEngineOpenSCAD(PartEngine):
 
     def _decode_sphere(self, lookup: dict) -> str:
         """
-        This method will return the string that will have the scad for a sphere cut out.
+        This method will return the string that will have the OpenSCAD for a sphere cut out.
 
         Args:
             lookup: This will be a dictionary containing the necessary information about the sphere.
@@ -227,7 +227,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return res
 
-    def build(self):
+    def build(self) -> list:
         """Create the output files for the part."""
 
         name = self.name
