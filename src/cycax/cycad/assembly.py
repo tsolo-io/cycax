@@ -79,7 +79,7 @@ class Assembly:
             data_files = part.render(engine=part_engine, engine_config=part_engine_config)
             self._part_files[part.part_no] = data_files
 
-        self.build(engine=assembler)
+        self.build(engine=assembler, part_engines=[])
 
     def build(self, engine: AssemblyEngine, part_engines: list[PartEngine]):
         """Create the parts defined in the assembly and assemble.
@@ -96,6 +96,8 @@ class Assembly:
 
         for part_engine in part_engines:
             for part in self.parts.values():
+                part_engine.new(part.part_no, self._base_path)
+                part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
                 data_files = part.build(engine=part_engine)
                 self._part_files[part.part_no] = data_files
 

@@ -554,17 +554,22 @@ def control_file(jobs_path: Path, name: str, start=False) -> bool:
 
 def main(freecad_jobs_path: Path):
     running = True
+    sleep = 1
     while running:
+        time.sleep(0.5)
         job_paths = get_next_job_path(freecad_jobs_path)
         if job_paths is None:
             running = control_file(freecad_jobs_path, "finnish")
             if running:
-                logging.warning("No jobs, going to sleep for 20s.")
-                for _ in range(10):
+                logging.warning("No jobs, going to sleep for %s s.", sleep)
+                for _ in range(sleep):
                     running = control_file(freecad_jobs_path, "quit")
                     if not running:
                         break
-                    time.sleep(2)  # TODO: Change to a GUI sleep.
+                    sleep += 1
+                    if sleep > 20:
+                        sleep = 20
+                    time.sleep(1)  # TODO: Change to a GUI sleep.
                     # This sleep needs to be very short to not lock up the GUI,
                     # but to short it adds load to the filesystem.
                     # Should rather be a QtGui type sleep. An GUI base async sleep.
@@ -577,6 +582,7 @@ def main(freecad_jobs_path: Path):
             logging.warning("Part creation took %s seconds", time.time() - _start)
             logging.warning("Job completed, removing symlink to part.")
             job_paths["job_path"].unlink()
+            sleep = 1
 
         running &= control_file(freecad_jobs_path, "quit")
 

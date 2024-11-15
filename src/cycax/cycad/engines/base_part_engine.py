@@ -13,18 +13,23 @@ class PartEngine:
         config: Engine specific configuration.
     """
 
-    def __init__(self, name, path: Path | None = None, config: dict | None = None):
+    def __init__(self, name: str = None, path: Path | None = None, config: dict | None = None):
         self._base_path = None
         self._json_file = None
         self.name = name
         self.part_no = name  # TODO: Deprecate self.part_no
         self.config = dict(config or {})
-        self.set_path(path)
+        if name:
+            self.set_path(path)
         self.check_part_init()
 
     def check_part_init(self):
         """Early hook for part classes to do custom checks."""
         pass
+
+    def new(self, name: str, path: Path):
+        self.name = name
+        self.set_path(path)
 
     def set_path(self, path: Path):
         if path is None:
@@ -33,7 +38,7 @@ class PartEngine:
             logging.error("Engine using a path that does not exists. Path=%s", path)
         self._base_path = path
         name = self.name
-        self._json_file = self._base_path / name / (name + ".json")
+        self._json_file = self._base_path / name / f"{name}.json"
         if not self._json_file.exists():
             raise FileNotFoundError(self._json_file)
 
