@@ -1,12 +1,8 @@
-#
-# This file is called directly from FreeCAD.
-# CyCAx launches the FreeCAD binary and pass in:
-# 1. The fullpath to this file.
-# 2. The path to the part JSON file.
-# 3. The path where the output files are stored.
-# 1. Open the file up in FreeCAD and run as a Macro.
-# 2. Run from command line. ./FreeCAD.AppImage img.py
-#
+"""
+This file is called directly from FreeCAD.
+
+Run from command line. ./FreeCAD.AppImage cycax_part_freecad.py
+"""
 import json
 import logging
 import os
