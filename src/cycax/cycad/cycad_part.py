@@ -13,8 +13,6 @@ from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
-# from cycax.cycad.assembly import Assembly
-
 
 class CycadPart(Location):
     """Define a Part in CyCAd.

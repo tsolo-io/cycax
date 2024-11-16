@@ -76,8 +76,8 @@ class Assembly:
 
         engine.set_path(self._base_path)
 
-        completed_parts = []
         for part_engine in part_engines:
+            completed_parts = []
             for part in self.parts.values():
                 if part.part_no not in completed_parts:
                     part_engine.new(part.part_no, self._base_path)
