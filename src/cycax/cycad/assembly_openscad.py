@@ -1,8 +1,10 @@
 import logging
 from pathlib import Path
 
+from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 
-class AssemblyOpenSCAD:
+
+class AssemblyOpenSCAD(AssemblyEngine):
     """Assemble the parts into an OpenSCAD model.
 
     Attributes:

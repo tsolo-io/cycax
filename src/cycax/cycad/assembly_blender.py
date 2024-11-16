@@ -5,8 +5,10 @@ from pathlib import Path
 import bpy
 import matplotlib.colors as mcolors
 
+from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 
-class AssemblyBlender:
+
+class AssemblyBlender(AssemblyEngine):
     """Assemble the parts into an Blender model.
 
     Args:

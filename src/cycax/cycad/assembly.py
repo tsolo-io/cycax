@@ -8,27 +8,9 @@ from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
+from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
-
-
-class AssemblyEngine:
-    # TODO: Move to own file to avoid circular dependency
-    # TODO: Make this an ABC.
-    # TODO: Update assembly_blender and assembly_scad to inherit from here.
-
-    def __init__(self, name: str, config: dict | None = None) -> None:
-        self.name = name
-        self._base_path = Path(".")
-        self._config = {} if config is None else config
-
-    def add(self, part_operation: dict):
-        """Add the part to the assembly."""
-        pass
-
-    def build(self, path: Path | None = None):
-        """Create the assembly of the parts added."""
-        pass
 
 
 class Assembly:
@@ -92,19 +74,24 @@ class Assembly:
             Files created by the assembly and parts.
         """
 
-        engine._base_path = self._base_path  # HACK
+        engine.set_path(self._base_path)
 
+        completed_parts = []
         for part_engine in part_engines:
             for part in self.parts.values():
-                part_engine.new(part.part_no, self._base_path)
-                part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
-                data_files = part.build(engine=part_engine)
-                self._part_files[part.part_no] = data_files
+                if part.part_no not in completed_parts:
+                    part_engine.new(part.part_no, self._base_path)
+                    part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
+                    data_files = part.build(engine=part_engine)
+                    self._part_files[part.part_no] = data_files
+                    completed_parts.append(part.part_no)
+                else:
+                    logging.warning("The part %s is already processed", part.part_no)
 
         data = self.export()
         for action in data["parts"]:
             engine.add(action)
-        engine.build(self._base_path)
+        engine.build()
 
     def save(self, path: Path | None = None):
         """Save the assembly and added part to JSON files.

@@ -13,6 +13,8 @@ from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
+# from cycax.cycad.assembly import Assembly
+
 
 class CycadPart(Location):
     """Define a Part in CyCAd.
@@ -42,6 +44,7 @@ class CycadPart(Location):
         z_size: float,
         polygon: str,
         colour: str = "orange",
+        assembly=None,
     ):
         super().__init__(x, y, z, side)
         self._name: str = ""
@@ -74,7 +77,7 @@ class CycadPart(Location):
         self.labels: set[str] = set()
         self._files = {}
         self.definition()
-        self.assembly = None
+        self.assembly = assembly
 
     def definition(self):
         """This method will be ovedridden to do a calculation."""
