@@ -12,6 +12,7 @@ from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
+from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 
 
 class CycadPart(Location):
@@ -27,6 +28,7 @@ class CycadPart(Location):
         part_no : The unique name that will be given to a type of parts.
         polygon: currently only cube available.
         colour: colour of the part.
+        assembly: The assembly this part is a component of.
 
     """
 
@@ -42,6 +44,7 @@ class CycadPart(Location):
         z_size: float,
         polygon: str,
         colour: str = "orange",
+        assembly: AssemblyEngine = None,
     ):
         super().__init__(x, y, z, side)
         self._name: str = ""
@@ -74,7 +77,9 @@ class CycadPart(Location):
         self.labels: set[str] = set()
         self._files = {}
         self.definition()
-        self.assembly = None
+        self.assembly = assembly
+        if assembly:
+            assembly.add(self)
 
     def definition(self):
         """This method will be ovedridden to do a calculation."""
