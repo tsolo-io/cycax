@@ -1,0 +1,37 @@
+---
+
+name: Build
+run-name: Build process for CyCAx
+on: [push]
+
+jobs:
+  build:
+    runs-on: "ubuntu-22.04"
+    steps:
+      - name: Checkout repository code
+        uses: https://gitea.com/actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          # cache: 'pip'
+      - name: Make docs and upload
+        uses: https://gitea.tu.tsolo.net/Tsolo/make-docs-upload-action@main
+#      - name: Install Hatch
+#        run: pip install hatch
+#      - name: Package with Python
+#        run: make build-python
+#      - name: Get packaged versions
+#        run: |
+#          echo "GIT REF: ${GITHUB_REF}"
+#          LOCAL_VERSION=$(hatch version)
+#          echo "LOCAL_VERSION=|${LOCAL_VERSION}|"
+#          echo "LOCAL_VERSION=|${LOCAL_VERSION}|" >> $GITHUB_ENV
+#          PACKAGED_VERSIONS="$(pip index versions red_ui_react --pre --index-url https://gitea.tu.tsolo.net/api/packages/tsolo/pypi/simple | grep 'Available versions:' | tr ', ' '|')"
+#          echo "PACKAGED_VERSIONS=${PACKAGED_VERSIONS}|"
+#          echo "PACKAGED_VERSIONS=${PACKAGED_VERSIONS}|" >> $GITHUB_ENV
+#      - name: Publish Python package
+#        run: |
+#          hatch --verbose publish -r https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi -u ${{ vars.REGISTRYUSER }} -a ${{ secrets.REGISTRYPASSWORD }}
+#          pip index versions red_ui_react --index-url https://gitea.tu.tsolo.net/api/packages/tsolo/pypi/simple
+#        if: ${{ (startsWith(env.GITHUB_REF, 'refs/heads/feature/') || env.GITHUB_REF == 'refs/heads/main') && ! contains(env.PACKAGED_VERSIONS, env.LOCAL_VERSION) }}

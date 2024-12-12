@@ -558,7 +558,7 @@ def main(freecad_jobs_path: Path):
                 time.sleep(0.1)
         else:
             logging.info("Got a job %s", job_path)
-            files_to_produce = "PNG,STL"
+            files_to_produce = "PNG,STL,DXF"
             _start = time.time()
             engine = EngineFreecad(job_path["part_path"])
             engine.build(job_path["part_json"], files_to_produce.replace(" ", ""))
