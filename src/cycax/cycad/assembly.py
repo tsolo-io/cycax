@@ -69,9 +69,6 @@ class Assembly:
         Args:
             engine: Instance of AssemblyEngine to use.
             part_engines: The PartEngine to use on all parts.
-
-        Returns:
-            Files created by the assembly and parts.
         """
 
         engine.set_path(self._base_path)
