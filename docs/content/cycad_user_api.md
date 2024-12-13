@@ -1,7 +1,7 @@
 # User API
 
 ## Parts
-::: cycax.cycad.cycad_part.CycadPart
+::: cycax.cycad.CycadPart
 
 ## Assemblies
 ::: cycax.cycad.assembly

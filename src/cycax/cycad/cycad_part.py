@@ -103,6 +103,7 @@ class CycadPart(Location):
 
     def add_labels(self, label_names: str):
         """This method adds a label:
+
         Args:
             label_names: add these labels.
         """
@@ -122,6 +123,7 @@ class CycadPart(Location):
     ):
         """
         If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+
         Args:
             x: Position of feature on X-axis.
             y: Position of feature on Y-axis.
@@ -281,8 +283,6 @@ class CycadPart(Location):
             x: the amount the object should be moved by along the x axis.
             y: the amount the object should be moved by along the y axis.
             z: the amount the object should be moved by along the z axis
-
-
         """
 
         x_size = self.x_max - self.x_min
@@ -334,8 +334,6 @@ class CycadPart(Location):
 
         Args:
             hole: hole to be inserted.
-
-
         """
 
         if self.position[0] != 0:
@@ -516,7 +514,7 @@ class CycadPart(Location):
 
         Args:
             default: A possible name for this part if the part has not been named.
-                And if it is not being used by another part.
+                     And if it is not being used by another part.
         """
 
         if not self._name:
@@ -565,8 +563,7 @@ class CycadPart(Location):
             back: Side to lign the back up with.
             top: Side to lign the top up with.
             bottom: Side to lign the bottom up with
-            subtract: if subtrace is set to True
-                it will transfer the holes from one part to the other.
+            subtract: When True transfer the holes from one part to the other.
 
         Raises:
             ValueError: When both left and right side is give.
@@ -608,11 +605,12 @@ class CycadPart(Location):
                 self.assembly.subtract(other_side, self)
 
     def rotate(self, actions: str):
-        """
-        This can be used to rotate a part in the assembly as follows:
-        CycadPart.rotate("xxyzyy")
-        This is: 2 rotate_freeze_front, rotate_freeze_left, rotate_freeze_top, 2 rotate_freeze_left.
-        Where rotate_freeze_ results in one 90degrees counter clock wise rotations around the specified axis.
+        """Rotate the part several times.
+
+        Example: `CycadPart.rotate("xxyzyy")`
+        is the same as two `rotate_freeze_front`, `rotate_freeze_left`, `rotate_freeze_top`, and two `rotate_freeze_left`.
+        Where rotate_freeze_<side> results in one 90degrees counter clock wise rotations on the side.
+
         Args:
             actions: This is a string specifying rotations.
 
