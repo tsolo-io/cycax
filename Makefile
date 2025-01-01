@@ -1,31 +1,36 @@
 .ONESHELL: # Run all the commands in the same shell
 .PHONY: docs
+.DEFAULT_GOAL := help
 
-build:
+help:
+	@echo "Help"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+build:  ## Build a test version of CyCAx
 	hatch build
 
-test:
+test: ## Run unit tests
 	hatch run test-not-slow
 
-test-all:
+test-all: ## Run all the tests
 	hatch run test
 
 test-ci:
 	hatch run cov
 
-format:
+format:  ## Format the code
 	hatch run lint:fmt
 
-spelling:
+spelling:  ## Show spelling mistakes in the code
 	hatch run lint:spell
 
-docs:
+docs:  ## Create documentation
 	hatch run docs:build
 
-docs-serve:
+docs-serve:  ## Run a server for documentation
 	hatch run docs:serve
 
-docs-open:
+docs-open:  ## Open the documentation
 	xdg-open ./docs/site/index.html
 
 parts:
