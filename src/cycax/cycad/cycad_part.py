@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
+from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
@@ -12,7 +13,6 @@ from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
-from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 
 
 class CycadPart(Location):
@@ -55,7 +55,7 @@ class CycadPart(Location):
         self.front = FrontSide(self)
         self.back = BackSide(self)
 
-        self._base_path = Path(".")
+        self._base_path = None
         self.part_no = part_no.strip().replace("-", "_").lower()
         self.x_size = x_size
         self.y_size = y_size
@@ -72,7 +72,7 @@ class CycadPart(Location):
         self.position = [0, 0, 0]
         self.rotation = []
         self.final_location = False
-        self.polygon = polygon
+        self.initial_polygon = polygon
         self.colour = colour
         self.labels: set[str] = set()
         self._files = {}
@@ -80,6 +80,7 @@ class CycadPart(Location):
         self.assembly = assembly
         if assembly:
             assembly.add(self)
+            # Assembly will set: part._base_path == assembly._base_path
 
     def definition(self):
         """This method will be ovedridden to do a calculation."""
@@ -362,53 +363,65 @@ class CycadPart(Location):
         self.features.append(hole)
         self.move_holes.append(hole)
 
+    @property
+    def path(self):
+        if self._base_path is None:
+            raise ValueError("BasePath has not been defined.")
+        if not self._base_path.exists():
+            raise ValueError("BasePath does not exists.")
+        return self._base_path / self.part_no
+
     def save(self, path: Path | None = None):
         """
-        This takes the provided part and will create its dictionary and export it to a JSON
+        Save the part specification to a JSON file.
 
         Args:
             path: Base path for storing part information.
                 A directory with the part_no will be created in this path.
         """
         if path is None:
-            path = Path(".")
-        if not path.exists():
+            if self._base_path is None:
+                # If no path is given and we do not have a path set then use the local directory.
+                path = Path(".")
+        elif not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
+        else:
+            self._base_path = path
 
-        self._base_path = path
-        dir_name = path / self.part_no
+        dir_name = self.path
         dir_name.mkdir(exist_ok=True)
         file_path = dir_name / f"{self.part_no}.json"
-        json.dump(self.export(), file_path.open("w+"))
+        file_path.write_text(json.dumps(self.export()))
 
     def export(self) -> dict:
         """
-        This method will take the values stored within the part and export it to a dict so that it can be decoded.
+        A static representation of the Part, suitable to be saved as JSON.
+
+        The export contains:
+            name: The part number.
+            features: A list of features. Each feature is a dictionary with a type and feature specific specifications.
 
         Returns:
-            dict : The dictionary of the part.
+            Static representation of the part.
         """
 
-        dict_piece = {
-            "name": self.polygon,
-            "type": "add",
-            "side": self.side,
-            "x": self.x,
-            "y": self.y,
-            "z": self.z,
-            "x_size": self.x_size,
-            "y_size": self.y_size,
-            "z_size": self.z_size,
-            "center": False,
-        }
-
-        list_part = []
-
-        list_part.append(dict_piece)
+        list_part = [
+            {
+                "name": self.initial_polygon,
+                "type": "add",
+                "side": self.side,
+                "x": self.x,
+                "y": self.y,
+                "z": self.z,
+                "x_size": self.x_size,
+                "y_size": self.y_size,
+                "z_size": self.z_size,
+                "center": False,
+            }
+        ]
         for item in self.features:
-            ret = item.export()
-            list_part.append(ret)
+            list_part.append(item.export())
         dict_out = {}
         dict_out["name"] = self.part_no
         dict_out["features"] = list_part
@@ -493,8 +506,8 @@ class CycadPart(Location):
 
         return self.build(part_engine)
 
-    def build(self, engine: PartEngine) -> list:
-        """Build the part with the given PartEngine.
+    def create(self, engine: PartEngine) -> list:
+        """Create the part in the given PartEngine.
 
         Args:
             engine: The instance of PartEngine to use.
@@ -502,7 +515,20 @@ class CycadPart(Location):
         Returns:
             The list of files created when the PartEngine was called.
         """
-        return engine.build()
+        return engine.create(self)
+
+    def build(self, engine: PartEngine) -> list:
+        """Build the part with the given PartEngine.
+
+        The same as calling engine.build(part).
+
+        Args:
+            engine: The instance of PartEngine to use.
+
+        Returns:
+            The list of files created when the PartEngine was called.
+        """
+        return engine.build(self)
 
     def get_name(self, default: str = None):
         """Return the part name, if the part has not been named generate a name.

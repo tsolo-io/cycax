@@ -15,7 +15,7 @@ class PartEngineLLL(PartEngine):
         """Early hook for part classes to do custom checks."""
         self.config["freecad_jobs_location"]
 
-    def build(self) -> list:
+    def build(self, part) -> list:
         """Create the output files for the part."""
 
         part_path = self._base_path / self.name

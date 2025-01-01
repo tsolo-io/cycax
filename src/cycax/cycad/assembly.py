@@ -63,7 +63,7 @@ class Assembly:
 
         self.build(engine=assembler, part_engines=[])
 
-    def build(self, engine: AssemblyEngine, part_engines: list[PartEngine]):
+    def build(self, engine: AssemblyEngine | None = None, part_engines: list[PartEngine] | None = None):
         """Create the parts defined in the assembly and assemble.
 
         Args:
@@ -71,24 +71,40 @@ class Assembly:
             part_engines: The PartEngine to use on all parts.
         """
 
-        engine.set_path(self._base_path)
+        if engine is not None:
+            engine.set_path(self._base_path)
+        else:
+            logging.warning("No assembly engine specified. No assembly output.")
 
-        for part_engine in part_engines:
-            completed_parts = []
+        if part_engines is not None:
+            unique_parts = {}
+            # Create the Parts.
             for part in self.parts.values():
-                if part.part_no not in completed_parts:
+                if part.part_no not in unique_parts:
+                    unique_parts[part.part_no] = part
+                    for part_engine in part_engines:
+                        part_engine.create(part)
+                else:
+                    logging.warning("The part %s is already processed", part.part_no)
+
+            # For asyncrounouse build environments, e.g. CyCAx Server and LinkLocation
+            # Creation on the Part in the Engine will start the build in the background.
+            # The build step is a collect/download step.
+            # Build the parts.
+            for part in unique_parts.values():
+                for part_engine in part_engines:
                     part_engine.new(part.part_no, self._base_path)
                     part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
                     data_files = part.build(engine=part_engine)
                     self._part_files[part.part_no] = data_files
-                    completed_parts.append(part.part_no)
-                else:
-                    logging.warning("The part %s is already processed", part.part_no)
+        else:
+            logging.warning("No Part engines given. No Parts created.")
 
-        data = self.export()
-        for action in data["parts"]:
-            engine.add(action)
-        engine.build()
+        if engine is not None:
+            data = self.export()
+            for action in data["parts"]:
+                engine.add(action)
+            engine.build()
 
     def save(self, path: Path | None = None):
         """Save the assembly and added part to JSON files.
@@ -139,7 +155,7 @@ class Assembly:
     def add(self, part: CycadPart, suggested_name: str = None) -> str:
         """This adds a part into the assembly.
 
-        Once the part has been added to the assembler it can no longer be moved around or eddited.
+        Once the part has been added to the assembler it can no longer be moved around or edited.
 
         Args:
             part: this in the part that will be added to the assembly.
@@ -150,6 +166,7 @@ class Assembly:
         """
 
         part.assembly = self
+        part._base_path = self._base_path
         part_name = part.get_name(suggested_name)
         if part_name in self.parts:
             msg = f"Part with name/id {part_name} already in parts catalogue."

@@ -227,7 +227,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return res
 
-    def build(self) -> list:
+    def build(self, part) -> list:
         """Create the output files for the part."""
 
         name = self.name

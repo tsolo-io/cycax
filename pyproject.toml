@@ -82,7 +82,7 @@ style = [
 spell = "typos {args:.}"
 fmt = [
   "black {args:.}",
-  "ruff --fix {args:.}",
+  "ruff check --fix {args:.}",
   "style",
 ]
 all = [
