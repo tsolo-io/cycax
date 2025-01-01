@@ -1,8 +1,6 @@
 from pathlib import Path
 
 from cycax.cycad import Assembly, SheetMetal
-from cycax.cycad.location import LEFT, RIGHT
-from cycax.parts.fan import Fan80x80x25
 
 
 def dial_a_box(working_directory, length=100, width=100, height=100):
@@ -15,13 +13,13 @@ def dial_a_box(working_directory, length=100, width=100, height=100):
     # Create the parts, the sides of the box, and add to assembly
     base_part = SheetMetal(part_no="base_part", x_size=length, y_size=width, z_size=2)
     assembly.add(base_part)
-    left_part = SheetMetal(part_no="left_part", x_size=length, y_size=width - 4, z_size=2)
+    left_part = SheetMetal(part_no="left_part", x_size=width, y_size=height - 4, z_size=2)
     assembly.add(left_part)
-    right_part = SheetMetal(part_no="right_part", x_size=length, y_size=width - 4, z_size=2)
+    right_part = SheetMetal(part_no="right_part", x_size=width, y_size=height - 4, z_size=2)
     assembly.add(right_part)
-    front_part = SheetMetal(part_no="front_part", x_size=length - 4, y_size=width - 4, z_size=2)
+    front_part = SheetMetal(part_no="front_part", x_size=length - 4, y_size=height - 4, z_size=2)
     assembly.add(front_part)
-    back_part = SheetMetal(part_no="back_part", x_size=length - 4, y_size=width - 4, z_size=2)
+    back_part = SheetMetal(part_no="back_part", x_size=length - 4, y_size=height - 4, z_size=2)
     assembly.add(back_part)
 
     # Rotate the parts

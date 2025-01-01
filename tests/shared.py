@@ -22,6 +22,7 @@ def hex_code_check(
     ext: str,
     hex_code: str | None = None,
     hex_codes: list[str] | None = None,
+    *,
     return_hex=False,
     equal=True,
 ) -> str:

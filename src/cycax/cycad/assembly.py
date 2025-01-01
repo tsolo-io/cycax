@@ -152,7 +152,7 @@ class Assembly:
             msg = f"merging {part1} and {part2} but they are not of the same size."
             raise ValueError(msg)
 
-    def add(self, part: CycadPart, suggested_name: str = None) -> str:
+    def add(self, part: CycadPart, suggested_name: str | None = None) -> str:
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be moved around or edited.

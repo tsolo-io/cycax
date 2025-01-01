@@ -350,15 +350,15 @@ class CycadPart(Location):
             rot = working_rotate.pop()
             if rot["axis"] == "x":
                 rotation = hole.swap_yz(3, rotation)
-            if rot["axis"] == "y":
+            elif rot["axis"] == "y":
                 rotation = hole.swap_xz(3, rotation)
-            if rot["axis"] == "z":
+            elif rot["axis"] == "z":
                 rotation = hole.swap_xy(3, rotation)
-        if hole.side == TOP or hole.side == BOTTOM:
+        if hole.side in (TOP, BOTTOM):
             hole.depth = self.z_size
-        if hole.side == LEFT or hole.side == RIGHT:
+        elif hole.side in (LEFT, RIGHT):
             hole.depth = self.x_size
-        if hole.side == FRONT or hole.side == BACK:
+        elif hole.side in (FRONT, BACK):
             hole.depth = self.y_size
         self.features.append(hole)
         self.move_holes.append(hole)
@@ -366,9 +366,11 @@ class CycadPart(Location):
     @property
     def path(self):
         if self._base_path is None:
-            raise ValueError("BasePath has not been defined.")
+            msg = "BasePath has not been defined."
+            raise ValueError(msg)
         if not self._base_path.exists():
-            raise ValueError("BasePath does not exists.")
+            msg = "BasePath does not exists."
+            raise ValueError(msg)
         return self._base_path / self.part_no
 
     def save(self, path: Path | None = None):

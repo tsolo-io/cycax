@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from cycax.cycad import Assembly, Cuboid, Print3D, SheetMetal
+from cycax.cycad import Assembly, Print3D, SheetMetal
 
 LEFT = "LEFT"
 RIGHT = "RIGHT"
