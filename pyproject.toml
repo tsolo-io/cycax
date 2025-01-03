@@ -21,7 +21,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "httpx",
+  "tenacity"
+]
 
 [project.urls]
 Documentation = "https://github.com/tsolo-dev/cycax#readme"
@@ -34,9 +37,10 @@ path = "src/cycax/__about__.py"
 [tool.hatch.envs.default]
 dependencies = [
   "coverage[toml]>=6.5",
-  "pytest",
   "bpy",
-  "matplotlib"
+  "matplotlib",
+  "httpx",
+  "tenacity"
 ]
 [tool.hatch.envs.default.scripts]
 test-not-slow = "pytest -m \"not slow\" --exitfirst {args:tests}"
