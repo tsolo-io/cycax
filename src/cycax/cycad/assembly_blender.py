@@ -120,7 +120,10 @@ class AssemblyBlender(AssemblyEngine):
         if path is not None:
             self._base_path = path
 
+        for screen_area in bpy.context.screen.areas:
+            if screen_area.type == "VIEW_3D":
+                # Set the clip depth from 1000 (1m) to 50m
+                screen_area.spaces.active.clip_end = 50000
         logging.info("Saving the .blend file.")
         save_file = str(self._base_path / f"{self.name}.blend")
         bpy.ops.wm.save_as_mainfile(filepath=save_file)
-        # bpy.ops.wm.save_mainfile()
