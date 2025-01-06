@@ -15,14 +15,16 @@ class PartEngineLLL(PartEngine):
         """Early hook for part classes to do custom checks."""
         self.config["freecad_jobs_location"]
 
-    def build(self) -> list:
+    def create(self, part):
+        part.save()
+
+    def build(self, part) -> list:
         """Create the output files for the part."""
 
-        part_path = self._base_path / self.name
         timestamp = int(time.time())
         symlink_part_path = self.config["freecad_jobs_location"] / f"{timestamp}.{self.name}"
 
-        Path(symlink_part_path).symlink_to(part_path)
+        Path(symlink_part_path).symlink_to(part.path)
 
         for _ in range(29):
             if symlink_part_path.exists():

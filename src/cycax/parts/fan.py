@@ -117,7 +117,6 @@ class Fan(Cuboid):
 
 class Fan80x80(Fan):
     def __init__(self, *, thickness: int, side_pad: int = 0, internal: bool = False):
-        print(f"Make FAN {thickness=} {internal=}")
         super().__init__(
             size=80,
             thickness=thickness,
@@ -130,10 +129,10 @@ class Fan80x80(Fan):
 
 
 class Fan80x80x15(Fan80x80):
-    def __init__(self, internal: bool = False):
+    def __init__(self, *, internal: bool = False):
         super().__init__(thickness=15, internal=internal)
 
 
 class Fan80x80x25(Fan80x80):
-    def __init__(self, side_pad: int = 0, internal: bool = False):
+    def __init__(self, side_pad: int = 0, *, internal: bool = False):
         super().__init__(thickness=25, side_pad=side_pad, internal=internal)

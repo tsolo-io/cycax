@@ -3,6 +3,7 @@ This file is called directly from FreeCAD.
 
 Run from command line. ./FreeCAD.AppImage cycax_part_freecad.py
 """
+
 import json
 import logging
 import os
@@ -154,7 +155,7 @@ class EngineFreecad:
         Accounts for when a cube is not going to penetrate the surface but rather sit above is.
 
         Args:
-            features: This is the dictionary that contains the deatails of where the cube must be placed.
+            features: This is the dictionary that contains the details of where the cube must be placed.
             pos_vec(list): where part is positioned.
 
         Returns:
@@ -188,7 +189,7 @@ class EngineFreecad:
         """This method will be used for cutting a cylindrical hole into a surface.
 
         Args:
-            feature: This is the dictionary that contains the deatails of where the hole must be placed and its details.
+            feature: This is the dictionary that contains the details of where the hole must be placed and its details.
         """
         pos_vec = Vector(0, 0, 0)
         if feature is not None:
@@ -558,7 +559,7 @@ def main(freecad_jobs_path: Path):
                 time.sleep(0.1)
         else:
             logging.info("Got a job %s", job_path)
-            files_to_produce = "PNG,STL"
+            files_to_produce = "PNG,STL,DXF"
             _start = time.time()
             engine = EngineFreecad(job_path["part_path"])
             engine.build(job_path["part_json"], files_to_produce.replace(" ", ""))
@@ -583,7 +584,7 @@ if not freecad_jobs_path.is_dir():
 control_file(freecad_jobs_path, "quit", start=True)
 try:
     main(freecad_jobs_path)
-except Exception as error:
+except Exception:
     logging.exception("Unexpected")
 logging.info("End of application. Normal termination.")
 QtGui.QApplication.quit()

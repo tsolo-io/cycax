@@ -40,5 +40,8 @@ def test_nut(tmp_path: Path):
         tmp_path=tmp_path,
         filename="testing_nut",
         ext=".stl",
-        hex_code="fdf00b4b0a62fbb105624bda0a7e3c870010f367515d7f7c6397c677a12fae86",
+        hex_codes=(
+            "fdf00b4b0a62fbb105624bda0a7e3c870010f367515d7f7c6397c677a12fae86",
+            "6fc6198e2798017a6c0480fe539b4bad0760c3e932c16c9aa96a6d240c7ba917",
+        ),
     )

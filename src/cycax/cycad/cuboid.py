@@ -1,9 +1,9 @@
+from cycax.cycad.assembly import Assembly
 from cycax.cycad.cycad_part import CycadPart
 
 
 class Cuboid(CycadPart):
     """
-    This class will contain information on the 3D printed part.
     This method will initialize a Cuboid at the desired location.
 
     Args:
@@ -12,10 +12,12 @@ class Cuboid(CycadPart):
         z_size : The size of z.
         part_no : The unique name that will be given to a type of parts.
         colour: This will specify the colour of the object and can be overwritten from red.
-
+        assembly: The assembly the part belongs to.
     """
 
-    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, colour: str = "pink"):
+    def __init__(
+        self, part_no: str, x_size: float, y_size: float, z_size: float, assembly: Assembly, colour: str = "pink"
+    ):
         super().__init__(
             x=0,
             y=0,
@@ -25,6 +27,7 @@ class Cuboid(CycadPart):
             x_size=x_size,
             y_size=y_size,
             z_size=z_size,
+            assembly=assembly,
             colour=colour,
             polygon="cube",
         )  # initializes the cuboid to (0,0,0)
@@ -32,7 +35,7 @@ class Cuboid(CycadPart):
 
 class SheetMetal(Cuboid):
     """
-    This class will initialize a sheetmetal part at the  location (0,0,0).
+    This class will initialize a sheetmetal part at the location (0,0,0).
 
     Args:
         x_size : The size of x.
@@ -47,7 +50,7 @@ class SheetMetal(Cuboid):
 
 class Print3D(Cuboid):
     """
-    This class will initialize a 3DPrint part at the  location (0,0,0).
+    This class will initialize a 3D Print part at the location (0,0,0).
 
     Args:
         x_size : The size of x.

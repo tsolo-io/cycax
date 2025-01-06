@@ -173,19 +173,16 @@ def get_hashes(name: str, tmp_path: Path, assembly, *, slow: bool = False) -> li
         for filename in assemb_path.glob("*/*.stl"):
             pname = filename.name.split("_")[-1]
             file_hash = get_file_hash(filename)
-            print(f"{pname=} {file_hash=} {filename=}")
             hash_map[pname] = file_hash
     else:
         for filename in assemb_path.glob("*/*.json"):
             pname = filename.name.split("_")[-1]
             file_hash = get_cycax_json_hash(filename)
-            print(f"{pname=} {file_hash=} {filename=}")
             hash_map[pname] = file_hash
 
     hash_list = []
     for key in sorted(hash_map.keys()):
         hash_list.append((key, hash_map[key]))
-    print(assemb_path, hash_list)
     return hash_list
 
 
@@ -261,6 +258,6 @@ def build_test_case(*, tmp_path, slow: bool):
                 assembly.subtract(side_left.right, conn_front_bottom_left)
 
         hashes_test = get_hashes(name, tmp_path, assembly, slow=slow)
-        print("Compare  REF:", hashes_ref)
-        print("Compare TEST:", hashes_test)
-        assert hashes_ref == hashes_test, "Compare the hashes for the two assemblies."
+        assert (
+            hashes_ref == hashes_test
+        ), f"Compare the hashes for the two assemblies: REF({hashes_ref}) != TEST({hashes_test})"

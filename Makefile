@@ -7,8 +7,6 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 build:  ## Build a test version of CyCAx
-	find dist -type f | sort | tail -n+5 | xargs rm -f
-	hatch version "$(shell hatch version | cut -d. -f1,2).$(shell date +%s)"
 	hatch build
 
 test: ## Run unit tests

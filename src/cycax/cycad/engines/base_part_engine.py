@@ -57,7 +57,10 @@ class PartEngine:
                 appimage = appimg
         return appimage
 
-    def build(self):
+    def create(self, part):
+        pass
+
+    def build(self, part):
         msg = "The build method needs to be implemented for this engine."
         raise NotImplementedError(msg)
 

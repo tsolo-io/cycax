@@ -40,7 +40,10 @@ def test_edge(tmp_path: Path):
         tmp_path=tmp_path,
         filename="sheet_round",
         ext=".stl",
-        hex_code="cf0f9c6a51c52f13977b6338c809a8ccd37643b5b937367cf0f329a5a02705cd",
+        hex_codes=[
+            "cf0f9c6a51c52f13977b6338c809a8ccd37643b5b937367cf0f329a5a02705cd",
+            "31e8b431facaf2b32a2a130a086d5d44cfecf14da531b7488f8c5c2d6484a4fb",
+        ],
     )
 
     hex_code_check(
