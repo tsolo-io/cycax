@@ -65,6 +65,8 @@ class PartEngineServer(PartEngine):
         """Create the output files for the part."""
 
         logging.error("PartServer.build(%s)", part.part_no)
+        if part.part_no not in self.jobs:
+            self.create(part)
         logging.error(self.jobs[part.part_no])
         job_id = self.jobs[part.part_no]["id"]
         job = self.server_get_job(job_id)

@@ -531,7 +531,7 @@ def get_next_job_path(jobs_path) -> dict:
     return None
 
 
-def control_file(jobs_path: Path, name: str, start=False) -> bool:
+def control_file(jobs_path: Path, name: str, *, start=False) -> bool:
     if name in ("quit", "finnish"):
         quit_file = jobs_path / f".{name}"
     else:
