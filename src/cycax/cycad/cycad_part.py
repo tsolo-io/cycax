@@ -127,13 +127,10 @@ class CycadPart(Location):
 
         """
         side_obj = self.get_side(side)
-        sides = (side, side_obj.opposite.name)
         new_holes = []
         for feature in self.features:
             if feature.name not in ("hole",):
                 continue
-            use = feature.side in sides
-            logging.error("make_counterbore side=%s, %s %s", side, feature, use)
             if feature.side == side:
                 _hole = Holes(side=feature.side, x=feature.x, y=feature.y, z=feature.z, diameter=diameter, depth=depth)
                 new_holes.append(_hole)
