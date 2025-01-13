@@ -144,22 +144,6 @@ class CycadPart(Location):
                     z = self.z_size - depth
                 _hole = Holes(side=feature.side, x=feature.x, y=feature.y, z=z, diameter=diameter, depth=depth)
                 new_holes.append(_hole)
-            # if feature.side == side:
-            #     _hole = Holes(side=side,
-            #             x=feature.x,
-            #             # y=feature.y,
-            #             y=self.y_size-feature.y,
-            #             z=feature.z,
-            #             diameter=diameter, depth=depth)
-            #     new_holes.append(_hole)
-            # elif feature.side == side_obj.opposite.name:
-            #     _hole = Holes(side=side,
-            #             x=feature.x,
-            #             y=self.y_size-feature.y,
-            #             z=self.z_size,
-            #             diameter=diameter,
-            #             depth=depth)
-            #     new_holes.append(_hole)
         self.features.extend(new_holes)
 
     def make_counterdrill(self, side: str, diameter: float, depth: float, angle: float = 90):
