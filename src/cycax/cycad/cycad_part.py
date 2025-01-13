@@ -111,6 +111,66 @@ class CycadPart(Location):
         for label in label_names:
             self.labels.add(str(label).lower())
 
+    def make_countersinc(self, side: str, diameter: float, angle: float = 90):
+        """Countersinc all holes on the side.
+
+        This includes holes drilled from this and opposite side.
+
+        """
+        # A Counter drill with no bole.
+        self.make_counterdrill(side=side, diameter=diameter, depth=0, angle=angle)
+
+    def make_counterbore(self, side: str, diameter: float, depth: float):
+        """Counterbore all holes on the side.
+
+        This includes holes drilled from this and opposite side.
+
+        """
+        side_obj = self.get_side(side)
+        sides = (side, side_obj.opposite.name)
+        new_holes = []
+        for feature in self.features:
+            if feature.name not in ("hole",):
+                continue
+            use = feature.side in sides
+            logging.error("make_counterbore side=%s, %s %s", side, feature, use)
+            if feature.side == side:
+                _hole = Holes(side=feature.side, x=feature.x, y=feature.y, z=feature.z, diameter=diameter, depth=depth)
+                new_holes.append(_hole)
+            elif feature.side == side_obj.opposite.name:
+                if side == BOTTOM:
+                    z = depth
+                else:
+                    z = self.z_size - depth
+                _hole = Holes(side=feature.side, x=feature.x, y=feature.y, z=z, diameter=diameter, depth=depth)
+                new_holes.append(_hole)
+            # if feature.side == side:
+            #     _hole = Holes(side=side,
+            #             x=feature.x,
+            #             # y=feature.y,
+            #             y=self.y_size-feature.y,
+            #             z=feature.z,
+            #             diameter=diameter, depth=depth)
+            #     new_holes.append(_hole)
+            # elif feature.side == side_obj.opposite.name:
+            #     _hole = Holes(side=side,
+            #             x=feature.x,
+            #             y=self.y_size-feature.y,
+            #             z=self.z_size,
+            #             diameter=diameter,
+            #             depth=depth)
+            #     new_holes.append(_hole)
+        self.features.extend(new_holes)
+
+    def make_counterdrill(self, side: str, diameter: float, depth: float, angle: float = 90):
+        """Counter drill is a combination of counterbore and countersinc.
+
+        A counterbore hole that was countersunc.
+        """
+
+        # TODO: Require cone shape cut.
+        raise NotImplementedError("The adding of counterdrill to a side has not been implemented.")
+
     def make_hole(
         self,
         x: float,
