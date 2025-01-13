@@ -19,6 +19,10 @@ class AssemblyBlender(AssemblyEngine):
         self.name = name
         self._base_path = Path(".")
         self.parts = {}
+        objs = bpy.data.objects
+        if "Cube" in objs:
+            # Remove the small Cube that is on all new models.
+            objs.remove(objs["Cube"], do_unlink=True)
 
     def _fetch_part(self, part: str):
         """Retrieves the part that will be imported and possitioned.

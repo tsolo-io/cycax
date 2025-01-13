@@ -16,7 +16,13 @@ class Cuboid(CycadPart):
     """
 
     def __init__(
-        self, part_no: str, x_size: float, y_size: float, z_size: float, assembly: Assembly, colour: str = "pink"
+        self,
+        part_no: str,
+        x_size: float,
+        y_size: float,
+        z_size: float,
+        assembly: Assembly | None = None,
+        colour: str = "pink",
     ):
         super().__init__(
             x=0,
@@ -42,10 +48,13 @@ class SheetMetal(Cuboid):
         y_size : The size of y.
         z_size : The size of z.
         part_no : The unique name that will be given to a type of parts.
+        assembly: The assembly the part belongs to.
     """
 
-    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float = 2.0):
-        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="grey")
+    def __init__(
+        self, part_no: str, x_size: float, y_size: float, z_size: float = 2.0, assembly: Assembly | None = None
+    ):
+        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="grey", assembly=assembly)
 
 
 class Print3D(Cuboid):
@@ -57,7 +66,8 @@ class Print3D(Cuboid):
         y_size : The size of y.
         z_size : The size of z.
         part_no : The unique name that will be given to a type of parts.
+        assembly: The assembly the part belongs to.
     """
 
-    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float):
-        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="red")
+    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, assembly: Assembly | None = None):
+        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="red", assembly=assembly)
