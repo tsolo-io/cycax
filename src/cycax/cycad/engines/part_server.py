@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import time
@@ -36,7 +37,7 @@ class PartEngineServer(PartEngine):
         assert state == "COMPLETED"
         return job
 
-    def download_artifacts(self, part):
+    def download_artifacts(self, part, *, overwrite: bool = True):
         client = self.connect()
         job_id = self.jobs[part.part_no]["id"]
         reply = client.get(f"/jobs/{job_id}/artifacts")
@@ -45,9 +46,12 @@ class PartEngineServer(PartEngine):
             artifact_id = artifact_obj.get("id")
             if artifact_id and artifact_obj.get("type") == "artifact":
                 artifact_path = part.path / artifact_id.replace(PART_NO_TEMPLATE, part.part_no)
-                areply = client.get(f"/jobs/{job_id}/artifacts/{artifact_id}")
-                artifact_path.write_bytes(areply.content)
-                logging.info("Saved %s", artifact_path)
+                if not artifact_path.exists() or overwrite:
+                    areply = client.get(f"/jobs/{job_id}/artifacts/{artifact_id}")
+                    artifact_path.write_bytes(areply.content)
+                    logging.info("Saved download to %s", artifact_path)
+                else:
+                    logging.info("Skip download of %s", artifact_path)
 
     def check_part_init(self):
         """Early hook for part classes to do custom checks."""
@@ -67,10 +71,18 @@ class PartEngineServer(PartEngine):
         logging.error("PartServer.build(%s)", part.part_no)
         if part.part_no not in self.jobs:
             self.create(part)
-        logging.error(self.jobs[part.part_no])
+        logging.debug(self.jobs[part.part_no])
         job_id = self.jobs[part.part_no]["id"]
         job = self.server_get_job(job_id)
-        self.download_artifacts(part)
-        logging.info(job)
+        job_id_file = part.path / ".jobid"
+        overwrite = True
+        if job_id_file.exists():
+            old_job_id_json = json.loads(job_id_file.read_text())
+            if old_job_id_json.get("jobid") == job_id:
+                overwrite = False
+        if overwrite:
+            job_id_file.write_text(json.dumps({"jobid": job_id}))
+        self.download_artifacts(part, overwrite=overwrite)
+        logging.debug(job)
         _files = []
-        return self.file_list(files=_files, engine="OpenSCAD", score=3)
+        return self.file_list(files=_files, engine="FreeCAD", score=3)
