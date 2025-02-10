@@ -124,7 +124,7 @@ class Fan80x80(Fan):
             internal=internal,
             side_pad=side_pad,
             hole_depth=None,
-            hole_diameter=3.0,
+            hole_diameter=3.2,
         )
 
 
