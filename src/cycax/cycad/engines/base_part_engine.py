@@ -13,13 +13,13 @@ class PartEngine:
         config: Engine specific configuration.
     """
 
-    def __init__(self, name: str = None, path: Path | None = None, config: dict | None = None):
+    def __init__(self, name: str | None = None, path: Path | None = None, config: dict | None = None):
         self._base_path = None
         self._json_file = None
         self.name = name
         self.part_no = name  # TODO: Deprecate self.part_no
         self.config = dict(config or {})
-        if name:
+        if path:
             self.set_path(path)
         self.check_part_init()
 

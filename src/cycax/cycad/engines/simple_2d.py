@@ -133,7 +133,7 @@ class Simple2D(PartEngine):
             ax.add_patch(Rectangle((feature["x"], feature["y"]), length, width, **self._get_feature_style(feature)))
 
     def figure_feature(self, ax: mpl.axes._axes.Axes, feature: dict):
-        """This method will coordingte the decoding of the dictionary.
+        """This method will coordinate the decoding of the dictionary.
 
         Args:
             ax: this is the axes onto which the object will be drawn.

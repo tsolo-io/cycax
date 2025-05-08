@@ -40,12 +40,12 @@ def hex_code_check(
             assert hash_value_file != hex_code, f"The hash value of the file is {hash_value_file}, this is incorrect."
     elif hex_codes:
         if equal:
-            assert (
-                hash_value_file in hex_codes
-            ), f"The hash value of the file is {hash_value_file}, expected it to be one of {hex_codes}."
+            assert hash_value_file in hex_codes, (
+                f"The hash value of the file is {hash_value_file}, expected it to be one of {hex_codes}."
+            )
         else:
-            assert (
-                hash_value_file not in hex_codes
-            ), f"The hash value of the file is {hash_value_file}, not supposed to be one of {hex_codes}."
+            assert hash_value_file not in hex_codes, (
+                f"The hash value of the file is {hash_value_file}, not supposed to be one of {hex_codes}."
+            )
 
     return ""

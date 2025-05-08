@@ -11,9 +11,9 @@ def test_check_source_hash(tmp_path):
     assert not hash_test_file.exists(), "There should be no hash file."
     source_test_file.write_text("bla bla")
     # No hash file and no target file, expect True.
-    assert check_source_hash(
-        source_test_file, target_test_file
-    ), "Should create the target since it is not there and there is no source hash file."
+    assert check_source_hash(source_test_file, target_test_file), (
+        "Should create the target since it is not there and there is no source hash file."
+    )
     assert hash_test_file.exists(), "The hash file should be there."
     # No target file, expect True.
     assert check_source_hash(source_test_file, target_test_file), "Should create the target since it is not there."
