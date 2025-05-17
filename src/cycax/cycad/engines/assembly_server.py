@@ -37,4 +37,4 @@ class AssemblyServer(AssemblyEngine, CycaxServerClient):
         print(assembly_spec)
         jobid = self.create(assembly_spec)
         print(jobid)
-        # download_artifacts(jobid, assembly_spec['part_no'], self._base_path, overwrite = True)
+        self.download_artifacts(jobid, self.name, self._base_path.parent, overwrite=True)
