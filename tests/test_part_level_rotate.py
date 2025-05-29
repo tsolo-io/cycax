@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from cycax.cycad import Assembly, SheetMetal
 
 # Test that if the part is levelled and rotated or rotated and then move the same assembly will be created.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Tests for the utilities of from CyCAD engines.
 from cycax.cycad.engines.utils import check_source_hash
 
