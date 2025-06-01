@@ -154,7 +154,8 @@ class CycadPart(Location):
         """
 
         # TODO: Require cone shape cut.
-        raise NotImplementedError("The adding of counterdrill to a side has not been implemented.")
+        msg = "The adding of counterdrill to a side has not been implemented."
+        raise NotImplementedError(msg)
 
     def make_hole(
         self,

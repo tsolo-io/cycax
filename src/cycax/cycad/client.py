@@ -32,7 +32,8 @@ class CycaxServerClient:
         job = reply.json().get("data")
         state = job["attributes"]["state"]["job"]
         if state != "COMPLETED":
-            raise ValueError("Job not completed")
+            msg = "Job not completed"
+            raise ValueError(msg)
         return job
 
     def download_artifacts(self, job_id: str, part_no: str, base_path: Path, *, overwrite: bool = True):

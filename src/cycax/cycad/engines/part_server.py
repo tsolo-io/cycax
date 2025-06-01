@@ -40,7 +40,8 @@ class PartEngineServer(PartEngine):
         job = reply.json().get("data")
         state = job["attributes"]["state"]["job"]
         if state != "COMPLETED":
-            raise ValueError("Job not completed")
+            msg = "Job not completed"
+            raise ValueError(msg)
         return job
 
     def download_artifacts(self, part, *, overwrite: bool = True):
