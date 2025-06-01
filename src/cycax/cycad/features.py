@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import typing
+
 from cycax.cycad.location import Location
 
 
@@ -164,8 +166,8 @@ class NutCutOut(Feature):
         vertical: this is a bool that will be set to False if you want the flat side down.
     """
 
-    nut_specifications: dict[
-        str, dict[str, float]
+    nut_specifications: typing.ClassVar[
+        dict[str, dict[str, float]]
     ] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
         "M3ISO": {
             "diameter": 6.01,

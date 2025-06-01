@@ -237,7 +237,6 @@ class PartEngineOpenSCAD(PartEngine):
         name = self.name
         json_file = self._json_file
         scad_file = self._base_path / name / f"{name}.scad"
-        # stl_file = self._base_path / name / f"{name}.openscad.stl" # TODO: use a filename that has reference to engine.
         stl_file = self._base_path / name / f"{name}.stl"
         if check_source_hash(json_file, scad_file):
             self.build_scad(json_file, scad_file)

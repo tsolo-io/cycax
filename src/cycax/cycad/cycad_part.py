@@ -534,7 +534,9 @@ class CycadPart(Location):
 
     def render(self, engine: str = "Preview3D", engine_config: dict | None = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods.
-        It is invoked by CycadPart and can be called: CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
+
+        It is invoked by CycadPart and can be called:
+        CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
 
         Args:
             engine: Name of the engine to use.
@@ -655,7 +657,9 @@ class CycadPart(Location):
             ValueError: When both front and back side is give.
             ValueError: When both top and bottom side is give.
         """
-        assert self.assembly, "The assembly has not been specified for this cycad part."
+        if not self.assembly:
+            msg = "The assembly has not been specified for this cycad part."
+            raise ValueError(msg)
 
         level_tasks = []
         if left is not None:

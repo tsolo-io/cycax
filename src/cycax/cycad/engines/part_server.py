@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import sys
+import typing
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_fixed
@@ -20,7 +21,7 @@ class PartEngineServer(PartEngine):
     Send part build jobs to a CyCAx server.
     """
 
-    jobs = {}
+    jobs: typing.ClassVar[dict[str, dict]] = {}
 
     def connect(self, address: str | None = None) -> httpx.Client:
         if not hasattr(self, "_client"):

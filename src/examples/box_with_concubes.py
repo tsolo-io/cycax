@@ -66,10 +66,10 @@ def main():
 
     count = 0
     increment = 2
-    while count != 8:
+    while count != 8:  # noqa: PLR2004
         box.rotateFreezeTop(cubes[count])
         count = count + 1
-        if count == 7:
+        if count == 7:  # noqa: PLR2004
             count = increment
             increment = increment + 2
 
