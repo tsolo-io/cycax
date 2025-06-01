@@ -497,8 +497,19 @@ class CycadPart(Location):
                     RIGHT: "x",
                 }[side]
             )
-        assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
-        assert edge_type in ["round", "chamfer"], "You need to specify the edge type as either round or chamfer."
+        if not edge:
+            msg = "No edge defined"
+            raise ValueError(msg)
+        if len(edge) != 2:
+            msg = "Only two edges are allowed"
+            raise ValueError(msg)
+        if edge[0] == edge[1]:
+            msg = "Cannot use the same edge"
+            raise ValueError(msg)
+        supported_edge_types = ["round", "chamfer"]
+        if edge_type not in supported_edge_types:
+            msg = f"You need to specify the edge type as one of {supported_edge_types}."
+            raise ValueError(msg)
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]
@@ -675,7 +686,7 @@ class CycadPart(Location):
             self.assembly.level(my_side, other_side)
 
         if subtract:
-            for my_side, other_side in level_tasks:
+            for _, other_side in level_tasks:
                 self.assembly.subtract(other_side, self)
 
     def rotate(self, actions: str):

@@ -294,7 +294,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         with scad_file.open("w+") as fh:
             for out in output:
-                if type(out) == list:
+                if type(out) is list:
                     for small in out:
                         fh.write(small)
                         fh.write("\n")

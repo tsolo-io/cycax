@@ -17,7 +17,7 @@ def fancy_edge(tmp_path: Path, edge_type: str, part_no: str):
     edges = combinations(("LEFT", "RIGHT", "FRONT", "BACK", "TOP", "BOTTOM"), 2)
     for edge in edges:
         if edge in (("LEFT", "RIGHT"), ("TOP", "BOTTOM"), ("FRONT", "BACK")):
-            with pytest.raises(Exception):
+            with pytest.raises(Exception):  # noqa: B017 cat the base exception in the test we have not decided on custom exceptions.
                 sheet.beveled_edge(edge_type=edge_type, side1=edge[0], side2=edge[1], size=3)
         else:
             sheet.beveled_edge(edge_type=edge_type, side1=edge[0], side2=edge[1], size=3)
