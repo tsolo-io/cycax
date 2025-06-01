@@ -162,6 +162,6 @@ class Simple2D(PartEngine):
         ax.set_title(self.name)
         ax.autoscale_view()
         ax.set_aspect("equal", "box")
-        figfile = figfile = self._base_path / self.name / (self.name + "-s2d.svg")
+        figfile = self._base_path / self.name / (self.name + "-s2d.svg")
         plt.savefig(figfile)
         logging.info("Write to %s", figfile)

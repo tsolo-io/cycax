@@ -1,13 +1,8 @@
-import json
 import logging
-import os
-import time
 from pathlib import Path
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_fixed
-
-from cycax.cycad.engines.base_part_engine import PartEngine
 
 PART_NO_TEMPLATE = "Pn--pN"
 
@@ -36,7 +31,8 @@ class CycaxServerClient:
         reply = client.get(f"/jobs/{job_id}")
         job = reply.json().get("data")
         state = job["attributes"]["state"]["job"]
-        assert state == "COMPLETED"
+        if state != "COMPLETED":
+            raise ValueError("Job not completed")
         return job
 
     def download_artifacts(self, job_id: str, part_no: str, base_path: Path, *, overwrite: bool = True):

@@ -66,11 +66,11 @@ class CycadPart(Location):
         self.z_size = z_size
         self.features = []  # Stores all the holes to be cut
         self.move_holes = []
-        self.x_max: float = self.x_size  # Location.Right
         self.x_min: float = 0  # Location.Left
         self.y_min: float = 0  # Location.Front
-        self.y_max: float = self.y_size  # Location.Back
         self.z_min: float = 0  # Location.Bottom
+        self.x_max: float = self.x_size  # Location.Right
+        self.y_max: float = self.y_size  # Location.Back
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
         self.position = [0, 0, 0]
@@ -577,7 +577,7 @@ class CycadPart(Location):
         """
         return engine.build(self)
 
-    def get_name(self, default: str = None):
+    def get_name(self, default: str | None = None):
         """Return the part name, if the part has not been named generate a name.
 
         The part name (or ID) is distict from the part_no or part number.
@@ -680,8 +680,8 @@ class CycadPart(Location):
     def rotate(self, actions: str):
         """Rotate the part several times.
 
-        Example: `CycadPart.rotate("xxyzyy")`
-        is the same as two `rotate_freeze_front`, `rotate_freeze_left`, `rotate_freeze_top`, and two `rotate_freeze_left`.
+        Example: `CycadPart.rotate("xxyzyy")` is the same as two `rotate_freeze_front`, `rotate_freeze_left`,
+        `rotate_freeze_top`, and two `rotate_freeze_left`.
         Where rotate_freeze_<side> results in one 90degrees counter clock wise rotations on the side.
 
         Args:

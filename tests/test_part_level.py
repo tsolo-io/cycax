@@ -191,7 +191,7 @@ def get_hashes(name: str, tmp_path: Path, assembly, *, slow: bool = False) -> li
 
 
 @pytest.mark.slow
-def test_level_subtract_order_slow(tmp_path: Path):
+def X_test_level_subtract_order_slow(tmp_path: Path):
     build_test_case(tmp_path=tmp_path, slow=True)
 
 

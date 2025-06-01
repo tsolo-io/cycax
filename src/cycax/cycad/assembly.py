@@ -72,10 +72,11 @@ class Assembly:
 
         Args:
             engine: Instance of AssemblyEngine to use.
-            part_engines: The PartEngine to use on all parts.
+            part_engines: Instances of PartEngine to use on parts.
         """
 
         if engine is not None:
+            engine.set_name(self.name)
             engine.set_path(self._base_path)
         else:
             logging.warning("No assembly engine specified. No assembly output.")

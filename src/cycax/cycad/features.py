@@ -18,15 +18,16 @@ class Feature(Location):
             AttributeError: When name or type is not defined on the feature.
         """
 
-        dict_hole = {}
+        feature_dict = {}
         for key in ("name", "type"):
             getattr(self, key)  # Just get the attribute and let Python raise attribute error if it does not exists.
 
         for key, value in vars(self).items():
             if not key.startswith("_"):
-                dict_hole[key] = value
+                # Save all the public variables of the feature.
+                feature_dict[key] = value
 
-        return dict_hole
+        return feature_dict
 
 
 class Holes(Feature):

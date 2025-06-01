@@ -5,7 +5,7 @@
 import json
 import logging
 import os
-import time
+import sys
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_fixed
@@ -28,6 +28,7 @@ class PartEngineServer(PartEngine):
         if self._client is None:
             if address is None:
                 address = os.environ["CYCAX_SERVER"]
+            self._server_address = address
             self._client = httpx.Client(base_url=address)
         return self._client
 
@@ -38,7 +39,8 @@ class PartEngineServer(PartEngine):
         reply = client.get(f"/jobs/{job_id}")
         job = reply.json().get("data")
         state = job["attributes"]["state"]["job"]
-        assert state == "COMPLETED"
+        if state != "COMPLETED":
+            raise ValueError("Job not completed")
         return job
 
     def download_artifacts(self, part, *, overwrite: bool = True):
@@ -65,9 +67,16 @@ class PartEngineServer(PartEngine):
         """Push the creation of a part to the server as a Job."""
         spec = part.export()
         client = self.connect()
-        response = client.post("/jobs", json=spec)
-        response.raise_for_status()
-        self.jobs[part.part_no] = response.json().get("data")
+        response = None
+        try:
+            response = client.post("/jobs", json=spec)
+            response.raise_for_status()
+        except httpx.ConnectError as error:
+            logging.error("Failed to create part %s", part.part_no)
+            logging.error("Could not connect to CyCAx server %s: %s", self._server_address, error)
+            sys.exit(1)
+        if response:
+            self.jobs[part.part_no] = response.json().get("data")
 
     def build(self, part) -> list:
         """Create the output files for the part."""
@@ -77,7 +86,11 @@ class PartEngineServer(PartEngine):
             self.create(part)
         logging.debug(self.jobs[part.part_no])
         job_id = self.jobs[part.part_no]["id"]
-        job = self.server_get_job(job_id)
+        try:
+            job = self.server_get_job(job_id)
+        except Exception as error:
+            logging.error("Could not get job %s: %s", job_id, error)
+            sys.exit(1)
         job_id_file = part.path / ".jobid"
         overwrite = True
         if job_id_file.exists():

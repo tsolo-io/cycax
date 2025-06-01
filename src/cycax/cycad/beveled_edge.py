@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+
 class BeveledEdge:
     """This class will store data relating to the rounding of edges on a cube.
 
