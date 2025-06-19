@@ -419,7 +419,7 @@ class CycadPart(Location):
             raise ValueError(msg)
         return self._base_path / self.part_no
 
-    def save(self, path: Path | None = None):
+    def save(self, path: Path |str| None = None):
         """
         Save the part specification to a JSON file.
 
@@ -431,11 +431,10 @@ class CycadPart(Location):
             if self._base_path is None:
                 # If no path is given and we do not have a path set then use the local directory.
                 path = Path(".")
-        elif not path.exists():
-            msg = f"The directory {path} does not exists."
-            raise FileNotFoundError(msg)
-        else:
-            self._base_path = path
+        path = Path(path)
+        if not path.exists():
+            path.mkdir(parents=False, exist_ok=True)
+        self._base_path = path
 
         dir_name = self.path
         dir_name.mkdir(exist_ok=True)
