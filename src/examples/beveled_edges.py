@@ -4,11 +4,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from pathlib import Path
-
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
-
 from cycax.cycad import SheetMetal
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
 def main():

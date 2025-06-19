@@ -109,7 +109,7 @@ class Assembly:
                 engine.add(action)
             engine.build()
 
-    def save(self, path: Path | str| None = None):
+    def save(self, path: Path | str | None = None):
         """Save the assembly and added part to JSON files.
 
         Args:

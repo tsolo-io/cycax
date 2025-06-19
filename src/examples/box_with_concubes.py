@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from cycax.cycad import Assembly, Print3D, SheetMetal
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
 class ConnCube(Print3D):
@@ -53,7 +52,7 @@ def main():
     box.level(left.front, front.front)
     box.level(right.front, front.front)
 
-    cubes =[ConnCube() for cube in range(8)]
+    cubes = [ConnCube() for cube in range(8)]
 
     count = 0
     increment = 2

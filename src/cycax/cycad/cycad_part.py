@@ -419,7 +419,7 @@ class CycadPart(Location):
             raise ValueError(msg)
         return self._base_path / self.part_no
 
-    def save(self, path: Path |str| None = None):
+    def save(self, path: Path | str | None = None):
         """
         Save the part specification to a JSON file.
 
