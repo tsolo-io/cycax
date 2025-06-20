@@ -35,10 +35,8 @@ class Assembly:
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":
             assembler = AssemblyOpenSCAD(self.name, config=engine_config)
-        # elif engine.lower() == "blender":
-        #     assembler = AssemblyBlender(self.name)
         else:
-            msg = f"""Engine {assembler} is not one of the recognized engines for assebling parts.
+            msg = f"""Engine {engine} is not one of the recognized engines for assebling parts.
                 Choose one of OpenSCAD (default) or Blender."""
             raise ValueError(msg)
         return assembler
@@ -72,10 +70,11 @@ class Assembly:
 
         Args:
             engine: Instance of AssemblyEngine to use.
-            part_engines: The PartEngine to use on all parts.
+            part_engines: Instances of PartEngine to use on parts.
         """
 
         if engine is not None:
+            engine.set_name(self.name)
             engine.set_path(self._base_path)
         else:
             logging.warning("No assembly engine specified. No assembly output.")
@@ -110,7 +109,7 @@ class Assembly:
                 engine.add(action)
             engine.build()
 
-    def save(self, path: Path | None = None):
+    def save(self, path: Path | str | None = None):
         """Save the assembly and added part to JSON files.
 
         Args:
@@ -120,6 +119,8 @@ class Assembly:
 
         if path is None:
             path = self._base_path
+        path = Path(path)
+        path.mkdir(parents=False, exist_ok=True)
         if not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)

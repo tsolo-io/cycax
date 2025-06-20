@@ -6,11 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 # CyCAx examples
 
-## Installation
-Copy there scripts to a directory adjacent to where the code is checked out.
-If you checked CyCAx out into ~/src/cycax then copy these scripts to ~/src/playpen.
-Run `make install` in the example directory to install CyCAx.
+## How to run the examples
+Use `make examples` in the base of the CyCAx repository to run all the examples.
+The files are placed in the `build` directory.
 
-## Build and test examples
-Run `hatch build` in cycax checkout directory to create the Python package files.
-Run `make` in the example directory to install and test the examples.
+## Requirements
+All the examples makes use of a Local copy of OpenSCAD.

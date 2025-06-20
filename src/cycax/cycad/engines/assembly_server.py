@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
 import json
 import logging
 import os
@@ -34,7 +38,5 @@ class AssemblyServer(AssemblyEngine, CycaxServerClient):
         for part_seq in range(len(assembly_spec["parts"])):
             part = assembly_spec["parts"][part_seq]
             part["jobid"] = self.config["job_ids"][part["part_no"]]
-        print(assembly_spec)
         jobid = self.create(assembly_spec)
-        print(jobid)
         self.download_artifacts(jobid, self.name, self._base_path.parent, overwrite=True)

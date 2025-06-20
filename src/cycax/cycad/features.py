@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import typing
+
 from cycax.cycad.location import Location
 
 
@@ -18,15 +20,16 @@ class Feature(Location):
             AttributeError: When name or type is not defined on the feature.
         """
 
-        dict_hole = {}
+        feature_dict = {}
         for key in ("name", "type"):
             getattr(self, key)  # Just get the attribute and let Python raise attribute error if it does not exists.
 
         for key, value in vars(self).items():
             if not key.startswith("_"):
-                dict_hole[key] = value
+                # Save all the public variables of the feature.
+                feature_dict[key] = value
 
-        return dict_hole
+        return feature_dict
 
 
 class Holes(Feature):
@@ -163,8 +166,8 @@ class NutCutOut(Feature):
         vertical: this is a bool that will be set to False if you want the flat side down.
     """
 
-    nut_specifications: dict[
-        str, dict[str, float]
+    nut_specifications: typing.ClassVar[
+        dict[str, dict[str, float]]
     ] = {  # This is a global variable that will be used to cut the nuts by the OpenSCAD engine.
         "M3ISO": {
             "diameter": 6.01,

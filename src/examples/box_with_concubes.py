@@ -6,15 +6,8 @@
 
 from cycax.cycad import Assembly, Print3D, SheetMetal
 
-LEFT = "LEFT"
-RIGHT = "RIGHT"
-TOP = "TOP"
-BOTTOM = "BOTTOM"
-FRONT = "FRONT"
-BACK = "BACK"
 
-
-class ConCube(Print3D):
+class ConnCube(Print3D):
     """This class holds the data for the corner cube."""
 
     def __init__(self):
@@ -23,13 +16,14 @@ class ConCube(Print3D):
     def definition(self):
         """Calculate the concube."""
         for side in (self.left, self.bottom, self.front):
-            side.hole(pos=[7, 7], diameter=3.2, depth=2, inner=False)
-            side.hole(pos=[7, 7], diameter=2.9, inner=True)  # Through everything
-            side.nut(pos=[7, 7], nut_type="M3", depth=2, sink=1)  # Coordinates based on center of the Nut.
-            side.box(pos=[7, 10], depth=2, width=6.2, length=3, sink=2, center=True)  # holes to fit the nuts into
+            side.hole(pos=(7, 7), diameter=3.2, depth=2)
+            side.hole(pos=(7, 7), diameter=2.9)  # Through everything
+            side.hole(pos=(7, 7), diameter=3.2, external_subtract=True)  # Through everything
+            side.nut(pos=(7, 7), nut_type="M3", depth=2, sink=1)  # Coordinates based on center of the Nut.
+            side.box(pos=(7, 10), depth=2, width=6.2, length=3, sink=2, center=True)  # holes to fit the nuts into
 
         # Cut the excess material we dont want to print.
-        self.top.box(pos=[4, 4], length=7, width=7, depth=7)
+        self.top.box(pos=(4, 4), length=7, width=7, depth=7)
 
 
 def main():
@@ -42,12 +36,10 @@ def main():
     front = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
     back = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
 
-    # HD = ExternalPart(part_no="SSD_SATA_2.5")
-
-    box.rotateFreezeFront(left)
-    box.rotateFreezeFront(right)
-    box.rotateFreezeLeft(front)
-    box.rotateFreezeLeft(back)
+    box.rotate_freeze_front(left)
+    box.rotate_freeze_front(right)
+    box.rotate_freeze_left(front)
+    box.rotate_freeze_left(back)
 
     box.level(front.back, bottom.front)
     box.level(back.front, bottom.back)
@@ -60,23 +52,21 @@ def main():
     box.level(left.front, front.front)
     box.level(right.front, front.front)
 
-    cubes = [0, 0, 0, 0, 0, 0, 0, 0]
-    for cube in range(8):
-        cubes[cube] = ConCube()
+    cubes = [ConnCube() for cube in range(8)]
 
     count = 0
     increment = 2
-    while count != 8:
-        box.rotateFreezeTop(cubes[count])
+    while count != 8:  # noqa: PLR2004
+        box.rotate_freeze_top(cubes[count])
         count = count + 1
-        if count == 7:
+        if count == 7:  # noqa: PLR2004
             count = increment
             increment = increment + 2
 
     for cube in range(1, 8, 2):
-        box.rotateFreezeLeft(cubes[cube])
-        box.rotateFreezeLeft(cubes[cube])
-        box.rotateFreezeTop(cubes[cube])
+        box.rotate_freeze_left(cubes[cube])
+        box.rotate_freeze_left(cubes[cube])
+        box.rotate_freeze_top(cubes[cube])
 
     for cube in range(4):
         box.level(cubes[cube].right, right.left)
@@ -105,22 +95,17 @@ def main():
     for cube in [0, 1, 6, 7]:
         box.subtract(front.back, cubes[cube])
 
-    # HD.make_hole(20, 20, TOP, 20, 20)
-
-    # box.rotateFreezeFront(HD)
-    # box.level(HD, LEFT, right, RIGHT)
-
     box.add(bottom)
     box.add(left)
     box.add(right)
     box.add(front)
     box.add(back)
-    box.add(top)
-    # box.add(HD)
+    # box.add(top)
 
     for cube in range(8):
         box.add(cubes[cube])
 
+    box.save("./build/box_with_concubes")
     box.render()
 
 

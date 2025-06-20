@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
+
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
@@ -17,7 +19,9 @@ class CycadSide:
     def __repr__(self):
         return "Side: " + self.name
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         """Location is calculated for the (x, y) plain using two values and a side.
 
         Args:
@@ -27,7 +31,9 @@ class CycadSide:
         Returns:
             The (x, y, z) location of an object.
         """
-        raise ValueError("_location_calc is Not implemented on" + self.name)
+        logging.debug("Call _location_calc(pos=%s, sink=%s, length=%s, width=%s)", pos, sink, length, width)
+        msg = f"_location_calc is Not implemented on {self.name}"
+        raise ValueError(msg)
 
     def _depth_check(self, val: float | None = None) -> float:
         """Determine the depth of a feature.
@@ -283,7 +289,7 @@ class RightSide(CycadSide):
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
-    def _depth_check(self, val: float) -> float:
+    def _depth_check(self, val: float | None = None) -> float:
         if val is None:
             return self._parent.x_size
         else:
