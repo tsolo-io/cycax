@@ -231,7 +231,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return res
 
-    def build(self, part) -> list:
+    def build(self, part) -> list:  # noqa: ARG002 Unused argument
         """Create the output files for the part."""
 
         name = str(self.part_no)

@@ -121,6 +121,7 @@ lint.ignore = [
     "S105",
     "S106",
     "S107",
+    "S603",
     # Ignore complexity
     "C901",
     "PLR0911",
