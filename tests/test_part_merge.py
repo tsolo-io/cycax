@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from cycax.cycad import Assembly, Print3D
 
 # Tests the merging of a part.

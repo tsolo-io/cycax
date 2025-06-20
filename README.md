@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Tsolo.io
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # CyCAx
 
 [![PyPI - Version](https://img.shields.io/pypi/v/cycax.svg)](https://pypi.org/project/cycax)

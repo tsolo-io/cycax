@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2025 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from cycax.cycad.engine_openscad import EngineOpenSCAD
 from cycax.cycad.fan import Fan
 from cycax.cycad.sheet_metal import SheetMetal
