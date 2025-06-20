@@ -35,7 +35,7 @@ class CycadSide:
         msg = f"_location_calc is Not implemented on {self.name}"
         raise ValueError(msg)
 
-    def _depth_check(self, val: float | None = None) -> float:
+    def _depth_check(self, val: float | None = None) -> float:  # noqa: ARG002 Unused argument
         """Determine the depth of a feature.
 
         Args:
@@ -255,7 +255,11 @@ class LeftSide(CycadSide):
     name = LEFT
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_min + sink
         temp_y = self._parent.y_max - pos[0] - length
@@ -282,7 +286,11 @@ class RightSide(CycadSide):
     name = RIGHT
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - sink
         temp_y = pos[0]
@@ -309,7 +317,11 @@ class TopSide(CycadSide):
     name = TOP
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 1.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = pos[1]
@@ -336,7 +348,11 @@ class BottomSide(CycadSide):
     name = BOTTOM
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 0.0,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_max - pos[1] - width
@@ -363,7 +379,11 @@ class FrontSide(CycadSide):
     name = FRONT
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_min + sink
@@ -390,7 +410,11 @@ class BackSide(CycadSide):
     name = BACK
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - pos[0] - length
         temp_y = self._parent.y_max - sink
