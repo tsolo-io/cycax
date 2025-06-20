@@ -5,7 +5,7 @@
 from pathlib import Path
 
 from cycax.cycad import Print3D
-from tests.shared import hex_code_check
+from tests.shared import stl_compare
 
 
 def sphere_cube(tmp_path: Path):
@@ -37,10 +37,4 @@ def test_sphere(tmp_path: Path):
     #    ext=".scad",
     #    hex_code="e2e9bd90687c806b16591a6c9741f840c13edfca7cdf62d4416b562ef1df2a65",
     # )
-
-    hex_code_check(
-        tmp_path=tmp_path,
-        filename="testing_sphere",
-        ext=".stl",
-        hex_code="e6af4da27e13425a9a0b2870a69fdd25f0d2188891ab03518d72aef0b6523045",
-    )
+    stl_compare(tmp_path / "testing_sphere" / "testing_sphere.stl", Path("tests/references/sphere.stl"))
