@@ -38,7 +38,7 @@ CyCAx provides integration with the following CAD tools:
 
 Add support for more CAD tools.
 Example of this would be to add [build123d](https://github.com/build123d/build123d) as a 3D modeling library.
-And Matplotlib as a 2D visualization library.
+And [Matplotlib](https://matplotlib.org) as a 2D visualization library.
 
 The integration in CAM tools for slicing for 3D printing and creation of g-code for CNC milling are also an objective.
 
