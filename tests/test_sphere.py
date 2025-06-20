@@ -37,4 +37,4 @@ def test_sphere(tmp_path: Path):
     #    ext=".scad",
     #    hex_code="e2e9bd90687c806b16591a6c9741f840c13edfca7cdf62d4416b562ef1df2a65",
     # )
-    stl_compare(tmp_path / "testing_sphere" / "testing_sphere.stl", Path("tests/references/sphere.stl"))
+    assert stl_compare(tmp_path / "testing_sphere" / "testing_sphere.stl", Path("tests/references/sphere.stl"))
