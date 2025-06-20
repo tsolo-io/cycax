@@ -14,6 +14,8 @@ SPDX-License-Identifier: Apache-2.0
 **Table of Contents**
 
 - [Installation](#installation)
+- [Integration](#integration)
+- [Future](#future)
 - [License](#license)
 
 CyCAx is a Python package that provides a set of tools for working with CAD models.
