@@ -15,5 +15,5 @@ class AssemblyBlender(AssemblyEngine):
 
     def __init__(self, name: str) -> None:
         self.name = name
-        msg = "The functionality has been remove. Please use the AssemblyServer."
+        msg = "The functionality has been removed. Please use the AssemblyServer."
         raise NotImplementedError(msg)
