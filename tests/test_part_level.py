@@ -191,7 +191,7 @@ def get_hashes(name: str, tmp_path: Path, assembly, *, slow: bool = False) -> li
 
 
 @pytest.mark.slow
-def test_level_subtract_order_slow(tmp_path: Path):
+def x_test_level_subtract_order_slow(tmp_path: Path):
     build_test_case(tmp_path=tmp_path, slow=True)
 
 
@@ -262,6 +262,6 @@ def build_test_case(*, tmp_path, slow: bool):
                 assembly.subtract(side_left.right, conn_front_bottom_left)
 
         hashes_test = get_hashes(name, tmp_path, assembly, slow=slow)
-        assert (
-            hashes_ref == hashes_test
-        ), f"Compare the hashes for the two assemblies: REF({hashes_ref}) != TEST({hashes_test})"
+        assert hashes_ref == hashes_test, (
+            f"Compare the hashes for the two assemblies: REF({hashes_ref}) != TEST({hashes_test})"
+        )

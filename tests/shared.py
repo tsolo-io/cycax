@@ -6,6 +6,30 @@ import hashlib
 from pathlib import Path
 
 
+def stl_compare(file1: Path, file2: Path) -> bool:
+    """Compare two STL files for equality.
+
+    This is a very memory intensive operation and should be used sparingly.
+
+    Args:
+        file1: Path to the first STL file.
+        file2: Path to the second STL file.
+
+    Returns:
+        True if the files are equal, False otherwise.
+    """
+    lines1 = file1.read_text().splitlines()
+    lines2 = file2.read_text().splitlines()
+    if len(lines1) != len(lines2):
+        return False
+    sorted_lines1 = sorted(lines1)
+    sorted_lines2 = sorted(lines2)
+    for line_number in range(len(lines1)):
+        if sorted_lines1[line_number] != sorted_lines2[line_number]:
+            return False
+    return True
+
+
 def get_file_hash(filename: str) -> str:
     """Calculate the sha256 of a file.
 
@@ -44,12 +68,12 @@ def hex_code_check(
             assert hash_value_file != hex_code, f"The hash value of the file is {hash_value_file}, this is incorrect."
     elif hex_codes:
         if equal:
-            assert (
-                hash_value_file in hex_codes
-            ), f"The hash value of the file is {hash_value_file}, expected it to be one of {hex_codes}."
+            assert hash_value_file in hex_codes, (
+                f"The hash value of the file is {hash_value_file}, expected it to be one of {hex_codes}."
+            )
         else:
-            assert (
-                hash_value_file not in hex_codes
-            ), f"The hash value of the file is {hash_value_file}, not supposed to be one of {hex_codes}."
+            assert hash_value_file not in hex_codes, (
+                f"The hash value of the file is {hash_value_file}, not supposed to be one of {hex_codes}."
+            )
 
     return ""

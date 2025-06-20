@@ -234,10 +234,9 @@ class PartEngineOpenSCAD(PartEngine):
     def build(self, part) -> list:
         """Create the output files for the part."""
 
-        name = self.name
+        name = str(self.part_no)
         json_file = self._json_file
         scad_file = self._base_path / name / f"{name}.scad"
-        # stl_file = self._base_path / name / f"{name}.openscad.stl" # TODO: use a filename that has reference to engine.
         stl_file = self._base_path / name / f"{name}.stl"
         if check_source_hash(json_file, scad_file):
             self.build_scad(json_file, scad_file)
@@ -294,7 +293,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         with scad_file.open("w+") as fh:
             for out in output:
-                if type(out) == list:
+                if type(out) is list:
                     for small in out:
                         fh.write(small)
                         fh.write("\n")

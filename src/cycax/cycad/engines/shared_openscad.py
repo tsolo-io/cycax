@@ -4,12 +4,14 @@
 
 # Functions shared between the OpenSCAD based AssemblyEngine and PartEngine
 
+import typing
+
 
 class CycadOpenSCADEncoder:
     """Creates SCAD code from called methods."""
 
-    head_lines = []
-    tail_lines = []
+    head_lines: typing.ClassVar[list[str]] = []
+    tail_lines: typing.ClassVar[list[str]] = []
 
     def text_out(self) -> str:
         code = ""
