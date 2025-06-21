@@ -4,24 +4,23 @@
 
 import json
 import logging
-import subprocess
 from pathlib import Path
+
+import build123d
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.utils import check_source_hash
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
-class PartEngineOpenSCAD(PartEngine):
+class PartEngineBuild123d(PartEngine):
     """
-    Decode a JSON to a OpenSCAD file which can be rendered in OpenSCAD for 3D view.
+    Decode a JSON and render with Build123d.
     """
-
-    dif = 0
 
     def _decode_cube(self, lookup: dict) -> str:
         """
-        This method will return the string that will have the OpenSCAD for a cube.
+        This method will return the string that will have the Build123d for a cube.
 
         Args:
             lookup: this will be the dictionary that contains the details about the cube.
@@ -62,7 +61,7 @@ class PartEngineOpenSCAD(PartEngine):
 
     def _decode_nut(self, lookup: dict) -> str:
         """
-        This method will return the string that will have the OpenSCAD for a nut cut out.
+        This method will return the string that will have the Build123d for a nut cut out.
 
         Args:
             lookup: This will be a dictionary containing the necessary information about the nut.
@@ -78,7 +77,7 @@ class PartEngineOpenSCAD(PartEngine):
 
     def _decode_sphere(self, lookup: dict) -> str:
         """
-        This method will return the string that will have the OpenSCAD for a sphere cut out.
+        This method will return the string that will have the Build123d for a sphere cut out.
 
         Args:
             lookup: This will be a dictionary containing the necessary information about the sphere.
@@ -93,7 +92,7 @@ class PartEngineOpenSCAD(PartEngine):
 
     def _decode_cut(self) -> str:
         """
-        This method returns a simple OpenSCAD string neceseray to cut.
+        This method returns a simple Build123d string neceseray to cut.
         """
         return "difference(){"
 
@@ -231,92 +230,89 @@ class PartEngineOpenSCAD(PartEngine):
 
         return res
 
-    def build(self, part) -> list:  # noqa: ARG002 Unused argument
+    def build(self, part) -> list:
         """Create the output files for the part."""
 
-        name = str(self.part_no)
-        json_file = self._json_file
-        scad_file = self._base_path / name / f"{name}.scad"
-        stl_file = self._base_path / name / f"{name}.stl"
-        if check_source_hash(json_file, scad_file):
-            self.build_scad(json_file, scad_file)
-        if self.config.get("stl"):
-            if check_source_hash(scad_file, stl_file):
-                self.build_stl(scad_file, stl_file)
-
+        self.name = part.part_no
+        self.set_path(part._base_path)
+        str_file = self._base_path / self.name / f"{self.name}.stl"
+        data = json.loads(self._json_file.read_text())
+        self._build(data, str_file)
         _files = [
-            {"file": self._base_path / name / f"{name}.scad"},
-            {"file": self._base_path / name / f"{name}.stl"},
-            {"file": self._base_path / name / f"{name}.openscad.stl"},
+            {"file": str_file},
         ]
 
-        return self.file_list(files=_files, engine="OpenSCAD", score=3)
+        return self.file_list(files=_files, engine="Build123d", score=3)
 
-    def build_scad(self, json_file: Path, scad_file: Path):
+
+    def get_plane(self, part, side: str) -> build123d.Plane:
+        SIDES = (LEFT, RIGHT, FRONT, BACK, TOP, BOTTOM)
+        if side is None:
+            side = BOTTOM
+        elif not side in SIDES:
+            raise ValueError()
+
+        ref_plane = getattr(build123d.Plane, side.lower())
+        for face in part.faces().filter_by(ref_plane):
+            plane = build123d.Plane(face)
+            if plane.z_dir == ref_plane.z_dir:
+                return plane
+
+    def _build(self, definition: dict, stl_file: Path):
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
+
         Raises:
             ValueError: if incorrect part_name is provided.
         """
 
-        data = json.loads(json_file.read_text())
+        # ex2 = Box(length, width, thickness)
+        # ex2 -= Cylinder(center_hole_dia / 2, height=thickness)
+        #
+        # {'name': 'cube', 'type': 'add', 'side': None, 'x': 0, 'y': 0, 'z': 0, 'x_size': 11, 'y_size': 11, 'z_size': 2, 'center': False}
+        # {'x': 5.5, 'y': 5.5, 'z': 2.0, 'side': 'TOP', 'diameter': 2, 'depth': 2, 'name': 'hole', 'type': 'cut'}
 
-        output = []
-        dif = 0
-        for action in data["features"]:
-            if action["type"] == "cut":
-                dif = dif + 1
-                output.insert(0, self._decode_cut())
-
-            if action["name"] == "beveled_edge":
-                output.append(self.decode_beveled_edge(action))
-
-            elif action["name"] == "cube":
-                output.append(self._decode_cube(action))
-
-            elif action["name"] == "external":
-                output.append(self._decode_external(self.name))
-
+        part = None
+        for action in definition["features"]:
+            print(action)
+            if action["name"] == "cube":
+                feature = build123d.Box(action["x_size"], action["y_size"], action["z_size"])
+                if not action.get("center"):
+                    # feature = build123d.Pos(action['x_size']/2, action['y_size']/2, action['z_size']/2) * feature
+                    feature = (
+                        build123d.Pos(
+                            action["x"] + action["x_size"] / 2,
+                            action["y"] + action["y_size"] / 2,
+                            action["z"] + action["z_size"] / 2,
+                        )
+                        * feature
+                    )
+                    if action.get("side") == "TOP":
+                        feature = build123d.Pos(0,0,-action["z_size"]) * feature
+                    # elif action.get("side") == "BOTTOM":
+                    #     feature = build123d.Plane.XZ * feature
+                    # elif action.get("side") == "LEFT":
+                    #     feature = build123d.Plane.YZ * feature
+                    # elif action.get("side") == "RIGHT":
+                    #     feature = build123d.Plane.YX * feature
             elif action["name"] == "hole":
-                output.append(self._decode_hole(action))
+                feature = build123d.Cylinder(action["diameter"] / 2, height=action["depth"])
+                feature = build123d.Pos(action["x"], action["y"], action["z"] - action["depth"] / 2) * feature
 
-            elif action["name"] == "nut":
-                output.append(self._decode_nut(action))
+            # feature = self.get_plane(feature, action.get("side")) * feature
+            feature = build123d.Plane.XY * feature
+            if part is None:
+                part = feature
+            elif action["type"] == "add":
+                part += feature
+            elif action["type"] == "cut":
+                part -= feature
 
-            elif action["name"] == "sphere":
-                output.append(self._decode_sphere(action))
-
-        i = 0
-        while i < dif:
-            i = i + 1
-            output.append("}")
-
-        with scad_file.open("w+") as fh:
-            for out in output:
-                if type(out) is list:
-                    for small in out:
-                        fh.write(small)
-                        fh.write("\n")
-                else:
-                    fh.write(out)
-                    fh.write("\n")
-
-    def build_stl(self, scad_file: Path, stl_file: Path):
-        """Calls OpenSCAD to create a STL for the part.
-
-        Depending on the complexity of the object it can take long to compute.
-        It prints out some messages to the terminal so that the impatient user will hopefully wait.
-        Similar to many windows request.
-
-        Raises:
-            ValueError: If incorrect part_name is provided.
-
-        """
-        app_bin = self.get_appimage("OpenSCAD")
-        logging.info("!!! THIS WILL TAKE SOME TIME, BE PATIENT !!! using %s", app_bin)
-        result = subprocess.run([app_bin, "-o", stl_file, scad_file], capture_output=True, text=True, check=False)
-
-        if result.stdout:
-            logging.info("OpenSCAD: %s", result.stdout)
-        if result.stderr:
-            logging.error("OpenSCAD: %s", result.stderr)
+        print(f"Save {self.name} to {stl_file}")
+        build123d.export_stl(to_export=part, file_path=stl_file)
+        build123d.export_gltf(to_export=part, file_path=f"{stl_file}.gltf")
+        build123d.export_step(to_export=part, file_path=f"{stl_file}.step")
+        # exporter = build123d.ExportSVG(unit=build123d.Unit.MM, line_weight=0.5)
+        # exporter.add_layer("Layer 1", fill_color=(255, 0, 0), line_color=(0, 0, 255))
+        # exporter.add_shape(part, layer="Layer 1")
+        # exporter.write(f"{stl_file.stem}.svg")

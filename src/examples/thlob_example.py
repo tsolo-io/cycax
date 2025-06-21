@@ -37,7 +37,7 @@ class Thing(Cuboid):
         )
 
 
-class Blob(Print3D):  # ExternalPart):
+class Blob(Print3D):
     def __init__(self):
         super().__init__(part_no="Blob", x_size=10, y_size=10, z_size=10)
         self.calculate()
@@ -45,7 +45,7 @@ class Blob(Print3D):  # ExternalPart):
     def calculate(self):
         for x in [4, 6]:
             for y in [4, 6]:
-                self.bottom.hole(pos=[x, y], diameter=2)
+                self.bottom.hole(pos=(x, y), diameter=2)
 
 
 def main():
