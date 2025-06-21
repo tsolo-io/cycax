@@ -48,7 +48,7 @@ class CycadPart(Location):
         z_size: float,
         polygon: str,
         colour: str = "orange",
-        assembly: AssemblyEngine = None,
+        assembly: AssemblyEngine | None = None,
     ):
         super().__init__(x, y, z, side)
         self._name: str = ""
@@ -66,14 +66,14 @@ class CycadPart(Location):
         self.z_size = z_size
         self.features = []  # Stores all the holes to be cut
         self.move_holes = []
-        self.x_min: float = 0  # Location.Left
-        self.y_min: float = 0  # Location.Front
-        self.z_min: float = 0  # Location.Bottom
+        self.x_min: float = 0.0  # Location.Left
+        self.y_min: float = 0.0  # Location.Front
+        self.z_min: float = 0.0  # Location.Bottom
         self.x_max: float = self.x_size  # Location.Right
         self.y_max: float = self.y_size  # Location.Back
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
-        self.position = [0, 0, 0]
+        self.position = [0.0, 0.0, 0.0]
         self.rotation = []
         self.final_location = False
         self.initial_polygon = polygon
@@ -311,7 +311,7 @@ class CycadPart(Location):
 
     def make_bounding_box(self):
         """This bounding box will be used to help keep track of and update the bounds.
-        This method is used extensively in assemble to keep track of where the box "should" be after moving it around.
+        This method is used extensively in assembly to keep track of where the box "should" be after moving it around.
         """
 
         self.bounding_box = {
@@ -431,7 +431,8 @@ class CycadPart(Location):
             if self._base_path is None:
                 # If no path is given and we do not have a path set then use the local directory.
                 path = Path(".")
-        path = Path(path)
+        else:
+            path = Path(path)
         if not path.exists():
             path.mkdir(parents=False, exist_ok=True)
         self._base_path = path
@@ -628,12 +629,12 @@ class CycadPart(Location):
     def level(
         self,
         *,
-        left: LeftSide = None,
-        right: RightSide = None,
-        front: FrontSide = None,
-        back: BackSide = None,
-        top: TopSide = None,
-        bottom: BottomSide = None,
+        left: LeftSide | None = None,
+        right: RightSide | None = None,
+        front: FrontSide | None = None,
+        back: BackSide | None = None,
+        top: TopSide | None = None,
+        bottom: BottomSide | None = None,
         subtract: bool = False,
     ):
         """

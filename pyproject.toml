@@ -33,7 +33,7 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["httpx", "tenacity", "matplotlib", "pytest"]
+dependencies = ["httpx", "tenacity", "matplotlib", "pytest", "build123d"]
 
 [project.urls]
 Documentation = "https://github.com/tsolo-dev/cycax#readme"
