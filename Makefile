@@ -46,6 +46,7 @@ examples:
 	hatch run python3 ./src/examples/box.py
 	hatch run python3 ./src/examples/box_with_concubes.py
 	hatch run python3 ./src/examples/thlob_example.py
+	hatch run python3 ./src/examples/gear_factory.py
 
-gear:
+example/gear:
 	hatch run python3 ./src/examples/gear_factory.py

@@ -1,10 +1,12 @@
-"""A gear factory."""
+"""A gear factory.
+
+Note: It makes gear like things for now.
+"""
 
 import math
 
 from cycax.cycad import Print3D
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-from cycax.cycad.engines.part_server import PartEngineServer
 
 
 class Gear(Print3D):
@@ -31,6 +33,5 @@ class Gear(Print3D):
 if __name__ == "__main__":
     gear = Gear()
     gear.save("./build")
-    # cycax_server = PartEngineServer()
     cycax_server = PartEngineBuild123d()
     cycax_server.build(gear)
