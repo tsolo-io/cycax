@@ -499,7 +499,7 @@ class CycadPart(Location):
         if not edge:
             msg = "No edge defined"
             raise ValueError(msg)
-        if len(edge) != 2:
+        if len(edge) != 2:  # noqa: PLR2004 use of constant
             msg = "Only two edges are allowed"
             raise ValueError(msg)
         if edge[0] == edge[1]:
