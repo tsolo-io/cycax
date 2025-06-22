@@ -3,7 +3,36 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import hashlib
+import json
 from pathlib import Path
+
+
+def check_json_reference(json_file: Path, reference_file: str) -> bool:
+    """Check if a JSON file matches a reference file.
+
+    Args:
+        json_file: Path to the JSON file to check.
+        reference_file: Path to the reference JSON file.
+
+    Returns:
+        True if the files are equal, False otherwise.
+    """
+    dut = json.loads(json_file.read_text())
+    ref = json.loads((Path("./tests/references") / reference_file).read_text())
+    assert dut == ref, f"Data under test from {json_file} does not match reference"
+
+
+def check_stl_reference(stl_file: Path, reference_file: str) -> bool:
+    """Check if an STL file matches a reference file.
+
+    Args:
+        stl_file: Path to the STL file to check.
+        reference_file: Path to the reference STL file.
+
+    Returns:
+        True if the files are equal, False otherwise.
+    """
+    assert stl_compare(stl_file, Path("./tests/references") / reference_file)
 
 
 def stl_compare(file1: Path, file2: Path) -> bool:
