@@ -16,7 +16,7 @@ class CornerCube(Print3D):
         super().__init__(part_no="corner_cube", x_size=15, y_size=15, z_size=15, assembly=assembly)
 
     def definition(self):
-        """Calculate the concube."""
+        """Calculate the corner cube."""
         for side, pos in ((self.left, (5, 10)), (self.bottom, (10, 5)), (self.front, (10, 10))):
             side.hole(pos=pos, diameter=3.2, depth=2)
             side.hole(pos=pos, diameter=2.9, depth=10)  # Through everything

@@ -25,9 +25,10 @@ class AssemblyBuild123d(AssemblyEngine):
         self._children = []
 
     def add(self, part_operation: dict):
-        """Add the part to the assembly."""
+        """Add a part to the assembly."""
         name = part_operation["part_no"]
         part = None
+        # Import Step files of Parts
         ext = "step"  # Only work with step files. STL import create a face only, we need a solid.
         file3d = self._base_path / name / f"{name}.{ext}"
         if file3d.exists():
@@ -37,9 +38,13 @@ class AssemblyBuild123d(AssemblyEngine):
                 part = build123d.import_stl(file3d)
             logging.warning("Imported %s", file3d)
         if part is None:
-            msg = f"No file found for part {name}"
+            msg = (
+                f"No file found for part {name} - AssemblerBuild123d require STEP files,"
+                " please use an engine that produce STEP files."
+            )
             raise FileNotFoundError(msg)
 
+        # Rotate and shift the parts
         for rotate in part_operation["rotate"]:
             kwarg = {rotate["axis"].upper(): rotate["angle"]}
             part = build123d.Rotation(**kwarg) * part
@@ -52,12 +57,14 @@ class AssemblyBuild123d(AssemblyEngine):
             elif rotate["axis"] == "z":
                 part.move(build123d.Location((x, 0, 0)))
 
+        # Set the parts colour.
         colour = part_operation.get("colour")
         if colour:
             try:
                 part.color = build123d.Color(colour)
             except ValueError:
                 logging.warning("Using an incompatible color %s", colour)
+        # Position the part - final transformation
         cpart = build123d.Pos(*part_operation["position"]) * part
         cpart.name = part_operation["part_no"]
         # Last thing we do is set the label. Sometimes the label changed to COMPOUND if we do a transformation.
@@ -65,10 +72,9 @@ class AssemblyBuild123d(AssemblyEngine):
         self._children.append(cpart)
 
     def build(self, path: Path | None = None):
-        """Create the assembly of the parts added."""
+        """Create the assembly."""
         if path is not None:
             self._base_path = path
-        # TODO: Save the assembly.
         if len(self._children) == 0:
             self._children.append(build123d.Sphere(10))  # The Sphere of emptiness
             logging.error("No parts added to the assembly - We added a sphere for you")
