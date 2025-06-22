@@ -5,6 +5,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from cycax.cycad import Assembly, Print3D, SheetMetal
+from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
+from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 
 
 class ConnCube(Print3D):
@@ -106,7 +108,7 @@ def main():
         box.add(cubes[cube])
 
     box.save("./build/box_with_concubes")
-    box.render()
+    box.build(engine=AssemblyBuild123d(box.name), part_engines=[PartEngineBuild123d()])
 
 
 if __name__ == "__main__":

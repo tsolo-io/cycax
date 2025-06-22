@@ -35,9 +35,9 @@ class PartEngineBuild123d(PartEngine):
                 * feature
             )
             if feature_spec.get("side") == TOP:
-                    feature = build123d.Pos(0, 0, -feature_spec["z_size"]) * feature
+                feature = build123d.Pos(0, 0, -feature_spec["z_size"]) * feature
             elif feature_spec.get("side") == BACK:
-                    feature = build123d.Pos(0, -feature_spec["y_size"], 0) * feature
+                feature = build123d.Pos(0, -feature_spec["y_size"], 0) * feature
             # TODO: The rest of the sides needs to be checked
         return feature
 
@@ -135,14 +135,10 @@ class PartEngineBuild123d(PartEngine):
 
         self.name = part.part_no
         self.set_path(part._base_path)
-        str_file = self._base_path / self.name / f"{self.name}.stl"
+        file_no_ext = self._base_path / self.name / f"{self.name}"
         data = json.loads(self._json_file.read_text())
-        self._build(data, str_file)
-        _files = [
-            {"file": str_file},
-        ]
-
-        return self.file_list(files=_files, engine="Build123d", score=3)
+        files = self._build(data, file_no_ext)
+        return self.file_list(files=files, engine="Build123d", score=3)
 
     def get_plane(self, part, side: str) -> build123d.Plane:
         if side is None:
@@ -156,7 +152,7 @@ class PartEngineBuild123d(PartEngine):
             if plane.z_dir == ref_plane.z_dir:
                 return plane
 
-    def _build(self, definition: dict, stl_file: Path):
+    def _build(self, definition: dict, file_no_ext: Path) -> list[Path]:
         """
         This is the main working class for decoding the scad. It is necessary for it to be refactored.
 
@@ -189,6 +185,11 @@ class PartEngineBuild123d(PartEngine):
             elif action["type"] == "cut":
                 part -= feature
 
-        build123d.export_stl(to_export=part, file_path=stl_file)
-        build123d.export_gltf(to_export=part, file_path=f"{stl_file}.gltf")
-        build123d.export_step(to_export=part, file_path=f"{stl_file}.step")
+        files = []
+        build123d.export_stl(to_export=part, file_path=file_no_ext.with_suffix(".stl"))
+        files.append({"file": file_no_ext.with_suffix(".stl"), "type": "stl"})
+        build123d.export_gltf(to_export=part, file_path=file_no_ext.with_suffix(".gltf"))
+        files.append({"file": file_no_ext.with_suffix(".gltf"), "type": "gltf"})
+        build123d.export_step(to_export=part, file_path=file_no_ext.with_suffix(".step"))
+        files.append({"file": file_no_ext.with_suffix(".step"), "type": "step"})
+        return files

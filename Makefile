@@ -50,3 +50,6 @@ examples:
 
 example/gear:
 	hatch run python3 ./src/examples/gear_factory.py
+
+example/box:
+	hatch run python3 ./src/examples/box_with_concubes.py
