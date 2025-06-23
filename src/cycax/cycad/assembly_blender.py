@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 
 

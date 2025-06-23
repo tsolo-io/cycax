@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from cycax.cycad import SheetMetal
-from tests.shared import hex_code_check, stl_compare
+from tests.shared import check_json_reference, check_stl_reference, hex_code_check, stl_compare
 
 
 def fancy_edge(tmp_path: Path, edge_type: str, part_no: str):
@@ -38,28 +38,16 @@ def test_edge_round(tmp_path: Path):
         ext=".scad",
         hex_code="18a554a0aae5b37ec09fcf68ce3ae153cb19ebf261f4be092636e5ddacc28fd0",
     )
-
-    hex_code_check(
-        tmp_path=tmp_path,
-        filename="sheet_round",
-        ext=".json",
-        hex_code="b224c64efdd0f82f092af986a21f20c9a67c2b0c99cbda2955e69a018715d26c",
-    )
+    check_json_reference(tmp_path / "sheet_round" / "sheet_round.json", "sheet_round.json")
 
 
 def test_edge_chamfer(tmp_path: Path):
     fancy_edge(tmp_path, edge_type="chamfer", part_no="sheet_chamfer")
-    assert stl_compare(tmp_path / "sheet_chamfer" / "sheet_chamfer.stl", Path("./tests/references/sheet_chamfer.stl"))
+    check_stl_reference(tmp_path / "sheet_chamfer" / "sheet_chamfer.stl", "sheet_chamfer.stl")
     hex_code_check(
         tmp_path=tmp_path,
         filename="sheet_chamfer",
         ext=".scad",
         hex_code="d7c03ff389ae4fef7776d92c36c5db48e162714b60e94d3334415bfdb7a6d94b",
     )
-
-    hex_code_check(
-        tmp_path=tmp_path,
-        filename="sheet_chamfer",
-        ext=".json",
-        hex_code="57e6bbe2ce79d236b6d361d3fdfaad7ffc308d16025a0123ae0a0b8325e78d9c",
-    )
+    check_json_reference(tmp_path / "sheet_chamfer" / "sheet_chamfer.json", "sheet_chamfer.json")
