@@ -55,7 +55,7 @@ class Simple2D(PartEngine):
         """
         action = feature.get("type")
         if action == "add":
-            return {"color": "grey", "edgecolor": "grey", "alpha": 0.6}
+            return {"color": "gray", "edgecolor": "gray", "alpha": 0.6}
         elif action == "cut":
             return {"color": "red", "edgecolor": "red", "alpha": 0.4}
         elif action == "outline":

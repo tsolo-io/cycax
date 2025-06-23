@@ -245,9 +245,9 @@ class PartEngineOpenSCAD(PartEngine):
                 self.build_stl(scad_file, stl_file)
 
         _files = [
-            {"file": self._base_path / self.name / f"{self.name}.scad"},
-            {"file": self._base_path / self.name / f"{self.name}.stl"},
-            {"file": self._base_path / self.name / f"{self.name}.openscad.stl"},
+            {"file": self._base_path / name / f"{name}.scad"},
+            {"file": self._base_path / name / f"{name}.stl"},
+            {"file": self._base_path / name / f"{name}.openscad.stl"},
         ]
 
         return self.file_list(files=_files, engine="OpenSCAD", score=3)

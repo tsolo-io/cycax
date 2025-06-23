@@ -46,7 +46,7 @@ class PartEngine:
         if not self._json_file.exists():
             raise FileNotFoundError(self._json_file)
 
-    def get_appimage(self, name) -> Path:
+    def get_appimage(self, name) -> Path | None:
         paths = ["~/Applications", self._base_path]
         appimage = None
         for p in paths:
