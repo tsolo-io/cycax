@@ -128,6 +128,7 @@ class CycadSide:
         sink: float = 0,
         *,
         center: bool = False,
+        external_subtract: bool = False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -138,6 +139,8 @@ class CycadSide:
             depth: The depth of the box, if not specified will drill all the way through the box.
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
+            external_subtract: The box will only be transferred onto other surfaces.
+                When set to True the box will not be cut from the main object.
         """
         _depth = self._depth_check(depth)
         if center is True:
@@ -155,6 +158,7 @@ class CycadSide:
             y_size=_box_dimensions[1],
             z_size=_box_dimensions[2],
             center=center,
+            external_subtract=external_subtract,
         )
 
     def nut(
