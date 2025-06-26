@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+import logging
+import typing
 from pathlib import Path
 
 import build123d
@@ -15,6 +17,8 @@ class PartEngineBuild123d(PartEngine):
     """
     Decode a JSON and render with Build123d.
     """
+
+    jobs: typing.ClassVar[dict[str, dict]] = {}
 
     def _decode_cube(self, feature_spec: dict) -> build123d.objects_part.Box:
         """
@@ -133,11 +137,16 @@ class PartEngineBuild123d(PartEngine):
     def build(self, part) -> list:
         """Create the output files for the part."""
 
-        self.name = part.part_no
-        self.set_path(part._base_path)
-        file_no_ext = self._base_path / self.name / f"{self.name}"
-        data = json.loads(self._json_file.read_text())
-        files = self._build(data, file_no_ext)
+        self.name = name = part.part_no
+        files = []
+        files = self.jobs.get(name, [])
+        if not files:
+            logging.info("Building part %s", name)
+            self.set_path(part._base_path)
+            file_no_ext = self._base_path / name / f"{name}"
+            data = json.loads(self._json_file.read_text())
+            files = self._build(data, file_no_ext)
+            self.jobs[name] = files
         return self.file_list(files=files, engine="Build123d", score=3)
 
     def get_plane(self, part, side: str) -> build123d.Plane:

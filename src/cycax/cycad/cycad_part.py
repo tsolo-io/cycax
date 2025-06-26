@@ -283,6 +283,7 @@ class CycadPart(Location):
         z_size: float,
         *,
         center=False,
+        external_subtract: bool = False,
     ):
         """This method will cut a block out of the CycadPart.
 
@@ -295,6 +296,7 @@ class CycadPart(Location):
             y_size : The size of y of rectangle.
             z_size : The size of z of rectangle.
             center : This can be overridden if you would like object centered at origin.
+            external_subtract: This feature will be cut from other parts.
         """
 
         temp_rect = RectangleCutOut(
@@ -307,7 +309,10 @@ class CycadPart(Location):
             z_size=z_size,
             center=center,
         )
-        self.features.append(temp_rect)
+        if external_subtract:
+            self.move_holes.append(temp_rect)
+        else:
+            self.features.append(temp_rect)
 
     def make_bounding_box(self):
         """This bounding box will be used to help keep track of and update the bounds.
