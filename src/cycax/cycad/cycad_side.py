@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
+
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
@@ -17,7 +19,9 @@ class CycadSide:
     def __repr__(self):
         return "Side: " + self.name
 
-    def _location_calc(self, pos: tuple[float, float], sink: float = 0.0) -> tuple[float, float, float]:
+    def _location_calc(
+        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+    ) -> tuple[float, float, float]:
         """Location is calculated for the (x, y) plain using two values and a side.
 
         Args:
@@ -27,9 +31,11 @@ class CycadSide:
         Returns:
             The (x, y, z) location of an object.
         """
-        raise ValueError("_location_calc is Not implemented on" + self.name)
+        logging.debug("Call _location_calc(pos=%s, sink=%s, length=%s, width=%s)", pos, sink, length, width)
+        msg = f"_location_calc is Not implemented on {self.name}"
+        raise ValueError(msg)
 
-    def _depth_check(self, val: float | None = None) -> float:
+    def _depth_check(self, val: float | None = None) -> float:  # noqa: ARG002 Unused argument
         """Determine the depth of a feature.
 
         Args:
@@ -122,6 +128,7 @@ class CycadSide:
         sink: float = 0,
         *,
         center: bool = False,
+        external_subtract: bool = False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -132,6 +139,8 @@ class CycadSide:
             depth: The depth of the box, if not specified will drill all the way through the box.
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
+            external_subtract: The box will only be transferred onto other surfaces.
+                When set to True the box will not be cut from the main object.
         """
         _depth = self._depth_check(depth)
         if center is True:
@@ -149,6 +158,7 @@ class CycadSide:
             y_size=_box_dimensions[1],
             z_size=_box_dimensions[2],
             center=center,
+            external_subtract=external_subtract,
         )
 
     def nut(
@@ -249,7 +259,11 @@ class LeftSide(CycadSide):
     name = LEFT
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_min + sink
         temp_y = self._parent.y_max - pos[0] - length
@@ -276,14 +290,18 @@ class RightSide(CycadSide):
     name = RIGHT
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - sink
         temp_y = pos[0]
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
-    def _depth_check(self, val: float) -> float:
+    def _depth_check(self, val: float | None = None) -> float:
         if val is None:
             return self._parent.x_size
         else:
@@ -303,7 +321,11 @@ class TopSide(CycadSide):
     name = TOP
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 1.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = pos[1]
@@ -330,7 +352,11 @@ class BottomSide(CycadSide):
     name = BOTTOM
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 0.0,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_max - pos[1] - width
@@ -357,7 +383,11 @@ class FrontSide(CycadSide):
     name = FRONT
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,  # noqa: ARG002 Unused argument
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_min + sink
@@ -384,7 +414,11 @@ class BackSide(CycadSide):
     name = BACK
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,
+        width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_max - pos[0] - length
         temp_y = self._parent.y_max - sink

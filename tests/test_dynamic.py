@@ -118,36 +118,36 @@ def test_dynamic():
     assert box.export() == {
         "name": "box",
         "parts": [
-            {"part_no": "top", "position": [0, 0, 0], "rotate": [], "rotmax": [100, 100, 2], "colour": "grey"},
+            {"part_no": "top", "position": [0, 0, 0], "rotate": [], "rotmax": [100, 100, 2], "colour": "gray"},
             {
                 "part_no": "side",
                 "position": [-2, -2, 0],
                 "rotate": [{"axis": "y", "angle": 90}],
                 "rotmax": [100, 104, 2],
-                "colour": "grey",
+                "colour": "gray",
             },
             {
                 "part_no": "side",
                 "position": [100, -2, 0],
                 "rotate": [{"axis": "y", "angle": 90}],
                 "rotmax": [100, 104, 2],
-                "colour": "grey",
+                "colour": "gray",
             },
             {
                 "part_no": "front",
                 "position": [0, -2, 0],
                 "rotate": [{"axis": "x", "angle": 90}],
                 "rotmax": [100, 100, 2],
-                "colour": "grey",
+                "colour": "gray",
             },
             {
                 "part_no": "front",
                 "position": [0, 100, 0],
                 "rotate": [{"axis": "x", "angle": 90}],
                 "rotmax": [100, 100, 2],
-                "colour": "grey",
+                "colour": "gray",
             },
-            {"part_no": "top", "position": [0, 0, 98], "rotate": [], "rotmax": [100, 100, 2], "colour": "grey"},
+            {"part_no": "top", "position": [0, 0, 98], "rotate": [], "rotmax": [100, 100, 2], "colour": "gray"},
             {
                 "part_no": "con_cube",
                 "position": [89, 0, 2],

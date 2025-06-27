@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 .ONESHELL: # Run all the commands in the same shell
-.PHONY: docs
+.PHONY: docs examples
 .DEFAULT_GOAL := help
 
 help:
@@ -39,3 +39,17 @@ docs-open:  ## Open the documentation
 
 parts:
 	hatch run python ./src/cycax/parts/main.py
+
+examples:
+	mkdir -p ./build
+	hatch run python3 ./src/examples/beveled_edges.py
+	hatch run python3 ./src/examples/box.py
+	hatch run python3 ./src/examples/box_with_concubes.py
+	hatch run python3 ./src/examples/thlob_example.py
+	hatch run python3 ./src/examples/gear_factory.py
+
+example/gear:
+	hatch run python3 ./src/examples/gear_factory.py
+
+example/box:
+	hatch run python3 ./src/examples/box_with_concubes.py

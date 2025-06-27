@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from cycax.cycad import SheetMetal
-from tests.shared import hex_code_check
+from tests.shared import check_json_reference, check_stl_reference, hex_code_check, stl_compare
 
 
 def fancy_edge(tmp_path: Path, edge_type: str, part_no: str):
@@ -17,7 +17,7 @@ def fancy_edge(tmp_path: Path, edge_type: str, part_no: str):
     edges = combinations(("LEFT", "RIGHT", "FRONT", "BACK", "TOP", "BOTTOM"), 2)
     for edge in edges:
         if edge in (("LEFT", "RIGHT"), ("TOP", "BOTTOM"), ("FRONT", "BACK")):
-            with pytest.raises(Exception):
+            with pytest.raises(Exception):  # noqa: B017 cat the base exception in the test we have not decided on custom exceptions.
                 sheet.beveled_edge(edge_type=edge_type, side1=edge[0], side2=edge[1], size=3)
         else:
             sheet.beveled_edge(edge_type=edge_type, side1=edge[0], side2=edge[1], size=3)
@@ -27,53 +27,27 @@ def fancy_edge(tmp_path: Path, edge_type: str, part_no: str):
     sheet.render("freecad")
 
 
-def test_edge(tmp_path: Path):
+def test_edge_round(tmp_path: Path):
     # This test checks that the two designs of beveled edges are being produced as they should.
 
     fancy_edge(tmp_path, edge_type="round", part_no="sheet_round")
-    fancy_edge(tmp_path, edge_type="chamfer", part_no="sheet_chamfer")
-
+    assert stl_compare(tmp_path / "sheet_round" / "sheet_round.stl", Path("./tests/references/sheet_round.stl"))
     hex_code_check(
         tmp_path=tmp_path,
         filename="sheet_round",
         ext=".scad",
         hex_code="18a554a0aae5b37ec09fcf68ce3ae153cb19ebf261f4be092636e5ddacc28fd0",
     )
+    check_json_reference(tmp_path / "sheet_round" / "sheet_round.json", "sheet_round.json")
 
-    hex_code_check(
-        tmp_path=tmp_path,
-        filename="sheet_round",
-        ext=".stl",
-        hex_codes=[
-            "cf0f9c6a51c52f13977b6338c809a8ccd37643b5b937367cf0f329a5a02705cd",
-            "31e8b431facaf2b32a2a130a086d5d44cfecf14da531b7488f8c5c2d6484a4fb",
-        ],
-    )
 
-    hex_code_check(
-        tmp_path=tmp_path,
-        filename="sheet_round",
-        ext=".json",
-        hex_code="b224c64efdd0f82f092af986a21f20c9a67c2b0c99cbda2955e69a018715d26c",
-    )
-
+def test_edge_chamfer(tmp_path: Path):
+    fancy_edge(tmp_path, edge_type="chamfer", part_no="sheet_chamfer")
+    check_stl_reference(tmp_path / "sheet_chamfer" / "sheet_chamfer.stl", "sheet_chamfer.stl")
     hex_code_check(
         tmp_path=tmp_path,
         filename="sheet_chamfer",
         ext=".scad",
         hex_code="d7c03ff389ae4fef7776d92c36c5db48e162714b60e94d3334415bfdb7a6d94b",
     )
-
-    hex_code_check(
-        tmp_path=tmp_path,
-        filename="sheet_chamfer",
-        ext=".stl",
-        hex_code="4bbcee334a5b95c759574e47b8960ecba076584ba1343ba839aa9f15745fbf8d",
-    )
-
-    hex_code_check(
-        tmp_path=tmp_path,
-        filename="sheet_chamfer",
-        ext=".json",
-        hex_code="57e6bbe2ce79d236b6d361d3fdfaad7ffc308d16025a0123ae0a0b8325e78d9c",
-    )
+    check_json_reference(tmp_path / "sheet_chamfer" / "sheet_chamfer.json", "sheet_chamfer.json")

@@ -48,7 +48,7 @@ class CycadPart(Location):
         z_size: float,
         polygon: str,
         colour: str = "orange",
-        assembly: AssemblyEngine = None,
+        assembly: AssemblyEngine | None = None,
     ):
         super().__init__(x, y, z, side)
         self._name: str = ""
@@ -66,14 +66,14 @@ class CycadPart(Location):
         self.z_size = z_size
         self.features = []  # Stores all the holes to be cut
         self.move_holes = []
+        self.x_min: float = 0.0  # Location.Left
+        self.y_min: float = 0.0  # Location.Front
+        self.z_min: float = 0.0  # Location.Bottom
         self.x_max: float = self.x_size  # Location.Right
-        self.x_min: float = 0  # Location.Left
-        self.y_min: float = 0  # Location.Front
         self.y_max: float = self.y_size  # Location.Back
-        self.z_min: float = 0  # Location.Bottom
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
-        self.position = [0, 0, 0]
+        self.position = [0.0, 0.0, 0.0]
         self.rotation = []
         self.final_location = False
         self.initial_polygon = polygon
@@ -154,7 +154,8 @@ class CycadPart(Location):
         """
 
         # TODO: Require cone shape cut.
-        raise NotImplementedError("The adding of counterdrill to a side has not been implemented.")
+        msg = "The adding of counterdrill to a side has not been implemented."
+        raise NotImplementedError(msg)
 
     def make_hole(
         self,
@@ -282,6 +283,7 @@ class CycadPart(Location):
         z_size: float,
         *,
         center=False,
+        external_subtract: bool = False,
     ):
         """This method will cut a block out of the CycadPart.
 
@@ -294,6 +296,7 @@ class CycadPart(Location):
             y_size : The size of y of rectangle.
             z_size : The size of z of rectangle.
             center : This can be overridden if you would like object centered at origin.
+            external_subtract: This feature will be cut from other parts.
         """
 
         temp_rect = RectangleCutOut(
@@ -306,11 +309,14 @@ class CycadPart(Location):
             z_size=z_size,
             center=center,
         )
-        self.features.append(temp_rect)
+        if external_subtract:
+            self.move_holes.append(temp_rect)
+        else:
+            self.features.append(temp_rect)
 
     def make_bounding_box(self):
         """This bounding box will be used to help keep track of and update the bounds.
-        This method is used extensively in assemble to keep track of where the box "should" be after moving it around.
+        This method is used extensively in assembly to keep track of where the box "should" be after moving it around.
         """
 
         self.bounding_box = {
@@ -418,7 +424,7 @@ class CycadPart(Location):
             raise ValueError(msg)
         return self._base_path / self.part_no
 
-    def save(self, path: Path | None = None):
+    def save(self, path: Path | str | None = None):
         """
         Save the part specification to a JSON file.
 
@@ -430,11 +436,11 @@ class CycadPart(Location):
             if self._base_path is None:
                 # If no path is given and we do not have a path set then use the local directory.
                 path = Path(".")
-        elif not path.exists():
-            msg = f"The directory {path} does not exists."
-            raise FileNotFoundError(msg)
         else:
-            self._base_path = path
+            path = Path(path)
+        if not path.exists():
+            path.mkdir(parents=False, exist_ok=True)
+        self._base_path = path
 
         dir_name = self.path
         dir_name.mkdir(exist_ok=True)
@@ -496,8 +502,19 @@ class CycadPart(Location):
                     RIGHT: "x",
                 }[side]
             )
-        assert edge[0] != edge[1], f"Cannot use {side1} and {side2}"
-        assert edge_type in ["round", "chamfer"], "You need to specify the edge type as either round or chamfer."
+        if not edge:
+            msg = "No edge defined"
+            raise ValueError(msg)
+        if len(edge) != 2:  # noqa: PLR2004 use of constant
+            msg = "Only two edges are allowed"
+            raise ValueError(msg)
+        if edge[0] == edge[1]:
+            msg = "Cannot use the same edge"
+            raise ValueError(msg)
+        supported_edge_types = ["round", "chamfer"]
+        if edge_type not in supported_edge_types:
+            msg = f"You need to specify the edge type as one of {supported_edge_types}."
+            raise ValueError(msg)
         if "x" not in edge:
             side = "LEFT"
             depth = self.bounding_box["RIGHT"]
@@ -522,7 +539,9 @@ class CycadPart(Location):
 
     def render(self, engine: str = "Preview3D", engine_config: dict | None = None) -> dict:
         """This class will render the necessary diagrams when called with the following methods.
-        It is invoked by CycadPart and can be called: CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
+
+        It is invoked by CycadPart and can be called:
+        CycadPart.render(engine="simple2D", engine_config={"side": "left"}).
 
         Args:
             engine: Name of the engine to use.
@@ -577,7 +596,7 @@ class CycadPart(Location):
         """
         return engine.build(self)
 
-    def get_name(self, default: str = None):
+    def get_name(self, default: str | None = None):
         """Return the part name, if the part has not been named generate a name.
 
         The part name (or ID) is distict from the part_no or part number.
@@ -615,12 +634,12 @@ class CycadPart(Location):
     def level(
         self,
         *,
-        left: LeftSide = None,
-        right: RightSide = None,
-        front: FrontSide = None,
-        back: BackSide = None,
-        top: TopSide = None,
-        bottom: BottomSide = None,
+        left: LeftSide | None = None,
+        right: RightSide | None = None,
+        front: FrontSide | None = None,
+        back: BackSide | None = None,
+        top: TopSide | None = None,
+        bottom: BottomSide | None = None,
         subtract: bool = False,
     ):
         """
@@ -643,7 +662,9 @@ class CycadPart(Location):
             ValueError: When both front and back side is give.
             ValueError: When both top and bottom side is give.
         """
-        assert self.assembly, "The assembly has not been specified for this cycad part."
+        if not self.assembly:
+            msg = "The assembly has not been specified for this cycad part."
+            raise ValueError(msg)
 
         level_tasks = []
         if left is not None:
@@ -674,14 +695,14 @@ class CycadPart(Location):
             self.assembly.level(my_side, other_side)
 
         if subtract:
-            for my_side, other_side in level_tasks:
+            for _, other_side in level_tasks:
                 self.assembly.subtract(other_side, self)
 
     def rotate(self, actions: str):
         """Rotate the part several times.
 
-        Example: `CycadPart.rotate("xxyzyy")`
-        is the same as two `rotate_freeze_front`, `rotate_freeze_left`, `rotate_freeze_top`, and two `rotate_freeze_left`.
+        Example: `CycadPart.rotate("xxyzyy")` is the same as two `rotate_freeze_front`, `rotate_freeze_left`,
+        `rotate_freeze_top`, and two `rotate_freeze_left`.
         Where rotate_freeze_<side> results in one 90degrees counter clock wise rotations on the side.
 
         Args:

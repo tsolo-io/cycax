@@ -2,12 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import logging
 import time
 from pathlib import Path
 
 from cycax.cycad.engines.base_part_engine import PartEngine
-from cycax.cycad.engines.utils import check_source_hash
 
 
 class PartEngineLLL(PartEngine):

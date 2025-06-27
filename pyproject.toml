@@ -11,19 +11,29 @@ name = "cycax"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10.0, <3.14"
+
 license = "Apache-2.0"
 keywords = ["CAD", "CyCAx"]
-authors = [{ name = "Martin Slabber", email = "martin@tsolo.io" }]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
+authors = [
+    { name = "Helen Forbes", email = "helen@tsolo.io" },
+    { name = "Martin Slabber", email = "martin@tsolo.io" },
 ]
-dependencies = ["httpx", "tenacity", "matplotlib"]
+maintainers = [
+    { name = "Helen Forbes", email = "helen@tsolo.io" },
+    { name = "Martin Slabber", email = "martin@tsolo.io" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = ["httpx", "tenacity", "matplotlib", "pytest", "build123d"]
 
 [project.urls]
 Documentation = "https://github.com/tsolo-dev/cycax#readme"
@@ -34,95 +44,95 @@ Source = "https://github.com/tsolo-dev/cycax"
 path = "src/cycax/__about__.py"
 
 [tool.hatch.envs.default]
-dependencies = ["bpy"]
+dependencies = []
+
 [tool.hatch.envs.default.scripts]
 test-not-slow = "pytest -m \"not slow\" --exitfirst {args:tests}"
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest -m \"not ci_exclude\" --junitxml=reports/tests.xml {args:tests}"
 cov-report = [
-  "- coverage combine",
-  "coverage report",
-  "coverage xml -o reports/coverage.xml",
+    "- coverage combine",
+    "coverage report",
+    "coverage xml -o reports/coverage.xml",
 ]
 cov = ["test-cov", "cov-report"]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.10", "3.11"]
+python = ["3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.docs]
-dependencies = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
+dependencies = [
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.6.14",
+    "mkdocstrings[python]==0.29.1",
+]
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build --clean --strict"
 serve = "mkdocs serve --dev-addr localhost:8003"
 
 [tool.hatch.envs.lint]
 detached = true
-dependencies = ["black>=23.7.0", "mypy>=1.0.0", "ruff>=0.0.243", "typos"]
+dependencies = ["mypy==1.16.1", "ruff==0.12.0", "typos==1.33.1"]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/cycax tests}"
-style = ["ruff {args:.}", "black --check --diff {args:.}"]
+style = ["ruff check --fix {args:.}"]
 spell = "typos {args:.}"
-fmt = ["black {args:.}", "ruff check --fix {args:.}", "style"]
+fmt = ["ruff format {args:.}", "style"]
 all = ["style", "typing"]
-
 
 [tool.typos.default.extend-words]
 Pn = "Pn"
-
-[tool.black]
-target-version = ["py310"]
-line-length = 120
-skip-string-normalization = true
 
 [tool.ruff]
 target-version = "py310"
 line-length = 120
 lint.select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
+    "A",
+    "ARG",
+    "B",
+    "C",
+    "DTZ",
+    "E",
+    "EM",
+    "F",
+    "FBT",
+    "I",
+    "ICN",
+    "ISC",
+    "N",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "Q",
+    "RUF",
+    "S",
+    "T",
+    "TID",
+    "UP",
+    "W",
+    "YTT",
 ]
 lint.ignore = [
-  # Allow non-abstract empty methods in abstract base classes
-  "B027",
-  # Allow boolean positional values in function calls, like `dict.get(... True)`
-  "FBT003",
-  # Ignore checks for possible passwords
-  "S105",
-  "S106",
-  "S107",
-  # Ignore complexity
-  "C901",
-  "PLR0911",
-  "PLR0912",
-  "PLR0913",
-  "PLR0915",
+    # Allow non-abstract empty methods in abstract base classes
+    "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    "FBT003",
+    # Ignore checks for possible passwords
+    "S105",
+    "S106",
+    "S107",
+    "S603",
+    # Ignore complexity
+    "C901",
+    "PLR0911",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
 ]
 lint.unfixable = [
-  # Don't touch unused imports
-  "F401",
+    # Don't touch unused imports
+    "F401",
 ]
 
 [tool.ruff.lint.isort]
@@ -149,7 +159,7 @@ tests = ["tests", "*/cycax/tests"]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 [tool.pytest.ini_options]
 markers = [
-  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-  "ci_exclude: marks tests as not to run on CI (deselect with '-m \"not ci_exclude\"')",
-  "serial",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "ci_exclude: marks tests as not to run on CI (deselect with '-m \"not ci_exclude\"')",
+    "serial",
 ]

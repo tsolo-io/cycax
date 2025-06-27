@@ -28,7 +28,7 @@ class AssemblyOpenSCAD(AssemblyEngine):
         Args:
             part: The name of the part to be imported.
         """
-        stl_file = self._base_path / part / f"{part}.stl"
+        stl_file = Path(part) / f"{part}.stl"
         if not stl_file.exists():
             logging.warning("Referencing a file that does not exists. File name %s", stl_file)
         return f'import("{stl_file}");'
@@ -88,11 +88,17 @@ class AssemblyOpenSCAD(AssemblyEngine):
 
             elif item["axis"] == "z":
                 working = self._swap_xy_(rotation, 1, rotmax)
+            else:
+                msg = f"Invalid axis: {item['axis']}"
+                raise ValueError(msg)
 
             rotation = working[0]
             rotmax = working[1]
 
-        output = f"translate([{rotation[0] + float(position[0])}, {rotation[1] + float(position[1])}, {rotation[2] + float(position[2])}])"
+        tr_x = rotation[0] + float(position[0])
+        tr_y = rotation[1] + float(position[1])
+        tr_z = rotation[2] + float(position[2])
+        output = f"translate([{tr_x}, {tr_y}, {tr_z}])"
         output = output + rotout
         return output
 
@@ -117,7 +123,9 @@ class AssemblyOpenSCAD(AssemblyEngine):
         if path is not None:
             self._base_path = path
 
-        assert self._scad_ops, "No SCAD operations defined. Please call add() on the AssemblyEngine"
+        if not self._scad_ops:
+            msg = "No SCAD operations defined. Please call add() on the AssemblyEngine"
+            raise ValueError(msg)
         scad_file = self._base_path / f"{self.name}.scad"
         with scad_file.open("w") as scad_fh:
             for out in self._scad_ops:
