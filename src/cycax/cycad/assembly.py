@@ -125,7 +125,7 @@ class Assembly:
             part_engines: Instances of PartEngine to use on parts.
         """
 
-        if engine is not None:
+        if engine:
             engine.set_name(self.name)
             engine.set_path(self._base_path)
         else:
@@ -147,7 +147,6 @@ class Assembly:
             # The build step is a collect/download step.
             # Build the parts.
             with Pool() as pool:
-                # pool.map(lambda part: part.build(engine=part_engines[0]), unique_parts.values())
                 for part in unique_parts.values():
                     for part_engine in part_engines:
                         data_files = pool.apply(self._run_build_in_parallel,(part_engine, part, self._base_path))
@@ -155,7 +154,7 @@ class Assembly:
         else:
             logging.warning("No Part engines given. No Parts created.")
 
-        if engine is not None:
+        if engine:
             data = self.export()
             for action in data["parts"]:
                 engine.add(action)
