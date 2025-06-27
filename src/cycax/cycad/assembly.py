@@ -7,8 +7,8 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
+from multiprocessing import Pool
 
-# from cycax.cycad.assembly_blender import AssemblyBlender
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
@@ -100,6 +100,58 @@ class Assembly:
                     part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
                     data_files = part.build(engine=part_engine)
                     self._part_files[part.part_no] = data_files
+        else:
+            logging.warning("No Part engines given. No Parts created.")
+
+        if engine is not None:
+            data = self.export()
+            for action in data["parts"]:
+                engine.add(action)
+            engine.build()
+
+
+    def _run_build_in_parallel(self, part_engine: PartEngine, part: dict, worker_path: Path):
+        logging.info("Building part %s in parallel", part.part_no)
+        part_engine.new(part.part_no, worker_path)
+        part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
+        data_files = part.build(engine=part_engine)
+        return data_files
+
+    def build_in_parallel(self, engine: AssemblyEngine | None = None, part_engines: list[PartEngine] | None = None):
+        """Create the parts defined in the assembly and assemble.
+
+        Args:
+            engine: Instance of AssemblyEngine to use.
+            part_engines: Instances of PartEngine to use on parts.
+        """
+
+        if engine is not None:
+            engine.set_name(self.name)
+            engine.set_path(self._base_path)
+        else:
+            logging.warning("No assembly engine specified. No assembly output.")
+
+        if part_engines is not None:
+            unique_parts = {}
+            # Create the Parts.
+            for part in self.parts.values():
+                if part.part_no not in unique_parts:
+                    unique_parts[part.part_no] = part
+                    for part_engine in part_engines:
+                        part_engine.create(part)
+                else:
+                    logging.warning("The part %s is already processed", part.part_no)
+
+            # For asyncrounouse build environments, e.g. CyCAx Server and LinkLocation
+            # Creation on the Part in the Engine will start the build in the background.
+            # The build step is a collect/download step.
+            # Build the parts.
+            with Pool() as pool:
+                # pool.map(lambda part: part.build(engine=part_engines[0]), unique_parts.values())
+                for part in unique_parts.values():
+                    for part_engine in part_engines:
+                        data_files = pool.apply(self._run_build_in_parallel,(part_engine, part, self._base_path))
+                        self._part_files[part.part_no] = data_files
         else:
             logging.warning("No Part engines given. No Parts created.")
 
