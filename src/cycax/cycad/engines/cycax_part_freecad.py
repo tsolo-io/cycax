@@ -146,6 +146,9 @@ class EngineFreecad:
             rotation2 = App.Rotation(Vector(0, 1, 0), 90)
         elif side == RIGHT:
             rotation2 = App.Rotation(Vector(0, 1, 0), 270)
+        else:
+            msg = "Invalid side"
+            raise ValueError(msg)
 
         nut.Placement = App.Placement(Vector(x, y, z), rotation2 * rotation1)
 
@@ -216,6 +219,9 @@ class EngineFreecad:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
         elif side == RIGHT:
             cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
+        else:
+            msg = "Invalid side"
+            raise ValueError(msg)
         return cyl
 
     def render_to_png(self, view: str | None = None):
@@ -325,6 +331,9 @@ class EngineFreecad:
             cube = Part.makeBox(length, depth, length, Vector(x, y, z))
         elif side in [LEFT, RIGHT]:
             cube = Part.makeBox(depth, length, length, Vector(x, y, z))
+        else:
+            msg = "Invalid side"
+            raise ValueError(msg)
 
         return cube
 
@@ -374,21 +383,21 @@ class EngineFreecad:
         """
 
         hypot = sqrt(features["size"] * 2 * features["size"] * 2 + features["size"] * 2 * features["size"] * 2) / 3
-        move_cutter_cyl = {"x": 0, "y": 0, "z": 0}
-        move_cutter_rhombus = {"x": 0, "y": 0, "z": 0}
-        move_cube = {"x": 0, "y": 0, "z": 0}
-        if features["bound1"] == 0:
+        move_cutter_cyl = {"x": 0.0, "y": 0.0, "z": 0.0}
+        move_cutter_rhombus = {"x": 0.0, "y": 0.0, "z": 0.0}
+        move_cube = {"x": 0.0, "y": 0.0, "z": 0.0}
+        if features["bound1"] == 0.0:
             move_cutter_cyl[features["axis1"]] = features["size"]
             move_cutter_rhombus[features["axis1"]] = hypot
-            move_cube[features["axis1"]] = 0
+            move_cube[features["axis1"]] = 0.0
         else:
             move_cutter_cyl[features["axis1"]] = features["bound1"] - features["size"]
             move_cutter_rhombus[features["axis1"]] = features["bound1"] - hypot
             move_cube[features["axis1"]] = features["bound1"] - features["size"]
-        if features["bound2"] == 0:
+        if features["bound2"] == 0.0:
             move_cutter_cyl[features["axis2"]] = features["size"]
             move_cutter_rhombus[features["axis2"]] = hypot
-            move_cube[features["axis2"]] = 0
+            move_cube[features["axis2"]] = 0.0
         else:
             move_cutter_cyl[features["axis2"]] = features["bound2"] - features["size"]
             move_cutter_rhombus[features["axis2"]] = features["bound2"] - hypot
@@ -403,6 +412,9 @@ class EngineFreecad:
             cutter = self._rhombus(
                 depth=features["depth"], length=features["size"], move=move_cutter_rhombus, side=features["side"]
             )
+        else:
+            msg = "Invalid edge type"
+            raise ValueError(msg)
 
         cube = self._beveled_edge_cube(
             length=features["size"], depth=features["depth"], side=features["side"], move=move_cube
