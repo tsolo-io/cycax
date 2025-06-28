@@ -138,20 +138,18 @@ class PartEngineBuild123d(PartEngine):
 
     def _decode_beveled_edge(self, feature_spec: dict):
         """
-        This method will return the string that will have the Build123d for a beveled edge.
+        Return the solid to subtract off the edge.
 
         Args:
             feature: This will be a dictionary containing the necessary information about the beveled edge.
 
-        Beveled Edge: {'name': 'beveled_edge', 'type': 'cut', 'edge_type': 'round', 'axis1': 'y', 'bound1': 0.0,
-                       'axis2': 'x', 'bound2': 0.0, 'size': 3, 'side': 'BOTTOM', 'depth': 2}
-        Beveled Edge: {'name': 'beveled_edge', 'type': 'cut', 'edge_type': 'round', 'axis1': 'y', 'bound1': 0.0,
-                       'axis2': 'x', 'bound2': 480, 'size': 3, 'side': 'BOTTOM', 'depth': 2}
-        Beveled Edge: {'name': 'beveled_edge', 'type': 'cut', 'edge_type': 'round', 'axis1': 'y', 'bound1': 85.9,
-                       'axis2': 'x', 'bound2': 0.0, 'size': 3, 'side': 'BOTTOM', 'depth': 2}
-        Beveled Edge: {'name': 'beveled_edge', 'type': 'cut', 'edge_type': 'round', 'axis1': 'y', 'bound1': 85.9,
-                       'axis2': 'x', 'bound2': 480, 'size': 3, 'side': 'BOTTOM', 'depth': 2}
-
+        Example:
+        feature_spec = {
+            'name': 'beveled_edge', 'type': 'cut', 'edge_type': 'round',
+            'axis1': 'y', 'bound1': 0.0,
+            'axis2': 'x', 'bound2': 0.0,
+            'size': 3, 'side': 'BOTTOM', 'depth': 2
+            }
         """
         action_cube = {
             "side": feature_spec["side"],
@@ -162,8 +160,8 @@ class PartEngineBuild123d(PartEngine):
             "y_size": feature_spec["depth"],
             "z_size": feature_spec["depth"],
         }
-        b1_cube = max(0, feature_spec["bound1"] - feature_spec["size"])
-        b2_cube = max(0, feature_spec["bound2"] - feature_spec["size"])
+        b1_cube = max(0.0, feature_spec["bound1"] - feature_spec["size"])
+        b2_cube = max(0.0, feature_spec["bound2"] - feature_spec["size"])
         action_cube[feature_spec["axis1"]] = b1_cube
         action_cube[f"{feature_spec['axis1']}_size"] = feature_spec["size"]
         action_cube[feature_spec["axis2"]] = b2_cube
@@ -174,7 +172,7 @@ class PartEngineBuild123d(PartEngine):
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
-            "diameter": feature_spec["size"] * 2,
+            "diameter": feature_spec["size"] * 2.0,
             "depth": feature_spec["depth"],
         }
         b1_cylinder = max(feature_spec["size"], feature_spec["bound1"] - feature_spec["size"])
@@ -232,7 +230,6 @@ class PartEngineBuild123d(PartEngine):
                     feature = self._decode_nut(action)
                 case "beveled_edge":
                     feature = self._decode_beveled_edge(action)
-                    # action["type"] = "add"
                 case _:
                     msg = f"Unknown feature type: {action['name']}"
                     raise ValueError(msg)
@@ -246,6 +243,9 @@ class PartEngineBuild123d(PartEngine):
                 part += feature
             elif action["type"] == "cut":
                 part -= feature
+            else:
+                msg = f"Unknown action type: {action['type']}"
+                raise ValueError(msg)
 
         files = []
         build123d.export_stl(to_export=part, file_path=file_no_ext.with_suffix(".stl"))
