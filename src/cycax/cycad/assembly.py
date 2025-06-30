@@ -6,8 +6,8 @@ import copy
 import json
 import logging
 from collections import defaultdict
-from pathlib import Path
 from multiprocessing import Pool
+from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
@@ -109,7 +109,6 @@ class Assembly:
                 engine.add(action)
             engine.build()
 
-
     def _run_build_in_parallel(self, part_engine: PartEngine, part: dict, worker_path: Path):
         logging.info("Building part %s in parallel", part.part_no)
         part_engine.new(part.part_no, worker_path)
@@ -149,7 +148,7 @@ class Assembly:
             with Pool() as pool:
                 for part in unique_parts.values():
                     for part_engine in part_engines:
-                        data_files = pool.apply(self._run_build_in_parallel,(part_engine, part, self._base_path))
+                        data_files = pool.apply(self._run_build_in_parallel, (part_engine, part, self._base_path))
                         self._part_files[part.part_no] = data_files
         else:
             logging.warning("No Part engines given. No Parts created.")
