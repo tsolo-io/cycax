@@ -5,7 +5,9 @@
 import copy
 import json
 import logging
+import os
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -109,12 +111,13 @@ class Assembly:
                 engine.add(action)
             engine.build()
 
-    def _run_build_in_parallel(self, part_engine: PartEngine, part: dict, worker_path: Path):
-        logging.info("Building part %s in parallel", part.part_no)
+    def _run_build_in_parallel(self, part_engine: PartEngine, part: dict, worker_path: Path) -> dict:
+        logging.info("Enter Building part %s in parallel: pid %s", part.part_no, os.getpid())
         part_engine.new(part.part_no, worker_path)
         part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
-        data_files = part.build(engine=part_engine)
-        return data_files
+        data_files = part_engine.build(part)
+        logging.info("Exit Part %s built in parallel: pid %s", part.part_no, os.getpid())
+        return {"part_no": part.part_no, "data_files": data_files}
 
     def build_in_parallel(self, engine: AssemblyEngine | None = None, part_engines: list[PartEngine] | None = None):
         """Create the parts defined in the assembly and assemble.
@@ -136,8 +139,8 @@ class Assembly:
             for part in self.parts.values():
                 if part.part_no not in unique_parts:
                     unique_parts[part.part_no] = part
-                    for part_engine in part_engines:
-                        part_engine.create(part)
+                    # for part_engine in part_engines:
+                    #     part_engine.create(part)
                 else:
                     logging.warning("The part %s is already processed", part.part_no)
 
@@ -145,11 +148,22 @@ class Assembly:
             # Creation on the Part in the Engine will start the build in the background.
             # The build step is a collect/download step.
             # Build the parts.
-            with Pool() as pool:
+            results = []
+            with ProcessPoolExecutor() as executor:
                 for part in unique_parts.values():
                     for part_engine in part_engines:
-                        data_files = pool.apply(self._run_build_in_parallel, (part_engine, part, self._base_path))
-                        self._part_files[part.part_no] = data_files
+                        results.append(executor.submit(self._run_build_in_parallel, part_engine, part, self._base_path))
+
+                for result in results:
+                    try:
+                        data_files = result.result()
+                        if data_files:
+                            if data_files.get("part_no") in self._part_files:
+                                self._part_files[data_files.get("part_no")].extend(data_files.get("data_files"))
+                            else:
+                                self._part_files[data_files.get("part_no")] = data_files.get("data_files")
+                    except Exception as error:
+                        logging.error("Error building part %s", error)
         else:
             logging.warning("No Part engines given. No Parts created.")
 
