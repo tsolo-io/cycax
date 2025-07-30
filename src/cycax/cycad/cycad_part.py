@@ -16,7 +16,7 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut, SphereCutOut
+from cycax.cycad.features import Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -386,38 +386,36 @@ class CycadPart(Location):
             self.z_max = z + z_size
             self.position[2] = z
 
-    def insert_hole(self, hole: Holes):
+    def insert_feature(self, feature: Feature):
         """This method will be used for inserting the hole into an object.
 
         Args:
             hole: hole to be inserted.
         """
-
+        # TODO: Maybe rename no subtract feature.
+        # NOTE: Issues exist when subtracting rectangles from back of part.
         if self.position[0] != 0.0:
-            hole.move(x=-self.position[0])
+            feature.move(x=-self.position[0])
         if self.position[1] != 0.0:
-            hole.move(y=-self.position[1])
+            feature.move(y=-self.position[1])
         if self.position[2] != 0.0:
-            hole.move(z=-self.position[2])
+            feature.move(z=-self.position[2])
 
-        working_rotate = copy.deepcopy(self.rotation)
         rotation = [self.x_max - self.x_min, self.y_max - self.y_min, self.z_max - self.z_min]
-        while len(working_rotate) > 0:
-            rot = working_rotate.pop()
+        for rot in self.rotation:
             if rot["axis"] == "x":
-                rotation = hole.swap_yz(3, rotation)
+                rotation = feature.swap_yz(3, rotation)
             elif rot["axis"] == "y":
-                rotation = hole.swap_xz(3, rotation)
+                rotation = feature.swap_xz(3, rotation)
             elif rot["axis"] == "z":
-                rotation = hole.swap_xy(3, rotation)
-        if hole.side in (TOP, BOTTOM):
-            hole.depth = self.z_size
-        elif hole.side in (LEFT, RIGHT):
-            hole.depth = self.x_size
-        elif hole.side in (FRONT, BACK):
-            hole.depth = self.y_size
-        self.features.append(hole)
-        self.move_holes.append(hole)
+                rotation = feature.swap_xy(3, rotation)
+        if feature.side in (TOP, BOTTOM):
+            feature.depth = self.z_size
+        elif feature.side in (LEFT, RIGHT):
+            feature.depth = self.x_size
+        elif feature.side in (FRONT, BACK):
+            feature.depth = self.y_size
+        self.features.append(feature)
 
     @property
     def path(self):
