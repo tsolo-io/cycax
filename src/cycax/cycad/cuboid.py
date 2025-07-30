@@ -4,6 +4,7 @@
 
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cycad_part import CycadPart
+from cycax.cycad.location import BOTTOM
 
 
 class Cuboid(CycadPart):
@@ -29,10 +30,10 @@ class Cuboid(CycadPart):
         colour: str = "pink",
     ):
         super().__init__(
-            x=0,
-            y=0,
-            z=0,
-            side=None,
+            x=0.0,
+            y=0.0,
+            z=0.0,
+            side=BOTTOM,
             part_no=part_no,
             x_size=x_size,
             y_size=y_size,

@@ -2,14 +2,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 import copy
 import json
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
-from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
@@ -17,6 +19,9 @@ from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.features import Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
+
+if TYPE_CHECKING:
+    from cycax.cycad.assembly import Assembly
 
 
 class CycadPart(Location):
@@ -48,7 +53,7 @@ class CycadPart(Location):
         z_size: float,
         polygon: str,
         colour: str = "orange",
-        assembly: AssemblyEngine | None = None,
+        assembly: Assembly | None = None,
     ):
         super().__init__(x, y, z, side)
         self._name: str = ""
@@ -388,11 +393,11 @@ class CycadPart(Location):
             hole: hole to be inserted.
         """
 
-        if self.position[0] != 0:
+        if self.position[0] != 0.0:
             hole.move(x=-self.position[0])
-        if self.position[1] != 0:
+        if self.position[1] != 0.0:
             hole.move(y=-self.position[1])
-        if self.position[2] != 0:
+        if self.position[2] != 0.0:
             hole.move(z=-self.position[2])
 
         working_rotate = copy.deepcopy(self.rotation)
@@ -436,10 +441,12 @@ class CycadPart(Location):
             if self._base_path is None:
                 # If no path is given and we do not have a path set then use the local directory.
                 path = Path(".")
+            else:
+                path = self._base_path
         else:
             path = Path(path)
-        if not path.exists():
-            path.mkdir(parents=False, exist_ok=True)
+            if not path.exists():
+                path.mkdir(parents=False, exist_ok=True)
         self._base_path = path
 
         dir_name = self.path
@@ -491,7 +498,7 @@ class CycadPart(Location):
         """
         edge = []
         self.make_bounding_box()
-        for side in [side1, side2]:
+        for side in (side1, side2):
             edge.append(
                 {
                     TOP: "z",
@@ -511,19 +518,22 @@ class CycadPart(Location):
         if edge[0] == edge[1]:
             msg = "Cannot use the same edge"
             raise ValueError(msg)
-        supported_edge_types = ["round", "chamfer"]
+        supported_edge_types = ("round", "chamfer")
         if edge_type not in supported_edge_types:
             msg = f"You need to specify the edge type as one of {supported_edge_types}."
             raise ValueError(msg)
         if "x" not in edge:
-            side = "LEFT"
-            depth = self.bounding_box["RIGHT"]
+            side = LEFT
+            depth = self.bounding_box[RIGHT]
         elif "y" not in edge:
-            side = "FRONT"
-            depth = self.bounding_box["BACK"]
+            side = FRONT
+            depth = self.bounding_box[BACK]
         elif "z" not in edge:
-            side = "BOTTOM"
-            depth = self.bounding_box["TOP"]
+            side = BOTTOM
+            depth = self.bounding_box[TOP]
+        else:
+            msg = "Invalid edge definition should be x, y, or z."
+            raise ValueError(msg)
         self.features.append(
             BeveledEdge(
                 edge_type=edge_type,
