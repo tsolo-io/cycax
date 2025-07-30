@@ -139,8 +139,6 @@ class Assembly:
             for part in self.parts.values():
                 if part.part_no not in unique_parts:
                     unique_parts[part.part_no] = part
-                    # for part_engine in part_engines:
-                    #     part_engine.create(part)
                 else:
                     logging.warning("The part %s is already processed", part.part_no)
 
