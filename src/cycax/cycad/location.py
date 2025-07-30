@@ -117,14 +117,12 @@ class Location:
             y: How much to move on the Y-axis.
             z: How much to move on the Z-axis.
         """
-        print(f"move({x=}, {y=}, {z=}) {self.x=}, {self.y=}, {self.z=}", end="")
         if x is not None:
             self.x = self.x + x
         if y is not None:
             self.y = self.y + y
         if z is not None:
             self.z = self.z + z
-        print(f" -> {self.x=}, {self.y=}, {self.z=}")
 
     def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Explicitly set the location of the part.
