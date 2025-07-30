@@ -641,6 +641,14 @@ class CycadPart(Location):
     def get_side(self, side_name: str) -> CycadSide:
         return getattr(self, side_name.lower())
 
+    def _assembly_level(self, my_side: CycadSide, other_side: CycadSide, *, subtract: bool = False):
+        if self.assembly is None:
+            msg = "Part is not part of an assembly. Please add it to an assembly before using this method."
+            raise ValueError(msg)
+        self.assembly.level(my_side, other_side)
+        if subtract:
+            self.assembly.subtract(other_side, self)
+
     def level(
         self,
         *,
@@ -653,10 +661,10 @@ class CycadPart(Location):
         subtract: bool = False,
     ):
         """
-        A short hand level method for part.
+        A shorthand level method for part.
 
         This method can only be used if the CycaxPart was added to an Assembly.
-        The method to replace multiple calls to assembly.level and assembly.subtract for a part.
+        The method is to replace multiple calls to assembly.level and assembly.subtract for a part.
 
         Args:
             left: Side to lign the left side up with.
@@ -665,48 +673,37 @@ class CycadPart(Location):
             back: Side to lign the back up with.
             top: Side to lign the top up with.
             bottom: Side to lign the bottom up with
-            subtract: When True transfer the holes from one part to the other.
+            subtract: When True transfer the features marked as external_subtract from one part to the other, for leveled sides.
 
         Raises:
             ValueError: When both left and right side is give.
             ValueError: When both front and back side is give.
             ValueError: When both top and bottom side is give.
+            ValueError: When the part is not part of an assembly.
         """
-        if not self.assembly:
-            msg = "The assembly has not been specified for this cycad part."
-            raise ValueError(msg)
-
-        level_tasks = []
         if left is not None:
             if right is not None:
-                msg = " "
+                msg = "Cannot level left and right at the same time."
                 raise ValueError(msg)
-            level_tasks.append((self.left, left))
+            self._assembly_level(self.left, left, subtract=subtract)
         elif right is not None:
-            level_tasks.append((self.right, right))
+            self._assembly_level(self.right, right, subtract=subtract)
 
         if top is not None:
             if bottom is not None:
-                msg = " "
+                msg = "Cannot level top and bottom at the same time."
                 raise ValueError(msg)
-            level_tasks.append((self.top, top))
+            self._assembly_level(self.top, top, subtract=subtract)
         elif bottom is not None:
-            level_tasks.append((self.bottom, bottom))
+            self._assembly_level(self.bottom, bottom, subtract=subtract)
 
         if front is not None:
             if back is not None:
-                msg = " "
+                msg = "Cannot level front and back at the same time."
                 raise ValueError(msg)
-            level_tasks.append((self.front, front))
+            self._assembly_level(self.front, front, subtract=subtract)
         elif back is not None:
-            level_tasks.append((self.back, back))
-
-        for my_side, other_side in level_tasks:
-            self.assembly.level(my_side, other_side)
-
-        if subtract:
-            for _, other_side in level_tasks:
-                self.assembly.subtract(other_side, self)
+            self._assembly_level(self.back, back, subtract=subtract)
 
     def rotate(self, actions: str):
         """Rotate the part several times.
