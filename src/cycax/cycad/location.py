@@ -95,7 +95,6 @@ class Location:
         Returns:
             New dimensions of the object.
         """
-
         while rot > 0:
             max_z = rotmax[2]
             self.y, self.z = max_z - self.z, self.y

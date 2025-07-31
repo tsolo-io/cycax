@@ -10,6 +10,9 @@ from cycax.cycad.location import Location
 class Feature(Location):
     """The Parent class of all features,"""
 
+    def __repr__(self) -> str:
+        return f"Feature(name={self.name}, type={self.type}, x={self.x}, y={self.y}, z={self.z}, side={self.side})"
+
     def export(self) -> dict:
         """Create a dictionary holding a representation of the feature.
 
