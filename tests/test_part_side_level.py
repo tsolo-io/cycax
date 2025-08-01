@@ -26,37 +26,31 @@ class Connect(Cuboid):
             side.hole(pos=pos, diameter=3.0, depth=3)
 
 
-def make_side(name: str | None = None) -> Assembly:
-    """Makes a cube where from flat sides, all the sides are the same.
-
-    No nicely overlapping sides since that will make sides of different sizes.
+def make_plate_with_connect_cubes(name: str | None = None) -> Assembly:
+    """Makes a plate with connector cubes on each corner.
 
     Args:
         name: The name of the assembly.
 
     Returns:
-        The assembly that was created with the sides.
+        The assembly that was created with plate and four corner cubes.
     """
     if name is None:
         name = "test"
-    length = 100
-    thickness = 2
 
     assembly = Assembly(name)
-    base_plate = SheetMetal(x_size=length, y_size=length, z_size=thickness, part_no=f"{name}_base")
+    base_plate = SheetMetal(x_size=100, y_size=60, z_size=2, part_no=f"{name}_base")
     assembly.add(base_plate)
-    conn = Connect()
-    assembly.add(conn)
-    conn.level(front=base_plate.front, left=base_plate.left, bottom=base_plate.top, subtract=True)
-    conn = Connect()
-    assembly.add(conn)
-    conn.level(back=base_plate.back, left=base_plate.left, bottom=base_plate.top, subtract=True)
-    conn = Connect()
-    assembly.add(conn)
-    conn.level(front=base_plate.front, right=base_plate.right, bottom=base_plate.top, subtract=True)
-    conn = Connect()
-    assembly.add(conn)
-    conn.level(back=base_plate.back, right=base_plate.right, bottom=base_plate.top, subtract=True)
+    name = assembly.name
+
+    for sides in product((LEFT, RIGHT), (FRONT, BACK)):
+        conn = Connect()
+        assembly.add(conn)
+        conn_level_dict = {"bottom": base_plate.top, "subtract": True}
+        for side in sides:
+            side_lower = side.lower()
+            conn_level_dict[side_lower] = getattr(base_plate, side_lower)
+        conn.level(**conn_level_dict)
     return assembly
 
 def make_sides(name: str | None = None) -> Assembly:
@@ -153,8 +147,12 @@ def compare_parts(part1, part2):
     assert exp1 == exp2
 
 
-def test_level_subtract_order(tmp_path: Path):
-    assembly1 = make_side()
+def test_level_subtract_side(tmp_path: Path):
+    assembly1 = make_plate_with_connect_cubes()
+    # Help with debugging
+    assembly1.save("/tmp/test2")
+    assembly1.build(engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
+
     for part_name, part in assembly1.parts.items():
         if "connect" in part_name:
             continue
@@ -162,10 +160,9 @@ def test_level_subtract_order(tmp_path: Path):
         for feature in features:
             if feature['type'] == 'cut':
                 assert feature['side'] == TOP
-    assembly1.save("/tmp/test2")
-    assembly1.build(engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
 
-def s_test_level_subtract_order(tmp_path: Path):
+
+def test_level_subtract_box(tmp_path: Path):
     assembly1 = make_sides()
     add_corner(assembly1)
     # Help with debugging
