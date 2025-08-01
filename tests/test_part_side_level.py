@@ -130,14 +130,12 @@ def add_corner(assembly: Assembly):
         "back": assembly.get_part(f"{name}_{BACK.lower()}_1").front,
     }
 
-    for sides in product((LEFT, RIGHT), (TOP, BOTTOM), (FRONT, BACK)):
+    for sides in product((TOP, BOTTOM), (LEFT, RIGHT), (FRONT, BACK)):
         conn = Connect()
         assembly.add(conn)
-        conn_level_dict = {"subtract": True}
         for side in sides:
             side_lower = side.lower()
-            conn_level_dict[side_lower] = level_dict[side_lower]
-        conn.level(**conn_level_dict)
+            conn.level(**{side_lower: level_dict[side_lower], "subtract": True})
 
 
 def compare_parts(part1, part2):
