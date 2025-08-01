@@ -401,8 +401,10 @@ class CycadPart(Location):
         if self.position[2] != 0.0:
             feature.move(z=-self.position[2])
 
+        working_rotate = copy.deepcopy(self.rotation)
         rotation = [self.x_max - self.x_min, self.y_max - self.y_min, self.z_max - self.z_min]
-        for rot in self.rotation:
+        while len(working_rotate) > 0:
+            rot = working_rotate.pop()
             if rot["axis"] == "x":
                 rotation = feature.swap_yz(3, rotation)
             elif rot["axis"] == "y":
