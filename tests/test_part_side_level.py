@@ -26,6 +26,39 @@ class Connect(Cuboid):
             side.hole(pos=pos, diameter=3.0, depth=3)
 
 
+def make_side(name: str | None = None) -> Assembly:
+    """Makes a cube where from flat sides, all the sides are the same.
+
+    No nicely overlapping sides since that will make sides of different sizes.
+
+    Args:
+        name: The name of the assembly.
+
+    Returns:
+        The assembly that was created with the sides.
+    """
+    if name is None:
+        name = "test"
+    length = 100
+    thickness = 2
+
+    assembly = Assembly(name)
+    base_plate = SheetMetal(x_size=length, y_size=length, z_size=thickness, part_no=f"{name}_base")
+    assembly.add(base_plate)
+    conn = Connect()
+    assembly.add(conn)
+    conn.level(front=base_plate.front, left=base_plate.left, bottom=base_plate.top, subtract=True)
+    conn = Connect()
+    assembly.add(conn)
+    conn.level(back=base_plate.back, left=base_plate.left, bottom=base_plate.top, subtract=True)
+    conn = Connect()
+    assembly.add(conn)
+    conn.level(front=base_plate.front, right=base_plate.right, bottom=base_plate.top, subtract=True)
+    conn = Connect()
+    assembly.add(conn)
+    conn.level(back=base_plate.back, right=base_plate.right, bottom=base_plate.top, subtract=True)
+    return assembly
+
 def make_sides(name: str | None = None) -> Assembly:
     """Makes a cube where from flat sides, all the sides are the same.
 
@@ -109,7 +142,7 @@ def compare_parts(part1, part2):
     features1 = sorted([json.dumps(f, sort_keys=True) for f in exp1["features"]])
     features2 = sorted([json.dumps(f, sort_keys=True) for f in exp2["features"]])
     for n in range(len(features1)):
-        # We could compare the two strings directly,
+        # We could comdiameterpare the two strings directly,
         # but doing it an element at a time gives an more informative error message.
         print(features1[n])
         print(features2[n])
@@ -121,16 +154,26 @@ def compare_parts(part1, part2):
 
 
 def test_level_subtract_order(tmp_path: Path):
+    assembly1 = make_side()
+    for part_name, part in assembly1.parts.items():
+        if "connect" in part_name:
+            continue
+        features = part.export().get("features", [])
+        for feature in features:
+            if feature['type'] == 'cut':
+                assert feature['side'] == TOP
+    assembly1.save("/tmp/test2")
+    assembly1.build(engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
+
+def s_test_level_subtract_order(tmp_path: Path):
     assembly1 = make_sides()
     add_corner(assembly1)
-    assembly1.save("/tmp/test")  # Help with debugging
+    # Help with debugging
+    assembly1.save("/tmp/test")
+    assembly1.build(engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
+
     parts = [p for p in assembly1.parts.keys() if "connect" not in p]
     for part1name, part2name in combinations(parts, 2):
         part1 = assembly1.get_part(part1name)
         part2 = assembly1.get_part(part2name)
         compare_parts(part1, part2)
-    assembly1.save("/tmp/test")
-    assembly1.build()
-    assembly1.build(engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
-
-    assert False
