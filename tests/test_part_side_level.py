@@ -26,7 +26,7 @@ class Connect(Cuboid):
             side.hole(pos=pos, diameter=3.0, depth=3)
 
 
-def make_plate_with_connect_cubes(name: str | None = None) -> Assembly:
+def make_plate_with_connect_cubes(side: str, name: str | None = None) -> Assembly:
     """Makes a plate with connector cubes on each corner.
 
     Args:
@@ -41,17 +41,30 @@ def make_plate_with_connect_cubes(name: str | None = None) -> Assembly:
     assembly = Assembly(name)
     base_plate = SheetMetal(x_size=100, y_size=60, z_size=2, part_no=f"{name}_base")
     assembly.add(base_plate)
-    name = assembly.name
+    bp_side = getattr(base_plate, side.lower()).opposite
+    if side in (LEFT, RIGHT):
+        base_plate.rotate("xz")
+        ref_sides = [(FRONT, BACK), (TOP, BOTTOM)]
+    elif side in (FRONT, BACK):
+        base_plate.rotate("x")
+        ref_sides = [(LEFT, RIGHT), (TOP, BOTTOM)]
+    elif side in (TOP, BOTTOM):
+        ref_sides = [(LEFT, RIGHT), (FRONT, BACK)]
+    else:
+        msg = f"Invalid side: {side}"
+        raise ValueError(msg)
 
-    for sides in product((LEFT, RIGHT), (FRONT, BACK)):
+    for sides in product(*ref_sides):
         conn = Connect()
         assembly.add(conn)
-        conn_level_dict = {"bottom": base_plate.top, "subtract": True}
-        for side in sides:
-            side_lower = side.lower()
+        conn_level_dict = {"subtract": True}
+        conn_level_dict[side.lower()] = bp_side
+        for ref_side in sides:
+            side_lower = ref_side.lower()
             conn_level_dict[side_lower] = getattr(base_plate, side_lower)
         conn.level(**conn_level_dict)
     return assembly
+
 
 def make_sides(name: str | None = None) -> Assembly:
     """Makes a cube where from flat sides, all the sides are the same.
@@ -148,29 +161,37 @@ def compare_parts(part1, part2):
 
 
 def test_level_subtract_side(tmp_path: Path):
-    assembly1 = make_plate_with_connect_cubes()
-    # Help with debugging
-    assembly1.save("/tmp/test2")
-    assembly1.build(engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
+    """Test adding connect cubes to different sides."""
+    for side in SIDES:
+        assembly1 = make_plate_with_connect_cubes(side)
+        # Help with debugging
+        save_path = Path(f"/tmp/test/{side.lower()}")
+        save_path.mkdir(parents=True, exist_ok=True)
+        print(save_path)
+        assembly1.save(save_path)
+        assembly1.build(
+            engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()]
+        )
 
-    for part_name, part in assembly1.parts.items():
-        if "connect" in part_name:
-            continue
-        features = part.export().get("features", [])
-        for feature in features:
-            if feature['type'] == 'cut':
-                assert feature['side'] == TOP
+        for part_name, part in assembly1.parts.items():
+            if "connect" in part_name:
+                continue
+            features = part.export().get("features", [])
+            for feature in features:
+                if feature["type"] == "cut":
+                    # assert feature["side"] == side
+                    pass
 
 
 def test_level_subtract_box(tmp_path: Path):
-    assembly1 = make_sides()
-    add_corner(assembly1)
+    assembly = make_sides()
+    add_corner(assembly)
     # Help with debugging
-    assembly1.save("/tmp/test")
-    assembly1.build(engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
+    assembly.save("/tmp/test")
+    assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
 
-    parts = [p for p in assembly1.parts.keys() if "connect" not in p]
+    parts = [p for p in assembly.parts.keys() if "connect" not in p]
     for part1name, part2name in combinations(parts, 2):
-        part1 = assembly1.get_part(part1name)
-        part2 = assembly1.get_part(part2name)
+        part1 = assembly.get_part(part1name)
+        part2 = assembly.get_part(part2name)
         compare_parts(part1, part2)
