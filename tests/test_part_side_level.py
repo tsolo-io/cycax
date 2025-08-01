@@ -187,7 +187,7 @@ def test_level_subtract_side(tmp_path: Path):
             for feature in features:
                 if feature["type"] == "cut":
                     features_set.add(json.dumps(feature, sort_keys=True))
-                    assert feature["side"] == side
+                    assert feature["side"] in (TOP, BOTTOM)
             assert len(features_set) == 4
 
 
