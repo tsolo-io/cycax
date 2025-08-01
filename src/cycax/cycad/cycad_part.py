@@ -641,23 +641,24 @@ class CycadPart(Location):
     def get_side(self, side_name: str) -> CycadSide:
         return getattr(self, side_name.lower())
 
-    def _assembly_level(self, my_side: CycadSide, other_side: CycadSide, *, subtract: bool = False):
+    def _assembly_level(self, my_side: CycadSide, other_side: CycadSide, *, subtract: bool = False) -> CycadPart:
         if self.assembly is None:
             msg = "Part is not part of an assembly. Please add it to an assembly before using this method."
             raise ValueError(msg)
         self.assembly.level(my_side, other_side)
         if subtract:
             self.assembly.subtract(other_side, self)
+        return other_side._parent
 
     def level(
         self,
         *,
-        left: LeftSide | None = None,
-        right: RightSide | None = None,
-        front: FrontSide | None = None,
-        back: BackSide | None = None,
-        top: TopSide | None = None,
-        bottom: BottomSide | None = None,
+        left: CycadSide | None = None,
+        right: CycadSide | None = None,
+        front: CycadSide | None = None,
+        back: CycadSide | None = None,
+        top: CycadSide | None = None,
+        bottom: CycadSide | None = None,
         subtract: bool = False,
     ):
         """
@@ -680,30 +681,41 @@ class CycadPart(Location):
             ValueError: When both front and back side is give.
             ValueError: When both top and bottom side is give.
             ValueError: When the part is not part of an assembly.
+            ValueError: When leveling with the same part twice and subtracting.
         """
+        level_with = {}
         if left is not None:
             if right is not None:
                 msg = "Cannot level left and right at the same time."
                 raise ValueError(msg)
-            self._assembly_level(self.left, left, subtract=subtract)
+            level_with["left"] = left
         elif right is not None:
-            self._assembly_level(self.right, right, subtract=subtract)
+            level_with["right"] = right
 
         if top is not None:
             if bottom is not None:
                 msg = "Cannot level top and bottom at the same time."
                 raise ValueError(msg)
-            self._assembly_level(self.top, top, subtract=subtract)
+            level_with["top"] = top
         elif bottom is not None:
-            self._assembly_level(self.bottom, bottom, subtract=subtract)
+            level_with["bottom"] = bottom
 
         if front is not None:
             if back is not None:
                 msg = "Cannot level front and back at the same time."
                 raise ValueError(msg)
-            self._assembly_level(self.front, front, subtract=subtract)
+            level_with["front"] = front
         elif back is not None:
-            self._assembly_level(self.back, back, subtract=subtract)
+            level_with["back"] = back
+
+        parts = []
+        for name, var in level_with.items():
+            part = self._assembly_level(getattr(self, name), var, subtract=subtract)
+            if subtract:
+                if part in parts:
+                    msg = f"Cannot subtract from the same part twice: {part}"
+                    raise ValueError(msg)
+                parts.append(part)
 
     def rotate(self, actions: str):
         """Rotate the part several times.
