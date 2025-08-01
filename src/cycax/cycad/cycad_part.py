@@ -464,7 +464,9 @@ class CycadPart(Location):
             Static representation of the part.
         """
 
-        list_part = [
+        dict_out = {}
+        dict_out["name"] = self.part_no
+        dict_out["features"] = [
             {
                 "name": self.initial_polygon,
                 "type": "add",
@@ -479,10 +481,10 @@ class CycadPart(Location):
             }
         ]
         for item in self.features:
-            list_part.append(item.export())
-        dict_out = {}
-        dict_out["name"] = self.part_no
-        dict_out["features"] = list_part
+            dict_out["features"].append(item.export())
+        dict_out["subtract"] = []
+        for item in self.move_holes:
+            dict_out["subtract"].append(item.export())
         return dict_out
 
     def beveled_edge(self, edge_type: str, side1: str, side2: str, size: float):

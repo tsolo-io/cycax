@@ -292,7 +292,7 @@ class Assembly:
         return dict_out
 
     def rotate_freeze_top(self, part: CycadPart):
-        """This method will hold the front and the left while holding the top where it currently is.
+        """This method will rotate the front and the left while holding the top where it currently is.
 
         Args:
             part: This is the part that will be rotated.
