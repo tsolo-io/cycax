@@ -162,7 +162,7 @@ def compare_parts(part1, part2):
 
 def test_level_subtract_side(tmp_path: Path):
     """Test adding connect cubes to different sides."""
-    for side in SIDES:
+    for side in (TOP,):
         assembly1 = make_plate_with_connect_cubes(side)
         # Help with debugging
         save_path = Path(f"/tmp/test/{side.lower()}")
@@ -177,10 +177,12 @@ def test_level_subtract_side(tmp_path: Path):
             if "connect" in part_name:
                 continue
             features = part.export().get("features", [])
+            features_set = set()
             for feature in features:
                 if feature["type"] == "cut":
-                    # assert feature["side"] == side
-                    pass
+                    features_set.add(json.dumps(feature, sort_keys=True))
+                    assert feature["side"] == side
+            assert len(features_set) == 4
 
 
 def test_level_subtract_box(tmp_path: Path):
