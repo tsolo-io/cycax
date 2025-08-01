@@ -15,9 +15,10 @@ def test_box_location():
         side.box(pos=(step, step), depth=step + 1, length=2, width=2)
     test = cube.export()
 
-    for features in test["features"]:
-        if features["side"] in ("BOTTOM", "LEFT"):
-            assert features["y"] == 7
-
-        if features["side"] == "BACK":
-            assert features["x"] == 7
+    for feature in test["features"]:
+        if feature["type"] != "cut":
+            continue
+        if feature["side"] in ("BOTTOM", "LEFT"):
+            assert feature["y"] == 7
+        if feature["side"] == "BACK":
+            assert feature["x"] == 7

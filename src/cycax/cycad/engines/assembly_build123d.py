@@ -40,7 +40,7 @@ class AssemblyBuild123d(AssemblyEngine):
         if part is None:
             msg = (
                 f"No file found for part {name} - AssemblerBuild123d require STEP files,"
-                " please use an engine that produce STEP files."
+                f" please use an engine that produce STEP files. Expected file at {file3d}"
             )
             raise FileNotFoundError(msg)
 
