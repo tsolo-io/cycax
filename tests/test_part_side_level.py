@@ -41,7 +41,8 @@ def make_plate_with_connect_cubes(side: str, name: str | None = None) -> Assembl
     assembly = Assembly(name)
     base_plate = SheetMetal(x_size=100, y_size=60, z_size=2, part_no=f"{name}_base")
     assembly.add(base_plate)
-    bp_side = getattr(base_plate, side.lower()).opposite
+    bp_side = getattr(base_plate, side.lower())
+    cc_side = bp_side.opposite.name.lower()
     if side in (LEFT, RIGHT):
         base_plate.rotate("xz")
         ref_sides = [(FRONT, BACK), (TOP, BOTTOM)]
@@ -57,12 +58,13 @@ def make_plate_with_connect_cubes(side: str, name: str | None = None) -> Assembl
     for sides in product(*ref_sides):
         conn = Connect()
         assembly.add(conn)
-        conn_level_dict = {"subtract": True}
-        conn_level_dict[side.lower()] = bp_side
+        conn_level_dict = {"subtract": False}
+        conn_level_dict[cc_side] = bp_side
         for ref_side in sides:
             side_lower = ref_side.lower()
             conn_level_dict[side_lower] = getattr(base_plate, side_lower)
         conn.level(**conn_level_dict)
+        conn.level(**{cc_side: bp_side, "subtract": True})
     return assembly
 
 
@@ -162,21 +164,25 @@ def compare_parts(part1, part2):
 
 def test_level_subtract_side(tmp_path: Path):
     """Test adding connect cubes to different sides."""
-    for side in (TOP,):
-        assembly1 = make_plate_with_connect_cubes(side)
+    assembly_list = []
+    for side in SIDES:
+        assembly = make_plate_with_connect_cubes(side, name=side)
+
         # Help with debugging
-        save_path = Path(f"/tmp/test/{side.lower()}")
+        save_path = Path(f"/tmp/test-side/{side.lower()}")
         save_path.mkdir(parents=True, exist_ok=True)
         print(save_path)
-        assembly1.save(save_path)
-        assembly1.build(
-            engine=AssemblyBuild123d(assembly1.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()]
-        )
+        assembly.save(save_path)
+        assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
+        assembly_list.append(assembly)
 
-        for part_name, part in assembly1.parts.items():
+    # Test the assembly list
+    for assembly in assembly_list:
+        for part_name, part in assembly.parts.items():
             if "connect" in part_name:
                 continue
             features = part.export().get("features", [])
+            assert len(features) == 5
             features_set = set()
             for feature in features:
                 if feature["type"] == "cut":

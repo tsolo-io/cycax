@@ -256,7 +256,7 @@ class Assembly:
         return self.parts[name]
 
     def get_parts_by_no(self, part_no: str) -> list[CycadPart]:
-        """Get all the part of a type, same part_no.
+        """Get all the parts of a type, same part_no.
 
         Args:
             part_no: The part_no of the parts we are looking for.
