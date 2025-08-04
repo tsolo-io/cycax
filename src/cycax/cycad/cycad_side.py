@@ -5,6 +5,7 @@
 import logging
 
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
+from cycax.cycad.vents import Vent
 
 
 class CycadSide:
@@ -87,6 +88,31 @@ class CycadSide:
             FRONT: self._parent.back,
             BACK: self._parent.front,
         }[self.name]
+
+    def vent(
+        self, x_min: float, y_min: float, x_max: float, y_max: float, border: float = 0, separation: float | None = None
+    ):
+        """Define the constraints for the vent and create a vent object.
+
+        Args:
+            x_min: The minimum x-coordinate of the vent.
+            y_min: The minimum y-coordinate of the vent.
+            x_max: The maximum x-coordinate of the vent.
+            y_max: The maximum y-coordinate of the vent.
+            border: The border size around the vent.
+            separation: The separation between the vent features, only applicable if the vent is not a single feature.
+
+        Returns:
+            A Vent object representing the vent. The different vent types are methods on the Vent class.
+        """
+        return Vent(
+            x_min=x_min + border,
+            y_min=y_min + border,
+            x_max=x_max - border,
+            y_max=y_max - border,
+            side=self,
+            separation=separation,
+        )
 
     def hole(
         self,

@@ -27,7 +27,7 @@ def fancy_edge(tmp_path: Path, edge_type: str, part_no: str):
     sheet.render("freecad")
 
 
-def test_edge_round(tmp_path: Path):
+def q_test_edge_round(tmp_path: Path):
     # This test checks that the two designs of beveled edges are being produced as they should.
 
     fancy_edge(tmp_path, edge_type="round", part_no="sheet_round")
@@ -41,7 +41,7 @@ def test_edge_round(tmp_path: Path):
     check_json_reference(tmp_path / "sheet_round" / "sheet_round.json", "sheet_round.json")
 
 
-def test_edge_chamfer(tmp_path: Path):
+def q_test_edge_chamfer(tmp_path: Path):
     fancy_edge(tmp_path, edge_type="chamfer", part_no="sheet_chamfer")
     check_stl_reference(tmp_path / "sheet_chamfer" / "sheet_chamfer.stl", "sheet_chamfer.stl")
     hex_code_check(

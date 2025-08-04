@@ -53,3 +53,6 @@ example/gear:
 
 example/box:
 	hatch run python3 ./src/examples/box_with_concubes.py
+
+example/vents:
+	hatch run python3 ./src/examples/vents.py

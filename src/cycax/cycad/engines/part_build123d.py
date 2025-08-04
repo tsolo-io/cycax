@@ -4,7 +4,6 @@
 
 import json
 import logging
-import typing
 from pathlib import Path
 
 import build123d
@@ -18,7 +17,9 @@ class PartEngineBuild123d(PartEngine):
     Decode a JSON and render with Build123d.
     """
 
-    jobs: typing.ClassVar[dict[str, dict]] = {}
+    def __init__(self, name: str | None = None, path: Path | None = None, config: dict | None = None):
+        self.jobs = {}
+        super().__init__(name, path, config)
 
     def _decode_cube(self, feature_spec: dict) -> build123d.objects_part.Box:
         """

@@ -7,8 +7,7 @@ import json
 import logging
 import os
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from multiprocessing import Pool
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
@@ -256,7 +255,7 @@ class Assembly:
         return self.parts[name]
 
     def get_parts_by_no(self, part_no: str) -> list[CycadPart]:
-        """Get all the part of a type, same part_no.
+        """Get all the parts of a type, same part_no.
 
         Args:
             part_no: The part_no of the parts we are looking for.
@@ -292,7 +291,7 @@ class Assembly:
         return dict_out
 
     def rotate_freeze_top(self, part: CycadPart):
-        """This method will hold the front and the left while holding the top where it currently is.
+        """This method will rotate the front and the left while holding the top where it currently is.
 
         Args:
             part: This is the part that will be rotated.
