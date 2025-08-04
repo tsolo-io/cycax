@@ -4,7 +4,6 @@
 
 import json
 import logging
-import typing
 from pathlib import Path
 
 import build123d

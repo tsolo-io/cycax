@@ -4,18 +4,18 @@
 
 import json
 from itertools import combinations, product
-from pathlib import Path
 
 from cycax.cycad import Assembly, Cuboid, SheetMetal
-from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
-from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
+
+# from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
+# from cycax.cycad.engines.part_build123d import PartEngineBuild123d
+# from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
 
 
 class Connect(Cuboid):
     def __init__(self):
-        super().__init__(part_no="connect", x_size=20, y_size=20, z_size=20)
+        super().__init__(part_no="connect", x_size=20.0, y_size=20.0, z_size=20.0)
 
     def definition(self):
         """Calculate the connect cube."""
@@ -58,12 +58,8 @@ def make_plate_with_connect_cubes(side: str, name: str | None = None) -> Assembl
     for sides in product(*ref_sides):
         conn = Connect()
         assembly.add(conn)
-        conn_level_dict = {"subtract": False}
-        conn_level_dict[cc_side] = bp_side
         for ref_side in sides:
-            side_lower = ref_side.lower()
-            conn_level_dict[side_lower] = getattr(base_plate, side_lower)
-        conn.level(**conn_level_dict)
+            conn.level(**{ref_side.lower(): getattr(base_plate, ref_side.lower())})
         conn.level(**{cc_side: bp_side, "subtract": True})
     return assembly
 
@@ -88,6 +84,8 @@ def make_sides(name: str | None = None) -> Assembly:
     for side_name in SIDES:
         side_plate = SheetMetal(x_size=length, y_size=length, z_size=thickness, part_no=f"{name}_{side_name}")
         assembly.add(side_plate)
+        side_plate.top.hole(pos=(length / 2, length / 2), diameter=3)
+        side_plate.top.hole(pos=(length / 2, length / 2), diameter=6, depth=1)
 
     bottom_plate = assembly.get_part(f"{name}_{BOTTOM.lower()}_1")
     bottom_plate.rotate("xx")
@@ -102,7 +100,7 @@ def make_sides(name: str | None = None) -> Assembly:
                 side_plate.level(front=bottom_plate.back, right=bottom_plate.right, bottom=bottom_plate.top)
                 side_plate.rotate("zz")
         elif side_name in (LEFT, RIGHT):
-            side_plate.rotate("z")  # Rotate the left and right sides
+            side_plate.rotate("zzz")  # Rotate the left and right sides
             if side_name == LEFT:
                 side_plate.level(back=bottom_plate.back, right=bottom_plate.left, bottom=bottom_plate.top)
             else:
@@ -135,6 +133,9 @@ def add_corner(assembly: Assembly):
         assembly.add(conn)
         for side in sides:
             side_lower = side.lower()
+            conn.level(**{side_lower: level_dict[side_lower]})
+        for side in sides:
+            side_lower = side.lower()
             conn.level(**{side_lower: level_dict[side_lower], "subtract": True})
 
 
@@ -148,39 +149,29 @@ def compare_parts(part1, part2):
     exp2 = part2.export()
     features1 = sorted([json.dumps(f, sort_keys=True) for f in exp1["features"]])
     features2 = sorted([json.dumps(f, sort_keys=True) for f in exp2["features"]])
-    # print(exp1['name'], features1)
-    # print(exp2['name'], features2)
     for n in range(len(features1)):
-        # We could comdiameterpare the two strings directly,
-        # but doing it an element at a time gives an more informative error message.
-        print(exp1["name"], features1[n])
-        print(exp2["name"], features2[n])
         assert features1[n] == features2[n]
 
-    # exp1["name"] = ""
-    # exp2["name"] = ""
-    # assert exp1 == exp2
 
-
-def test_level_subtract_side(tmp_path: Path):
+def test_level_subtract_side():
     """Test adding connect cubes to different sides."""
     assembly_tests = {}
     for side in SIDES:
         assembly = make_plate_with_connect_cubes(side, name=side)
 
         # Help with debugging
-        save_path = Path(f"/tmp/test-side/{side.lower()}")
-        save_path.mkdir(parents=True, exist_ok=True)
-        print(save_path)
-        assembly.save(save_path)
-        assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
-        assembly_tests[side] = assembly
+        # save_path = Path(f"/tmp/test-side/{side.lower()}")
+        # save_path.mkdir(parents=True, exist_ok=True)
+        # assembly.save(save_path)
+        # assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
+        # assembly_tests[side] = assembly
 
     # Test the assembly list
-    for side, assembly in assembly_tests.items():
+    for _side, assembly in assembly_tests.items():
         for part_name, part in assembly.parts.items():
             if "connect" in part_name:
                 continue
+            pos_vals = (10, part.x_size - 10, part.y_size - 10)
             features = part.export().get("features", [])
             assert len(features) == 5
             features_set = set()
@@ -188,15 +179,17 @@ def test_level_subtract_side(tmp_path: Path):
                 if feature["type"] == "cut":
                     features_set.add(json.dumps(feature, sort_keys=True))
                     assert feature["side"] in (TOP, BOTTOM)
+                    assert feature["x"] in pos_vals
+                    assert feature["y"] in pos_vals
             assert len(features_set) == 4
 
 
-def test_level_subtract_box(tmp_path: Path):
+def test_level_subtract_box():
     assembly = make_sides()
     add_corner(assembly)
     # Help with debugging
-    assembly.save("/tmp/test")
-    assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
+    # assembly.save("/tmp/test")
+    # assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
 
     parts = [p for p in assembly.parts.keys() if "connect" not in p]
     for part1name, part2name in combinations(parts, 2):

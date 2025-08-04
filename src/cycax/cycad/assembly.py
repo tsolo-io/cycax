@@ -7,8 +7,7 @@ import json
 import logging
 import os
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from multiprocessing import Pool
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD

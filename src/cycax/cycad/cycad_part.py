@@ -676,7 +676,8 @@ class CycadPart(Location):
             back: Side to lign the back up with.
             top: Side to lign the top up with.
             bottom: Side to lign the bottom up with
-            subtract: When True transfer the features marked as external_subtract from one part to the other, for leveled sides.
+            subtract: When True transfer the features marked as external_subtract from one part to the other,
+                      for leveled sides.
 
         Raises:
             ValueError: When both left and right side is give.

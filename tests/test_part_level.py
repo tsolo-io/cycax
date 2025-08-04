@@ -274,9 +274,8 @@ def build_test_case(*, tmp_path, slow: bool):
                 assembly.subtract(side_left.right, conn_front_bottom_left)
 
         hashes_test = get_hashes(name, tmp_path, assembly, slow=slow)
-        print(tmp_path)
-        Path("/tmp/hashes_ref").write_text("\n".join(str(hashes_ref).split(",")))
-        Path("/tmp/hashes_test").write_text("\n".join(str(hashes_test).split(",")))
+        # Path("/tmp/hashes_ref").write_text("\n".join(str(hashes_ref).split(",")))
+        # Path("/tmp/hashes_test").write_text("\n".join(str(hashes_test).split(",")))
         assert hashes_ref == hashes_test, (
             f"Compare the hashes for the two assemblies: REF({hashes_ref}) != TEST({hashes_test})"
         )

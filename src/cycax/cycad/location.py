@@ -27,9 +27,9 @@ class Location:
     """
 
     def __init__(self, x: float, y: float, z: float, side: str):
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
         self.side = side
 
     def __repr__(self) -> str:
