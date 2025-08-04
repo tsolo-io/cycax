@@ -154,7 +154,11 @@ def compare_parts(part1, part2):
 
 
 def test_level_subtract_side():
-    """Test adding connect cubes to different sides."""
+    """Test adding connect cubes to different sides of a plate.
+
+    Each orientation of the plate is tested separately.
+    This test is a simplified version of the next test, where a box is built from plates and connectors cubes.
+    """
     assembly_tests = {}
     for side in SIDES:
         assembly = make_plate_with_connect_cubes(side, name=side)
@@ -185,6 +189,10 @@ def test_level_subtract_side():
 
 
 def test_level_subtract_box():
+    """Test the creation of a box with six sides held together by eight connection cubes on the corners.
+
+    This test checks that the level and rotate of the sides work correctly when the cubes subtrcat holes from the sides.
+    """
     assembly = make_sides()
     add_corner(assembly)
     # Help with debugging
