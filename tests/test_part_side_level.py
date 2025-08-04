@@ -5,6 +5,7 @@
 import json
 from itertools import combinations, product
 
+# from pathlib import Path
 from cycax.cycad import Assembly, Cuboid, SheetMetal
 
 # from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
@@ -14,7 +15,8 @@ from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
 
 
 class Connect(Cuboid):
-    def __init__(self):
+    def __init__(self, *, holes: bool = True):
+        self.holes = holes
         super().__init__(part_no="connect", x_size=20.0, y_size=20.0, z_size=20.0)
 
     def definition(self):
@@ -22,11 +24,14 @@ class Connect(Cuboid):
         for side_name in SIDES:
             pos = (10, 10)
             side = self.get_side(side_name)
-            side.hole(pos=pos, diameter=3.2, external_subtract=True)
             side.hole(pos=pos, diameter=3.0, depth=3)
+            if self.holes:
+                side.hole(pos=pos, diameter=3.2, external_subtract=True)
+            else:
+                side.box(pos=(pos[0] - 2, pos[1] - 2), length=4, width=4, external_subtract=True)
 
 
-def make_plate_with_connect_cubes(side: str, name: str | None = None) -> Assembly:
+def make_plate_with_connect_cubes(side: str, name: str | None = None, *, holes: bool = True) -> Assembly:
     """Makes a plate with connector cubes on each corner.
 
     Args:
@@ -56,7 +61,7 @@ def make_plate_with_connect_cubes(side: str, name: str | None = None) -> Assembl
         raise ValueError(msg)
 
     for sides in product(*ref_sides):
-        conn = Connect()
+        conn = Connect(holes=holes)
         assembly.add(conn)
         for ref_side in sides:
             conn.level(**{ref_side.lower(): getattr(base_plate, ref_side.lower())})
@@ -160,32 +165,41 @@ def test_level_subtract_side():
     This test is a simplified version of the next test, where a box is built from plates and connectors cubes.
     """
     assembly_tests = {}
-    for side in SIDES:
-        assembly = make_plate_with_connect_cubes(side, name=side)
+    for holes in (True, False):
+        for side in SIDES:
+            assembly = make_plate_with_connect_cubes(side, name=side, holes=holes)
 
-        # Help with debugging
-        # save_path = Path(f"/tmp/test-side/{side.lower()}")
-        # save_path.mkdir(parents=True, exist_ok=True)
-        # assembly.save(save_path)
-        # assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
-        # assembly_tests[side] = assembly
+            # Help with debugging
+            # save_path = Path(f"/tmp/test-side/{side.lower()}")
+            # save_path.mkdir(parents=True, exist_ok=True)
+            # assembly.save(save_path)
+            # assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
+            # assembly_tests[side] = assembly
 
-    # Test the assembly list
-    for _side, assembly in assembly_tests.items():
-        for part_name, part in assembly.parts.items():
-            if "connect" in part_name:
-                continue
-            pos_vals = (10, part.x_size - 10, part.y_size - 10)
-            features = part.export().get("features", [])
-            assert len(features) == 5
-            features_set = set()
-            for feature in features:
-                if feature["type"] == "cut":
-                    features_set.add(json.dumps(feature, sort_keys=True))
-                    assert feature["side"] in (TOP, BOTTOM)
-                    assert feature["x"] in pos_vals
-                    assert feature["y"] in pos_vals
-            assert len(features_set) == 4
+        # Test the assembly list
+        for _side, assembly in assembly_tests.items():
+            for part_name, part in assembly.parts.items():
+                if "connect" in part_name:
+                    continue
+                if holes:
+                    pos_vals = (10, part.x_size - 10, part.y_size - 10)
+                else:
+                    pos_vals = (8, part.x_size - 12, part.y_size - 12)
+                features = part.export().get("features", [])
+                assert len(features) == 5
+                features_set = set()
+                for feature in features:
+                    if feature["type"] == "cut":
+                        features_set.add(json.dumps(feature, sort_keys=True))
+                        assert feature["side"] in (TOP, BOTTOM)
+                        assert feature["x"] in pos_vals
+                        assert feature["y"] in pos_vals
+                        if holes:
+                            assert feature["diameter"] == 3.2
+                        else:
+                            assert feature["x_size"] == 4.0
+                            assert feature["y_size"] == 4.0
+                assert len(features_set) == 4
 
 
 def test_level_subtract_box():
