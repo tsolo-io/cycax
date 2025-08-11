@@ -2,15 +2,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-#
 # This file is called directly from FreeCAD.
 # CyCAx launches the FreeCAD binary and pass in:
 # 1. The fullpath to this file.
-# 2. The path to the part JSON file.
-# 3. The path where the output files are stored.
+# 2. The path to the part JSON file; as environmental variable ("CYCAX_JSON")
+# 3. The path to where the output files should be stored; as environmental variable ("CYCAX_CWD")
+# 4. The file types that needs to be generated; as environmental variable ("CYCAX_OUT_FORMATS")
+
+# How to use this file:
 # 1. Open the file up in FreeCAD and run as a Macro.
 # 2. Run from command line. ./FreeCAD.AppImage img.py
-#
+
 import json
 import logging
 import os
@@ -21,10 +23,8 @@ import FreeCAD as App
 import FreeCADGui
 import importDXF
 import importSVG
-
-# import QtGui
 import Part
-from FreeCAD import Rotation, Vector  # NoQa
+from FreeCAD import Rotation, Vector  # noqa
 from PySide import QtGui
 
 logging.error("Open FreeCAD")
@@ -49,6 +49,18 @@ class EngineFreecad:
     def __init__(self, base_path: Path):
         self._base_path = base_path
         self.filepath = ""
+
+    def cylinder(self, feature: dict):
+        """This method will draw a cylinder when given a dict that contains the necessary dimensions
+
+        Args:
+            feature: This is the dict that contains the necessary details of the cylinder to be made.
+        """
+        radius = feature["x_size"] / 2
+        pos_vec = (radius, radius, 0)
+        pos_vec = self._move_cube(feature, pos_vec, center=feature["center"])
+        pos = Vector(pos_vec[0], pos_vec[1], pos_vec[2])
+        return Part.makeCylinder(radius, feature["z_size"], pos)
 
     def cube(self, feature: dict):
         """This method will draw a cube when given a dict that contains the necessary dimensions
@@ -442,22 +454,32 @@ class EngineFreecad:
         if App.ActiveDocument:
             App.closeDocument(name)
         doc = App.newDocument(name)
-        for data in definition["features"]:
-            if data["type"] == "add":
-                solid = self.cube(data)
+        feature = definition["features"][0]
+        if feature["type"] != "add":
+            msg = "First feature must be added."
+            raise ValueError(msg)
+        if feature["name"] == "cube":
+            solid = self.cube(feature)
+        elif feature["name"] == "sphere":
+            solid = self.sphere(feature)
+        elif feature["name"] == "cylinder":
+            solid = self.cylinder(feature)
 
-            elif data["type"] == "cut":
-                if data["name"] == "hole":
-                    cut_features.append(self.hole(data))
-                elif data["name"] == "beveled_edge":
-                    solid = self.decode_beveled_edge(data, solid)
-                elif data["name"] == "cube":
-                    cut_features.append(self.cube(data))
-                elif data["name"] == "sphere":
-                    solid = solid.cut(self.sphere(data))
+        for feature in definition["features"][1:]:
+            if feature["type"] == "add":
+                logging.error("Adding not yet supported.")
+            elif feature["type"] == "cut":
+                if feature["name"] == "hole":
+                    cut_features.append(self.hole(feature))
+                elif feature["name"] == "beveled_edge":
+                    solid = self.decode_beveled_edge(feature, solid)
+                elif feature["name"] == "cube":
+                    cut_features.append(self.cube(feature))
+                elif feature["name"] == "sphere":
+                    solid = solid.cut(self.sphere(feature))
                     # This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
-                elif data["name"] == "nut":
-                    cut_features.append(self.cut_nut(data))
+                elif feature["name"] == "nut":
+                    cut_features.append(self.cut_nut(feature))
 
         if len(cut_features) > 1:
             s1 = cut_features.pop()
