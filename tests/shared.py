@@ -6,6 +6,9 @@ import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
+from stl import mesh
+
 
 def check_json_reference(json_file: Path, reference_file: str) -> bool:
     """Check if a JSON file matches a reference file.
@@ -57,6 +60,32 @@ def stl_compare(file1: Path, file2: Path) -> bool:
         if sorted_lines1[line_number] != sorted_lines2[line_number]:
             return False
     return True
+
+
+def stl_compare_models(file1: Path, file2: Path) -> bool:
+    """Compare two STL files for equality.
+
+    Args:
+        file1: Path to the first STL file.
+        file2: Path to the second STL file.
+
+    Returns:
+        True if the models in the files are equal or very similar, False otherwise.
+    """
+
+    mesh1 = mesh.Mesh.from_file(file1)
+    volume1, cog1, _ = mesh1.get_mass_properties()
+    # Read FreeCAD Mesh
+    mesh2 = mesh.Mesh.from_file(file2)
+    volume2, cog2, _ = mesh2.get_mass_properties()
+    # Compare the bounding box of the two meshes
+    for axis in ("x", "y", "z"):
+        b_axis, f_axis = getattr(mesh1, axis), getattr(mesh2, axis)
+        assert np.isclose(b_axis.min(), f_axis.min(), atol=1e-2), f"{axis} min: {b_axis.min()} != {f_axis.min()}"
+        assert np.isclose(b_axis.max(), f_axis.max(), atol=1e-2), f"{axis} max: {b_axis.max()} != {f_axis.max()}"
+    assert np.isclose(volume1, volume2, rtol=1e-3)
+    for bp, fp in zip(cog1, cog2, strict=False):
+        assert np.isclose(bp, fp, atol=1e-2), f"{bp} != {fp} from file1({cog1}) and file2({cog2})"
 
 
 def get_file_hash(filename: str) -> str:

@@ -7,8 +7,8 @@ from pathlib import Path
 from cycax.cycad import Assembly, Cuboid, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
+
 
 class Socket(Cuboid):
     """A simple part with a rectangle cutout and a matching rectangle external subtract.
@@ -17,6 +17,7 @@ class Socket(Cuboid):
     The one hole has a diameter of 1mm and the other a diameter of 2mm.
     The socket is rotated so that the 1mm hole should be the origin of the cut square.
     """
+
     def __init__(self):
         super().__init__(part_no="socket", x_size=34.0, y_size=24.0, z_size=20.0)
 
@@ -36,11 +37,11 @@ class Socket(Cuboid):
         self.back.hole(pos=pos, diameter=1)
         self.back.hole(pos=pos, diameter=1, external_subtract=True)
         # The 2mm hole is for visual reference only, when debugging the test.
-        self.back.hole(pos=(pos[0]+length, pos[1]+width), diameter=2)
-        self.back.hole(pos=(pos[0]+length, pos[1]+width), diameter=2, external_subtract=True)
+        self.back.hole(pos=(pos[0] + length, pos[1] + width), diameter=2)
+        self.back.hole(pos=(pos[0] + length, pos[1] + width), diameter=2, external_subtract=True)
         # The 3mm hole is to check the center of the cutout. This will all us to determine the orientation.
-        self.back.hole(pos=(pos[0]+length/2, pos[1]+width/2), diameter=3)
-        self.back.hole(pos=(pos[0]+length/2, pos[1]+width/2), diameter=3, external_subtract=True)
+        self.back.hole(pos=(pos[0] + length / 2, pos[1] + width / 2), diameter=3)
+        self.back.hole(pos=(pos[0] + length / 2, pos[1] + width / 2), diameter=3, external_subtract=True)
 
 
 def make_plate_with_socket(side: str) -> Assembly:
@@ -99,13 +100,13 @@ def test_subtract_side():
             print(_side, feature)
             if feature["type"] == "cut":
                 if feature["name"] == "hole":
-                    name = f"{feature["name"]}{feature['diameter']}"
+                    name = f"{feature['name']}{feature['diameter']}"
                 else:
                     name = feature["name"]
                 compare[name] = feature
         assert compare["hole1"]["x"] == compare["cube"]["x"]
         assert compare["hole1"]["y"] == compare["cube"]["y"]
         assert compare["hole1"]["z"] == compare["cube"]["z"]
-        assert compare["hole1"]["x"] == (compare["cube"]["x"] +compare["cube"]["x_size"]/2)
-        assert compare["hole1"]["y"] == (compare["cube"]["y"] +compare["cube"]["y_size"]/2)
-        assert compare["hole1"]["z"] == (compare["cube"]["z"] +compare["cube"]["z_size"]/2)
+        assert compare["hole1"]["x"] == (compare["cube"]["x"] + compare["cube"]["x_size"] / 2)
+        assert compare["hole1"]["y"] == (compare["cube"]["y"] + compare["cube"]["y_size"] / 2)
+        assert compare["hole1"]["z"] == (compare["cube"]["z"] + compare["cube"]["z_size"] / 2)

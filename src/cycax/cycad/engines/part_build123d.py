@@ -21,6 +21,21 @@ class PartEngineBuild123d(PartEngine):
         self.jobs = {}
         super().__init__(name, path, config)
 
+    def _decode_cylinder(self, feature_spec: dict) -> build123d.objects_part.Box:
+        """
+        This method creates a Cylinder object in Build123d.
+
+        Args:
+            feature_spec: The details about the cylinder.
+
+        """
+        radius = feature_spec["x_size"] / 2
+        height = feature_spec["z_size"]
+        feature = build123d.Cylinder(radius=radius, height=height)
+        # TODO: Support the different orientations
+        feature = build123d.Pos(radius, radius, height / 2) * feature
+        return feature
+
     def _decode_cube(self, feature_spec: dict) -> build123d.objects_part.Box:
         """
         This method will return the string that will have the Build123d for a cube.
@@ -231,6 +246,8 @@ class PartEngineBuild123d(PartEngine):
                     feature = self._decode_nut(action)
                 case "beveled_edge":
                     feature = self._decode_beveled_edge(action)
+                case "cylinder":
+                    feature = self._decode_cylinder(action)
                 case _:
                     msg = f"Unknown feature type: {action['name']}"
                     raise ValueError(msg)

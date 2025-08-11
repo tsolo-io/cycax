@@ -9,37 +9,43 @@ Note: It makes a gear like things for now.
 
 import math
 
-from cycax.cycad import Print3D
+from cycax.cycad import Cylinder
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 
 
-class Gear(Print3D):
+class Gear(Cylinder):
     """Define a gear.
 
     Note: It makes a gear like things for now.
 
     """
 
-    def __init__(self, outer_diameter=0):
-        name = f"Gear-{outer_diameter}"
-        super().__init__(part_no=name, x_size=11, y_size=11, z_size=2)
+    def __init__(self, diameter: float, teath: int = 12):
+        name = f"Gear-{diameter}-{teath}"
+        self.teath = teath
+        if diameter < 10:  # noqa PLR2004 Magic value used
+            msg = "Diameter must be greater than 10"
+            raise ValueError(msg)
+        if teath < 6:  # noqa PLR2004 Magic value used
+            msg = "Teeth must be greater than 6"
+            raise ValueError(msg)
+        super().__init__(part_no=name, diameter=diameter, height=3)
 
     def definition(self):
         """Calculate the gear."""
-        cx = self.x_size / 2
-        cy = self.y_size / 2
-        radius = self.x_size / 2 - 1
-        self.top.hole(pos=(cx, cy), diameter=2)
-        self.top.box(pos=(cx - 0.5, cy), length=1, width=1.2)
-        angle = (math.pi * 2) / 12
-        for n in range(1, 13):
-            pos = (cx + math.cos(angle * n) * radius, cy + math.sin(angle * n) * radius)
-            self.top.hole(pos=pos, diameter=1)
-        self.top.hole(pos=(cx, cy), diameter=2 * radius - 1.5, depth=0.5)
+        self.bottom.hole(pos=(self.x_center, self.y_center), diameter=2)
+        self.top.box(pos=(self.x_center - 0.5, self.y_center), length=1, width=1.2)
+        teath_diameter = math.pi * self.diameter / self.teath
+        angle = (math.pi * 2) / self.teath
+        radius = self.diameter / 2
+        for n in range(1, self.teath + 1):
+            pos = (self.x_center + math.cos(angle * n) * radius, self.y_center + math.sin(angle * n) * radius)
+            self.top.hole(pos=pos, diameter=teath_diameter)
+        self.top.hole(pos=(self.x_center, self.y_center), diameter=2 * radius - teath_diameter - 2, depth=0.5)
 
 
 if __name__ == "__main__":
-    gear = Gear()
+    gear = Gear(diameter=10, teath=6)
     gear.save("./build")
     cycax_server = PartEngineBuild123d()
     cycax_server.build(gear)

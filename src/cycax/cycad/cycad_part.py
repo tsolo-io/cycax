@@ -390,9 +390,9 @@ class CycadPart(Location):
         """This method will be used for inserting the hole into an object.
 
         Args:
-            hole: hole to be inserted.
+            feature: The feature transferred from the leveled part.
         """
-        # TODO: Maybe rename no subtract feature.
+        # TODO: Maybe rename to subtract_feature.
         # NOTE: Issues exist when subtracting rectangles from back of part.
         if self.position[0] != 0.0:
             feature.move(x=-self.position[0])
