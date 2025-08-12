@@ -268,6 +268,7 @@ class CycadSide:
         if horizontal is False:
             length, width = width, length
         _box_dimensions = self._box_size_calc(width=width, length=length, depth=_depth)
+        print(_box_dimensions, "box_dimentions")
         self._parent.make_slot(
             x=_location_tuple[0],
             y=_location_tuple[1],
