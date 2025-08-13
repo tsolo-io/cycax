@@ -76,7 +76,7 @@ def assemble(side: str, *, horizontal: bool) -> Assembly:
 def test_slots(tmp_path):
     print(tmp_path)
     base_plate = None
-    for side, horizontal in product((RIGHT,), (True, False)):
+    for side, horizontal in product(SIDES, (True, False)):
         assembly = assemble(side, horizontal=horizontal)
         assembly.save(tmp_path / assembly.name)
         if horizontal:

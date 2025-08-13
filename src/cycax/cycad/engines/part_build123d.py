@@ -60,6 +60,8 @@ class PartEngineBuild123d(PartEngine):
                 feature = build123d.Pos(0, 0, -feature_spec["z_size"]) * feature
             elif feature_spec.get("side") == BACK:
                 feature = build123d.Pos(0, -feature_spec["y_size"], 0) * feature
+            elif feature_spec.get("side") == RIGHT:
+                feature = build123d.Pos(-feature_spec["x_size"], 0, 0) * feature
             # TODO: The rest of the sides needs to be checked
         return feature
 
