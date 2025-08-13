@@ -56,3 +56,6 @@ example/box:
 
 example/vents:
 	hatch run python3 ./src/examples/vents.py
+
+example/thlob:
+	hatch run python3 ./src/examples/thlob_example.py
