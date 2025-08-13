@@ -91,7 +91,9 @@ def test_subtract_side():
         save_path = Path(f"/tmp/test-subtract/{side}")
         save_path.mkdir(parents=True, exist_ok=True)
         assembly.save(save_path)
-        assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()])
+        assembly.build(
+            engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d(), PartEngineFreeCAD()]
+        )
         assembled_side[side] = assembly
 
     for _side, assembly in assembled_side.items():
@@ -101,16 +103,16 @@ def test_subtract_side():
             print(_side, feature)
             if feature["type"] == "cut":
                 if feature["name"] == "hole":
-                    name = f"{feature["name"]}{feature['diameter']}"
+                    name = f"{feature['name']}{feature['diameter']}"
                 else:
                     name = feature["name"]
                 compare[name] = feature
         assert compare["hole1"]["x"] == compare["cube"]["x"]
         assert compare["hole1"]["y"] == compare["cube"]["y"]
         assert compare["hole1"]["z"] == compare["cube"]["z"]
-        assert compare["hole1"]["x"] == (compare["cube"]["x"] +compare["cube"]["x_size"]/2)
-        assert compare["hole1"]["y"] == (compare["cube"]["y"] +compare["cube"]["y_size"]/2)
-        assert compare["hole1"]["z"] == (compare["cube"]["z"] +compare["cube"]["z_size"]/2)
+        assert compare["hole1"]["x"] == (compare["cube"]["x"] + compare["cube"]["x_size"] / 2)
+        assert compare["hole1"]["y"] == (compare["cube"]["y"] + compare["cube"]["y_size"] / 2)
+        assert compare["hole1"]["z"] == (compare["cube"]["z"] + compare["cube"]["z_size"] / 2)
 
 
 def test_sphere_cube(tmp_path: Path):

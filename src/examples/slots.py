@@ -55,6 +55,8 @@ def main():
                 assembly.add(cube, f"cube-{side}-{horizontal}-{subtract}")
                 if subtract:
                     cube.rotate(rotation_str)
+                    if not horizontal:
+                        cube.rotate("z")
                 if horizontal and subtract:
                     cube.level(bottom=base_board.top, back=base_board.back, left=left_on)
                     cube.move(x=100)
