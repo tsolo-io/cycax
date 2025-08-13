@@ -221,7 +221,7 @@ class Assembly:
     def add(self, part: CycadPart, suggested_name: str | None = None) -> str:
         """This adds a part into the assembly.
 
-        Once the part has been added to the assembler it can no longer be moved around or edited.
+        Once the part has been added to the assembler it can no longer be edited.
 
         Args:
             part: this in the part that will be added to the assembly.
