@@ -74,6 +74,14 @@ def assemble(side: str, *, horizontal: bool) -> Assembly:
 
 
 def test_slots(tmp_path):
+    """Test slots.
+
+    A cube with a slot is created for every side and orientation.
+    This cube is rotated so the slot is at the bottom, then the cube is subtracted from a base plate.
+
+    The cube is created in Build123d and in FreeCAD the output STL files are compared.
+    The JSON of the base plates are compared to ensure they are identical.
+    """
     print(tmp_path)
     base_plate = None
     for side, horizontal in product(SIDES, (True, False)):
