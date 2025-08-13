@@ -62,7 +62,7 @@ def stl_compare(file1: Path, file2: Path) -> bool:
     return True
 
 
-def stl_compare_models(file1: Path, file2: Path) -> bool:
+def stl_compare_models(file1: Path, file2: Path):
     """Compare two STL files for equality.
 
     Args:
@@ -83,7 +83,7 @@ def stl_compare_models(file1: Path, file2: Path) -> bool:
         b_axis, f_axis = getattr(mesh1, axis), getattr(mesh2, axis)
         assert np.isclose(b_axis.min(), f_axis.min(), atol=1e-2), f"{axis} min: {b_axis.min()} != {f_axis.min()}"
         assert np.isclose(b_axis.max(), f_axis.max(), atol=1e-2), f"{axis} max: {b_axis.max()} != {f_axis.max()}"
-    assert np.isclose(volume1, volume2, rtol=1e-3)
+    assert np.isclose(volume1, volume2, rtol=1e-3), f"Volume: {volume1} != {volume2}"
     for bp, fp in zip(cog1, cog2, strict=False):
         assert np.isclose(bp, fp, atol=1e-2), f"{bp} != {fp} from file1({cog1}) and file2({cog2})"
 
