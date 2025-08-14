@@ -85,6 +85,7 @@ def test_slots(tmp_path):
     """
     tmp_path = Path("/home/helen/src/tsolo/test-slot")
     base_plate = None
+    base_plate_special = None
     for side, horizontal in product(SIDES, (True, False)):
         assembly = assemble(side, horizontal=horizontal)
         assembly.save(tmp_path / assembly.name)
@@ -105,8 +106,19 @@ def test_slots(tmp_path):
         #####
         # Test that each baseplate is correct by checking that it is the same as the previous one.
         my_base_plate = tmp_path / assembly.name / "base" / "base.json"
-        if base_plate:
-            #####
-            json_compare_models(my_base_plate, base_plate)
-            #####
-        base_plate = my_base_plate
+
+
+        #As these holes are inserted from the far side there actual y value is y_value = y-width - provided_y_value 
+        if assembly.name in ("slots_back_h", "slots_back_v", "slots_left_v", "slots_left_h"): 
+            if base_plate_special:
+                #####
+                json_compare_models(my_base_plate, base_plate_special)
+                #####
+            base_plate_special = my_base_plate
+
+        else:
+            if base_plate:
+                #####
+                json_compare_models(my_base_plate, base_plate)
+                #####
+            base_plate = my_base_plate
