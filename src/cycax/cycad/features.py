@@ -6,6 +6,8 @@ import typing
 
 from cycax.cycad.location import Location
 
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
+
 
 class Feature(Location):
     """The Parent class of all features,"""
@@ -100,6 +102,25 @@ class RectangleCutOut(Feature):
         self.name = "cube"
         self.type = "cut"
 
+    def __calc__(self):
+        if self.side in (FRONT, LEFT, BOTTOM):
+            self.x += self.x_size/2
+            self.y += self.y_size/2
+            self.z += self.z_size/2
+        elif self.side == BACK:
+            self.x += self.x_size/2
+            self.y -= self.y_size/2
+            self.z += self.z_size/2
+        elif self.side == RIGHT:
+            self.x -= self.x_size/2
+            self.y += self.y_size/2
+            self.z += self.z_size/2
+        else: #side = TOP
+            self.x += self.x_size/2
+            self.y += self.y_size/2
+            self.z -= self.z_size/2
+        self.center=True
+
     def swap_xy(self, rot: float, rotmax: list) -> list:
         """
         This will rotate slot while holding top where it is. It overrides the method present in the location super.
@@ -147,6 +168,7 @@ class RectangleCutOut(Feature):
         while rot > 0:
             self.y_size, self.z_size = self.z_size, self.y_size
             rot = rot - 1
+        
         return rotmax
 
 

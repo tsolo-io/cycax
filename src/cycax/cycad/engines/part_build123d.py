@@ -63,6 +63,15 @@ class PartEngineBuild123d(PartEngine):
             elif feature_spec.get("side") == RIGHT:
                 feature = build123d.Pos(-feature_spec["x_size"], 0, 0) * feature
             # TODO: The rest of the sides needs to be checked
+        else:
+            feature = (
+                build123d.Pos(
+                    feature_spec["x"],
+                    feature_spec["y"],
+                    feature_spec["z"],
+                )
+                * feature
+            )
         return feature
 
     def _decode_hole(self, feature_spec: dict) -> build123d.objects_part.Cylinder:

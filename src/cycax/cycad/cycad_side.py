@@ -155,6 +155,7 @@ class CycadSide:
         *,
         center: bool = False,
         external_subtract: bool = False,
+        calculate: bool = False
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -185,7 +186,9 @@ class CycadSide:
             z_size=_box_dimensions[2],
             center=center,
             external_subtract=external_subtract,
+            calculate=calculate,
         )
+
 
     def nut(
         self,
@@ -268,7 +271,6 @@ class CycadSide:
         if horizontal is False:
             length, width = width, length
         _box_dimensions = self._box_size_calc(width=width, length=length, depth=_depth)
-        print(_box_dimensions, "box_dimentions")
         self._parent.make_slot(
             x=_location_tuple[0],
             y=_location_tuple[1],
