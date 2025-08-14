@@ -15,6 +15,8 @@ from cycax.cycad.location import TOP
 
 class PartEngineFreeCAD(PartEngine):
     def build(self, part) -> dict:  # noqa: ARG002 Unused argument
+        # self._base_path = part._base_path
+        # self.name = part.part_no
         fcstd_file = self._base_path / self.name / f"{self.name}.FCStd"
         if check_source_hash(self._json_file, fcstd_file):
             app_bin = self.get_appimage("FreeCAD")
@@ -25,6 +27,8 @@ class PartEngineFreeCAD(PartEngine):
             out_formats_set = set()
             for file_format in self.config.get("out_formats", []):
                 out_formats_set.add(":".join(file_format[:2]))
+            if not out_formats_set:
+                out_formats_set.add("STL")
 
             environment = dict(os.environ)
             environment.update(
