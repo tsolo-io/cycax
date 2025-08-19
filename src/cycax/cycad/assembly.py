@@ -194,6 +194,49 @@ class Assembly:
         data_filename = path / f"{self.name}.json"
         data_filename.write_text(json.dumps(data))
 
+    def bounding_box(self) -> dict:
+        """
+        Creates a bounding box that will give the plane of each side of the assembly.
+
+        Returns:
+            Bounding box.
+        """
+        min_x = 0
+        min_y = 0
+        min_z = 0
+        max_x = 0
+        max_y = 0
+        max_z = 0
+        for part in self.parts:
+            part_center = part.center
+            
+            min_x = min(part_center[0], min_x)
+            min_y = min(part_center[1], min_y)
+            min_z = min(part_center[2], min_z)
+
+            max_x = max(part_center[0]+part.x_size, max_x)
+            max_y = max(part_center[1]+part.y_size, max_y)
+            max_z = max(part_center[2]+part.z_size, max_z)
+
+        bounding_box = {LEFT: min_x, FRONT: min_y, BOTTOM: min_z, RIGHT: max_x, BACK: max_y, TOP: max_z}
+        return bounding_box
+    
+    def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
+        """Place parts in the assembly at the exact provided coordinates.
+
+        Args:
+            x: The value to which x needs to be moved to on the axis.
+            y: The value to which y needs to be moved to on the axis.
+            z: The value to which z needs to be moved to on the axis.
+        """
+        for part in self.parts:
+            if x is not None:
+                part.at(x=x + part.position[0])
+            if y is not None:
+                part.at(y=y + part.position[1])
+            if z is not None:
+                part.at(z=z + part.position[2])
+
     def merge(self, part1: CycadPart, part2: CycadPart):
         """This method will be used to merge 2 parts together
         which have identical sizes but different features.

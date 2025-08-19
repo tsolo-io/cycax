@@ -9,7 +9,8 @@ import copy
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from turtle import position
+from typing import TYPE_CHECKING, Self
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
@@ -79,7 +80,7 @@ class CycadPart(Location):
         self.y_max: float = self.y_size  # Location.Back
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
-        self.position = [0.0, 0.0, 0.0]
+        self.position = [0.0, 0.0, 0.0]  
         self.rotation = []
         self.final_location = False
         self.initial_polygon = polygon
@@ -451,7 +452,15 @@ class CycadPart(Location):
             msg = "BasePath does not exists."
             raise ValueError(msg)
         return self._base_path / self.part_no
-
+    
+    @property
+    def center(self) -> list:
+        """Return the center of a part."""
+        centered_x = self.position[0] + self.x_size/2
+        centered_y = self.position[1] + self.y_size/2
+        centered_z = self.position[2] + self.z_size/2
+        return [centered_x, centered_y, centered_z]
+ 
     def save(self, path: Path | str | None = None):
         """
         Save the part specification to a JSON file.
