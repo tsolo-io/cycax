@@ -456,9 +456,9 @@ class CycadPart(Location):
     @property
     def center(self) -> list:
         """Return the center of a part."""
-        centered_x = self.position[0] + self.x_size/2
-        centered_y = self.position[1] + self.y_size/2
-        centered_z = self.position[2] + self.z_size/2
+        centered_x = self.position[0] + self.x_max/2
+        centered_y = self.position[1] + self.y_max/2
+        centered_z = self.position[2] + self.z_max/2
         return [centered_x, centered_y, centered_z]
  
     def save(self, path: Path | str | None = None):

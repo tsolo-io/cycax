@@ -185,7 +185,7 @@ class Assembly:
         if not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
-
+        print(self.parts)
         for item in self.parts.values():
             item.save(path)
 
@@ -194,6 +194,7 @@ class Assembly:
         data_filename = path / f"{self.name}.json"
         data_filename.write_text(json.dumps(data))
 
+    @property
     def bounding_box(self) -> dict:
         """
         Creates a bounding box that will give the plane of each side of the assembly.
@@ -207,19 +208,38 @@ class Assembly:
         max_x = 0
         max_y = 0
         max_z = 0
-        for part in self.parts:
-            part_center = part.center
-            
-            min_x = min(part_center[0], min_x)
-            min_y = min(part_center[1], min_y)
-            min_z = min(part_center[2], min_z)
+        for part in self.parts.values():
 
-            max_x = max(part_center[0]+part.x_size, max_x)
-            max_y = max(part_center[1]+part.y_size, max_y)
-            max_z = max(part_center[2]+part.z_size, max_z)
+            min_x = min(part.position[0], min_x)
+            min_y = min(part.position[1], min_y)
+            min_z = min(part.position[2], min_z)
+
+            max_x = max(part.position[0]+part.x_size, max_x)
+            max_y = max(part.position[1]+part.y_size, max_y)
+            max_z = max(part.position[2]+part.z_size, max_z)
 
         bounding_box = {LEFT: min_x, FRONT: min_y, BOTTOM: min_z, RIGHT: max_x, BACK: max_y, TOP: max_z}
         return bounding_box
+    
+    @property
+    def center(self) -> dict:
+        """
+        Creates a bounding box that will give the plane of each side of the assembly.
+
+        Returns:
+            Bounding box.
+        """
+        center_x = 0
+        center_y = 0
+        center_z = 0
+        for part in self.parts.values():
+
+
+            center_x = min(part.center[0], center_x)
+            center_y = min(part.center[1], center_y)
+            center_z = min(part.center[2], center_z)
+
+        return (center_x, center_y, center_z)
     
     def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Place parts in the assembly at the exact provided coordinates.
@@ -229,7 +249,8 @@ class Assembly:
             y: The value to which y needs to be moved to on the axis.
             z: The value to which z needs to be moved to on the axis.
         """
-        for part in self.parts:
+        for part in self.parts.values():
+            print(part)
             if x is not None:
                 part.at(x=x + part.position[0])
             if y is not None:
@@ -446,6 +467,7 @@ class Assembly:
         """
         part1 = partside1._parent
         side = partside1.name
+        part1.make_bounding_box()
 
         for feature in self._final_place(part2):
             if feature.name == "cube":
@@ -478,6 +500,7 @@ class Assembly:
                     raise ValueError(msg)
             else:
                 if side == TOP:
+                    print(part1.bounding_box)
                     if feature.z == part1.bounding_box[TOP]:
                         feature.side = TOP
                         part1.insert_feature(feature)

@@ -35,12 +35,12 @@ class ComplexAssembly:
         Raises:
             ValueError: When the side present in Assembly does not match one of the expected sides.
         """
-        if assembly1_side or assembly2_side not in SIDES:
+        if assembly1_side not in SIDES or assembly2_side not in SIDES:
             msg = f"Side: {assembly1_side} or Side: {assembly2_side} is not one of {SIDES}"
             raise ValueError(msg)
         
-        assembly1_bounding_box = assembly1.bounding_box()
-        assembly2_bounding_box = assembly2.bounding_box()
+        assembly1_bounding_box = assembly1.bounding_box
+        assembly2_bounding_box = assembly2.bounding_box
         to_here = assembly2_bounding_box[assembly2_side]
 
         if assembly1_side == BOTTOM:
@@ -66,10 +66,10 @@ class ComplexAssembly:
         """
         Rotate the front and the left while holding the top where it currently is. Of all the parts in an assembly.
         """
-        for part in assembly.parts:
+        for part in assembly.parts.values():
             part_center = part.center 
-            self.rotate_freeze_top(part=part)
-            part_center[0], part_center[1] = self.bounding_box[BACK] - part_center[1], part_center[0]
+            assembly.rotate_freeze_top(part=part)
+            part_center[0], part_center[1] = assembly.center[1] - part_center[1], part_center[0]
             part.position[0] = part_center[0] - part.x_size/2
             part.position[1] = part_center[1] - part.y_size/2
 
@@ -77,21 +77,20 @@ class ComplexAssembly:
         """
         Rotate the top and front while holding the left where it currently is. Of all the parts in an assembly.
         """
-        for part in assembly.parts:
-            part_center = part.center
-            self.rotate_freeze_left(part=part)
-            part_center[1], part_center[2] = self.bounding_box[TOP] - part_center[2], part_center[1]
-            part.position[1] = part_center[1] - part.y_size/2
-            part.position[2] = part_center[2] - part.z_size/2
+        top = assembly.bounding_box[TOP]
+        for part in assembly.parts.values():
+            part_center = part.center 
+            assembly.rotate_freeze_left(part=part)
+            part.position[1], part.position[2] = top - part.position[2], part.position[1]
 
     def rotate_freeze_front(self, assembly: Assembly):
         """
         Rotate the left and top while holding the front where it currently is. Of all the parts in an assembly.
         """
-        for part in assembly.parts:
+        for part in assembly.parts.values():
             part_center = part.center
-            self.rotate_freeze_front(part=part)
-            part_center[0], part_center[2] = part_center[2], self.bounding_box[RIGHT] - part_center[0]
+            assembly.rotate_freeze_front(part=part)
+            part_center[0], part_center[2] = part_center[2], assembly.center[0] - part_center[0]
             part.position[0] = part_center[0] - part.x_size/2
             part.position[2] = part_center[2] - part.z_size/2
 
@@ -104,9 +103,28 @@ class ComplexAssembly:
             assembly1_side: The side of the assembly that you add features to.
             assembly2: The assemly that is used as the template when transferring features.
         """
-        for part1 in assembly1.parts:
-            for part2 in assembly2.parts:
-                assembly1.subtract(partside1=part1.side, part2=part2)
+        for part1 in assembly1.parts.values():
+            if assembly1_side==TOP:
+                for part2 in assembly2.parts.values():
+                    assembly1.subtract(partside1=part1.top, part2=part2)
+            elif assembly1_side==BOTTOM:
+                for part2 in assembly2.parts.values():
+                    assembly1.subtract(partside1=part1.bottom, part2=part2)
+            elif assembly1_side==LEFT:
+                for part2 in assembly2.parts.values():
+                    assembly1.subtract(partside1=part1.left, part2=part2)
+            elif assembly1_side==RIGHT:
+                for part2 in assembly2.parts.values():
+                    assembly1.subtract(partside1=part1.right, part2=part2)
+            elif assembly1_side==FRONT:
+                for part2 in assembly2.parts.values():
+                    assembly1.subtract(partside1=part1.front, part2=part2)
+            elif assembly1_side==BACK:
+                for part2 in assembly2.parts.values():
+                    assembly1.subtract(partside1=part1.back, part2=part2)
+            else:
+                msg = f"{assembly1_side} not in {SIDES}."
+                raise ValueError(msg)
 
     def combine_assemblies(self) -> Assembly:
         """
@@ -115,9 +133,9 @@ class ComplexAssembly:
         Returns:
             Combined Assembly formed from all the assemblies in the list of Assemblies.
         """
-        total_parts = []
+        total_parts = {}
         for assembly in self.assemblies:
-            total_parts += assembly.parts
+            total_parts.update(assembly.parts)
         assembly_out = Assembly(name=self.name)
         assembly_out.parts = total_parts
         assembly_out._base_path = self._base_path
