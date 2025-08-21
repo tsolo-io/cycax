@@ -61,11 +61,6 @@ class CycadSide:
             angle: The angle in degrees that the part will be rotates on.
 
         """
-        if self._parent.assembly is None:
-            # TODO: Think about which exception should be raised, maybe even a custom one.
-            msg = "Not part of an assembly"
-            raise ValueError(msg)
-
         if angle % 90 != 0:
             # TODO: Think about which exception should be raised, maybe even a custom one.
             msg = "Can only rotate in multiples of 90 degrees"
@@ -312,7 +307,7 @@ class LeftSide(CycadSide):
             return val
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_left(self._parent)
+        self._parent.rotate_freeze_left()
 
 
 class RightSide(CycadSide):
@@ -343,7 +338,7 @@ class RightSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_left(self._parent)
+        self._parent.rotate_freeze_left()
 
 
 class TopSide(CycadSide):
@@ -374,7 +369,7 @@ class TopSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_top(self._parent)
+        self._parent.rotate_freeze_top()
 
 
 class BottomSide(CycadSide):
@@ -405,7 +400,7 @@ class BottomSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_top(self._parent)
+        self._parent.rotate_freeze_top()
 
 
 class FrontSide(CycadSide):
@@ -436,7 +431,7 @@ class FrontSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_front(self._parent)
+        self._parent.rotate_freeze_front()
 
 
 class BackSide(CycadSide):
@@ -467,4 +462,4 @@ class BackSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_front(self._parent)
+        self._parent.rotate_freeze_front()

@@ -202,23 +202,22 @@ class Assembly:
         Returns:
             Bounding box.
         """
-        min_x = 0
-        min_y = 0
-        min_z = 0
-        max_x = 0
-        max_y = 0
-        max_z = 0
+        x_min = 0
+        y_min = 0
+        z_min = 0
+        x_max = 0
+        y_max = 0
+        z_max = 0
         for part in self.parts.values():
+            x_min = min(part.x_min, x_min)
+            y_min = min(part.y_min, y_min)
+            z_min = min(part.z_min, z_min)
 
-            min_x = min(part.position[0], min_x)
-            min_y = min(part.position[1], min_y)
-            min_z = min(part.position[2], min_z)
+            x_max = max(part.x_max, x_max)
+            y_max = max(part.y_max, y_max)
+            z_max = max(part.z_max, z_max)
 
-            max_x = max(part.position[0]+part.x_size, max_x)
-            max_y = max(part.position[1]+part.y_size, max_y)
-            max_z = max(part.position[2]+part.z_size, max_z)
-
-        bounding_box = {LEFT: min_x, FRONT: min_y, BOTTOM: min_z, RIGHT: max_x, BACK: max_y, TOP: max_z}
+        bounding_box = {LEFT: x_min, FRONT: y_min, BOTTOM: z_min, RIGHT: x_max, BACK: y_max, TOP: z_max}
         return bounding_box
     
     @property
@@ -353,39 +352,6 @@ class Assembly:
         dict_out["name"] = self.name
         dict_out["parts"] = list_out
         return dict_out
-
-    def rotate_freeze_top(self, part: CycadPart):
-        """This method will rotate the front and the left while holding the top where it currently is.
-
-        Args:
-            part: This is the part that will be rotated.
-        """
-        part.rotation.append({"axis": "z", "angle": 90})
-        part.x_max, part.y_max = part.y_max, part.x_max
-        part.x_min, part.y_min = part.y_min, part.x_min
-        part.make_bounding_box()
-
-    def rotate_freeze_left(self, part: CycadPart):
-        """This method will rotate the top and front while holding the left where it currently is.
-
-        Args:
-            part: This is the part that will be rotated.
-        """
-        part.rotation.append({"axis": "x", "angle": 90})
-        part.y_max, part.z_max = part.z_max, part.y_max
-        part.y_min, part.z_min = part.z_min, part.y_min
-        part.make_bounding_box()
-
-    def rotate_freeze_front(self, part: CycadPart):
-        """This method will rotate the left and top while holding the front where it currently is.
-
-        Args:
-            part: This is the part that will be rotated.
-        """
-        part.rotation.append({"axis": "y", "angle": 90})
-        part.x_max, part.z_max = part.z_max, part.x_max
-        part.x_min, part.z_min = part.z_min, part.x_min
-        part.make_bounding_box()
 
     def level(self, partside1: CycadSide, partside2: CycadSide):
         """

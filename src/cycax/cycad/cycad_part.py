@@ -768,12 +768,39 @@ class CycadPart(Location):
         for action in actions:
             match action.lower():
                 case "x":
-                    self.assembly.rotate_freeze_left(self)
+                    self.rotate_freeze_left()
                 case "y":
-                    self.assembly.rotate_freeze_front(self)
+                    self.rotate_freeze_front()
                 case "z":
-                    self.assembly.rotate_freeze_top(self)
+                    self.rotate_freeze_top()
                 case _:
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
+                
+    def rotate_freeze_top(self):
+        """
+        This method will rotate the front and the left while holding the top where it currently is.
+        """
+        self.rotation.append({"axis": "z", "angle": 90})
+        self.x_max, self.y_max = self.y_max, self.x_max
+        self.x_min, self.y_min = self.y_min, self.x_min
+        self.make_bounding_box()
+
+    def rotate_freeze_left(self):
+        """
+        This method will rotate the top and front while holding the left where it currently is.
+        """
+        self.rotation.append({"axis": "x", "angle": 90})
+        self.y_max, self.z_max = self.z_max, self.y_max
+        self.y_min, self.z_min = self.z_min, self.y_min
+        self.make_bounding_box()
+
+    def rotate_freeze_front(self):
+        """
+        This method will rotate the left and top while holding the front where it currently is.
+        """
+        self.rotation.append({"axis": "y", "angle": 90})
+        self.x_max, self.z_max = self.z_max, self.x_max
+        self.x_min, self.z_min = self.z_min, self.x_min
+        self.make_bounding_box()

@@ -61,8 +61,8 @@ def test_level():
     assert mypart1.position == [-1000, 100, -2]
 
     assembly.level(mypart1.back, mypart2.front)
-    assembly.rotate_freeze_front(mypart1)
-    assembly.rotate_freeze_top(mypart1)
+    mypart1.rotate_freeze_front()
+    mypart1.rotate_freeze_top()
 
     assert mypart1.position == [-1000, -100, -2]
 
@@ -109,13 +109,13 @@ def sides(name: str) -> tuple:
     assembly.add(side_front)
     assembly.add(side_bottom)
 
-    assembly.rotate_freeze_left(side_front)
-    assembly.rotate_freeze_top(side_bottom)
-    assembly.rotate_freeze_top(side_top)
-    assembly.rotate_freeze_top(side_left)
-    assembly.rotate_freeze_front(side_left)
-    assembly.rotate_freeze_top(side_right)
-    assembly.rotate_freeze_front(side_right)
+    side_front.rotate_freeze_left()
+    side_bottom.rotate_freeze_top()
+    side_top.rotate_freeze_top()
+    side_left.rotate_freeze_top()
+    side_left.rotate_freeze_front()
+    side_right.rotate_freeze_top()
+    side_right.rotate_freeze_front()
 
     assembly.level(side_top.front, side_front.back)
     assembly.level(side_left.front, side_front.back)

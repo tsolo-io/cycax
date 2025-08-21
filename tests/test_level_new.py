@@ -56,13 +56,13 @@ def test_level_new():
     back_side = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
     box.add(back_side)
 
-    box.rotate_freeze_front(left_side)
+    left_side.rotate_freeze_front()
 
-    box.rotate_freeze_front(right_side)
-    box.rotate_freeze_front(right_side_fancy)
+    right_side.rotate_freeze_front()
+    right_side_fancy.rotate_freeze_front()
 
-    box.rotate_freeze_left(front_side)
-    box.rotate_freeze_left(back_side)
+    front_side.rotate_freeze_left()
+    back_side.rotate_freeze_left()
 
     box.level(front_side.back, bottom_side.front)
     box.level(back_side.front, bottom_side.back)

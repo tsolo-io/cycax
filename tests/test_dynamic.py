@@ -43,10 +43,10 @@ def test_dynamic():
     front = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
     back = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
 
-    box.rotate_freeze_front(left)
-    box.rotate_freeze_front(right)
-    box.rotate_freeze_left(front)
-    box.rotate_freeze_left(back)
+    left.rotate_freeze_front()
+    right.rotate_freeze_front()
+    front.rotate_freeze_left()
+    back.rotate_freeze_left()
 
     box.level(front.back, bottom.front)
     box.level(back.front, bottom.back)
@@ -66,13 +66,13 @@ def test_dynamic():
     start = 0
     for _count in range(8):
         for cube in range(start, 8):
-            box.rotate_freeze_top(cubes[cube])
+            cubes[cube].rotate_freeze_top()
         start = start + 2
 
     for cube in range(1, 8, 2):
-        box.rotate_freeze_front(cubes[cube])
-        box.rotate_freeze_front(cubes[cube])
-        box.rotate_freeze_top(cubes[cube])
+        cubes[cube].rotate_freeze_front()
+        cubes[cube].rotate_freeze_front()
+        cubes[cube].rotate_freeze_top()
 
     for cube in range(0, 8, 2):
         box.level(cubes[cube].bottom, bottom.top)
