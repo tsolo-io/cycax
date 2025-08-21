@@ -39,6 +39,7 @@ class Assembly:
         self.bottom = BottomSide(self)
         self.front = FrontSide(self)
         self.back = BackSide(self)
+        self.assemblies = []
 
     def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
         logging.info("Calling to the assembler")
@@ -388,5 +389,33 @@ class Assembly:
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
+                
+    def add_assembly(self, assembly):
+        """
+        Adds a new Assembly into the list of Assemblies.
+        """
+        self.assemblies.append(assembly)
+
+
+    def combine_all_assemblies(self, new_name: str = None, path: Path = None):
+        """
+        Combine all the assemblies into one Assembly.
+
+        Returns:
+            Combined Assembly formed from all the assemblies in the list of Assemblies.
+        """
+        total_parts = {}
+        for assembly in self.assemblies:
+            total_parts.update(assembly.parts)
+        if new_name:
+            assembly_out = Assembly(name=new_name)
+        else:
+            assembly_out = Assembly(name=self.name)
+        assembly_out.parts = total_parts
+        if path:
+            assembly_out._base_path = path
+        else:
+            assembly_out._base_path = self._base_path
+        return assembly_out
                 
     

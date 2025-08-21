@@ -676,9 +676,9 @@ class CycadPart(Location):
         return getattr(self, side_name.lower())
 
     def _assembly_level(self, my_side: CycadSide, other_side: CycadSide, *, subtract: bool = False) -> CycadPart:
-        if self.assembly is None:
-            msg = "Part is not part of an assembly. Please add it to an assembly before using this method."
-            raise ValueError(msg)
+        # if self.assembly is None:
+        #     msg = "Part is not part of an assembly. Please add it to an assembly before using this method."
+        #     raise ValueError(msg)
         my_side.level(other_side)
         if subtract:
             other_side.subtract(part2=self)
