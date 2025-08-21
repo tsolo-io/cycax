@@ -32,8 +32,7 @@ def test_complex_assembly(tmp_path):
     # assembly2.at(x=50, y=50)
     ca.add(assembly2)
     assembly1.rotate_freeze_left()
-    assembly1.rotate_freeze_left()
-    assembly1.rotate_freeze_left()
+    assembly1.rotate("x")
     assembly1.rotate_freeze_front()
     assembly1.rotate_freeze_top()
     ca.level(assembly1, "BACK", assembly2, "BACK")
@@ -45,4 +44,4 @@ def test_complex_assembly(tmp_path):
     assembly = ca.combine_assemblies()
     assembly.save("/home/helen/src/tsolo/test-slot")
     assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
-    assert True
+    assert False

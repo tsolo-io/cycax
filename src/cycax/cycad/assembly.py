@@ -16,6 +16,7 @@ from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
+from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 
 
 class Assembly:
@@ -31,6 +32,12 @@ class Assembly:
         self.parts = {}
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
+        self.left = LeftSide(self)
+        self.right = RightSide(self)
+        self.top = TopSide(self)
+        self.bottom = BottomSide(self)
+        self.front = FrontSide(self)
+        self.back = BackSide(self)
 
     def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
         logging.info("Calling to the assembler")
@@ -527,3 +534,29 @@ class Assembly:
             part.position[0], part.position[2] = part.position[2], right - part.position[0]
             part.rotate_freeze_front()
             part.position[0], part.position[2] = part.position[0] - (part.x_max - part.x_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
+
+    def rotate(self, actions: str):
+        """Rotate the assembly several times.
+
+        Example: `Assembly.rotate("xxyzyy")` is the same as two `rotate_freeze_front`, `rotate_freeze_left`,
+        `rotate_freeze_top`, and two `rotate_freeze_left`.
+        Where rotate_freeze_<side> results in one 90degrees counter clock wise rotations on the side.
+
+        Args:
+            actions: This is a string specifying rotations.
+
+        Raises:
+            ValueError: When the given actions contains a string that is non x, y, or z.
+        """
+        for action in actions:
+            match action.lower():
+                case "x":
+                    self.rotate_freeze_left()
+                case "y":
+                    self.rotate_freeze_front()
+                case "z":
+                    self.rotate_freeze_top()
+                case _:
+                    msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
+                            {action} is not one of the permissable actions."""
+                    raise ValueError(msg)
