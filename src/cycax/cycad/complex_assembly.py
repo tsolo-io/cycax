@@ -70,7 +70,7 @@ class ComplexAssembly:
         for part in assembly.parts.values():
             part.position[0], part.position[1] = part.position[0] + (part.x_max - part.x_min)/2, part.position[1]  + (part.y_max - part.y_min)/2
             part.position[0], part.position[1] = back - part.position[1], part.position[0]
-            assembly.rotate_freeze_top(part=part)
+            part.rotate_freeze_top()
             part.position[0], part.position[1] = part.position[0] - (part.x_max - part.x_min)/2, part.position[1]  - (part.y_max - part.y_min)/2
 
     def rotate_freeze_left(self, assembly: Assembly):
@@ -81,7 +81,7 @@ class ComplexAssembly:
         for part in assembly.parts.values():
             part.position[1], part.position[2] = part.position[1] + (part.y_max - part.y_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
             part.position[1], part.position[2] = top - part.position[2], part.position[1]
-            assembly.rotate_freeze_left(part=part)
+            part.rotate_freeze_left()
             part.position[1], part.position[2] = part.position[1] - (part.y_max - part.y_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
             
 
@@ -93,7 +93,7 @@ class ComplexAssembly:
         for part in assembly.parts.values():
             part.position[0], part.position[2] = part.position[0] + (part.x_max - part.x_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
             part.position[0], part.position[2] = part.position[2], right - part.position[0]
-            assembly.rotate_freeze_front(part=part)
+            part.rotate_freeze_front()
             part.position[0], part.position[2] = part.position[0] - (part.x_max - part.x_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
 
 

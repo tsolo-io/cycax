@@ -83,7 +83,6 @@ def test_slots(tmp_path):
     The cube is created in Build123d and in FreeCAD the output STL files are compared.
     The JSON of the base plates are compared to ensure they are identical.
     """
-    tmp_path = Path("/home/helen/src/tsolo/test-slot")
     base_plate = None
     base_plate_special = None
     for side, horizontal in product(SIDES, (True, False)):
