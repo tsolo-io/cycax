@@ -55,16 +55,16 @@ def main():
     for thing_no in range(1, 11):
         thing = Thing()
         thing.move(x=thing_no * 100)
-        assembly.level(thing.bottom, base_board.top)
-        assembly.level(thing.back, base_board.back)
+        thing.bottom.level(base_board.top)
+        thing.back.level(base_board.back)
         base_board.top.subtract(thing)
         assembly.add(thing)
 
         blob = Blob()
         blob.calculate()
-        assembly.level(blob.bottom, thing.top)
-        assembly.level(blob.back, thing.back)
-        assembly.level(blob.left, thing.left)
+        blob.bottom.level(thing.top)
+        blob.back.level(thing.back)
+        blob.left.level(thing.left)
         assembly.add(blob)
 
     assembly.add(base_board)

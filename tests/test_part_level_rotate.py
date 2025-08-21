@@ -34,7 +34,7 @@ def test_move_level():
     mypart3.rotate_freeze_front()
     mypart3.rotate_freeze_top()
 
-    assembly.level(mypart3.bottom, mypart4.top)
+    mypart3.bottom.level(mypart4.top)
 
     mypart1.rotate_freeze_left()
     mypart1.rotate_freeze_front()
@@ -44,8 +44,8 @@ def test_move_level():
     mypart3.rotate_freeze_front()
     mypart3.rotate_freeze_top()
 
-    assembly.level(mypart3.bottom, mypart2.top)
-    assembly.level(mypart1.bottom, mypart2.top)
+    mypart3.bottom.level(mypart2.top)
+    mypart1.bottom.level(mypart2.top)
 
     assembly_def = assembly.export()
     assert assembly_def["parts"][0]["position"] == assembly_def["parts"][2]["position"]

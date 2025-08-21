@@ -679,7 +679,7 @@ class CycadPart(Location):
         if self.assembly is None:
             msg = "Part is not part of an assembly. Please add it to an assembly before using this method."
             raise ValueError(msg)
-        self.assembly.level(my_side, other_side)
+        my_side.level(other_side)
         if subtract:
             other_side.subtract(part2=self)
         return other_side._parent
@@ -827,4 +827,29 @@ class CycadPart(Location):
             if self.position[2] != 0:
                 temp_feature.move(z=self.position[2])
             yield temp_feature
+
+    def merge(self, part2: CycadPart):
+        """
+        This method will be used to merge this part and another part together.
+        which have identical sizes but different features.
+        This part will receive the features of part2 and part2 its features.
+
+        Args:
+            part2: This part will receive the features present on part1.
+
+        Raises:
+            ValueError: if the sizes of the parts are not identical.
+        """
+        if self.x_size == part2.x_size and self.y_size == part2.y_size and self.z_size == part2.z_size:
+            for item in part2.features:
+                if item not in self.features:
+                    self.features.append(item)
+            for item in part2.external_features:
+                if item not in self.external_features:
+                    self.external_features.append(item)
+            part2.features = self.features
+            part2.external_features = self.external_features
+        else:
+            msg = f"merging {self} and {part2} but they are not of the same size."
+            raise ValueError(msg)
 

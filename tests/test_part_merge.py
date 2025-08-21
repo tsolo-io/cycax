@@ -30,7 +30,7 @@ def test_merge():
 
     assembly.add(mypart1)
     assembly.add(mypart2)
-    assembly.merge(mypart1, mypart2)
+    mypart1.merge(mypart2)
 
     assert mypart1.features == mypart2.features
     assert mypart2.external_features == mypart1.external_features

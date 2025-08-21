@@ -4,6 +4,8 @@
 
 import logging
 
+from traitlets import This
+
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 from cycax.cycad.vents import Vent
 
@@ -352,6 +354,49 @@ class CycadSide:
                 else:
                     msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
                     raise ValueError(msg)
+                
+    def level(self, partside2): #reference to CycadSide results in error
+        """
+        Align the two sides onto the same plain.
+
+        Moves part1 so that its given side is on the same plain as the given
+        side of parts2. e.g. `level(part1.front part2.back)` will move part1
+        so that its front is on the same plain as the back of part2.
+
+        Args:
+            partside1: The CycadSide to be moved to match the plain of the other part.
+            partside2: The CycadSide used as reference when moving part1.
+        Raises:
+            ValueError: When the side present in CycadSide does not match one of the expected sides.
+        """
+        part1 = self._parent
+        part2 = partside2._parent
+        part1side = self.name
+        part2side = partside2.name
+        part2.make_bounding_box()
+        part1.make_bounding_box()
+        to_here = part2.bounding_box[part2side]
+
+        if part1side == BOTTOM:
+            part1.at(z=to_here)
+        elif part1side == TOP:
+            z_size = part1.z_max - part1.z_min
+            part1.at(z=to_here - z_size)
+        elif part1side == LEFT:
+            part1.at(x=to_here)
+        elif part1side == RIGHT:
+            x_size = part1.x_max - part1.x_min
+            part1.at(x=to_here - x_size)
+        elif part1side == FRONT:
+            part1.at(y=to_here)
+        elif part1side == BACK:
+            y_size = part1.y_max - part1.y_min
+            part1.at(y=to_here - y_size)
+        else:
+            msg = f"Side: {part1side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+            raise ValueError(msg)
+
+        part1.make_bounding_box()
 
 
 class LeftSide(CycadSide):

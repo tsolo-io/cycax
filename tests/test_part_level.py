@@ -28,39 +28,39 @@ def test_level():
     assembly.add(mypart1)
     assembly.add(mypart2)
 
-    assembly.level(mypart1.bottom, mypart2.bottom)
+    mypart1.bottom.level(mypart2.bottom)
 
     assert mypart1.position == mypart2.position
 
-    assembly.level(mypart1.right, mypart2.right)
+    mypart1.right.level(mypart2.right)
 
     assert mypart1.position == mypart2.position
 
-    assembly.level(mypart1.front, mypart2.front)
+    mypart1.front.level(mypart2.front)
 
     assert mypart1.position == mypart2.position
 
-    assembly.level(mypart1.bottom, mypart2.top)
+    mypart1.bottom.level(mypart2.top)
 
     assert mypart1.position == [0, 0, 2]
 
-    assembly.level(mypart1.left, mypart2.right)
+    mypart1.left.level(mypart2.right)
 
     assert mypart1.position == [1000, 0, 2]
 
-    assembly.level(mypart1.front, mypart2.back)
+    mypart1.front.level(mypart2.back)
 
     assert mypart1.position == [1000, 100, 2]
 
-    assembly.level(mypart1.top, mypart2.bottom)
+    mypart1.top.level(mypart2.bottom)
 
     assert mypart1.position == [1000, 100, -2]
 
-    assembly.level(mypart1.right, mypart2.left)
+    mypart1.right.level(mypart2.left)
 
     assert mypart1.position == [-1000, 100, -2]
 
-    assembly.level(mypart1.back, mypart2.front)
+    mypart1.back.level(mypart2.front)
     mypart1.rotate_freeze_front()
     mypart1.rotate_freeze_top()
 
@@ -117,17 +117,18 @@ def sides(name: str) -> tuple:
     side_right.rotate_freeze_top()
     side_right.rotate_freeze_front()
 
-    assembly.level(side_top.front, side_front.back)
-    assembly.level(side_left.front, side_front.back)
-    assembly.level(side_right.front, side_front.back)
-    assembly.level(side_bottom.front, side_front.back)
-    assembly.level(side_top.top, side_front.top)
-    assembly.level(side_left.left, side_front.left)
-    assembly.level(side_right.right, side_front.right)
-    assembly.level(side_bottom.bottom, side_front.bottom)
 
-    assembly.level(side_top.right, side_right.left)
-    assembly.level(side_bottom.right, side_right.left)
+    side_top.front.level(side_front.back)
+    side_left.front.level(side_front.back)
+    side_right.front.level(side_front.back)
+    side_bottom.front.level(side_front.back)
+    side_top.top.level(side_front.top)
+    side_left.left.level(side_front.left)
+    side_right.right.level(side_front.right)
+    side_bottom.bottom.level(side_front.bottom)
+
+    side_top.right.level(side_right.left)
+    side_bottom.right.level(side_right.left)
 
     return (
         assembly,
@@ -253,14 +254,14 @@ def build_test_case(*, tmp_path, slow: bool):
         ) = sides(name)
         for side in order_test:
             if side == FRONT:
-                assembly.level(conn_front_top_left.front, side_front.back)
-                assembly.level(conn_front_bottom_left.front, side_front.back)
+                conn_front_top_left.front.level(side_front.back)
+                conn_front_bottom_left.front.level(side_front.back)
             if side == TOP:
-                assembly.level(conn_front_top_left.top, side_top.bottom)
-                assembly.level(conn_front_bottom_left.bottom, side_bottom.top)
+                conn_front_top_left.top.level(side_top.bottom)
+                conn_front_bottom_left.bottom.level(side_bottom.top)
             if side == LEFT:
-                assembly.level(conn_front_top_left.left, side_left.right)
-                assembly.level(conn_front_bottom_left.left, side_left.right)
+                conn_front_top_left.left.level(side_left.right)
+                conn_front_bottom_left.left.level(side_left.right)
 
         for side in order_test:
             if side == FRONT:

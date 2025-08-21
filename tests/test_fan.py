@@ -15,7 +15,7 @@ def fans(tmp_path: Path):
     fan_face = Fan(size=50, thickness=10, part_no="fan_face", internal=True, hole_depth=2.0, hole_diameter=3.0)
 
     box = Assembly("box")
-    box.level(face.bottom, fan_face.top)
+    face.bottom.level(fan_face.top)
     face.bottom.subtract(fan_face)
     box.add(fan_face)
     box.add(face)

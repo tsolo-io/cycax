@@ -210,20 +210,12 @@ class Assembly:
         Returns:
             Bounding box.
         """
-        x_min = 0
-        y_min = 0
-        z_min = 0
-        x_max = 0
-        y_max = 0
-        z_max = 0
-        for part in self.parts.values():
-            x_min = min(part.x_min, x_min)
-            y_min = min(part.y_min, y_min)
-            z_min = min(part.z_min, z_min)
-
-            x_max = max(part.x_max, x_max)
-            y_max = max(part.y_max, y_max)
-            z_max = max(part.z_max, z_max)
+        x_min = min(part.x_min for part in self.parts.values())
+        y_min = min(part.y_min for part in self.parts.values())
+        z_min = min(part.z_min for part in self.parts.values())
+        x_max = max(part.x_max for part in self.parts.values())
+        y_max = max(part.y_max for part in self.parts.values())
+        z_max = max(part.z_max for part in self.parts.values())
 
         bounding_box = {LEFT: x_min, FRONT: y_min, BOTTOM: z_min, RIGHT: x_max, BACK: y_max, TOP: z_max}
         return bounding_box
@@ -240,8 +232,6 @@ class Assembly:
         center_y = 0
         center_z = 0
         for part in self.parts.values():
-
-
             center_x = min(part.center[0], center_x)
             center_y = min(part.center[1], center_y)
             center_z = min(part.center[2], center_z)
@@ -264,30 +254,6 @@ class Assembly:
                 part.at(y=y + part.position[1])
             if z is not None:
                 part.at(z=z + part.position[2])
-
-    def merge(self, part1: CycadPart, part2: CycadPart):
-        """This method will be used to merge 2 parts together
-        which have identical sizes but different features.
-
-        Args:
-            part1: this part will receive the features present on part2.
-            part2: this part will receive the features present on part1.
-
-        Raises:
-            ValueError: if the sizes of the parts are not identical.
-        """
-        if part1.x_size == part2.x_size and part1.y_size == part2.y_size and part1.z_size == part2.z_size:
-            for item in part2.features:
-                if item not in part1.features:
-                    part1.features.append(item)
-            for item in part2.external_features:
-                if item not in part1.external_features:
-                    part1.external_features.append(item)
-            part2.features = part1.features
-            part2.external_features = part1.external_features
-        else:
-            msg = f"merging {part1} and {part2} but they are not of the same size."
-            raise ValueError(msg)
 
     def add(self, part: CycadPart, suggested_name: str | None = None, external_subract: bool = False) -> str:
         """This adds a part into the assembly.
@@ -362,49 +328,6 @@ class Assembly:
         dict_out["name"] = self.name
         dict_out["parts"] = list_out
         return dict_out
-
-    def level(self, partside1: CycadSide, partside2: CycadSide):
-        """
-        Alight the two sides onto the same plain.
-
-        Moves part1 so that its given side is on the same plain as the given
-        side of parts2. e.g. `level(part1.front part2.back)` will move part1
-        so that its front is on the same plain as the back of part2.
-
-        Args:
-            partside1: The CycadSide to be moved to match the plain of the other part.
-            partside2: The CycadSide used as reference when moving part1.
-        Raises:
-            ValueError: When the side present in CycadSide does not match one of the expected sides.
-        """
-        part1 = partside1._parent
-        part2 = partside2._parent
-        part1side = partside1.name
-        part2side = partside2.name
-        part2.make_bounding_box()
-        part1.make_bounding_box()
-        to_here = part2.bounding_box[part2side]
-
-        if part1side == BOTTOM:
-            part1.at(z=to_here)
-        elif part1side == TOP:
-            z_size = part1.z_max - part1.z_min
-            part1.at(z=to_here - z_size)
-        elif part1side == LEFT:
-            part1.at(x=to_here)
-        elif part1side == RIGHT:
-            x_size = part1.x_max - part1.x_min
-            part1.at(x=to_here - x_size)
-        elif part1side == FRONT:
-            part1.at(y=to_here)
-        elif part1side == BACK:
-            y_size = part1.y_max - part1.y_min
-            part1.at(y=to_here - y_size)
-        else:
-            msg = f"Side: {part1side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-            raise ValueError(msg)
-
-        part1.make_bounding_box()
                 
     def rotate_freeze_top(self):
         """
