@@ -264,14 +264,14 @@ def build_test_case(*, tmp_path, slow: bool):
 
         for side in order_test:
             if side == FRONT:
-                assembly.subtract(side_front.back, conn_front_top_left)
-                assembly.subtract(side_front.back, conn_front_bottom_left)
+                side_front.back.subtract(conn_front_top_left)
+                side_front.back.subtract(conn_front_bottom_left)
             if side == TOP:
-                assembly.subtract(side_top.bottom, conn_front_top_left)
-                assembly.subtract(side_bottom.top, conn_front_bottom_left)
+                side_top.bottom.subtract(conn_front_top_left)
+                side_bottom.top.subtract(conn_front_bottom_left)
             if side == LEFT:
-                assembly.subtract(side_left.right, conn_front_top_left)
-                assembly.subtract(side_left.right, conn_front_bottom_left)
+                side_left.right.subtract(conn_front_top_left)
+                side_left.right.subtract(conn_front_bottom_left)
 
         hashes_test = get_hashes(name, tmp_path, assembly, slow=slow)
         # Path("/tmp/hashes_ref").write_text("\n".join(str(hashes_ref).split(",")))

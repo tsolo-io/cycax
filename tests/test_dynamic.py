@@ -93,13 +93,13 @@ def test_dynamic():
         box.level(cubes[cube].front, front.back)
 
     for cube in range(0, 8, 2):
-        box.subtract(bottom.top, cubes[cube])
+        bottom.top.subtract(cubes[cube])
 
     for cube in [3, 5, 6, 4]:
-        box.subtract(left.right, cubes[cube])
+        left.right.subtract(cubes[cube])
 
     for cube in [2, 7, 4, 5]:
-        box.subtract(back.front, cubes[cube])
+        back.front.subtract(cubes[cube])
 
     box.merge(top, bottom)
     box.merge(front, back)

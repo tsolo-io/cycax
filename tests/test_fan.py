@@ -16,7 +16,7 @@ def fans(tmp_path: Path):
 
     box = Assembly("box")
     box.level(face.bottom, fan_face.top)
-    box.subtract(face.bottom, fan_face)
+    face.bottom.subtract(fan_face)
     box.add(fan_face)
     box.add(face)
 

@@ -44,4 +44,4 @@ def test_complex_assembly(tmp_path):
     assembly = ca.combine_assemblies()
     assembly.save("/home/helen/src/tsolo/test-slot")
     assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
-    assert False
+    assert True

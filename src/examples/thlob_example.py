@@ -57,7 +57,7 @@ def main():
         thing.move(x=thing_no * 100)
         assembly.level(thing.bottom, base_board.top)
         assembly.level(thing.back, base_board.back)
-        assembly.subtract(base_board.top, thing)
+        base_board.top.subtract(thing)
         assembly.add(thing)
 
         blob = Blob()

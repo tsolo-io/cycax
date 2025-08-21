@@ -681,7 +681,7 @@ class CycadPart(Location):
             raise ValueError(msg)
         self.assembly.level(my_side, other_side)
         if subtract:
-            self.assembly.subtract(other_side, self)
+            other_side.subtract(part2=self)
         return other_side._parent
 
     def level(
@@ -804,3 +804,27 @@ class CycadPart(Location):
         self.x_max, self.z_max = self.z_max, self.x_max
         self.x_min, self.z_min = self.z_min, self.x_min
         self.make_bounding_box()
+
+    def _final_place(self):
+        """
+        It is used to move the external_features to their final location before they are subtracted from
+        the other part.
+        """
+        for feature in self.external_features:
+            temp_feature = copy.deepcopy(feature)
+            rotation = [self.x_size, self.y_size, self.z_size]
+            for rot in self.rotation:
+                if rot["axis"] == "x":
+                    rotation = temp_feature.swap_yz(rot=1, rotmax=rotation)
+                elif rot["axis"] == "y":
+                    rotation = temp_feature.swap_xz(rot=1, rotmax=rotation)
+                elif rot["axis"] == "z":
+                    rotation = temp_feature.swap_xy(rot=1, rotmax=rotation)
+            if self.position[0] != 0:
+                temp_feature.move(x=self.position[0])
+            if self.position[1] != 0:
+                temp_feature.move(y=self.position[1])
+            if self.position[2] != 0:
+                temp_feature.move(z=self.position[2])
+            yield temp_feature
+

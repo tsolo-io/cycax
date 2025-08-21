@@ -84,8 +84,8 @@ def test_level_new():
     box.level(cc.top, top_side.bottom)
     box.level(cc.back, top_side.back)
     box.level(cc.right, right_side.left)
-    box.subtract(top_side.bottom, cc)
-    box.subtract(right_side.left, cc)
+    top_side.bottom.subtract(cc)
+    right_side.left.subtract(cc)
 
     cc_fancy = ConCube(name="ConCube_Fancy")
     box.add(cc_fancy)

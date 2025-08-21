@@ -74,22 +74,22 @@ class ComplexAssembly:
         for part1 in assembly1.parts.values():
             if assembly1_side==TOP:
                 for part2 in assembly2.parts.values():
-                    assembly1.subtract(partside1=part1.top, part2=part2)
+                    part1.top.subtract(part2=part2)
             elif assembly1_side==BOTTOM:
                 for part2 in assembly2.parts.values():
-                    assembly1.subtract(partside1=part1.bottom, part2=part2)
+                    part1.bottom.subtract(part2=part2)
             elif assembly1_side==LEFT:
                 for part2 in assembly2.parts.values():
-                    assembly1.subtract(partside1=part1.left, part2=part2)
+                    part1.left.subtract(part2=part2)
             elif assembly1_side==RIGHT:
                 for part2 in assembly2.parts.values():
-                    assembly1.subtract(partside1=part1.right, part2=part2)
+                    part1.right.subtract(part2=part2)
             elif assembly1_side==FRONT:
                 for part2 in assembly2.parts.values():
-                    assembly1.subtract(partside1=part1.front, part2=part2)
+                    part1.front.subtract(part2=part2)
             elif assembly1_side==BACK:
                 for part2 in assembly2.parts.values():
-                    assembly1.subtract(partside1=part1.back, part2=part2)
+                    part1.back.subtract(part2=part2)
             else:
                 msg = f"{assembly1_side} not in {SIDES}."
                 raise ValueError(msg)

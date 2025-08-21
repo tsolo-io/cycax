@@ -32,6 +32,7 @@ class Assembly:
         self.parts = {}
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
+        self.external_features = []
         self.left = LeftSide(self)
         self.right = RightSide(self)
         self.top = TopSide(self)
@@ -288,7 +289,7 @@ class Assembly:
             msg = f"merging {part1} and {part2} but they are not of the same size."
             raise ValueError(msg)
 
-    def add(self, part: CycadPart, suggested_name: str | None = None) -> str:
+    def add(self, part: CycadPart, suggested_name: str | None = None, external_subract: bool = False) -> str:
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be edited.
@@ -308,6 +309,8 @@ class Assembly:
             msg = f"Part with name/id {part_name} already in parts catalogue."
             raise KeyError(msg)
         self.parts[part_name] = part
+        if external_subract:
+            self.external_features.append(part.external_features)
         return part_name
 
     def get_part(self, name: str) -> CycadPart:
@@ -402,104 +405,6 @@ class Assembly:
             raise ValueError(msg)
 
         part1.make_bounding_box()
-
-    def _final_place(self, part: CycadPart):
-        """
-        It is used to move the external_features to their final location before they are subtracted from
-        the other part.
-        """
-        for feature in part.external_features:
-            temp_feature = copy.deepcopy(feature)
-            rotation = [part.x_size, part.y_size, part.z_size]
-            for rot in part.rotation:
-                if rot["axis"] == "x":
-                    rotation = temp_feature.swap_yz(rot=1, rotmax=rotation)
-                elif rot["axis"] == "y":
-                    rotation = temp_feature.swap_xz(rot=1, rotmax=rotation)
-                elif rot["axis"] == "z":
-                    rotation = temp_feature.swap_xy(rot=1, rotmax=rotation)
-            if part.position[0] != 0:
-                temp_feature.move(x=part.position[0])
-            if part.position[1] != 0:
-                temp_feature.move(y=part.position[1])
-            if part.position[2] != 0:
-                temp_feature.move(z=part.position[2])
-            yield temp_feature
-
-    def subtract(self, partside1: CycadSide, part2: CycadPart):
-        """
-        This method adds the features of part2 to the part1 on the side where they touch.
-        This method will be used for moving around conn-cube and harddive screw holes.
-
-        Args:
-            partside1: The part side that will receive the features.
-            part2: The part that is used as the template when transferring features.
-
-        Raises:
-            ValueError: When the side present in CycadSide does not match one of the expected sides.
-        """
-        part1 = partside1._parent
-        side = partside1.name
-        part1.make_bounding_box()
-
-        for feature in self._final_place(part2):
-            if feature.name == "cube":
-                if side == TOP:
-                    if (feature.z - feature.z_size/2) == part1.bounding_box[TOP]:
-                        feature.side = TOP
-                        part1.insert_feature(feature)
-                elif side == BOTTOM:
-                    if (feature.z + feature.z_size/2) == part1.bounding_box[BOTTOM]:
-                        feature.side = BOTTOM
-                        part1.insert_feature(feature)
-                elif side == LEFT:
-                    if (feature.x + feature.x_size/2) == part1.bounding_box[LEFT]:
-                        feature.side = LEFT
-                        part1.insert_feature(feature)
-                elif side == RIGHT:
-                    if (feature.x - feature.x_size/2) == part1.bounding_box[RIGHT]:
-                        feature.side = RIGHT
-                        part1.insert_feature(feature)
-                elif side == FRONT:
-                    if (feature.y + feature.y_size/2) == part1.bounding_box[FRONT]:
-                        feature.side = FRONT
-                        part1.insert_feature(feature)
-                elif side == BACK:
-                    if (feature.y - feature.y_size/2) == part1.bounding_box[BACK]:
-                        feature.side = BACK
-                        part1.insert_feature(feature)
-                else:
-                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-                    raise ValueError(msg)
-            else:
-                if side == TOP:
-                    print(part1.bounding_box)
-                    if feature.z == part1.bounding_box[TOP]:
-                        feature.side = TOP
-                        part1.insert_feature(feature)
-                elif side == BOTTOM:
-                    if feature.z == part1.bounding_box[BOTTOM]:
-                        feature.side = BOTTOM
-                        part1.insert_feature(feature)
-                elif side == LEFT:
-                    if feature.x == part1.bounding_box[LEFT]:
-                        feature.side = LEFT
-                        part1.insert_feature(feature)
-                elif side == RIGHT:
-                    if feature.x == part1.bounding_box[RIGHT]:
-                        feature.side = RIGHT
-                        part1.insert_feature(feature)
-                elif side == FRONT:
-                    if feature.y == part1.bounding_box[FRONT]:
-                        feature.side = FRONT
-                        part1.insert_feature(feature)
-                elif side == BACK:
-                    if feature.y == part1.bounding_box[BACK]:
-                        feature.side = BACK
-                        part1.insert_feature(feature)
-                else:
-                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-                    raise ValueError(msg)
                 
     def rotate_freeze_top(self):
         """

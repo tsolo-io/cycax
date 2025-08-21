@@ -278,6 +278,81 @@ class CycadSide:
             external_subtract=external_subtract,
         )
 
+    def subtract(self, part2): #referencing CycadPart results in a circular import
+        """
+        This method adds the features of part2 to the part1 on the side where they touch.
+        This method will be used for moving around conn-cube and harddive screw holes.
+
+        Args:
+            partside1: The part side that will receive the features.
+            part2: The part that is used as the template when transferring features.
+
+        Raises:
+            ValueError: When the side present in CycadSide does not match one of the expected sides.
+        """
+        part1 = self._parent
+        side = self.name
+        part1.make_bounding_box()
+
+        for feature in part2._final_place():
+            if feature.name == "cube":
+                if side == TOP:
+                    if (feature.z - feature.z_size/2) == part1.bounding_box[TOP]:
+                        feature.side = TOP
+                        part1.insert_feature(feature)
+                elif side == BOTTOM:
+                    if (feature.z + feature.z_size/2) == part1.bounding_box[BOTTOM]:
+                        feature.side = BOTTOM
+                        part1.insert_feature(feature)
+                elif side == LEFT:
+                    if (feature.x + feature.x_size/2) == part1.bounding_box[LEFT]:
+                        feature.side = LEFT
+                        part1.insert_feature(feature)
+                elif side == RIGHT:
+                    if (feature.x - feature.x_size/2) == part1.bounding_box[RIGHT]:
+                        feature.side = RIGHT
+                        part1.insert_feature(feature)
+                elif side == FRONT:
+                    if (feature.y + feature.y_size/2) == part1.bounding_box[FRONT]:
+                        feature.side = FRONT
+                        part1.insert_feature(feature)
+                elif side == BACK:
+                    if (feature.y - feature.y_size/2) == part1.bounding_box[BACK]:
+                        feature.side = BACK
+                        part1.insert_feature(feature)
+                else:
+                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+                    raise ValueError(msg)
+            else:
+                if side == TOP:
+                    print(part1.bounding_box)
+                    if feature.z == part1.bounding_box[TOP]:
+                        feature.side = TOP
+                        part1.insert_feature(feature)
+                elif side == BOTTOM:
+                    if feature.z == part1.bounding_box[BOTTOM]:
+                        feature.side = BOTTOM
+                        part1.insert_feature(feature)
+                elif side == LEFT:
+                    if feature.x == part1.bounding_box[LEFT]:
+                        feature.side = LEFT
+                        part1.insert_feature(feature)
+                elif side == RIGHT:
+                    if feature.x == part1.bounding_box[RIGHT]:
+                        feature.side = RIGHT
+                        part1.insert_feature(feature)
+                elif side == FRONT:
+                    if feature.y == part1.bounding_box[FRONT]:
+                        feature.side = FRONT
+                        part1.insert_feature(feature)
+                elif side == BACK:
+                    if feature.y == part1.bounding_box[BACK]:
+                        feature.side = BACK
+                        part1.insert_feature(feature)
+                else:
+                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+                    raise ValueError(msg)
+
 
 class LeftSide(CycadSide):
     name = LEFT
