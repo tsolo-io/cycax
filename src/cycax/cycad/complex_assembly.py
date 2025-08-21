@@ -61,41 +61,6 @@ class ComplexAssembly:
         else:
             msg = f"Side: {assembly1_side} is not one of {SIDES}."
             raise ValueError(msg)
-        
-    def rotate_freeze_top(self, assembly: Assembly):
-        """
-        Rotate the front and the left while holding the top where it currently is. Of all the parts in an assembly.
-        """
-        back = assembly.bounding_box[BACK]
-        for part in assembly.parts.values():
-            part.position[0], part.position[1] = part.position[0] + (part.x_max - part.x_min)/2, part.position[1]  + (part.y_max - part.y_min)/2
-            part.position[0], part.position[1] = back - part.position[1], part.position[0]
-            part.rotate_freeze_top()
-            part.position[0], part.position[1] = part.position[0] - (part.x_max - part.x_min)/2, part.position[1]  - (part.y_max - part.y_min)/2
-
-    def rotate_freeze_left(self, assembly: Assembly):
-        """
-        Rotate the top and front while holding the left where it currently is. Of all the parts in an assembly.
-        """
-        top = assembly.bounding_box[TOP]
-        for part in assembly.parts.values():
-            part.position[1], part.position[2] = part.position[1] + (part.y_max - part.y_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
-            part.position[1], part.position[2] = top - part.position[2], part.position[1]
-            part.rotate_freeze_left()
-            part.position[1], part.position[2] = part.position[1] - (part.y_max - part.y_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
-            
-
-    def rotate_freeze_front(self, assembly: Assembly):
-        """
-        Rotate the left and top while holding the front where it currently is. Of all the parts in an assembly.
-        """
-        right = assembly.bounding_box[RIGHT]
-        for part in assembly.parts.values():
-            part.position[0], part.position[2] = part.position[0] + (part.x_max - part.x_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
-            part.position[0], part.position[2] = part.position[2], right - part.position[0]
-            part.rotate_freeze_front()
-            part.position[0], part.position[2] = part.position[0] - (part.x_max - part.x_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
-
 
     def subtract(self, assembly1: Assembly, assembly1_side: str, assembly2: Assembly):
         """

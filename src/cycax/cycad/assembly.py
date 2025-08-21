@@ -493,3 +493,37 @@ class Assembly:
                 else:
                     msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
                     raise ValueError(msg)
+                
+    def rotate_freeze_top(self):
+        """
+        Rotate the front and the left while holding the top where it currently is. Of all the parts in an assembly.
+        """
+        back = self.bounding_box[BACK]
+        for part in self.parts.values():
+            part.position[0], part.position[1] = part.position[0] + (part.x_max - part.x_min)/2, part.position[1]  + (part.y_max - part.y_min)/2
+            part.position[0], part.position[1] = back - part.position[1], part.position[0]
+            part.rotate_freeze_top()
+            part.position[0], part.position[1] = part.position[0] - (part.x_max - part.x_min)/2, part.position[1]  - (part.y_max - part.y_min)/2
+
+    def rotate_freeze_left(self):
+        """
+        Rotate the top and front while holding the left where it currently is. Of all the parts in an assembly.
+        """
+        top = self.bounding_box[TOP]
+        for part in self.parts.values():
+            part.position[1], part.position[2] = part.position[1] + (part.y_max - part.y_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
+            part.position[1], part.position[2] = top - part.position[2], part.position[1]
+            part.rotate_freeze_left()
+            part.position[1], part.position[2] = part.position[1] - (part.y_max - part.y_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
+            
+
+    def rotate_freeze_front(self):
+        """
+        Rotate the left and top while holding the front where it currently is. Of all the parts in an assembly.
+        """
+        right = self.bounding_box[RIGHT]
+        for part in self.parts.values():
+            part.position[0], part.position[2] = part.position[0] + (part.x_max - part.x_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
+            part.position[0], part.position[2] = part.position[2], right - part.position[0]
+            part.rotate_freeze_front()
+            part.position[0], part.position[2] = part.position[0] - (part.x_max - part.x_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
