@@ -43,21 +43,21 @@ def test_dynamic():
     front = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
     back = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
 
-    box.rotate_freeze_front(left)
-    box.rotate_freeze_front(right)
-    box.rotate_freeze_left(front)
-    box.rotate_freeze_left(back)
+    left.rotate_freeze_front()
+    right.rotate_freeze_front()
+    front.rotate_freeze_left()
+    back.rotate_freeze_left()
 
-    box.level(front.back, bottom.front)
-    box.level(back.front, bottom.back)
+    front.back.level(bottom.front)
+    back.front.level(bottom.back)
 
-    box.level(left.right, bottom.left)
-    box.level(right.left, bottom.right)
+    left.right.level(bottom.left)
+    right.left.level(bottom.right)
 
-    box.level(top.top, back.top)
+    top.top.level(back.top)
 
-    box.level(left.front, front.front)
-    box.level(right.front, front.front)
+    left.front.level(front.front)
+    right.front.level(front.front)
 
     cubes = [0, 0, 0, 0, 0, 0, 0, 0]
     for cube in range(8):
@@ -66,44 +66,44 @@ def test_dynamic():
     start = 0
     for _count in range(8):
         for cube in range(start, 8):
-            box.rotate_freeze_top(cubes[cube])
+            cubes[cube].rotate_freeze_top()
         start = start + 2
 
     for cube in range(1, 8, 2):
-        box.rotate_freeze_front(cubes[cube])
-        box.rotate_freeze_front(cubes[cube])
-        box.rotate_freeze_top(cubes[cube])
+        cubes[cube].rotate_freeze_front()
+        cubes[cube].rotate_freeze_front()
+        cubes[cube].rotate_freeze_top()
 
     for cube in range(0, 8, 2):
-        box.level(cubes[cube].bottom, bottom.top)
+        cubes[cube].bottom.level(bottom.top)
 
     for cube in range(1, 8, 2):
-        box.level(cubes[cube].top, top.bottom)
+        cubes[cube].top.level(top.bottom)
 
     for cube in [0, 1, 2, 7]:
-        box.level(cubes[cube].right, right.left)
+        cubes[cube].right.level(right.left)
 
     for cube in [3, 4, 5, 6]:
-        box.level(cubes[cube].left, left.right)
+        cubes[cube].left.level(left.right)
 
     for cube in [2, 4, 5, 7]:
-        box.level(cubes[cube].back, back.front)
+        cubes[cube].back.level(back.front)
 
     for cube in [0, 1, 6, 3]:
-        box.level(cubes[cube].front, front.back)
+        cubes[cube].front.level(front.back)
 
     for cube in range(0, 8, 2):
-        box.subtract(bottom.top, cubes[cube])
+        bottom.top.subtract(cubes[cube])
 
     for cube in [3, 5, 6, 4]:
-        box.subtract(left.right, cubes[cube])
+        left.right.subtract(cubes[cube])
 
     for cube in [2, 7, 4, 5]:
-        box.subtract(back.front, cubes[cube])
+        back.front.subtract(cubes[cube])
 
-    box.merge(top, bottom)
-    box.merge(front, back)
-    box.merge(left, right)
+    top.merge(bottom)
+    front.merge(back)
+    left.merge(right)
 
     box.add(bottom)
     box.add(left)

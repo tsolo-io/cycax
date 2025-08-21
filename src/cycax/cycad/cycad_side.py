@@ -4,6 +4,8 @@
 
 import logging
 
+from traitlets import This
+
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 from cycax.cycad.vents import Vent
 
@@ -61,11 +63,6 @@ class CycadSide:
             angle: The angle in degrees that the part will be rotates on.
 
         """
-        if self._parent.assembly is None:
-            # TODO: Think about which exception should be raised, maybe even a custom one.
-            msg = "Not part of an assembly"
-            raise ValueError(msg)
-
         if angle % 90 != 0:
             # TODO: Think about which exception should be raised, maybe even a custom one.
             msg = "Can only rotate in multiples of 90 degrees"
@@ -283,6 +280,124 @@ class CycadSide:
             external_subtract=external_subtract,
         )
 
+    def subtract(self, part2): #referencing CycadPart results in a circular import
+        """
+        This method adds the features of part2 to the part1 on the side where they touch.
+        This method will be used for moving around conn-cube and harddive screw holes.
+
+        Args:
+            partside1: The part side that will receive the features.
+            part2: The part that is used as the template when transferring features.
+
+        Raises:
+            ValueError: When the side present in CycadSide does not match one of the expected sides.
+        """
+        part1 = self._parent
+        side = self.name
+        part1.make_bounding_box()
+
+        for feature in part2._final_place():
+            if feature.name == "cube":
+                if side == TOP:
+                    if (feature.z - feature.z_size/2) == part1.bounding_box[TOP]:
+                        feature.side = TOP
+                        part1.insert_feature(feature)
+                elif side == BOTTOM:
+                    if (feature.z + feature.z_size/2) == part1.bounding_box[BOTTOM]:
+                        feature.side = BOTTOM
+                        part1.insert_feature(feature)
+                elif side == LEFT:
+                    if (feature.x + feature.x_size/2) == part1.bounding_box[LEFT]:
+                        feature.side = LEFT
+                        part1.insert_feature(feature)
+                elif side == RIGHT:
+                    if (feature.x - feature.x_size/2) == part1.bounding_box[RIGHT]:
+                        feature.side = RIGHT
+                        part1.insert_feature(feature)
+                elif side == FRONT:
+                    if (feature.y + feature.y_size/2) == part1.bounding_box[FRONT]:
+                        feature.side = FRONT
+                        part1.insert_feature(feature)
+                elif side == BACK:
+                    if (feature.y - feature.y_size/2) == part1.bounding_box[BACK]:
+                        feature.side = BACK
+                        part1.insert_feature(feature)
+                else:
+                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+                    raise ValueError(msg)
+            else:
+                if side == TOP:
+                    print(part1.bounding_box)
+                    if feature.z == part1.bounding_box[TOP]:
+                        feature.side = TOP
+                        part1.insert_feature(feature)
+                elif side == BOTTOM:
+                    if feature.z == part1.bounding_box[BOTTOM]:
+                        feature.side = BOTTOM
+                        part1.insert_feature(feature)
+                elif side == LEFT:
+                    if feature.x == part1.bounding_box[LEFT]:
+                        feature.side = LEFT
+                        part1.insert_feature(feature)
+                elif side == RIGHT:
+                    if feature.x == part1.bounding_box[RIGHT]:
+                        feature.side = RIGHT
+                        part1.insert_feature(feature)
+                elif side == FRONT:
+                    if feature.y == part1.bounding_box[FRONT]:
+                        feature.side = FRONT
+                        part1.insert_feature(feature)
+                elif side == BACK:
+                    if feature.y == part1.bounding_box[BACK]:
+                        feature.side = BACK
+                        part1.insert_feature(feature)
+                else:
+                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+                    raise ValueError(msg)
+                
+    def level(self, partside2): #reference to CycadSide results in error
+        """
+        Align the two sides onto the same plain.
+
+        Moves part1 so that its given side is on the same plain as the given
+        side of parts2. e.g. `level(part1.front part2.back)` will move part1
+        so that its front is on the same plain as the back of part2.
+
+        Args:
+            partside1: The CycadSide to be moved to match the plain of the other part.
+            partside2: The CycadSide used as reference when moving part1.
+        Raises:
+            ValueError: When the side present in CycadSide does not match one of the expected sides.
+        """
+        part1 = self._parent
+        part2 = partside2._parent
+        part1side = self.name
+        part2side = partside2.name
+        part2.make_bounding_box()
+        part1.make_bounding_box()
+        to_here = part2.bounding_box[part2side]
+
+        if part1side == BOTTOM:
+            part1.at(z=to_here)
+        elif part1side == TOP:
+            z_size = part1.z_max - part1.z_min
+            part1.at(z=to_here - z_size)
+        elif part1side == LEFT:
+            part1.at(x=to_here)
+        elif part1side == RIGHT:
+            x_size = part1.x_max - part1.x_min
+            part1.at(x=to_here - x_size)
+        elif part1side == FRONT:
+            part1.at(y=to_here)
+        elif part1side == BACK:
+            y_size = part1.y_max - part1.y_min
+            part1.at(y=to_here - y_size)
+        else:
+            msg = f"Side: {part1side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+            raise ValueError(msg)
+
+        part1.make_bounding_box()
+
 
 class LeftSide(CycadSide):
     name = LEFT
@@ -312,7 +427,7 @@ class LeftSide(CycadSide):
             return val
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_left(self._parent)
+        self._parent.rotate_freeze_left()
 
 
 class RightSide(CycadSide):
@@ -343,7 +458,7 @@ class RightSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_left(self._parent)
+        self._parent.rotate_freeze_left()
 
 
 class TopSide(CycadSide):
@@ -374,7 +489,7 @@ class TopSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_top(self._parent)
+        self._parent.rotate_freeze_top()
 
 
 class BottomSide(CycadSide):
@@ -405,7 +520,7 @@ class BottomSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_top(self._parent)
+        self._parent.rotate_freeze_top()
 
 
 class FrontSide(CycadSide):
@@ -436,7 +551,7 @@ class FrontSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_front(self._parent)
+        self._parent.rotate_freeze_front()
 
 
 class BackSide(CycadSide):
@@ -467,4 +582,4 @@ class BackSide(CycadSide):
         return x_size, y_size, z_size
 
     def _rotate(self):
-        self._parent.assembly.rotate_freeze_front(self._parent)
+        self._parent.rotate_freeze_front()

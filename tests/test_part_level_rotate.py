@@ -25,26 +25,27 @@ def test_move_level():
     mypart4.move(100, 100, 100)
 
     # Test that a part is rotated multiple times.
-    assembly.rotate_freeze_left(mypart1)
-    assembly.rotate_freeze_front(mypart1)
-    assembly.rotate_freeze_top(mypart1)
 
-    assembly.rotate_freeze_left(mypart3)
-    assembly.rotate_freeze_front(mypart3)
-    assembly.rotate_freeze_top(mypart3)
+    mypart1.rotate_freeze_left()
+    mypart1.rotate_freeze_front()
+    mypart1.rotate_freeze_top()
 
-    assembly.level(mypart3.bottom, mypart4.top)
+    mypart3.rotate_freeze_left()
+    mypart3.rotate_freeze_front()
+    mypart3.rotate_freeze_top()
 
-    assembly.rotate_freeze_left(mypart1)
-    assembly.rotate_freeze_front(mypart1)
-    assembly.rotate_freeze_top(mypart1)
+    mypart3.bottom.level(mypart4.top)
 
-    assembly.rotate_freeze_left(mypart3)
-    assembly.rotate_freeze_front(mypart3)
-    assembly.rotate_freeze_top(mypart3)
+    mypart1.rotate_freeze_left()
+    mypart1.rotate_freeze_front()
+    mypart1.rotate_freeze_top()
 
-    assembly.level(mypart3.bottom, mypart2.top)
-    assembly.level(mypart1.bottom, mypart2.top)
+    mypart3.rotate_freeze_left()
+    mypart3.rotate_freeze_front()
+    mypart3.rotate_freeze_top()
+
+    mypart3.bottom.level(mypart2.top)
+    mypart1.bottom.level(mypart2.top)
 
     assembly_def = assembly.export()
     assert assembly_def["parts"][0]["position"] == assembly_def["parts"][2]["position"]

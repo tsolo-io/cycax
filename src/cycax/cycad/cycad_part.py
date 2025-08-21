@@ -72,7 +72,7 @@ class CycadPart(Location):
         self.y_size = y_size
         self.z_size = z_size
         self.features = []  # Stores all the holes to be cut
-        self.move_holes = []
+        self.external_features = []
         self.x_min: float = 0.0  # Location.Left
         self.y_min: float = 0.0  # Location.Front
         self.z_min: float = 0.0  # Location.Bottom
@@ -190,7 +190,7 @@ class CycadPart(Location):
 
         temp_hole = Holes(side=side, x=x, y=y, z=z, diameter=diameter, depth=depth)
         if external_subtract:
-            self.move_holes.append(temp_hole)
+            self.external_features.append(temp_hole)
         else:
             self.features.append(temp_hole)
 
@@ -233,9 +233,9 @@ class CycadPart(Location):
         )
         # This will add it to the relevant array
         if external_subtract:
-            self.move_holes.append(temp_slot.hole_left)
-            self.move_holes.append(temp_slot.hole_right)
-            self.move_holes.append(temp_slot.rectangle)
+            self.external_features.append(temp_slot.hole_left)
+            self.external_features.append(temp_slot.hole_right)
+            self.external_features.append(temp_slot.rectangle)
         else:
             self.features.append(temp_slot.hole_left)
             self.features.append(temp_slot.hole_right)
@@ -319,7 +319,7 @@ class CycadPart(Location):
         )
         if calculate: temp_rect.__calc__()
         if external_subtract:
-            self.move_holes.append(temp_rect)
+            self.external_features.append(temp_rect)
         else:
             self.features.append(temp_rect)
 
@@ -517,7 +517,7 @@ class CycadPart(Location):
         for item in self.features:
             dict_out["features"].append(item.export())
         dict_out["subtract"] = []
-        for item in self.move_holes:
+        for item in self.external_features:
             dict_out["subtract"].append(item.export())
         return dict_out
 
@@ -676,12 +676,12 @@ class CycadPart(Location):
         return getattr(self, side_name.lower())
 
     def _assembly_level(self, my_side: CycadSide, other_side: CycadSide, *, subtract: bool = False) -> CycadPart:
-        if self.assembly is None:
-            msg = "Part is not part of an assembly. Please add it to an assembly before using this method."
-            raise ValueError(msg)
-        self.assembly.level(my_side, other_side)
+        # if self.assembly is None:
+        #     msg = "Part is not part of an assembly. Please add it to an assembly before using this method."
+        #     raise ValueError(msg)
+        my_side.level(other_side)
         if subtract:
-            self.assembly.subtract(other_side, self)
+            other_side.subtract(part2=self)
         return other_side._parent
 
     def level(
@@ -768,12 +768,88 @@ class CycadPart(Location):
         for action in actions:
             match action.lower():
                 case "x":
-                    self.assembly.rotate_freeze_left(self)
+                    self.rotate_freeze_left()
                 case "y":
-                    self.assembly.rotate_freeze_front(self)
+                    self.rotate_freeze_front()
                 case "z":
-                    self.assembly.rotate_freeze_top(self)
+                    self.rotate_freeze_top()
                 case _:
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
+                
+    def rotate_freeze_top(self):
+        """
+        This method will rotate the front and the left while holding the top where it currently is.
+        """
+        self.rotation.append({"axis": "z", "angle": 90})
+        self.x_max, self.y_max = self.y_max, self.x_max
+        self.x_min, self.y_min = self.y_min, self.x_min
+        self.make_bounding_box()
+
+    def rotate_freeze_left(self):
+        """
+        This method will rotate the top and front while holding the left where it currently is.
+        """
+        self.rotation.append({"axis": "x", "angle": 90})
+        self.y_max, self.z_max = self.z_max, self.y_max
+        self.y_min, self.z_min = self.z_min, self.y_min
+        self.make_bounding_box()
+
+    def rotate_freeze_front(self):
+        """
+        This method will rotate the left and top while holding the front where it currently is.
+        """
+        self.rotation.append({"axis": "y", "angle": 90})
+        self.x_max, self.z_max = self.z_max, self.x_max
+        self.x_min, self.z_min = self.z_min, self.x_min
+        self.make_bounding_box()
+
+    def _final_place(self):
+        """
+        It is used to move the external_features to their final location before they are subtracted from
+        the other part.
+        """
+        for feature in self.external_features:
+            temp_feature = copy.deepcopy(feature)
+            rotation = [self.x_size, self.y_size, self.z_size]
+            for rot in self.rotation:
+                if rot["axis"] == "x":
+                    rotation = temp_feature.swap_yz(rot=1, rotmax=rotation)
+                elif rot["axis"] == "y":
+                    rotation = temp_feature.swap_xz(rot=1, rotmax=rotation)
+                elif rot["axis"] == "z":
+                    rotation = temp_feature.swap_xy(rot=1, rotmax=rotation)
+            if self.position[0] != 0:
+                temp_feature.move(x=self.position[0])
+            if self.position[1] != 0:
+                temp_feature.move(y=self.position[1])
+            if self.position[2] != 0:
+                temp_feature.move(z=self.position[2])
+            yield temp_feature
+
+    def merge(self, part2: CycadPart):
+        """
+        This method will be used to merge this part and another part together.
+        which have identical sizes but different features.
+        This part will receive the features of part2 and part2 its features.
+
+        Args:
+            part2: This part will receive the features present on part1.
+
+        Raises:
+            ValueError: if the sizes of the parts are not identical.
+        """
+        if self.x_size == part2.x_size and self.y_size == part2.y_size and self.z_size == part2.z_size:
+            for item in part2.features:
+                if item not in self.features:
+                    self.features.append(item)
+            for item in part2.external_features:
+                if item not in self.external_features:
+                    self.external_features.append(item)
+            part2.features = self.features
+            part2.external_features = self.external_features
+        else:
+            msg = f"merging {self} and {part2} but they are not of the same size."
+            raise ValueError(msg)
+

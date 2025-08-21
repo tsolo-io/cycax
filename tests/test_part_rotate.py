@@ -27,9 +27,9 @@ def test_rotate():
 
     # Test that a part is rotated multiple times.
     for count in range(1, 4):
-        assembly.rotate_freeze_left(mypart2)
-        assembly.rotate_freeze_front(mypart3)
-        assembly.rotate_freeze_top(mypart4)
+        mypart2.rotate_freeze_left()
+        mypart3.rotate_freeze_front()
+        mypart4.rotate_freeze_top()
         assembly_def = assembly.export()
         assert assembly_def["parts"][0]["rotate"] == []
         assert assembly_def["parts"][1]["rotate"] == [{"axis": "x", "angle": 90}] * count
@@ -55,18 +55,18 @@ def test_new_rotate():
     # Test that a part is rotated multiple times.
     mypart1.rotate("xxxx")
     for _count in range(0, 4):
-        assembly.rotate_freeze_left(mypart2)
+        mypart2.rotate_freeze_left()
 
     mypart3.rotate("yXyyxZzxy")
-    assembly.rotate_freeze_front(mypart4)
-    assembly.rotate_freeze_left(mypart4)
-    assembly.rotate_freeze_front(mypart4)
-    assembly.rotate_freeze_front(mypart4)
-    assembly.rotate_freeze_left(mypart4)
-    assembly.rotate_freeze_top(mypart4)
-    assembly.rotate_freeze_top(mypart4)
-    assembly.rotate_freeze_left(mypart4)
-    assembly.rotate_freeze_front(mypart4)
+    mypart4.rotate_freeze_front()
+    mypart4.rotate_freeze_left()
+    mypart4.rotate_freeze_front()
+    mypart4.rotate_freeze_front()
+    mypart4.rotate_freeze_left()
+    mypart4.rotate_freeze_top()
+    mypart4.rotate_freeze_top()
+    mypart4.rotate_freeze_left()
+    mypart4.rotate_freeze_front()
 
     assembly_def = assembly.export()
 
@@ -94,11 +94,8 @@ def test_rotate_side():
 
     # Test that a part is rotated multiple times.
     for count in range(1, 4):
-        # assembly.rotate_freeze_left(mypart2)
         mypart2.left.rotate()
-        # assembly.rotate_freeze_front(mypart3)
         mypart3.front.rotate()
-        # assembly.rotate_freeze_top(mypart4)
         mypart4.top.rotate()
         assembly_def = assembly.export()
         assert assembly_def["parts"][0]["rotate"] == []

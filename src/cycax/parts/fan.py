@@ -34,13 +34,13 @@ class Fan(Cuboid):
         self.border = 1
         self.diameter = size - 2 * self.border
         self.internal = internal
-        self.center = size / 2
         self.hole_depth = hole_depth
         self.hole_diameter = hole_diameter
         # hole_from_edge - The distance the center of mounting holes is from the edge.
         # Normally 4mm but we can be more specific for fan sizes we know.
         self.hole_from_edge = {80: 4.25}.get(size, 4)
         self.side_pad = side_pad
+        self.fan_center = self.size / 2 # I had to change this from self.center because it was conflicting with the center property. 
 
         super().__init__(part_no=part_no, x_size=size, y_size=size, z_size=thickness)
 
@@ -51,8 +51,8 @@ class Fan(Cuboid):
         This method will be called within the init method.
         Based on whether the specified fan is external or internal it will call the relevant method.
         """
-        self.top.hole(pos=(self.center, self.center), diameter=self.diameter, depth=2)
-        self.bottom.hole(pos=(self.center, self.center), diameter=self.diameter, depth=2)
+        self.top.hole(pos=(self.fan_center, self.fan_center), diameter=self.diameter, depth=2)
+        self.bottom.hole(pos=(self.fan_center, self.fan_center), diameter=self.diameter, depth=2)
         if self.internal:
             self._internal()
         else:
