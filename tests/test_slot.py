@@ -5,6 +5,7 @@
 from itertools import product
 
 from pathlib import Path
+import pytest
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
@@ -73,7 +74,7 @@ def assemble(side: str, *, horizontal: bool) -> Assembly:
     cube.level(bottom=base_board.top, subtract=True)
     return assembly
 
-
+@pytest.mark.slow
 def test_slots(tmp_path):
     """Test slots.
 

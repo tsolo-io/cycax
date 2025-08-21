@@ -72,7 +72,7 @@ class CycadPart(Location):
         self.y_size = y_size
         self.z_size = z_size
         self.features = []  # Stores all the holes to be cut
-        self.move_holes = []
+        self.external_features = []
         self.x_min: float = 0.0  # Location.Left
         self.y_min: float = 0.0  # Location.Front
         self.z_min: float = 0.0  # Location.Bottom
@@ -190,7 +190,7 @@ class CycadPart(Location):
 
         temp_hole = Holes(side=side, x=x, y=y, z=z, diameter=diameter, depth=depth)
         if external_subtract:
-            self.move_holes.append(temp_hole)
+            self.external_features.append(temp_hole)
         else:
             self.features.append(temp_hole)
 
@@ -233,9 +233,9 @@ class CycadPart(Location):
         )
         # This will add it to the relevant array
         if external_subtract:
-            self.move_holes.append(temp_slot.hole_left)
-            self.move_holes.append(temp_slot.hole_right)
-            self.move_holes.append(temp_slot.rectangle)
+            self.external_features.append(temp_slot.hole_left)
+            self.external_features.append(temp_slot.hole_right)
+            self.external_features.append(temp_slot.rectangle)
         else:
             self.features.append(temp_slot.hole_left)
             self.features.append(temp_slot.hole_right)
@@ -319,7 +319,7 @@ class CycadPart(Location):
         )
         if calculate: temp_rect.__calc__()
         if external_subtract:
-            self.move_holes.append(temp_rect)
+            self.external_features.append(temp_rect)
         else:
             self.features.append(temp_rect)
 
@@ -517,7 +517,7 @@ class CycadPart(Location):
         for item in self.features:
             dict_out["features"].append(item.export())
         dict_out["subtract"] = []
-        for item in self.move_holes:
+        for item in self.external_features:
             dict_out["subtract"].append(item.export())
         return dict_out
 

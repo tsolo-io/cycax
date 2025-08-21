@@ -272,11 +272,11 @@ class Assembly:
             for item in part2.features:
                 if item not in part1.features:
                     part1.features.append(item)
-            for item in part2.move_holes:
-                if item not in part1.move_holes:
-                    part1.move_holes.append(item)
+            for item in part2.external_features:
+                if item not in part1.external_features:
+                    part1.external_features.append(item)
             part2.features = part1.features
-            part2.move_holes = part1.move_holes
+            part2.external_features = part1.external_features
         else:
             msg = f"merging {part1} and {part2} but they are not of the same size."
             raise ValueError(msg)
@@ -398,10 +398,10 @@ class Assembly:
 
     def _final_place(self, part: CycadPart):
         """
-        It is used to move the move_holes to their final location before they are subtracted from
+        It is used to move the external_features to their final location before they are subtracted from
         the other part.
         """
-        for feature in part.move_holes:
+        for feature in part.external_features:
             temp_feature = copy.deepcopy(feature)
             rotation = [part.x_size, part.y_size, part.z_size]
             for rot in part.rotation:
