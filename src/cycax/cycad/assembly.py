@@ -388,3 +388,5 @@ class Assembly:
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
+                
+    
