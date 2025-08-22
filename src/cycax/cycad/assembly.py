@@ -219,7 +219,7 @@ class Assembly:
         return bounding_box
 
     @property
-    def center(self) -> dict:
+    def center(self) -> tuple[float, float, float]:
         """
         Creates a bounding box that will give the plane of each side of the assembly.
 
