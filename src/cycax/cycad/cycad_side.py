@@ -4,8 +4,6 @@
 
 import logging
 
-from traitlets import This
-
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 from cycax.cycad.vents import Vent
 
@@ -325,7 +323,6 @@ class CycadSide:
                     msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
                     raise ValueError(msg)
             elif side == TOP:
-                print(part1.bounding_box)
                 if feature.z == part1.bounding_box[TOP]:
                     feature.side = TOP
                     part1.insert_feature(feature)

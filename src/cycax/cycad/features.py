@@ -4,7 +4,7 @@
 
 import typing
 
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP, Location
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, Location
 
 
 class Feature(Location):

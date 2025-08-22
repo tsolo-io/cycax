@@ -3,12 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from itertools import product
-from pathlib import Path
 
 import pytest
 
 from cycax.cycad.assembly import Assembly
-from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
+from cycax.cycad.cuboid import Cuboid, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD

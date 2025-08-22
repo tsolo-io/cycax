@@ -2,14 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from pathlib import Path
-from struct import calcsize
-
-from cycax.cycad import Assembly, Cuboid, Print3D, SheetMetal
+from cycax.cycad import Assembly, Cuboid, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
+from cycax.cycad.location import BACK, FRONT, TOP
 
 
 class Socket(Cuboid):
@@ -98,7 +94,6 @@ def test_subtract_side(tmp_path):
         base = assembly.get_part("base_1").export()
         compare = {}
         for feature in base["features"]:
-            print(_side, feature)
             if feature["type"] == "cut":
                 if feature["name"] == "hole":
                     name = f"{feature['name']}{feature['diameter']}"

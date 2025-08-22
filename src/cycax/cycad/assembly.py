@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import copy
 import json
 import logging
 import os
@@ -13,7 +12,6 @@ from pathlib import Path
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.cycad_part import CycadPart
-from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
@@ -194,7 +192,6 @@ class Assembly:
         if not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
-        print(self.parts)
         for item in self.parts.values():
             item.save(path)
 
@@ -248,7 +245,6 @@ class Assembly:
             z: The value to which z needs to be moved to on the axis.
         """
         for part in self.parts.values():
-            print(part)
             if x is not None:
                 part.at(x=x + part.position[0])
             if y is not None:
@@ -256,7 +252,7 @@ class Assembly:
             if z is not None:
                 part.at(z=z + part.position[2])
 
-    def add(self, part: CycadPart, suggested_name: str | None = None, external_subract: bool = False) -> str:
+    def add(self, part: CycadPart, suggested_name: str | None = None, *, external_subtract: bool = False) -> str:
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be edited.
@@ -276,7 +272,7 @@ class Assembly:
             msg = f"Part with name/id {part_name} already in parts catalogue."
             raise KeyError(msg)
         self.parts[part_name] = part
-        if external_subract:
+        if external_subtract:
             self.external_features.append(part.external_features)
         return part_name
 
@@ -413,7 +409,7 @@ class Assembly:
         """
         self.assemblies.append(assembly)
 
-    def combine_all_assemblies(self, new_name: str = None, path: Path = None):
+    def combine_all_assemblies(self, new_name: str | None = None, path: Path | None = None):
         """
         Combine all the assemblies into one Assembly.
 

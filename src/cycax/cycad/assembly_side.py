@@ -88,12 +88,12 @@ class AssemblySide:
 
     def subtract(self, assembly2):  # Using the Assembling in the description creates a circular import.
         """
-        Loops through the parts in each assemly and adds the features from assembly2 that touch the face of assembly1.
+        Loops through the parts in each assembly and adds the features from assembly2 that touch the face of assembly1.
 
         Args:
             assembly1: The assembly that you add the features to.
             assembly1_side: The side of the assembly that you add features to.
-            assembly2: The assemly that is used as the template when transferring features.
+            assembly2: The assembly that is used as the template when transferring features.
         """
         assembly1 = self._parent
         assembly1_side = self.name

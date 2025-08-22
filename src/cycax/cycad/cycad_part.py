@@ -7,10 +7,8 @@ from __future__ import annotations
 import copy
 import json
 import logging
-from asyncio import FastChildWatcher
 from pathlib import Path
-from turtle import position
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide

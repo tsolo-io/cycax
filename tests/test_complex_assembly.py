@@ -1,10 +1,7 @@
-from pathlib import Path
-
 from cycax.cycad.assembly import Assembly
-from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
+from cycax.cycad.cuboid import SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
 
 
 def test_complex_assembly(tmp_path):
