@@ -2,11 +2,30 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 import logging
 
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 from cycax.cycad.vents import Vent
 
+class FeatureAdd:
+
+    def __init__(self, side: CycadSide, x: float, y: float, height: float):
+        self.side = side
+        self.x = x
+        self.y = y
+        self.pos = (x, y)
+        self.height = height
+
+    def cylinder(self, diameter: float):
+        _location_tuple = self.side._location_calc(pos=self.pos)
+        pass
+
+    def box(self, length: float, width: float, angle: float=0):
+        pass
+
+    def polygon(self, sides: int, radius: float, angle: float=0):
+        pass
 
 class CycadSide:
     name = ""
@@ -52,6 +71,9 @@ class CycadSide:
         msg = "_rotate should be defined for each side."
         raise NotImplementedError(msg)
 
+    def add(self, height: float, position: tuple[float|None, float|None] = (None, None)) -> FeatureAdd:
+        pass
+
     def rotate(self, angle: float = 90):
         """Rotate the part by keeping the selected side on the same plain.
 
@@ -90,7 +112,7 @@ class CycadSide:
         }[self.name]
 
     def vent(
-        self, x_min: float, y_min: float, x_max: float, y_max: float, border: float = 0, separation: float | None = None
+        self, x_min: float = 0.0, y_min: float = 0.0, x_max: float = 0.0, y_max: float = 0.0, border: float = 0, separation: float | None = None
     ):
         """Define the constraints for the vent and create a vent object.
 

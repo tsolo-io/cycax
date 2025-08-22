@@ -42,7 +42,7 @@ class Gear(Cylinder):
             pos = (self.x_center + math.cos(angle * n) * radius, self.y_center + math.sin(angle * n) * radius)
             self.top.hole(pos=pos, diameter=teath_diameter)
         self.top.hole(pos=(self.x_center, self.y_center), diameter=2 * radius - teath_diameter - 2, depth=0.5)
-
+        self.top.add(pos=(3,4), height=6).cylinder(diameter=2)
 
 if __name__ == "__main__":
     gear = Gear(diameter=10, teath=6)

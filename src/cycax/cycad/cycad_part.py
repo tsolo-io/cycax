@@ -315,7 +315,7 @@ class CycadPart(Location):
             z_size=z_size,
             center=center,
         )
-        if calculate:
+        if calculate or external_subtract:
             temp_rect.__calc__()
         if external_subtract:
             self.move_holes.append(temp_rect)
