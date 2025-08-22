@@ -40,7 +40,9 @@ class Fan(Cuboid):
         # Normally 4mm but we can be more specific for fan sizes we know.
         self.hole_from_edge = {80: 4.25}.get(size, 4)
         self.side_pad = side_pad
-        self.fan_center = self.size / 2 # I had to change this from self.center because it was conflicting with the center property. 
+        self.fan_center = (
+            self.size / 2
+        )  # I had to change this from self.center because it was conflicting with the center property.
 
         super().__init__(part_no=part_no, x_size=size, y_size=size, z_size=thickness)
 

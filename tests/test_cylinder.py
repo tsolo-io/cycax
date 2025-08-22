@@ -25,5 +25,4 @@ def sphere_cube(tmp_path: Path):
 
 
 def test_sphere(tmp_path: Path):
-    print(tmp_path)
     sphere_cube(tmp_path)

@@ -117,7 +117,6 @@ def sides(name: str) -> tuple:
     side_right.rotate_freeze_top()
     side_right.rotate_freeze_front()
 
-
     side_top.front.level(side_front.back)
     side_left.front.level(side_front.back)
     side_right.front.level(side_front.back)

@@ -64,7 +64,6 @@ def test_level_new():
     front_side.rotate_freeze_left()
     back_side.rotate_freeze_left()
 
-
     front_side.back.level(bottom_side.front)
     back_side.front.level(bottom_side.back)
 
