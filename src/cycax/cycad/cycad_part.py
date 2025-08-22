@@ -4,10 +4,10 @@
 
 from __future__ import annotations
 
-from asyncio import FastChildWatcher
 import copy
 import json
 import logging
+from asyncio import FastChildWatcher
 from pathlib import Path
 from turtle import position
 from typing import TYPE_CHECKING, Self
@@ -80,7 +80,7 @@ class CycadPart(Location):
         self.y_max: float = self.y_size  # Location.Back
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
-        self.position = [0.0, 0.0, 0.0]  
+        self.position = [0.0, 0.0, 0.0]
         self.rotation = []
         self.final_location = False
         self.initial_polygon = polygon
@@ -291,7 +291,7 @@ class CycadPart(Location):
         *,
         center=False,
         external_subtract: bool = False,
-        calculate: bool=False,
+        calculate: bool = False,
     ):
         """This method will cut a block out of the CycadPart.
 
@@ -317,7 +317,8 @@ class CycadPart(Location):
             z_size=z_size,
             center=center,
         )
-        if calculate: temp_rect.__calc__()
+        if calculate:
+            temp_rect.__calc__()
         if external_subtract:
             self.external_features.append(temp_rect)
         else:
@@ -417,30 +418,29 @@ class CycadPart(Location):
                 rotation = feature.swap_xy(3, rotation)
         if feature.name == "cube":
             if feature.side == TOP:
-                feature.z = feature.z -feature.z_size/2 - self.z_size/2
+                feature.z = feature.z - feature.z_size / 2 - self.z_size / 2
                 feature.z_size = self.z_size
             elif feature.side == BOTTOM:
-                feature.z = feature.z + feature.z_size/2 + self.z_size/2
+                feature.z = feature.z + feature.z_size / 2 + self.z_size / 2
                 feature.z_size = self.z_size
             elif feature.side == LEFT:
-                feature.x = feature.x + feature.x_size/2 + self.x_size/2
+                feature.x = feature.x + feature.x_size / 2 + self.x_size / 2
                 feature.x_size = self.x_size
             elif feature.side == RIGHT:
-                feature.x = feature.x - feature.x_size/2 - self.x_size/2
+                feature.x = feature.x - feature.x_size / 2 - self.x_size / 2
                 feature.x_size = self.x_size
             elif feature.side == FRONT:
-                feature.x = feature.y + feature.y_size/2 + self.y_size/2
+                feature.x = feature.y + feature.y_size / 2 + self.y_size / 2
                 feature.x_size = self.y_size
             elif feature.side == BACK:
-                feature.x = feature.y - feature.y_size/2 - self.y_size/2
+                feature.x = feature.y - feature.y_size / 2 - self.y_size / 2
                 feature.x_size = self.y_size
-        else:
-            if feature.side in (TOP, BOTTOM):
-                feature.depth = self.z_size
-            elif feature.side in (LEFT, RIGHT):
-                feature.depth = self.x_size
-            elif feature.side in (FRONT, BACK):
-                feature.depth = self.y_size
+        elif feature.side in (TOP, BOTTOM):
+            feature.depth = self.z_size
+        elif feature.side in (LEFT, RIGHT):
+            feature.depth = self.x_size
+        elif feature.side in (FRONT, BACK):
+            feature.depth = self.y_size
         self.features.append(feature)
 
     @property
@@ -452,15 +452,15 @@ class CycadPart(Location):
             msg = "BasePath does not exists."
             raise ValueError(msg)
         return self._base_path / self.part_no
-    
+
     @property
     def center(self) -> list:
         """Return the center of a part."""
-        centered_x = self.position[0] + self.x_max/2
-        centered_y = self.position[1] + self.y_max/2
-        centered_z = self.position[2] + self.z_max/2
+        centered_x = self.position[0] + self.x_max / 2
+        centered_y = self.position[1] + self.y_max / 2
+        centered_z = self.position[2] + self.z_max / 2
         return [centered_x, centered_y, centered_z]
- 
+
     def save(self, path: Path | str | None = None):
         """
         Save the part specification to a JSON file.
@@ -777,7 +777,7 @@ class CycadPart(Location):
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
-                
+
     def rotate_freeze_top(self):
         """
         This method will rotate the front and the left while holding the top where it currently is.
@@ -852,4 +852,3 @@ class CycadPart(Location):
         else:
             msg = f"merging {self} and {part2} but they are not of the same size."
             raise ValueError(msg)
-

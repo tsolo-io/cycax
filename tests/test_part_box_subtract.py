@@ -34,7 +34,7 @@ class Socket(Cuboid):
             length=length,
             width=width,
             external_subtract=True,
-            calculate = True,
+            calculate=True,
         )
         # For the test, rotate the part so that the 1mm hole is the origin of the cut square.
         self.back.hole(pos=pos, diameter=1)
@@ -76,13 +76,10 @@ def make_plate_with_socket(side: str) -> Assembly:
         psocket.move(y=5, x=-5)
         psocket.level(bottom=base.top, subtract=True)
 
-    base.save("/home/helen/src/tsolo/test-subtract")
-    base.render("preview3d")
-
     return assembly
 
 
-def test_subtract_side():
+def test_subtract_side(tmp_path):
     """This test creates a plate with a socket that has a rectangle cutout and a hole.
 
     A check is made to ensure that the hole and the rectangle cutout are at the same locations.
@@ -93,12 +90,8 @@ def test_subtract_side():
     for side in TOP, BACK, FRONT:
         assembly = make_plate_with_socket(side=side)
         # Help with debugging
-        save_path = Path(f"/home/helen/src/tsolo/test-subtract/{side}")
-        save_path.mkdir(parents=True, exist_ok=True)
-        assembly.save(save_path)
-        assembly.build(
-            engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()]
-        )
+        assembly.save(tmp_path)
+        assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
         assembled_side[side] = assembly
 
     for _side, assembly in assembled_side.items():
@@ -114,5 +107,3 @@ def test_subtract_side():
                 compare[name] = feature
         assert compare["hole3"]["x"] == compare["cube"]["x"]
         assert compare["hole3"]["y"] == compare["cube"]["y"]
-
-

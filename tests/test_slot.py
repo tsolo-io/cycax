@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from itertools import product
-
 from pathlib import Path
+
 import pytest
+
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
@@ -74,6 +75,7 @@ def assemble(side: str, *, horizontal: bool) -> Assembly:
     cube.level(bottom=base_board.top, subtract=True)
     return assembly
 
+
 @pytest.mark.slow
 def test_slots(tmp_path):
     """Test slots.
@@ -107,9 +109,8 @@ def test_slots(tmp_path):
         # Test that each baseplate is correct by checking that it is the same as the previous one.
         my_base_plate = tmp_path / assembly.name / "base" / "base.json"
 
-
-        #As these holes are inserted from the far side there actual y value is y_value = y-width - provided_y_value 
-        if assembly.name in ("slots_back_h", "slots_back_v", "slots_left_v", "slots_left_h"): 
+        # As these holes are inserted from the far side there actual y value is y_value = y-width - provided_y_value
+        if assembly.name in ("slots_back_h", "slots_back_v", "slots_left_v", "slots_left_h"):
             if base_plate_special:
                 #####
                 json_compare_models(my_base_plate, base_plate_special)

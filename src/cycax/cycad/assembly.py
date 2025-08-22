@@ -11,12 +11,12 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
+from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
-from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 
 
 class Assembly:
@@ -220,7 +220,7 @@ class Assembly:
 
         bounding_box = {LEFT: x_min, FRONT: y_min, BOTTOM: z_min, RIGHT: x_max, BACK: y_max, TOP: z_max}
         return bounding_box
-    
+
     @property
     def center(self) -> dict:
         """
@@ -238,7 +238,7 @@ class Assembly:
             center_z = min(part.center[2], center_z)
 
         return (center_x, center_y, center_z)
-    
+
     def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Place parts in the assembly at the exact provided coordinates.
 
@@ -329,17 +329,23 @@ class Assembly:
         dict_out["name"] = self.name
         dict_out["parts"] = list_out
         return dict_out
-                
+
     def rotate_freeze_top(self):
         """
         Rotate the front and the left while holding the top where it currently is. Of all the parts in an assembly.
         """
         back = self.bounding_box[BACK]
         for part in self.parts.values():
-            part.position[0], part.position[1] = part.position[0] + (part.x_max - part.x_min)/2, part.position[1]  + (part.y_max - part.y_min)/2
+            part.position[0], part.position[1] = (
+                part.position[0] + (part.x_max - part.x_min) / 2,
+                part.position[1] + (part.y_max - part.y_min) / 2,
+            )
             part.position[0], part.position[1] = back - part.position[1], part.position[0]
             part.rotate_freeze_top()
-            part.position[0], part.position[1] = part.position[0] - (part.x_max - part.x_min)/2, part.position[1]  - (part.y_max - part.y_min)/2
+            part.position[0], part.position[1] = (
+                part.position[0] - (part.x_max - part.x_min) / 2,
+                part.position[1] - (part.y_max - part.y_min) / 2,
+            )
 
     def rotate_freeze_left(self):
         """
@@ -347,11 +353,16 @@ class Assembly:
         """
         top = self.bounding_box[TOP]
         for part in self.parts.values():
-            part.position[1], part.position[2] = part.position[1] + (part.y_max - part.y_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
+            part.position[1], part.position[2] = (
+                part.position[1] + (part.y_max - part.y_min) / 2,
+                part.position[2] + (part.z_max - part.z_min) / 2,
+            )
             part.position[1], part.position[2] = top - part.position[2], part.position[1]
             part.rotate_freeze_left()
-            part.position[1], part.position[2] = part.position[1] - (part.y_max - part.y_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
-            
+            part.position[1], part.position[2] = (
+                part.position[1] - (part.y_max - part.y_min) / 2,
+                part.position[2] - (part.z_max - part.z_min) / 2,
+            )
 
     def rotate_freeze_front(self):
         """
@@ -359,10 +370,16 @@ class Assembly:
         """
         right = self.bounding_box[RIGHT]
         for part in self.parts.values():
-            part.position[0], part.position[2] = part.position[0] + (part.x_max - part.x_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
+            part.position[0], part.position[2] = (
+                part.position[0] + (part.x_max - part.x_min) / 2,
+                part.position[2] + (part.z_max - part.z_min) / 2,
+            )
             part.position[0], part.position[2] = part.position[2], right - part.position[0]
             part.rotate_freeze_front()
-            part.position[0], part.position[2] = part.position[0] - (part.x_max - part.x_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
+            part.position[0], part.position[2] = (
+                part.position[0] - (part.x_max - part.x_min) / 2,
+                part.position[2] - (part.z_max - part.z_min) / 2,
+            )
 
     def rotate(self, actions: str):
         """Rotate the assembly several times.
@@ -389,13 +406,12 @@ class Assembly:
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
-                
+
     def add_assembly(self, assembly):
         """
         Adds a new Assembly into the list of Assemblies.
         """
         self.assemblies.append(assembly)
-
 
     def combine_all_assemblies(self, new_name: str = None, path: Path = None):
         """
@@ -417,5 +433,3 @@ class Assembly:
         else:
             assembly_out._base_path = self._base_path
         return assembly_out
-                
-    
