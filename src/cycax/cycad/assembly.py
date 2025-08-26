@@ -419,6 +419,7 @@ class Assembly:
         total_parts = {}
         for assembly in self.assemblies:
             total_parts.update(assembly.parts)
+        total_parts.update(self.parts)
         if new_name:
             assembly_out = Assembly(name=new_name)
         else:
