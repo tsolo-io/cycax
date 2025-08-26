@@ -27,6 +27,11 @@ class Bracket(Print3D):
             side.hole(pos=pos, diameter=2.9, depth=10)
             side.hole(pos=pos, diameter=3.2, external_subtract=True)  # Through everything
             x += 10
+        
+        self.right.hole((5,5), 3, external_subtract=True)
+        self.right.hole((5,5), 3)
+        self.left.hole((5,5), 3, external_subtract=True)
+        self.left.hole((5,5), 3)
 
 
 class Device(Cuboid):
@@ -42,6 +47,10 @@ class Device(Cuboid):
                 side.hole(pos=(x, 10), diameter=4.2, depth=2)
                 side.hole(pos=(x, 10), diameter=3.9, depth=10)
                 side.hole(pos=(x, 10), diameter=4.2, external_subtract=True)  # Through everything
+        self.front.hole(pos=(50, 10), depth=10, diameter=3, external_subtract=True)
+        self.front.hole(pos=(50, 10), depth=10, diameter=3, external_subtract=False)
+        self.back.hole(pos=(50, 10), depth=10, diameter=3, external_subtract=True)
+        self.back.hole(pos=(50, 10), depth=10, diameter=3, external_subtract=False)
 
 
 class DriveStack(Assembly):
@@ -49,8 +58,8 @@ class DriveStack(Assembly):
         """Define the drive stack."""
         bracket_l = Bracket()
         bracket_r = Bracket()
-        self.add(bracket_l, "bracket_left")
-        self.add(bracket_r, "bracket_right")
+        self.add(bracket_l, "bracket_left", external_subtract=True)
+        self.add(bracket_r, "bracket_right", external_subtract=True)
 
         dev1 = Device()
         dev2 = Device()
@@ -86,14 +95,17 @@ def assemble() -> Assembly:
     box.add_assembly(drive_stack)
 
     # TODO: Change to: drive_stack.level(bottom=base.top, left=base.left, front=base.front)
-    drive_stack.bottom.level(base.top)
-    drive_stack.front.level(base.front)
+    # drive_stack.bottom.level(base.top)
+    # drive_stack.front.level(base.front)
+    drive_stack.left.rotate()
     drive_stack.left.level(base.left)
-
+    drive_stack.bottom.level(base.top)
+    drive_stack.back.level(base.back)
+    base.top.subtract(drive_stack)
     return box.combine_all_assemblies()
 
 
 if __name__ == "__main__":
     box = assemble()
-    box.save("./build/assemblies")
+    box.save("/home/helen/src/tsolo/test-slot")
     box.build(engine=AssemblyBuild123d(box.name), part_engines=[PartEngineBuild123d()])

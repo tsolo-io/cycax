@@ -244,13 +244,20 @@ class Assembly:
             y: The value to which y needs to be moved to on the axis.
             z: The value to which z needs to be moved to on the axis.
         """
+        if x is not None:
+            x_move = x - self.bounding_box[LEFT]
+        if y is not None:
+            y_move = y - self.bounding_box[FRONT]
+        if z is not None:
+            z_move = z - self.bounding_box[BOTTOM]
+
         for part in self.parts.values():
-            if x is not None:
-                part.at(x=x + part.position[0])
+            if x is not None:  
+                part.at(x=x_move + part.position[0])
             if y is not None:
-                part.at(y=y + part.position[1])
+                part.at(y=y_move + part.position[1])
             if z is not None:
-                part.at(z=z + part.position[2])
+                part.at(z=z_move + part.position[2])
 
     def add(self, part: CycadPart, suggested_name: str | None = None, *, external_subtract: bool = False) -> str:
         """This adds a part into the assembly.
@@ -273,7 +280,7 @@ class Assembly:
             raise KeyError(msg)
         self.parts[part_name] = part
         if external_subtract:
-            self.external_feature_parts.append(part.name)
+            self.external_feature_parts.append(part._name)
         return part_name
 
     def get_part(self, name: str) -> CycadPart:
