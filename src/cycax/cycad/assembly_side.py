@@ -100,22 +100,28 @@ class AssemblySide:
         for part1 in assembly1.parts.values():
             if assembly1_side == TOP:
                 for part2 in assembly2.parts.values():
-                    part1.top.subtract(part2=part2)
-            elif assembly1_side == BOTTOM:
+                    if part2.name in assembly2.external_feature_parts:
+                        part1.top.subtract(part2=part2)
+            elif assembly1_side==BOTTOM:
                 for part2 in assembly2.parts.values():
-                    part1.bottom.subtract(part2=part2)
-            elif assembly1_side == LEFT:
+                    if part2.name in assembly2.external_feature_parts:
+                        part1.bottom.subtract(part2=part2)
+            elif assembly1_side==LEFT:
                 for part2 in assembly2.parts.values():
-                    part1.left.subtract(part2=part2)
-            elif assembly1_side == RIGHT:
+                    if part2.name in assembly2.external_feature_parts:
+                        part1.left.subtract(part2=part2)
+            elif assembly1_side==RIGHT:
                 for part2 in assembly2.parts.values():
-                    part1.right.subtract(part2=part2)
-            elif assembly1_side == FRONT:
+                    if part2.name in assembly2.external_feature_parts:
+                        part1.right.subtract(part2=part2)
+            elif assembly1_side==FRONT:
                 for part2 in assembly2.parts.values():
-                    part1.front.subtract(part2=part2)
-            elif assembly1_side == BACK:
+                    if part2.name in assembly2.external_feature_parts:
+                        part1.front.subtract(part2=part2)
+            elif assembly1_side==BACK:
                 for part2 in assembly2.parts.values():
-                    part1.back.subtract(part2=part2)
+                    if part2.name in assembly2.external_feature_parts:
+                        part1.back.subtract(part2=part2)
             else:
                 msg = f"{assembly1_side} not in {SIDES}."
                 raise ValueError(msg)

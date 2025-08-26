@@ -30,7 +30,7 @@ class Assembly:
         self.parts = {}
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
-        self.external_features = []
+        self.external_feature_parts = []
         self.left = LeftSide(self)
         self.right = RightSide(self)
         self.top = TopSide(self)
@@ -273,7 +273,7 @@ class Assembly:
             raise KeyError(msg)
         self.parts[part_name] = part
         if external_subtract:
-            self.external_features.append(part.external_features)
+            self.external_feature_parts.append(part.name)
         return part_name
 
     def get_part(self, name: str) -> CycadPart:
