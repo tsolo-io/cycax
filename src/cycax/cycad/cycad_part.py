@@ -7,10 +7,9 @@ from __future__ import annotations
 import copy
 import json
 import logging
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-import warnings
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
@@ -163,20 +162,39 @@ class CycadPart(Location):
         # TODO: Require cone shape cut.
         msg = "The adding of counterdrill to a side has not been implemented."
         raise NotImplementedError(msg)
-    
-    def test_mesh_hole(self, x: float, y: float, z: float, diamter: float, depth: float):
-        if x-diamter/2 < self.x_min or x+diamter/2 > self.x_max or y-diamter/2 < self.y_min or y+diamter/2 > self.y_max or depth>self.z_max:
-            warnings.warn("This hole may break the mesh of the CycadPart.")
-        
-    def test_mesh_rectangle_cutout(self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, centered: bool):
-        if centered:
-            if x-x_size/2<self.x_size or x+x_size/2>self.x_max or y-y_size/2<self.y_min or y+y_size/2>self.y_max or z-z_size/2<self.z_min or z+z_size/2>self.z_max:
-                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
-        else:
-            if x<self.x_size or x+x_size>self.x_max or y<self.y_min or y+y_size>self.y_max or z<self.z_min or z+z_size>self.z_max:
-                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
 
-        
+    def test_mesh_hole(self, x: float, y: float, z: float, diamter: float, depth: float):
+        if (
+            x - diamter / 2 < self.x_min
+            or x + diamter / 2 > self.x_max
+            or y - diamter / 2 < self.y_min
+            or y + diamter / 2 > self.y_max
+            or depth > self.z_max
+        ):
+            warnings.warn("This hole may break the mesh of the CycadPart.")
+
+    def test_mesh_rectangle_cutout(
+        self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, centered: bool
+    ):
+        if centered:
+            if (
+                x - x_size / 2 < self.x_size
+                or x + x_size / 2 > self.x_max
+                or y - y_size / 2 < self.y_min
+                or y + y_size / 2 > self.y_max
+                or z - z_size / 2 < self.z_min
+                or z + z_size / 2 > self.z_max
+            ):
+                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
+        elif (
+            x < self.x_size
+            or x + x_size > self.x_max
+            or y < self.y_min
+            or y + y_size > self.y_max
+            or z < self.z_min
+            or z + z_size > self.z_max
+        ):
+            warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
 
     def make_hole(
         self,

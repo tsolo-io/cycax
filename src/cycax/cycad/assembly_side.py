@@ -102,23 +102,23 @@ class AssemblySide:
                 for part2 in assembly2.parts.values():
                     if part2._name in assembly2.external_feature_parts:
                         part1.top.subtract(part2=part2)
-            elif assembly1_side==BOTTOM:
+            elif assembly1_side == BOTTOM:
                 for part2 in assembly2.parts.values():
                     if part2._name in assembly2.external_feature_parts:
                         part1.bottom.subtract(part2=part2)
-            elif assembly1_side==LEFT:
+            elif assembly1_side == LEFT:
                 for part2 in assembly2.parts.values():
                     if part2._name in assembly2.external_feature_parts:
                         part1.left.subtract(part2=part2)
-            elif assembly1_side==RIGHT:
+            elif assembly1_side == RIGHT:
                 for part2 in assembly2.parts.values():
                     if part2._name in assembly2.external_feature_parts:
                         part1.right.subtract(part2=part2)
-            elif assembly1_side==FRONT:
+            elif assembly1_side == FRONT:
                 for part2 in assembly2.parts.values():
                     if part2._name in assembly2.external_feature_parts:
                         part1.front.subtract(part2=part2)
-            elif assembly1_side==BACK:
+            elif assembly1_side == BACK:
                 for part2 in assembly2.parts.values():
                     if part2._name in assembly2.external_feature_parts:
                         part1.back.subtract(part2=part2)

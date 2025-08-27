@@ -252,7 +252,7 @@ class Assembly:
             z_move = z - self.bounding_box[BOTTOM]
 
         for part in self.parts.values():
-            if x is not None:  
+            if x is not None:
                 part.at(x=x_move + part.position[0])
             if y is not None:
                 part.at(y=y_move + part.position[1])

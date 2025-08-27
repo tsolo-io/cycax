@@ -27,11 +27,11 @@ class Bracket(Print3D):
             side.hole(pos=pos, diameter=2.9, depth=10)
             side.hole(pos=pos, diameter=3.2, external_subtract=True)  # Through everything
             x += 10
-        
-        self.right.hole((5,5), 3, external_subtract=True)
-        self.right.hole((5,5), 3)
-        self.left.hole((5,5), 3, external_subtract=True)
-        self.left.hole((5,5), 3)
+
+        self.right.hole((5, 5), 3, external_subtract=True)
+        self.right.hole((5, 5), 3)
+        self.left.hole((5, 5), 3, external_subtract=True)
+        self.left.hole((5, 5), 3)
 
 
 class Device(Cuboid):
