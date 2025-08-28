@@ -45,18 +45,22 @@ class PartEngineOpenSCAD(PartEngine):
 
         return f'import("{lookup["label"]}");'
 
-    def _decode_hole(self, lookup: dict) -> str:
+    def _decode_cylinder(self, lookup: dict, cut: bool) -> str:
         """
         This method will return the string that will have the scad for a hole.
 
         Args:
             lookup: This will be a dictionary containing the necessary information about the hole.
+            cut: This will change the direction that the cylinder is orientated in. either out of or into the part.
 
         """
         tempdiam = lookup["diameter"] / 2
         res = []
         res.append(self._translate(lookup))
-        res.append(self._rotate(lookup["side"]))
+        if cut:
+            res.append(self._cut_rotate(lookup["side"]))
+        else:
+            res.append(self._add_rotate(lookup["side"]))
         res.append("cylinder(r= {diam}, h={depth}, $fn=64);".format(diam=tempdiam, depth=lookup["depth"]))
         return res
 
@@ -70,7 +74,7 @@ class PartEngineOpenSCAD(PartEngine):
         """
         res = []
         res.append(self._translate(lookup))
-        res.append(self._rotate(lookup["side"], vertical=lookup["vertical"]))
+        res.append(self._cut_rotate(lookup["side"], vertical=lookup["vertical"]))
         radius = lookup["diameter"] / 2
         res.append("cylinder(r={rad}, h={deep}, $fn=6);".format(rad=radius, deep=lookup["depth"]))
 
@@ -134,7 +138,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return output
 
-    def _rotate(self, side: str, *, vertical: bool = False) -> str:
+    def _cut_rotate(self, side: str, *, vertical: bool = False) -> str:
         """
         This will rotate the object and return the scad necessary.
 
@@ -148,6 +152,28 @@ class PartEngineOpenSCAD(PartEngine):
             FRONT: "rotate([270, 0, 0])",
             LEFT: "rotate([0, 90, 0])rotate([0, 0, 30])",
             RIGHT: "rotate([0, 270, 0])rotate([0, 0, 30])",
+        }[side]
+
+        if vertical is True:
+            side2 = "rotate([0, 0, 30])"
+            side = side + side2
+
+        return side
+
+    def _add_rotate(self, side: str, *, vertical: bool = False) -> str:
+        """
+        This will rotate the object and return the scad necessary.
+
+        Args:
+            side: this is the side as retrieved form the dictionary.
+        """
+        side = {
+            TOP: "rotate([0, 0, 0])",
+            BACK: "rotate([270, 0, 0])",
+            BOTTOM: "rotate([0, 180, 0])",
+            FRONT: "rotate([90, 0, 0])",
+            LEFT: "rotate([0, 270, 0])rotate([0, 0, 30])",
+            RIGHT: "rotate([0, 90, 0])rotate([0, 0, 30])",
         }[side]
 
         if vertical is True:
@@ -196,7 +222,7 @@ class PartEngineOpenSCAD(PartEngine):
             String of beveled edges.
         """
         if features["edge_type"] == "round":
-            rotate = self._rotate(features["side"])
+            rotate = self._cut_rotate(features["side"])
             cutter = "{rotate}cylinder(r= {diam}, h={depth}, $fn=64);".format(
                 rotate=rotate, diam=features["size"], depth=features["depth"]
             )
@@ -278,7 +304,10 @@ class PartEngineOpenSCAD(PartEngine):
                 output.append(self._decode_external(self.name))
 
             elif action["name"] == "hole":
-                output.append(self._decode_hole(action))
+                output.append(self._decode_cylinder(action, cut=True))
+
+            elif action["name"] == "cylinder_feature":
+                output.append(self._decode_cylinder(action, cut=False))
 
             elif action["name"] == "nut":
                 output.append(self._decode_nut(action))

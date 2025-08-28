@@ -17,7 +17,7 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
+from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -225,6 +225,31 @@ class CycadPart(Location):
             self.external_features.append(temp_hole)
         else:
             self.features.append(temp_hole)
+
+    def make_cylinder(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        side: str,
+        diameter: float,
+        height: float,
+    ):
+        """
+        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the hole will be made in.
+            diameter: The diameter of the hole.
+            depth: The depth of the hole. If Null the hole is through the part.
+            external_subtract: This is to specify that the hole should only be cut into other surfaces and not itself.
+        """
+
+        cylinder = Cylinder(side=side, x=x, y=y, z=z, diameter=diameter, height=height)
+        self.features.append(cylinder)
 
     def make_slot(
         self,

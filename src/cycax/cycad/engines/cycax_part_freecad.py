@@ -201,6 +201,7 @@ class EngineFreecad:
         radius: float | None = None,
         move: dict | None = None,
         side: str | None = None,
+        cut: bool | None = None,
     ):
         """This method will be used for cutting a cylindrical hole into a surface.
 
@@ -214,26 +215,34 @@ class EngineFreecad:
             x = feature["x"]
             y = feature["y"]
             z = feature["z"]
+            cut = feature["type"] == "cut"
         else:
             cyl = Part.makeCylinder(radius, depth, pos_vec)
             x = move["x"]
             y = move["y"]
             z = move["z"]
-        if side == FRONT:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270))
-        elif side == BACK:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90))
-        elif side == TOP:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180))
-        elif side == BOTTOM:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0))
-        elif side == LEFT:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90))
-        elif side == RIGHT:
-            cyl.Placement = App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270))
+
+        if cut:
+            pos = {
+                FRONT: App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270)),
+                BACK: App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90)),
+                TOP: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180)),
+                BOTTOM: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0)),
+                LEFT: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90)),
+                RIGHT: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270)),
+            }[side]
         else:
-            msg = "Invalid side"
-            raise ValueError(msg)
+            pos = {
+                FRONT: App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 90)),
+                BACK: App.Placement(Vector(x, y, z), App.Rotation(Vector(1, 0, 0), 270)),
+                TOP: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 0)),
+                BOTTOM: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 180)),
+                LEFT: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 270)),
+                RIGHT: App.Placement(Vector(x, y, z), App.Rotation(Vector(0, 1, 0), 90)),
+            }[side]
+
+        cyl.Placement = pos
+
         return cyl
 
     def render_to_png(self, view: str | None = None):
@@ -417,7 +426,7 @@ class EngineFreecad:
 
         if features["edge_type"] == "round":
             cutter = self.hole(
-                radius=features["size"], depth=features["depth"], side=features["side"], move=move_cutter_cyl
+                radius=features["size"], depth=features["depth"], side=features["side"], move=move_cutter_cyl, cut=True
             )
 
         elif features["edge_type"] == "chamfer":
@@ -467,7 +476,10 @@ class EngineFreecad:
 
         for feature in definition["features"][1:]:
             if feature["type"] == "add":
-                logging.error("Adding not yet supported.")
+                if feature["name"] == "cylinder_feature":
+                    solid = solid.fuse(self.hole(feature))
+                else:
+                    logging.error("Adding not yet supported.")
             elif feature["type"] == "cut":
                 if feature["name"] == "hole":
                     cut_features.append(self.hole(feature))
@@ -480,7 +492,6 @@ class EngineFreecad:
                     # This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
                 elif feature["name"] == "nut":
                     cut_features.append(self.cut_nut(feature))
-
         if len(cut_features) > 1:
             s1 = cut_features.pop()
             fused = s1.multiFuse(cut_features)

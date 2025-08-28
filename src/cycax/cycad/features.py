@@ -59,6 +59,30 @@ class Holes(Feature):
         self.type = "cut"
 
 
+class Cylinder(Feature):
+    """This class will store data on cylinders. A Cylinder is added to an object.
+    This class will initialize a cylinder at the desired location.
+
+    Args:
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the object that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        diameter: Diameter of the cylinder.
+        height: Height of the cylinder.
+
+    """
+
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, height: float):
+        Location.__init__(self, x, y, z, side)
+        self.diameter = diameter
+        self.depth = height
+        self.name = "cylinder_feature"
+        self.type = "add"
+
+
 class RectangleCutOut(Feature):
     """This class can be used for cutting a hole that is not round but rather of the defined parameters.
 
