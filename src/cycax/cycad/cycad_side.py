@@ -441,7 +441,7 @@ class LeftSide(CycadSide):
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.x_size
+            return self._parent.x_max - self._parent.x_min
         else:
             return val
 
@@ -463,7 +463,7 @@ class LeftSide(CycadSide):
             height: How tall to make the cylinder.
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.x_min -= height
+        self._parent.x_min = self._parent.x_min - height + sink
 
 
 class RightSide(CycadSide):
@@ -483,7 +483,7 @@ class RightSide(CycadSide):
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.x_size
+            return self._parent.x_max - self._parent.x_min
         else:
             return val
 
@@ -511,7 +511,7 @@ class RightSide(CycadSide):
             height: How tall to make the cylinder.
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.x_max += height
+        self._parent.x_max = self._parent.x_max + height - sink
 
 
 class TopSide(CycadSide):
@@ -531,7 +531,7 @@ class TopSide(CycadSide):
 
     def _depth_check(self, val: float) -> float:
         if val is None:
-            return self._parent.z_size
+            return self._parent.z_max - self._parent.z_min
         else:
             return val
 
@@ -559,7 +559,7 @@ class TopSide(CycadSide):
             height: How tall to make the cylinder.
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.z_max += height
+        self._parent.z_max = self._parent.z_max + height - sink
 
 
 class BottomSide(CycadSide):
@@ -579,7 +579,7 @@ class BottomSide(CycadSide):
 
     def _depth_check(self, val: float) -> float:
         if val is None:
-            return self._parent.z_size
+            return self._parent.z_max - self._parent.z_min
         else:
             return val
 
@@ -607,7 +607,7 @@ class BottomSide(CycadSide):
             height: How tall to make the cylinder.
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.z_min -= height
+        self._parent.z_min = self._parent.z_min - height + sink
 
 
 class FrontSide(CycadSide):
@@ -627,7 +627,7 @@ class FrontSide(CycadSide):
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.y_size
+            return self._parent.y_max - self._parent.y_min
         else:
             return val
 
@@ -655,7 +655,7 @@ class FrontSide(CycadSide):
             height: How tall to make the cylinder.
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.y_min -= height
+        self._parent.y_min = self._parent.y_min - height + sink
 
 
 class BackSide(CycadSide):
@@ -675,7 +675,7 @@ class BackSide(CycadSide):
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.y_size
+            return self._parent.y_max - self._parent.y_min
         else:
             return val
 
@@ -703,4 +703,4 @@ class BackSide(CycadSide):
             height: How tall to make the cylinder.
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.y_max += height
+        self._parent.y_max = self._parent.y_max + height - sink
