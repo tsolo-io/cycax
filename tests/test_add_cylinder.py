@@ -4,11 +4,8 @@
 
 from pathlib import Path
 
-from numpy import sinc
-
 from cycax.cycad import Print3D
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 
 
 def test_cube_add_cylinder(tmp_path: Path):
@@ -24,4 +21,3 @@ def test_cube_add_cylinder(tmp_path: Path):
     cube.save(tmp_path)
     cube.render("preview3d")
     cube.build(PartEngineBuild123d())
-    # cube.render("freecad")

@@ -201,6 +201,7 @@ class EngineFreecad:
         radius: float | None = None,
         move: dict | None = None,
         side: str | None = None,
+        *,
         cut: bool | None = None,
     ):
         """This method will be used for cutting a cylindrical hole into a surface.

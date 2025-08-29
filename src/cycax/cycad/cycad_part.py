@@ -163,18 +163,18 @@ class CycadPart(Location):
         msg = "The adding of counterdrill to a side has not been implemented."
         raise NotImplementedError(msg)
 
-    def test_mesh_hole(self, x: float, y: float, z: float, diamter: float, depth: float):
+    def test_mesh_hole(self, x: float, y: float, z: float, diameter: float, depth: float):
         if (
-            x - diamter / 2 < self.x_min
-            or x + diamter / 2 > self.x_max
-            or y - diamter / 2 < self.y_min
-            or y + diamter / 2 > self.y_max
+            x - diameter / 2 < self.x_min
+            or x + diameter / 2 > self.x_max
+            or y - diameter / 2 < self.y_min
+            or y + diameter / 2 > self.y_max
             or depth > self.z_max
         ):
-            warnings.warn("This hole may break the mesh of the CycadPart.")
+            warnings.warn("This hole may break the mesh of the CycadPart.", stacklevel=2)
 
     def test_mesh_rectangle_cutout(
-        self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, centered: bool
+        self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, *, centered: bool
     ):
         if centered:
             if (
@@ -185,7 +185,7 @@ class CycadPart(Location):
                 or z - z_size / 2 < self.z_min
                 or z + z_size / 2 > self.z_max
             ):
-                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
+                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.", stacklevel=2)
         elif (
             x < self.x_size
             or x + x_size > self.x_max
@@ -194,7 +194,7 @@ class CycadPart(Location):
             or z < self.z_min
             or z + z_size > self.z_max
         ):
-            warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
+            warnings.warn("This rectangle cutout may break the mesh of the CycadPart.", stacklevel=2)
 
     def make_hole(
         self,

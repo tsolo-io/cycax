@@ -7,7 +7,6 @@ import logging
 from pathlib import Path
 
 import build123d
-from numpy import subtract
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP

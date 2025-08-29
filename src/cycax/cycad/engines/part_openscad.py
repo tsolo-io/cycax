@@ -45,7 +45,7 @@ class PartEngineOpenSCAD(PartEngine):
 
         return f'import("{lookup["label"]}");'
 
-    def _decode_cylinder(self, lookup: dict, cut: bool) -> str:
+    def _decode_cylinder(self, lookup: dict, *, cut: bool) -> str:
         """
         This method will return the string that will have the scad for a hole.
 
