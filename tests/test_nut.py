@@ -5,8 +5,11 @@
 from pathlib import Path
 
 from cycax.cycad import Print3D
+from cycax.cycad.engines.part_build123d import PartEngineBuild123d
+from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from tests.shared import hex_code_check
-
+from tests.shared import stl_compare, stl_compare_models
+import pytest
 
 def nutty_cube(tmp_path: Path):
     cube = Print3D(x_size=11, y_size=11, z_size=11, part_no="testing_nut")
@@ -15,8 +18,14 @@ def nutty_cube(tmp_path: Path):
         side.nut(pos=(7.0, 7.0), nut_type="M3", depth=2)  # Coordinates based on center of the Nut.
 
     cube.save(tmp_path)
-    cube.render("freecad")
-    cube.render("preview3d")
+    cube.build(PartEngineBuild123d())
+    stl = tmp_path / "testing_nut" / "testing_nut.stl"
+    build123d_stl = stl.with_name("testing_nut_build123d.stl")
+    stl.rename(build123d_stl)
+    cube.build(PartEngineFreeCAD(name=cube.part_no, path=tmp_path))
+
+    # Read Build123d Mesh
+    stl_compare_models(build123d_stl, stl)
 
 
 def test_nut(tmp_path: Path):
