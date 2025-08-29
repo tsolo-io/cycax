@@ -26,8 +26,6 @@ def nutty_cube(tmp_path: Path):
 
     # Read Build123d Mesh
     stl_compare_models(build123d_stl, stl)
-    # cube.render("freecad")
-    # cube.render("preview3d")
 
 
 def test_nut(tmp_path: Path):
