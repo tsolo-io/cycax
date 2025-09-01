@@ -355,10 +355,12 @@ class Assembly:
         """
         back = self.bounding_box[BACK]
         for part in self.parts.values():
-            part.position[0], part.position[1] = part.position[0] + (part.x_max - part.x_min)/2, part.position[1]  + (part.y_max - part.y_min)/2
-            part.position[0], part.position[1] = back - part.position[1], part.position[0]
+            x = part.position[0] + (part.x_max - part.x_min)/2
+            y = part.position[1]  + (part.y_max - part.y_min)/2
+            x, y = back - y, x
             part.rotate_freeze_top()
-            part.position[0], part.position[1] = part.position[0] - (part.x_max - part.x_min)/2, part.position[1]  - (part.y_max - part.y_min)/2
+            part.position[0] = x - (part.x_max - part.x_min)/2
+            part.position[1] = y - (part.y_max - part.y_min)/2
 
     def rotate_freeze_left(self):
         """
@@ -366,10 +368,12 @@ class Assembly:
         """
         top = self.bounding_box[TOP]
         for part in self.parts.values():
-            part.position[1], part.position[2] = part.position[1] + (part.y_max - part.y_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
-            part.position[1], part.position[2] = top - part.position[2], part.position[1]
+            y = part.position[1] + (part.y_max - part.y_min)/2
+            z = part.position[2]  + (part.z_max - part.z_min)/2
+            y, z = top - z, y
             part.rotate_freeze_left()
-            part.position[1], part.position[2] = part.position[1] - (part.y_max - part.y_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
+            part.position[1] = y - (part.y_max - part.y_min)/2
+            part.position[2] = z  - (part.z_max - part.z_min)/2
             
 
     def rotate_freeze_front(self):
@@ -378,10 +382,12 @@ class Assembly:
         """
         right = self.bounding_box[RIGHT]
         for part in self.parts.values():
-            part.position[0], part.position[2] = part.position[0] + (part.x_max - part.x_min)/2, part.position[2]  + (part.z_max - part.z_min)/2
-            part.position[0], part.position[2] = part.position[2], right - part.position[0]
+            x = part.position[0] + (part.x_max - part.x_min)/2
+            z = part.position[2]  + (part.z_max - part.z_min)/2
+            x, z = z, right - x
             part.rotate_freeze_front()
-            part.position[0], part.position[2] = part.position[0] - (part.x_max - part.x_min)/2, part.position[2]  - (part.z_max - part.z_min)/2
+            part.position[0] = x - (part.x_max - part.x_min)/2
+            part.position[2] = z  - (part.z_max - part.z_min)/2
 
     def rotate(self, actions: str):
         """Rotate the assembly several times.
