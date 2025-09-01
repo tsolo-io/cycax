@@ -9,6 +9,7 @@ import os
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from tkinter import NO
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.cycad_part import CycadPart
@@ -211,16 +212,34 @@ class Assembly:
         Returns:
             Bounding box.
         """
-        x_min = min(part.x_min for part in self.parts.values())
-        y_min = min(part.y_min for part in self.parts.values())
-        z_min = min(part.z_min for part in self.parts.values())
-        x_max = max(part.x_max for part in self.parts.values())
-        y_max = max(part.y_max for part in self.parts.values())
-        z_max = max(part.z_max for part in self.parts.values())
-
+        x_min = None
+        x_max = None
+        y_min = None
+        y_max = None
+        z_min = None
+        z_max = None
+        for part in self.parts.values():
+            x_min = self._min(x_min, part.x_min)
+            y_min = self._min(y_min, part.y_min)
+            z_min = self._min(z_min, part.z_min)
+            x_max = self._max(x_max, part.x_max)
+            y_max = self._max(y_max, part.y_max)
+            z_max = self._max(z_max, part.z_max)
         bounding_box = {LEFT: x_min, FRONT: y_min, BOTTOM: z_min, RIGHT: x_max, BACK: y_max, TOP: z_max}
         return bounding_box
-    
+
+    def _min(self, current_value: float, new_value: float):
+        if current_value is None:
+            return new_value
+        else:
+            return min(current_value, new_value)
+
+    def _max(self, current_value: float, new_value: float):
+        if current_value is None:
+            return new_value
+        else:
+            return max(current_value, new_value)
+
     @property
     def center(self) -> dict:
         """
