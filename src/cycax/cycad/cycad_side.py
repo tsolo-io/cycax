@@ -4,8 +4,6 @@
 
 import logging
 
-from traitlets import This
-
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 from cycax.cycad.vents import Vent
 
