@@ -472,27 +472,27 @@ class Assembly:
         for feature in self._final_place(part2):
             if feature.name == "cube":
                 if side == TOP:
-                    if (feature.z - feature.z_size/2) == part1.bounding_box[TOP]:
+                    if (feature.z - feature.z_size / 2) == part1.bounding_box[TOP]:
                         feature.side = TOP
                         part1.insert_feature(feature)
                 elif side == BOTTOM:
-                    if (feature.z + feature.z_size/2) == part1.bounding_box[BOTTOM]:
+                    if (feature.z + feature.z_size / 2) == part1.bounding_box[BOTTOM]:
                         feature.side = BOTTOM
                         part1.insert_feature(feature)
                 elif side == LEFT:
-                    if (feature.x + feature.x_size/2) == part1.bounding_box[LEFT]:
+                    if (feature.x + feature.x_size / 2) == part1.bounding_box[LEFT]:
                         feature.side = LEFT
                         part1.insert_feature(feature)
                 elif side == RIGHT:
-                    if (feature.x - feature.x_size/2) == part1.bounding_box[RIGHT]:
+                    if (feature.x - feature.x_size / 2) == part1.bounding_box[RIGHT]:
                         feature.side = RIGHT
                         part1.insert_feature(feature)
                 elif side == FRONT:
-                    if (feature.y + feature.y_size/2) == part1.bounding_box[FRONT]:
+                    if (feature.y + feature.y_size / 2) == part1.bounding_box[FRONT]:
                         feature.side = FRONT
                         part1.insert_feature(feature)
                 elif side == BACK:
-                    if (feature.y - feature.y_size/2) == part1.bounding_box[BACK]:
+                    if (feature.y - feature.y_size / 2) == part1.bounding_box[BACK]:
                         feature.side = BACK
                         part1.insert_feature(feature)
                 else:
@@ -500,7 +500,6 @@ class Assembly:
                     raise ValueError(msg)
             else:
                 if side == TOP:
-                    print(part1.bounding_box)
                     if feature.z == part1.bounding_box[TOP]:
                         feature.side = TOP
                         part1.insert_feature(feature)

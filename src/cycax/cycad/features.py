@@ -4,9 +4,7 @@
 
 import typing
 
-from cycax.cycad.location import Location
-
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 
 
 class Feature(Location):
@@ -104,22 +102,25 @@ class RectangleCutOut(Feature):
 
     def __calc__(self):
         if self.side in (FRONT, LEFT, BOTTOM):
-            self.x += self.x_size/2
-            self.y += self.y_size/2
-            self.z += self.z_size/2
+            self.x += self.x_size / 2
+            self.y += self.y_size / 2
+            self.z += self.z_size / 2
         elif self.side == BACK:
-            self.x += self.x_size/2
-            self.y -= self.y_size/2
-            self.z += self.z_size/2
+            self.x += self.x_size / 2
+            self.y -= self.y_size / 2
+            self.z += self.z_size / 2
         elif self.side == RIGHT:
-            self.x -= self.x_size/2
-            self.y += self.y_size/2
-            self.z += self.z_size/2
-        else: #side = TOP
-            self.x += self.x_size/2
-            self.y += self.y_size/2
-            self.z -= self.z_size/2
-        self.center=True
+            self.x -= self.x_size / 2
+            self.y += self.y_size / 2
+            self.z += self.z_size / 2
+        elif self.side == TOP:
+            self.x += self.x_size / 2
+            self.y += self.y_size / 2
+            self.z -= self.z_size / 2
+        else:
+            msg = "Invalid side"
+            raise ValueError(msg)
+        self.center = True
 
     def swap_xy(self, rot: float, rotmax: list) -> list:
         """
@@ -168,7 +169,7 @@ class RectangleCutOut(Feature):
         while rot > 0:
             self.y_size, self.z_size = self.z_size, self.y_size
             rot = rot - 1
-        
+
         return rotmax
 
 
