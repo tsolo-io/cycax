@@ -275,29 +275,32 @@ class Assembly:
             if z is not None:
                 part.at(z=z + part.position[2])
 
-    def add(self, part: CycadPart, suggested_name: str | None = None, external_subract: bool = False) -> str:
+    def add(self, part, suggested_name: str | None = None, external_subract: bool = False):
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be edited.
 
         Args:
-            part: this in the part that will be added to the assembly.
+            part: If this is a part it will add it to the list of parts, else it will add it to the list of assemblies.
             suggested_name: A proposal for a part name, if a part with such a name exists then a name will be generated.
 
         Returns:
-            The name of the part.
+            The name of the part if a part gets returned.
         """
 
-        part.assembly = self
-        part._base_path = self._base_path
-        part_name = part.get_name(suggested_name)
-        if part_name in self.parts:
-            msg = f"Part with name/id {part_name} already in parts catalogue."
-            raise KeyError(msg)
-        self.parts[part_name] = part
-        if external_subract:
-            self.external_features.append(part.external_features)
-        return part_name
+        if isinstance(part, Assembly):
+            self.assemblies.append(part)
+        else:
+            part.assembly = self
+            part._base_path = self._base_path
+            part_name = part.get_name(suggested_name)
+            if part_name in self.parts:
+                msg = f"Part with name/id {part_name} already in parts catalogue."
+                raise KeyError(msg)
+            self.parts[part_name] = part
+            if external_subract:
+                self.external_features.append(part.external_features)
+            return part_name
 
     def get_part(self, name: str) -> CycadPart:
         """Get a part from the assembly based on part name.
@@ -414,12 +417,6 @@ class Assembly:
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
-                
-    def add_assembly(self, assembly):
-        """
-        Adds a new Assembly into the list of Assemblies.
-        """
-        self.assemblies.append(assembly)
 
 
     def combine_all_assemblies(self, new_name: str = None, path: Path = None):

@@ -26,7 +26,7 @@ def test_complex_assembly(tmp_path):
     assembly2.add(part_4)
     part_3.level(bottom=part_1.top)
     part_4.level(right=part_2.left)
-    assembly1.add_assembly(assembly2)
+    assembly1.add(assembly2)
     # assembly2.at(x=50, y=50)
     assembly1.rotate_freeze_left()
     assembly1.rotate("x")
