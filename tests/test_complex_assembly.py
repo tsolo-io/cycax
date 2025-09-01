@@ -39,6 +39,5 @@ def test_complex_assembly(tmp_path):
     # ca.level(assembly1, "RIGHT", assembly2, "LEFT")
     # ca.level(assembly1, "BACK", assembly2, "FRONT")
     assembly = assembly1.combine_all_assemblies()
-    assembly.save("/home/helen/src/tsolo/test-slot")
+    assembly.save(tmp_path / assembly.name)
     assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
-    assert True
