@@ -16,7 +16,7 @@ from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
-from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
+from cycax.cycad.assembly_side import AssemblySideBack, AssemblySideBottom, AssemblySideFront, AssemblySideLeft, AssemblySideRight, AssemblySideTop
 
 
 class Assembly:
@@ -33,12 +33,12 @@ class Assembly:
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
         self.external_features = []
-        self.left = LeftSide(self)
-        self.right = RightSide(self)
-        self.top = TopSide(self)
-        self.bottom = BottomSide(self)
-        self.front = FrontSide(self)
-        self.back = BackSide(self)
+        self.left = AssemblySideLeft(self)
+        self.right = AssemblySideRight(self)
+        self.top = AssemblySideTop(self)
+        self.bottom = AssemblySideBottom(self)
+        self.front = AssemblySideFront(self)
+        self.back = AssemblySideBack(self)
         self.assemblies = []
 
     def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
