@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from cycax.cycad.features import Holes, RectangleCutOut
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 
 
 class Slot:
@@ -40,16 +41,176 @@ class Slot:
         *,
         horizontal: bool = True,
     ):
-        if horizontal:
-            self.hole_left = Holes(side=side, x=x + y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
-            self.hole_right = Holes(side=side, x=x + x_size - y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
-            self.rectangle = RectangleCutOut(
-                side=side, x=x + y_size / 2, y=y - y_size / 2, z=z, x_size=x_size - y_size, y_size=y_size, z_size=z_size
-            )
+        if side is TOP:
+            if horizontal:
+                self.hole_left = Holes(side=side, x=x + y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
+                self.hole_right = Holes(side=side, x=x + x_size - y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x + y_size / 2,
+                    y=y - y_size / 2,
+                    z=z,
+                    x_size=x_size - y_size,
+                    y_size=y_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
 
-        else:
-            self.hole_left = Holes(side=side, x=x, y=y + x_size / 2, z=z, diameter=x_size, depth=z_size)
-            self.hole_right = Holes(side=side, x=x, y=y + y_size - x_size / 2, z=z, diameter=x_size, depth=z_size)
-            self.rectangle = RectangleCutOut(
-                side=side, x=x - x_size / 2, y=y + x_size / 2, z=z, x_size=x_size, y_size=y_size - x_size, z_size=z_size
-            )
+            else:
+                self.hole_left = Holes(side=side, x=x, y=y + x_size / 2, z=z, diameter=x_size, depth=z_size)
+                self.hole_right = Holes(side=side, x=x, y=y + y_size - x_size / 2, z=z, diameter=x_size, depth=z_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x - x_size / 2,
+                    y=y + x_size / 2,
+                    z=z,
+                    x_size=x_size,
+                    y_size=y_size - x_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
+
+        if side is BOTTOM:
+            if horizontal:
+                self.hole_left = Holes(side=side, x=x + y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
+                self.hole_right = Holes(side=side, x=x + x_size - y_size / 2, y=y, z=z, diameter=y_size, depth=z_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x + y_size / 2,
+                    y=y - y_size / 2,
+                    z=z,
+                    x_size=x_size - y_size,
+                    y_size=y_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
+
+            else:
+                self.hole_left = Holes(side=side, x=x, y=y - x_size / 2, z=z, diameter=x_size, depth=z_size)
+                self.hole_right = Holes(side=side, x=x, y=y - y_size + x_size / 2, z=z, diameter=x_size, depth=z_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x - x_size / 2,
+                    y=y - y_size + x_size / 2,
+                    z=z,
+                    x_size=x_size,
+                    y_size=y_size - x_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
+
+        if side is FRONT:
+            if horizontal:
+                self.hole_left = Holes(side=side, x=x + z_size / 2, y=y, z=z, diameter=z_size, depth=y_size)
+                self.hole_right = Holes(side=side, x=x + x_size - z_size / 2, y=y, z=z, diameter=z_size, depth=y_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x + z_size / 2,
+                    y=y,
+                    z=z - z_size / 2,
+                    x_size=x_size - z_size,
+                    y_size=y_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
+
+            else:
+                self.hole_left = Holes(side=side, x=x, y=y, z=z + x_size / 2, diameter=x_size, depth=y_size)
+                self.hole_right = Holes(side=side, x=x, y=y, z=z - x_size / 2 + z_size, diameter=x_size, depth=y_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x - x_size / 2,
+                    y=y,
+                    z=z + x_size / 2,
+                    x_size=x_size,
+                    y_size=y_size,
+                    z_size=z_size - x_size,
+                )
+                self.rectangle.__calc__()
+
+        if side is BACK:
+            if horizontal:
+                self.hole_left = Holes(side=side, x=x - z_size / 2, y=y, z=z, diameter=z_size, depth=y_size)
+                self.hole_right = Holes(side=side, x=x - x_size + z_size / 2, y=y, z=z, diameter=z_size, depth=y_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x - x_size + z_size / 2,
+                    y=y,
+                    z=z - z_size / 2,
+                    x_size=x_size - z_size,
+                    y_size=y_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
+
+            else:
+                self.hole_left = Holes(side=side, x=x, y=y, z=z + x_size / 2, diameter=x_size, depth=y_size)
+                self.hole_right = Holes(side=side, x=x, y=y, z=z - x_size / 2 + z_size, diameter=x_size, depth=y_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x - x_size / 2,
+                    y=y,
+                    z=z + x_size / 2,
+                    x_size=x_size,
+                    y_size=y_size,
+                    z_size=z_size - x_size,
+                )
+                self.rectangle.__calc__()
+
+        if side is RIGHT:
+            if horizontal:
+                self.hole_left = Holes(side=side, x=x, y=y + z_size / 2, z=z, diameter=z_size, depth=x_size)
+                self.hole_right = Holes(side=side, x=x, y=y + y_size - z_size / 2, z=z, diameter=z_size, depth=x_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x,
+                    y=y + z_size / 2,
+                    z=z - z_size / 2,
+                    x_size=x_size,
+                    y_size=y_size - z_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
+
+            else:
+                self.hole_left = Holes(side=side, x=x, y=y, z=z + y_size / 2, diameter=y_size, depth=x_size)
+                self.hole_right = Holes(side=side, x=x, y=y, z=z + z_size - y_size / 2, diameter=y_size, depth=x_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x,
+                    y=y - y_size / 2,
+                    z=z + y_size / 2,
+                    x_size=x_size,
+                    y_size=y_size,
+                    z_size=z_size - y_size,
+                )
+                self.rectangle.__calc__()
+
+        if side is LEFT:
+            if horizontal:
+                self.hole_left = Holes(side=side, x=x, y=y - z_size / 2, z=z, diameter=z_size, depth=x_size)
+                self.hole_right = Holes(side=side, x=x, y=y - y_size + z_size / 2, z=z, diameter=z_size, depth=x_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x,
+                    y=y - y_size + z_size / 2,
+                    z=z - z_size / 2,
+                    x_size=x_size,
+                    y_size=y_size - z_size,
+                    z_size=z_size,
+                )
+                self.rectangle.__calc__()
+
+            else:
+                self.hole_left = Holes(side=side, x=x, y=y, z=z + y_size / 2, diameter=y_size, depth=x_size)
+                self.hole_right = Holes(side=side, x=x, y=y, z=z + z_size - y_size / 2, diameter=y_size, depth=x_size)
+                self.rectangle = RectangleCutOut(
+                    side=side,
+                    x=x,
+                    y=y - y_size / 2,
+                    z=z + y_size / 2,
+                    x_size=x_size,
+                    y_size=y_size,
+                    z_size=z_size - y_size,
+                )
+                self.rectangle.__calc__()

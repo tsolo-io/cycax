@@ -289,6 +289,7 @@ class CycadPart(Location):
         *,
         center=False,
         external_subtract: bool = False,
+        calculate: bool = False,
     ):
         """This method will cut a block out of the CycadPart.
 
@@ -314,6 +315,8 @@ class CycadPart(Location):
             z_size=z_size,
             center=center,
         )
+        if calculate:
+            temp_rect.__calc__()
         if external_subtract:
             self.move_holes.append(temp_rect)
         else:
@@ -411,7 +414,26 @@ class CycadPart(Location):
                 rotation = feature.swap_xz(3, rotation)
             elif rot["axis"] == "z":
                 rotation = feature.swap_xy(3, rotation)
-        if feature.side in (TOP, BOTTOM):
+        if feature.name == "cube":
+            if feature.side == TOP:
+                feature.z = feature.z - feature.z_size / 2 - self.z_size / 2
+                feature.z_size = self.z_size
+            elif feature.side == BOTTOM:
+                feature.z = feature.z + feature.z_size / 2 + self.z_size / 2
+                feature.z_size = self.z_size
+            elif feature.side == LEFT:
+                feature.x = feature.x + feature.x_size / 2 + self.x_size / 2
+                feature.x_size = self.x_size
+            elif feature.side == RIGHT:
+                feature.x = feature.x - feature.x_size / 2 - self.x_size / 2
+                feature.x_size = self.x_size
+            elif feature.side == FRONT:
+                feature.x = feature.y + feature.y_size / 2 + self.y_size / 2
+                feature.x_size = self.y_size
+            elif feature.side == BACK:
+                feature.x = feature.y - feature.y_size / 2 - self.y_size / 2
+                feature.x_size = self.y_size
+        elif feature.side in (TOP, BOTTOM):
             feature.depth = self.z_size
         elif feature.side in (LEFT, RIGHT):
             feature.depth = self.x_size

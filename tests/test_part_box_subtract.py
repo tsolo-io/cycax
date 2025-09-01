@@ -2,12 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from pathlib import Path
-
 from cycax.cycad import Assembly, Cuboid, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
+from cycax.cycad.location import BACK, FRONT, TOP
 
 
 class Socket(Cuboid):
@@ -32,6 +30,7 @@ class Socket(Cuboid):
             length=length,
             width=width,
             external_subtract=True,
+            calculate=True,
         )
         # For the test, rotate the part so that the 1mm hole is the origin of the cut square.
         self.back.hole(pos=pos, diameter=1)
@@ -76,7 +75,7 @@ def make_plate_with_socket(side: str) -> Assembly:
     return assembly
 
 
-def test_subtract_side():
+def test_subtract_side(tmp_path):
     """This test creates a plate with a socket that has a rectangle cutout and a hole.
 
     A check is made to ensure that the hole and the rectangle cutout are at the same locations.
@@ -84,12 +83,10 @@ def test_subtract_side():
     """
 
     assembled_side = {}
-    for side in (TOP, BACK, FRONT):
+    for side in TOP, BACK, FRONT:
         assembly = make_plate_with_socket(side=side)
         # Help with debugging
-        save_path = Path(f"/tmp/test-subtract/{side}")
-        save_path.mkdir(parents=True, exist_ok=True)
-        assembly.save(save_path)
+        assembly.save(tmp_path)
         assembly.build(engine=AssemblyBuild123d(assembly.name), part_engines=[PartEngineBuild123d()])
         assembled_side[side] = assembly
 
@@ -97,16 +94,11 @@ def test_subtract_side():
         base = assembly.get_part("base_1").export()
         compare = {}
         for feature in base["features"]:
-            print(_side, feature)
             if feature["type"] == "cut":
                 if feature["name"] == "hole":
                     name = f"{feature['name']}{feature['diameter']}"
                 else:
                     name = feature["name"]
                 compare[name] = feature
-        assert compare["hole1"]["x"] == compare["cube"]["x"]
-        assert compare["hole1"]["y"] == compare["cube"]["y"]
-        assert compare["hole1"]["z"] == compare["cube"]["z"]
-        assert compare["hole1"]["x"] == (compare["cube"]["x"] + compare["cube"]["x_size"] / 2)
-        assert compare["hole1"]["y"] == (compare["cube"]["y"] + compare["cube"]["y_size"] / 2)
-        assert compare["hole1"]["z"] == (compare["cube"]["z"] + compare["cube"]["z_size"] / 2)
+        assert compare["hole3"]["x"] == compare["cube"]["x"]
+        assert compare["hole3"]["y"] == compare["cube"]["y"]

@@ -7,7 +7,8 @@ from pathlib import Path
 from cycax.cycad import Cylinder
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
-from tests.shared import stl_compare, stl_compare_models
+
+from .shared import stl_compare_models
 
 
 def sphere_cube(tmp_path: Path):
@@ -24,5 +25,4 @@ def sphere_cube(tmp_path: Path):
 
 
 def test_sphere(tmp_path: Path):
-    print(tmp_path)
     sphere_cube(tmp_path)

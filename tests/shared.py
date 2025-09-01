@@ -61,8 +61,21 @@ def stl_compare(file1: Path, file2: Path) -> bool:
             return False
     return True
 
+def json_compare_models(file1: Path, file2: Path):
+    """Compare two JSON files for equality.
 
-def stl_compare_models(file1: Path, file2: Path):
+    Args:
+        file1: Path to the first JSON file.
+        file2: Path to the second JSON file.
+    """
+    json1 = json.loads(file1.read_text())
+    json2 = json.loads(file2.read_text())
+    for feature1, feature2 in zip(json1["features"], json2["features"], strict=False):
+        assert feature1 == feature2, f"Feature mismatch {feature1} != {feature2} thus {file1} != {file2}"
+    assert json1 == json2, f"{file1} != {file2}"
+
+
+def stl_compare_models(file1: Path, file2: Path) -> bool:
     """Compare two STL files for equality.
 
     Args:
@@ -81,11 +94,17 @@ def stl_compare_models(file1: Path, file2: Path):
     # Compare the bounding box of the two meshes
     for axis in ("x", "y", "z"):
         b_axis, f_axis = getattr(mesh1, axis), getattr(mesh2, axis)
-        assert np.isclose(b_axis.min(), f_axis.min(), atol=1e-2), f"{axis} min: {b_axis.min()} != {f_axis.min()}"
-        assert np.isclose(b_axis.max(), f_axis.max(), atol=1e-2), f"{axis} max: {b_axis.max()} != {f_axis.max()}"
-    assert np.isclose(volume1, volume2, rtol=1e-3), f"Volume: {volume1} != {volume2}"
+        assert np.isclose(b_axis.min(), f_axis.min(), atol=1e-2), (
+            f"{axis} min: {b_axis.min()} != {f_axis.min()} thus {file1} != {file2}"
+        )
+        assert np.isclose(b_axis.max(), f_axis.max(), atol=1e-2), (
+            f"{axis} max: {b_axis.max()} != {f_axis.max()} thus {file1} != {file2}"
+        )
+    assert np.isclose(volume1, volume2, rtol=1e-3), f"Volume: {volume1} != {volume2} thus {file1} != {file2}"
     for bp, fp in zip(cog1, cog2, strict=False):
-        assert np.isclose(bp, fp, atol=1e-2), f"{bp} != {fp} from file1({cog1}) and file2({cog2})"
+        assert np.isclose(bp, fp, atol=1e-2), (
+            f"{bp} != {fp} from file1({cog1}) and file2({cog2}) thus {file1} != {file2}"
+        )
 
 
 def get_file_hash(filename: str) -> str:
