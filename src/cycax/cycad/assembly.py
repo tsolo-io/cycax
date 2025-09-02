@@ -8,6 +8,7 @@ import os
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from tkinter import NO
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
@@ -15,6 +16,7 @@ from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
+from cycax.cycad.assembly_side import AssemblySideBack, AssemblySideBottom, AssemblySideFront, AssemblySideLeft, AssemblySideRight, AssemblySideTop
 
 
 class Assembly:
@@ -30,13 +32,13 @@ class Assembly:
         self.parts = {}
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
-        self.external_feature_parts = []
-        self.left = LeftSide(self)
-        self.right = RightSide(self)
-        self.top = TopSide(self)
-        self.bottom = BottomSide(self)
-        self.front = FrontSide(self)
-        self.back = BackSide(self)
+        self.external_features = []
+        self.left = AssemblySideLeft(self)
+        self.right = AssemblySideRight(self)
+        self.top = AssemblySideTop(self)
+        self.bottom = AssemblySideBottom(self)
+        self.front = AssemblySideFront(self)
+        self.back = AssemblySideBack(self)
         self.assemblies = []
 
     def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
@@ -208,15 +210,33 @@ class Assembly:
         Returns:
             Bounding box.
         """
-        x_min = min(part.x_min for part in self.parts.values())
-        y_min = min(part.y_min for part in self.parts.values())
-        z_min = min(part.z_min for part in self.parts.values())
-        x_max = max(part.x_max for part in self.parts.values())
-        y_max = max(part.y_max for part in self.parts.values())
-        z_max = max(part.z_max for part in self.parts.values())
-
+        x_min = None
+        x_max = None
+        y_min = None
+        y_max = None
+        z_min = None
+        z_max = None
+        for part in self.parts.values():
+            x_min = self._min(x_min, part.x_min)
+            y_min = self._min(y_min, part.y_min)
+            z_min = self._min(z_min, part.z_min)
+            x_max = self._max(x_max, part.x_max)
+            y_max = self._max(y_max, part.y_max)
+            z_max = self._max(z_max, part.z_max)
         bounding_box = {LEFT: x_min, FRONT: y_min, BOTTOM: z_min, RIGHT: x_max, BACK: y_max, TOP: z_max}
         return bounding_box
+
+    def _min(self, current_value: float, new_value: float):
+        if current_value is None:
+            return new_value
+        else:
+            return min(current_value, new_value)
+
+    def _max(self, current_value: float, new_value: float):
+        if current_value is None:
+            return new_value
+        else:
+            return max(current_value, new_value)
 
     @property
     def center(self) -> tuple[float, float, float]:
@@ -259,29 +279,32 @@ class Assembly:
             if z is not None:
                 part.at(z=z_move + part.position[2])
 
-    def add(self, part: CycadPart, suggested_name: str | None = None, *, external_subtract: bool = False) -> str:
+    def add(self, part, suggested_name: str | None = None, external_subract: bool = False):
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be edited.
 
         Args:
-            part: this in the part that will be added to the assembly.
+            part: If this is a part it will add it to the list of parts, else it will add it to the list of assemblies.
             suggested_name: A proposal for a part name, if a part with such a name exists then a name will be generated.
 
         Returns:
-            The name of the part.
+            The name of the part if a part gets returned.
         """
 
-        part.assembly = self
-        part._base_path = self._base_path
-        part_name = part.get_name(suggested_name)
-        if part_name in self.parts:
-            msg = f"Part with name/id {part_name} already in parts catalogue."
-            raise KeyError(msg)
-        self.parts[part_name] = part
-        if external_subtract:
-            self.external_feature_parts.append(part._name)
-        return part_name
+        if isinstance(part, Assembly):
+            self.assemblies.append(part)
+        else:
+            part.assembly = self
+            part._base_path = self._base_path
+            part_name = part.get_name(suggested_name)
+            if part_name in self.parts:
+                msg = f"Part with name/id {part_name} already in parts catalogue."
+                raise KeyError(msg)
+            self.parts[part_name] = part
+            if external_subract:
+                self.external_features.append(part.external_features)
+            return part_name
 
     def get_part(self, name: str) -> CycadPart:
         """Get a part from the assembly based on part name.
@@ -339,16 +362,12 @@ class Assembly:
         """
         back = self.bounding_box[BACK]
         for part in self.parts.values():
-            part.position[0], part.position[1] = (
-                part.position[0] + (part.x_max - part.x_min) / 2,
-                part.position[1] + (part.y_max - part.y_min) / 2,
-            )
-            part.position[0], part.position[1] = back - part.position[1], part.position[0]
+            x = part.position[0] + (part.x_max - part.x_min)/2
+            y = part.position[1]  + (part.y_max - part.y_min)/2
+            x, y = back - y, x
             part.rotate_freeze_top()
-            part.position[0], part.position[1] = (
-                part.position[0] - (part.x_max - part.x_min) / 2,
-                part.position[1] - (part.y_max - part.y_min) / 2,
-            )
+            part.position[0] = x - (part.x_max - part.x_min)/2
+            part.position[1] = y - (part.y_max - part.y_min)/2
 
     def rotate_freeze_left(self):
         """
@@ -356,16 +375,12 @@ class Assembly:
         """
         top = self.bounding_box[TOP]
         for part in self.parts.values():
-            part.position[1], part.position[2] = (
-                part.position[1] + (part.y_max - part.y_min) / 2,
-                part.position[2] + (part.z_max - part.z_min) / 2,
-            )
-            part.position[1], part.position[2] = top - part.position[2], part.position[1]
+            y = part.position[1] + (part.y_max - part.y_min)/2
+            z = part.position[2]  + (part.z_max - part.z_min)/2
+            y, z = top - z, y
             part.rotate_freeze_left()
-            part.position[1], part.position[2] = (
-                part.position[1] - (part.y_max - part.y_min) / 2,
-                part.position[2] - (part.z_max - part.z_min) / 2,
-            )
+            part.position[1] = y - (part.y_max - part.y_min)/2
+            part.position[2] = z  - (part.z_max - part.z_min)/2
 
     def rotate_freeze_front(self):
         """
@@ -373,16 +388,12 @@ class Assembly:
         """
         right = self.bounding_box[RIGHT]
         for part in self.parts.values():
-            part.position[0], part.position[2] = (
-                part.position[0] + (part.x_max - part.x_min) / 2,
-                part.position[2] + (part.z_max - part.z_min) / 2,
-            )
-            part.position[0], part.position[2] = part.position[2], right - part.position[0]
+            x = part.position[0] + (part.x_max - part.x_min)/2
+            z = part.position[2]  + (part.z_max - part.z_min)/2
+            x, z = z, right - x
             part.rotate_freeze_front()
-            part.position[0], part.position[2] = (
-                part.position[0] - (part.x_max - part.x_min) / 2,
-                part.position[2] - (part.z_max - part.z_min) / 2,
-            )
+            part.position[0] = x - (part.x_max - part.x_min)/2
+            part.position[2] = z  - (part.z_max - part.z_min)/2
 
     def rotate(self, actions: str):
         """Rotate the assembly several times.
@@ -409,12 +420,6 @@ class Assembly:
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
-
-    def add_assembly(self, assembly):
-        """
-        Adds a new Assembly into the list of Assemblies.
-        """
-        self.assemblies.append(assembly)
 
     def combine_all_assemblies(self, new_name: str | None = None, path: Path | None = None):
         """
