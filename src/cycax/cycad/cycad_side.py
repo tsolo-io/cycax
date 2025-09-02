@@ -262,6 +262,28 @@ class CycadSide:
             diameter=diameter,
         )
 
+    def add_sphere(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the  cut out.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        _location_tuple = self._location_calc(pos=pos, sink=sink)
+        self._parent.make_sphere_add(
+            side=self.name,
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
+            diameter=diameter,
+        )
+
     def slot(
         self,
         pos: tuple[float, float],
