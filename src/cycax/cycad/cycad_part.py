@@ -17,7 +17,7 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
+from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -163,18 +163,18 @@ class CycadPart(Location):
         msg = "The adding of counterdrill to a side has not been implemented."
         raise NotImplementedError(msg)
 
-    def test_mesh_hole(self, x: float, y: float, z: float, diamter: float, depth: float):
+    def test_mesh_hole(self, x: float, y: float, z: float, diameter: float, depth: float):
         if (
-            x - diamter / 2 < self.x_min
-            or x + diamter / 2 > self.x_max
-            or y - diamter / 2 < self.y_min
-            or y + diamter / 2 > self.y_max
+            x - diameter / 2 < self.x_min
+            or x + diameter / 2 > self.x_max
+            or y - diameter / 2 < self.y_min
+            or y + diameter / 2 > self.y_max
             or depth > self.z_max
         ):
-            warnings.warn("This hole may break the mesh of the CycadPart.")
+            warnings.warn("This hole may break the mesh of the CycadPart.", stacklevel=2)
 
     def test_mesh_rectangle_cutout(
-        self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, centered: bool
+        self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, *, centered: bool
     ):
         if centered:
             if (
@@ -185,7 +185,7 @@ class CycadPart(Location):
                 or z - z_size / 2 < self.z_min
                 or z + z_size / 2 > self.z_max
             ):
-                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
+                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.", stacklevel=2)
         elif (
             x < self.x_size
             or x + x_size > self.x_max
@@ -194,7 +194,7 @@ class CycadPart(Location):
             or z < self.z_min
             or z + z_size > self.z_max
         ):
-            warnings.warn("This rectangle cutout may break the mesh of the CycadPart.")
+            warnings.warn("This rectangle cutout may break the mesh of the CycadPart.", stacklevel=2)
 
     def make_hole(
         self,
@@ -225,6 +225,31 @@ class CycadPart(Location):
             self.external_features.append(temp_hole)
         else:
             self.features.append(temp_hole)
+
+    def make_cylinder(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        side: str,
+        diameter: float,
+        height: float,
+    ):
+        """
+        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the hole will be made in.
+            diameter: The diameter of the hole.
+            depth: The depth of the hole. If Null the hole is through the part.
+            external_subtract: This is to specify that the hole should only be cut into other surfaces and not itself.
+        """
+
+        cylinder = Cylinder(side=side, x=x, y=y, z=z, diameter=diameter, height=height)
+        self.features.append(cylinder)
 
     def make_slot(
         self,
