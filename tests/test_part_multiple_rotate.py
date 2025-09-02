@@ -38,7 +38,7 @@ def test_rotate():
     mypart1.rotate_freeze_top()
     mypart1.rotate_freeze_left()
     mypart1.rotate_freeze_left()
-    
+
     mypart2.rotate_freeze_left()
     mypart2.rotate_freeze_front()
     mypart2.rotate_freeze_top()

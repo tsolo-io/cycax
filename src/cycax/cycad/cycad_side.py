@@ -109,6 +109,30 @@ class CycadSide:
             separation=separation,
         )
 
+    def cylinder(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        height: float,
+        sink: float = 0.0,
+    ):
+        """This will put a cylinder of the relevant details onto the side.
+
+        Args:
+            pos: This is a tuple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            height: How tall to make the cylinder.
+        """
+        _location_tuple = self._location_calc(pos=pos, sink=sink)
+        self._parent.make_cylinder(
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
+            side=self.name,
+            diameter=diameter,
+            height=height,
+        )
+
     def hole(
         self,
         pos: tuple[float, float],
@@ -118,7 +142,7 @@ class CycadSide:
         *,
         external_subtract: bool = False,
     ):
-        """This will insert a whole given the relatice details, into the correct side.
+        """This will insert a hole given the relative details, into the correct side.
 
         Args:
             pos: this is a tuple that contains the (x, y) coordinates of the object.
@@ -150,7 +174,7 @@ class CycadSide:
         *,
         center: bool = False,
         external_subtract: bool = False,
-        calculate: bool = False
+        calculate: bool = False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -183,7 +207,6 @@ class CycadSide:
             external_subtract=external_subtract,
             calculate=calculate,
         )
-
 
     def nut(
         self,
@@ -278,7 +301,7 @@ class CycadSide:
             external_subtract=external_subtract,
         )
 
-    def subtract(self, part2): #referencing CycadPart results in a circular import
+    def subtract(self, part2):  # referencing CycadPart results in a circular import
         """
         This method adds the features of part2 to the part1 on the side where they touch.
         This method will be used for moving around conn-cube and harddive screw holes.
@@ -297,63 +320,61 @@ class CycadSide:
         for feature in part2._final_place():
             if feature.name == "cube":
                 if side == TOP:
-                    if (feature.z - feature.z_size/2) == part1.bounding_box[TOP]:
+                    if (feature.z - feature.z_size / 2) == part1.bounding_box[TOP]:
                         feature.side = TOP
                         part1.insert_feature(feature)
                 elif side == BOTTOM:
-                    if (feature.z + feature.z_size/2) == part1.bounding_box[BOTTOM]:
+                    if (feature.z + feature.z_size / 2) == part1.bounding_box[BOTTOM]:
                         feature.side = BOTTOM
                         part1.insert_feature(feature)
                 elif side == LEFT:
-                    if (feature.x + feature.x_size/2) == part1.bounding_box[LEFT]:
+                    if (feature.x + feature.x_size / 2) == part1.bounding_box[LEFT]:
                         feature.side = LEFT
                         part1.insert_feature(feature)
                 elif side == RIGHT:
-                    if (feature.x - feature.x_size/2) == part1.bounding_box[RIGHT]:
+                    if (feature.x - feature.x_size / 2) == part1.bounding_box[RIGHT]:
                         feature.side = RIGHT
                         part1.insert_feature(feature)
                 elif side == FRONT:
-                    if (feature.y + feature.y_size/2) == part1.bounding_box[FRONT]:
+                    if (feature.y + feature.y_size / 2) == part1.bounding_box[FRONT]:
                         feature.side = FRONT
                         part1.insert_feature(feature)
                 elif side == BACK:
-                    if (feature.y - feature.y_size/2) == part1.bounding_box[BACK]:
+                    if (feature.y - feature.y_size / 2) == part1.bounding_box[BACK]:
                         feature.side = BACK
                         part1.insert_feature(feature)
                 else:
                     msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
                     raise ValueError(msg)
+            elif side == TOP:
+                if feature.z == part1.bounding_box[TOP]:
+                    feature.side = TOP
+                    part1.insert_feature(feature)
+            elif side == BOTTOM:
+                if feature.z == part1.bounding_box[BOTTOM]:
+                    feature.side = BOTTOM
+                    part1.insert_feature(feature)
+            elif side == LEFT:
+                if feature.x == part1.bounding_box[LEFT]:
+                    feature.side = LEFT
+                    part1.insert_feature(feature)
+            elif side == RIGHT:
+                if feature.x == part1.bounding_box[RIGHT]:
+                    feature.side = RIGHT
+                    part1.insert_feature(feature)
+            elif side == FRONT:
+                if feature.y == part1.bounding_box[FRONT]:
+                    feature.side = FRONT
+                    part1.insert_feature(feature)
+            elif side == BACK:
+                if feature.y == part1.bounding_box[BACK]:
+                    feature.side = BACK
+                    part1.insert_feature(feature)
             else:
-                if side == TOP:
-                    print(part1.bounding_box)
-                    if feature.z == part1.bounding_box[TOP]:
-                        feature.side = TOP
-                        part1.insert_feature(feature)
-                elif side == BOTTOM:
-                    if feature.z == part1.bounding_box[BOTTOM]:
-                        feature.side = BOTTOM
-                        part1.insert_feature(feature)
-                elif side == LEFT:
-                    if feature.x == part1.bounding_box[LEFT]:
-                        feature.side = LEFT
-                        part1.insert_feature(feature)
-                elif side == RIGHT:
-                    if feature.x == part1.bounding_box[RIGHT]:
-                        feature.side = RIGHT
-                        part1.insert_feature(feature)
-                elif side == FRONT:
-                    if feature.y == part1.bounding_box[FRONT]:
-                        feature.side = FRONT
-                        part1.insert_feature(feature)
-                elif side == BACK:
-                    if feature.y == part1.bounding_box[BACK]:
-                        feature.side = BACK
-                        part1.insert_feature(feature)
-                else:
-                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-                    raise ValueError(msg)
-                
-    def level(self, partside2): #reference to CycadSide results in error
+                msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
+                raise ValueError(msg)
+
+    def level(self, partside2):  # reference to CycadSide results in error
         """
         Align the two sides onto the same plain.
 
@@ -408,7 +429,7 @@ class LeftSide(CycadSide):
         width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_min + sink
-        temp_y = self._parent.y_max - pos[0] - length
+        temp_y = self._parent.y_size - pos[0] - length
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
@@ -420,12 +441,29 @@ class LeftSide(CycadSide):
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.x_size
+            return self._parent.x_max - self._parent.x_min
         else:
             return val
 
     def _rotate(self):
         self._parent.rotate_freeze_left()
+
+    def cylinder(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        height: float,
+        sink: float = 0.0,
+    ):
+        """This will put a cylinder of the relevant details onto the side.
+
+        Args:
+            pos: This is a tuple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            height: How tall to make the cylinder.
+        """
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        self._parent.x_min = self._parent.x_min - height + sink
 
 
 class RightSide(CycadSide):
@@ -445,7 +483,7 @@ class RightSide(CycadSide):
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.x_size
+            return self._parent.x_max - self._parent.x_min
         else:
             return val
 
@@ -457,6 +495,23 @@ class RightSide(CycadSide):
 
     def _rotate(self):
         self._parent.rotate_freeze_left()
+
+    def cylinder(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        height: float,
+        sink: float = 0.0,
+    ):
+        """This will put a cylinder of the relevant details onto the side.
+
+        Args:
+            pos: This is a tuple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            height: How tall to make the cylinder.
+        """
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        self._parent.x_max = self._parent.x_max + height - sink
 
 
 class TopSide(CycadSide):
@@ -476,7 +531,7 @@ class TopSide(CycadSide):
 
     def _depth_check(self, val: float) -> float:
         if val is None:
-            return self._parent.z_size
+            return self._parent.z_max - self._parent.z_min
         else:
             return val
 
@@ -488,6 +543,23 @@ class TopSide(CycadSide):
 
     def _rotate(self):
         self._parent.rotate_freeze_top()
+
+    def cylinder(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        height: float,
+        sink: float = 0.0,
+    ):
+        """This will put a cylinder of the relevant details onto the side.
+
+        Args:
+            pos: This is a tuple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            height: How tall to make the cylinder.
+        """
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        self._parent.z_max = self._parent.z_max + height - sink
 
 
 class BottomSide(CycadSide):
@@ -501,13 +573,13 @@ class BottomSide(CycadSide):
         width: float = 0.0,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
-        temp_y = self._parent.y_max - pos[1] - width
+        temp_y = self._parent.y_size - pos[1] - width
         temp_z = self._parent.z_min + sink
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
         if val is None:
-            return self._parent.z_size
+            return self._parent.z_max - self._parent.z_min
         else:
             return val
 
@@ -519,6 +591,23 @@ class BottomSide(CycadSide):
 
     def _rotate(self):
         self._parent.rotate_freeze_top()
+
+    def cylinder(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        height: float,
+        sink: float = 0.0,
+    ):
+        """This will put a cylinder of the relevant details onto the side.
+
+        Args:
+            pos: This is a tuple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            height: How tall to make the cylinder.
+        """
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        self._parent.z_min = self._parent.z_min - height + sink
 
 
 class FrontSide(CycadSide):
@@ -538,7 +627,7 @@ class FrontSide(CycadSide):
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.y_size
+            return self._parent.y_max - self._parent.y_min
         else:
             return val
 
@@ -550,6 +639,23 @@ class FrontSide(CycadSide):
 
     def _rotate(self):
         self._parent.rotate_freeze_front()
+
+    def cylinder(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        height: float,
+        sink: float = 0.0,
+    ):
+        """This will put a cylinder of the relevant details onto the side.
+
+        Args:
+            pos: This is a tuple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            height: How tall to make the cylinder.
+        """
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        self._parent.y_min = self._parent.y_min - height + sink
 
 
 class BackSide(CycadSide):
@@ -562,14 +668,14 @@ class BackSide(CycadSide):
         length: float = 0.0,
         width: float = 0.0,  # noqa: ARG002 Unused argument
     ) -> tuple[float, float, float]:
-        temp_x = self._parent.x_max - pos[0] - length
+        temp_x = self._parent.x_size - pos[0] - length
         temp_y = self._parent.y_max - sink
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float | None = None) -> float:
         if val is None:
-            return self._parent.y_size
+            return self._parent.y_max - self._parent.y_min
         else:
             return val
 
@@ -581,3 +687,20 @@ class BackSide(CycadSide):
 
     def _rotate(self):
         self._parent.rotate_freeze_front()
+
+    def cylinder(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        height: float,
+        sink: float = 0.0,
+    ):
+        """This will put a cylinder of the relevant details onto the side.
+
+        Args:
+            pos: This is a tuple that contains the (x, y) coordinates of the object.
+            diameter: The diameter of the hole.
+            height: How tall to make the cylinder.
+        """
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        self._parent.y_max = self._parent.y_max + height - sink

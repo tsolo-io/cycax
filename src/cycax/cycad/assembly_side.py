@@ -1,4 +1,5 @@
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, SIDES
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
+
 
 class AssemblySide:
     name = ""
@@ -11,7 +12,7 @@ class AssemblySide:
 
     def __repr__(self):
         return "Side: " + self.name
-    
+
     def _rotate(self):
         """
         Rotate the assembly by 90 degrees by keeping selected side on the same plain.
@@ -61,7 +62,7 @@ class AssemblySide:
         if assembly1_side not in SIDES or assembly2_side not in SIDES:
             msg = f"Side: {assembly1_side} or Side: {assembly2_side} is not one of {SIDES}"
             raise ValueError(msg)
-        
+
         assembly1_bounding_box = assembly1.bounding_box
         assembly2_bounding_box = assembly2.bounding_box
         to_here = assembly2_bounding_box[assembly2_side]
@@ -85,36 +86,42 @@ class AssemblySide:
             msg = f"Side: {assembly1_side} is not one of {SIDES}."
             raise ValueError(msg)
 
-    def subtract(self, assembly2): #Using the Assembling in the description creates a circular import.
+    def subtract(self, assembly2):  # Using the Assembling in the description creates a circular import.
         """
-        Loops through the parts in each assemly and adds the features from assembly2 that touch the face of assembly1.
+        Loops through the parts in each assembly and adds the features from assembly2 that touch the face of assembly1.
 
         Args:
             assembly1: The assembly that you add the features to.
             assembly1_side: The side of the assembly that you add features to.
-            assembly2: The assemly that is used as the template when transferring features.
+            assembly2: The assembly that is used as the template when transferring features.
         """
         assembly1 = self._parent
         assembly1_side = self.name
         for part1 in assembly1.parts.values():
-            if assembly1_side==TOP:
+            if assembly1_side == TOP:
                 for part2 in assembly2.parts.values():
-                    part1.top.subtract(part2=part2)
-            elif assembly1_side==BOTTOM:
+                    if part2._name in assembly2.external_feature_parts:
+                        part1.top.subtract(part2=part2)
+            elif assembly1_side == BOTTOM:
                 for part2 in assembly2.parts.values():
-                    part1.bottom.subtract(part2=part2)
-            elif assembly1_side==LEFT:
+                    if part2._name in assembly2.external_feature_parts:
+                        part1.bottom.subtract(part2=part2)
+            elif assembly1_side == LEFT:
                 for part2 in assembly2.parts.values():
-                    part1.left.subtract(part2=part2)
-            elif assembly1_side==RIGHT:
+                    if part2._name in assembly2.external_feature_parts:
+                        part1.left.subtract(part2=part2)
+            elif assembly1_side == RIGHT:
                 for part2 in assembly2.parts.values():
-                    part1.right.subtract(part2=part2)
-            elif assembly1_side==FRONT:
+                    if part2._name in assembly2.external_feature_parts:
+                        part1.right.subtract(part2=part2)
+            elif assembly1_side == FRONT:
                 for part2 in assembly2.parts.values():
-                    part1.front.subtract(part2=part2)
-            elif assembly1_side==BACK:
+                    if part2._name in assembly2.external_feature_parts:
+                        part1.front.subtract(part2=part2)
+            elif assembly1_side == BACK:
                 for part2 in assembly2.parts.values():
-                    part1.back.subtract(part2=part2)
+                    if part2._name in assembly2.external_feature_parts:
+                        part1.back.subtract(part2=part2)
             else:
                 msg = f"{assembly1_side} not in {SIDES}."
                 raise ValueError(msg)
@@ -130,7 +137,7 @@ class AssemblySideRight(AssemblySide):
 
     def _rotate(self):
         self._parent.rotate_freeze_left()
-
+ 
 class AssemblySideTop(AssemblySide):
     name = TOP
 
@@ -142,7 +149,7 @@ class AssemblySideBottom(AssemblySide):
 
     def _rotate(self):
         self._parent.rotate_freeze_top()
-    
+  
 class AssemblySideFront(AssemblySide):
     name = FRONT
 

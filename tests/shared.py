@@ -72,7 +72,6 @@ def json_compare_models(file1: Path, file2: Path):
     json1 = json.loads(file1.read_text())
     json2 = json.loads(file2.read_text())
     for feature1, feature2 in zip(json1["features"], json2["features"], strict=False):
-        print(feature1, feature2)
         assert feature1 == feature2, f"Feature mismatch {feature1} != {feature2} thus {file1} != {file2}"
     assert json1 == json2, f"{file1} != {file2}"
 

@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import copy
 import json
 import logging
 import os
@@ -12,8 +11,8 @@ from pathlib import Path
 from tkinter import NO
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
+from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.cycad_part import CycadPart
-from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
@@ -195,7 +194,6 @@ class Assembly:
         if not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
-        print(self.parts)
         for item in self.parts.values():
             item.save(path)
 
@@ -241,7 +239,7 @@ class Assembly:
             return max(current_value, new_value)
 
     @property
-    def center(self) -> dict:
+    def center(self) -> tuple[float, float, float]:
         """
         Creates a bounding box that will give the plane of each side of the assembly.
 
@@ -257,7 +255,7 @@ class Assembly:
             center_z = min(part.center[2], center_z)
 
         return (center_x, center_y, center_z)
-    
+
     def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Place parts in the assembly at the exact provided coordinates.
 
@@ -266,14 +264,20 @@ class Assembly:
             y: The value to which y needs to be moved to on the axis.
             z: The value to which z needs to be moved to on the axis.
         """
+        if x is not None:
+            x_move = x - self.bounding_box[LEFT]
+        if y is not None:
+            y_move = y - self.bounding_box[FRONT]
+        if z is not None:
+            z_move = z - self.bounding_box[BOTTOM]
+
         for part in self.parts.values():
-            print(part)
             if x is not None:
-                part.at(x=x + part.position[0])
+                part.at(x=x_move + part.position[0])
             if y is not None:
-                part.at(y=y + part.position[1])
+                part.at(y=y_move + part.position[1])
             if z is not None:
-                part.at(z=z + part.position[2])
+                part.at(z=z_move + part.position[2])
 
     def add(self, part, suggested_name: str | None = None, external_subract: bool = False):
         """This adds a part into the assembly.
@@ -351,7 +355,7 @@ class Assembly:
         dict_out["name"] = self.name
         dict_out["parts"] = list_out
         return dict_out
-                
+
     def rotate_freeze_top(self):
         """
         Rotate the front and the left while holding the top where it currently is. Of all the parts in an assembly.
@@ -377,7 +381,6 @@ class Assembly:
             part.rotate_freeze_left()
             part.position[1] = y - (part.y_max - part.y_min)/2
             part.position[2] = z  - (part.z_max - part.z_min)/2
-            
 
     def rotate_freeze_front(self):
         """
@@ -418,8 +421,7 @@ class Assembly:
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
 
-
-    def combine_all_assemblies(self, new_name: str = None, path: Path = None):
+    def combine_all_assemblies(self, new_name: str | None = None, path: Path | None = None):
         """
         Combine all the assemblies into one Assembly.
 
@@ -429,6 +431,7 @@ class Assembly:
         total_parts = {}
         for assembly in self.assemblies:
             total_parts.update(assembly.parts)
+        total_parts.update(self.parts)
         if new_name:
             assembly_out = Assembly(name=new_name)
         else:
@@ -439,5 +442,3 @@ class Assembly:
         else:
             assembly_out._base_path = self._base_path
         return assembly_out
-                
-    

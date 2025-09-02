@@ -1,25 +1,23 @@
-
-from pathlib import Path
 from cycax.cycad.assembly import Assembly
-from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
+from cycax.cycad.cuboid import SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
-print("test")
+
+
 def test_complex_assembly(tmp_path):
-    part_1 = SheetMetal(part_no = "this", x_size = 20, y_size = 10)
-    part_1.bottom.hole(pos=(7,7), diameter=3.2)
-    part_1.bottom.hole(pos=(7,7), diameter=3.2, external_subtract=True)
-    part_2 = SheetMetal(part_no = "that", x_size = 30, y_size = 40)
-    part_2.top.hole(pos=(19,19), diameter=3.2)
-    part_2.top.hole(pos=(19,19), diameter=3.2, external_subtract=True)
+    part_1 = SheetMetal(part_no="this", x_size=20, y_size=10)
+    part_1.bottom.hole(pos=(7, 7), diameter=3.2)
+    part_1.bottom.hole(pos=(7, 7), diameter=3.2, external_subtract=True)
+    part_2 = SheetMetal(part_no="that", x_size=30, y_size=40)
+    part_2.top.hole(pos=(19, 19), diameter=3.2)
+    part_2.top.hole(pos=(19, 19), diameter=3.2, external_subtract=True)
 
-    part_3 = SheetMetal(part_no = "this1", x_size = 5, y_size = 5)
-    
-    part_4 = SheetMetal(part_no = "that1", x_size = 3, y_size = 3)
+    part_3 = SheetMetal(part_no="this1", x_size=5, y_size=5)
 
-    assembly1 = Assembly(name = "a")
-    assembly2 = Assembly(name = "b")
+    part_4 = SheetMetal(part_no="that1", x_size=3, y_size=3)
+
+    assembly1 = Assembly(name="a")
+    assembly2 = Assembly(name="b")
     assembly1.add(part_1)
     assembly2.add(part_2)
     assembly1.add(part_3)

@@ -4,13 +4,12 @@
 
 from __future__ import annotations
 
-from asyncio import FastChildWatcher
 import copy
 import json
 import logging
+import warnings
 from pathlib import Path
-from turtle import position
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING
 
 from cycax.cycad.beveled_edge import BeveledEdge
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
@@ -18,7 +17,7 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
+from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -80,7 +79,7 @@ class CycadPart(Location):
         self.y_max: float = self.y_size  # Location.Back
         self.z_max: float = self.z_size  # Location.Top
         self.bounding_box = {}
-        self.position = [0.0, 0.0, 0.0]  
+        self.position = [0.0, 0.0, 0.0]
         self.rotation = []
         self.final_location = False
         self.initial_polygon = polygon
@@ -164,6 +163,39 @@ class CycadPart(Location):
         msg = "The adding of counterdrill to a side has not been implemented."
         raise NotImplementedError(msg)
 
+    def test_mesh_hole(self, x: float, y: float, z: float, diameter: float, depth: float):
+        if (
+            x - diameter / 2 < self.x_min
+            or x + diameter / 2 > self.x_max
+            or y - diameter / 2 < self.y_min
+            or y + diameter / 2 > self.y_max
+            or depth > self.z_max
+        ):
+            warnings.warn("This hole may break the mesh of the CycadPart.", stacklevel=2)
+
+    def test_mesh_rectangle_cutout(
+        self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, *, centered: bool
+    ):
+        if centered:
+            if (
+                x - x_size / 2 < self.x_size
+                or x + x_size / 2 > self.x_max
+                or y - y_size / 2 < self.y_min
+                or y + y_size / 2 > self.y_max
+                or z - z_size / 2 < self.z_min
+                or z + z_size / 2 > self.z_max
+            ):
+                warnings.warn("This rectangle cutout may break the mesh of the CycadPart.", stacklevel=2)
+        elif (
+            x < self.x_size
+            or x + x_size > self.x_max
+            or y < self.y_min
+            or y + y_size > self.y_max
+            or z < self.z_min
+            or z + z_size > self.z_max
+        ):
+            warnings.warn("This rectangle cutout may break the mesh of the CycadPart.", stacklevel=2)
+
     def make_hole(
         self,
         x: float,
@@ -193,6 +225,31 @@ class CycadPart(Location):
             self.external_features.append(temp_hole)
         else:
             self.features.append(temp_hole)
+
+    def make_cylinder(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        side: str,
+        diameter: float,
+        height: float,
+    ):
+        """
+        If instead of Location.top and Location.bottom it were possible to think rather (x, y, z_max)
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the hole will be made in.
+            diameter: The diameter of the hole.
+            depth: The depth of the hole. If Null the hole is through the part.
+            external_subtract: This is to specify that the hole should only be cut into other surfaces and not itself.
+        """
+
+        cylinder = Cylinder(side=side, x=x, y=y, z=z, diameter=diameter, height=height)
+        self.features.append(cylinder)
 
     def make_slot(
         self,
@@ -291,7 +348,7 @@ class CycadPart(Location):
         *,
         center=False,
         external_subtract: bool = False,
-        calculate: bool=False,
+        calculate: bool = False,
     ):
         """This method will cut a block out of the CycadPart.
 
@@ -317,7 +374,8 @@ class CycadPart(Location):
             z_size=z_size,
             center=center,
         )
-        if calculate: temp_rect.__calc__()
+        if calculate:
+            temp_rect.__calc__()
         if external_subtract:
             self.external_features.append(temp_rect)
         else:
@@ -417,30 +475,29 @@ class CycadPart(Location):
                 rotation = feature.swap_xy(3, rotation)
         if feature.name == "cube":
             if feature.side == TOP:
-                feature.z = feature.z -feature.z_size/2 - self.z_size/2
+                feature.z = feature.z - feature.z_size / 2 - self.z_size / 2
                 feature.z_size = self.z_size
             elif feature.side == BOTTOM:
-                feature.z = feature.z + feature.z_size/2 + self.z_size/2
+                feature.z = feature.z + feature.z_size / 2 + self.z_size / 2
                 feature.z_size = self.z_size
             elif feature.side == LEFT:
-                feature.x = feature.x + feature.x_size/2 + self.x_size/2
+                feature.x = feature.x + feature.x_size / 2 + self.x_size / 2
                 feature.x_size = self.x_size
             elif feature.side == RIGHT:
-                feature.x = feature.x - feature.x_size/2 - self.x_size/2
+                feature.x = feature.x - feature.x_size / 2 - self.x_size / 2
                 feature.x_size = self.x_size
             elif feature.side == FRONT:
-                feature.x = feature.y + feature.y_size/2 + self.y_size/2
+                feature.x = feature.y + feature.y_size / 2 + self.y_size / 2
                 feature.x_size = self.y_size
             elif feature.side == BACK:
-                feature.x = feature.y - feature.y_size/2 - self.y_size/2
+                feature.x = feature.y - feature.y_size / 2 - self.y_size / 2
                 feature.x_size = self.y_size
-        else:
-            if feature.side in (TOP, BOTTOM):
-                feature.depth = self.z_size
-            elif feature.side in (LEFT, RIGHT):
-                feature.depth = self.x_size
-            elif feature.side in (FRONT, BACK):
-                feature.depth = self.y_size
+        elif feature.side in (TOP, BOTTOM):
+            feature.depth = self.z_size
+        elif feature.side in (LEFT, RIGHT):
+            feature.depth = self.x_size
+        elif feature.side in (FRONT, BACK):
+            feature.depth = self.y_size
         self.features.append(feature)
 
     @property
@@ -452,15 +509,15 @@ class CycadPart(Location):
             msg = "BasePath does not exists."
             raise ValueError(msg)
         return self._base_path / self.part_no
-    
+
     @property
     def center(self) -> list:
         """Return the center of a part."""
-        centered_x = self.position[0] + self.x_max/2
-        centered_y = self.position[1] + self.y_max/2
-        centered_z = self.position[2] + self.z_max/2
+        centered_x = self.position[0] + self.x_max / 2
+        centered_y = self.position[1] + self.y_max / 2
+        centered_z = self.position[2] + self.z_max / 2
         return [centered_x, centered_y, centered_z]
- 
+
     def save(self, path: Path | str | None = None):
         """
         Save the part specification to a JSON file.
@@ -777,7 +834,7 @@ class CycadPart(Location):
                     msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
                             {action} is not one of the permissable actions."""
                     raise ValueError(msg)
-                
+
     def rotate_freeze_top(self):
         """
         This method will rotate the front and the left while holding the top where it currently is.
@@ -852,4 +909,3 @@ class CycadPart(Location):
         else:
             msg = f"merging {self} and {part2} but they are not of the same size."
             raise ValueError(msg)
-

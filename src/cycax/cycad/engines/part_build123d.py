@@ -74,7 +74,7 @@ class PartEngineBuild123d(PartEngine):
             )
         return feature
 
-    def _decode_hole(self, feature_spec: dict) -> build123d.objects_part.Cylinder:
+    def _decode_cylinder_feature(self, feature_spec: dict) -> build123d.objects_part.Cylinder:
         """
         This method will return the string that will have the scad for a hole.
 
@@ -83,25 +83,30 @@ class PartEngineBuild123d(PartEngine):
 
         """
         feature = build123d.Cylinder(feature_spec["diameter"] / 2, height=feature_spec["depth"])
-        if feature_spec["side"] == FRONT:
-            pos = build123d.Pos(feature_spec["x"], feature_spec["y"] + feature_spec["depth"] / 2, feature_spec["z"])
-            feature = pos * build123d.Rotation(X=270) * feature
-        elif feature_spec["side"] == BACK:
-            pos = build123d.Pos(feature_spec["x"], feature_spec["y"] - feature_spec["depth"] / 2, feature_spec["z"])
-            feature = pos * build123d.Rotation(X=90) * feature
-        elif feature_spec["side"] == TOP:
-            pos = build123d.Pos(feature_spec["x"], feature_spec["y"], feature_spec["z"] - feature_spec["depth"] / 2)
-            feature = pos * build123d.Rotation(Y=180) * feature
-        elif feature_spec["side"] == BOTTOM:
-            pos = build123d.Pos(feature_spec["x"], feature_spec["y"], feature_spec["z"] + feature_spec["depth"] / 2)
-            feature = pos * build123d.Rotation(Y=0) * feature
-        elif feature_spec["side"] == LEFT:
-            pos = build123d.Pos(feature_spec["x"] + feature_spec["depth"] / 2, feature_spec["y"], feature_spec["z"])
-            feature = pos * build123d.Rotation(Y=90) * feature
-        elif feature_spec["side"] == RIGHT:
-            pos = build123d.Pos(feature_spec["x"] - feature_spec["depth"] / 2, feature_spec["y"], feature_spec["z"])
-            feature = pos * build123d.Rotation(Y=270) * feature
-
+        x = feature_spec["x"]
+        y = feature_spec["y"]
+        z = feature_spec["z"]
+        depth = feature_spec["depth"]
+        side = feature_spec["side"]
+        if feature_spec["type"] == "cut":
+            pos = {
+                FRONT: build123d.Pos(x, y + depth / 2, z) * build123d.Rotation(X=270),
+                BACK: build123d.Pos(x, y - depth / 2, z) * build123d.Rotation(X=90),
+                TOP: build123d.Pos(x, y, z - depth / 2) * build123d.Rotation(Y=180),
+                BOTTOM: build123d.Pos(x, y, z + depth / 2) * build123d.Rotation(Y=0),
+                LEFT: build123d.Pos(x + depth / 2, y, z) * build123d.Rotation(Y=90),
+                RIGHT: build123d.Pos(x - depth / 2, y, z) * build123d.Rotation(Y=270),
+            }[side]
+        else:
+            pos = {
+                FRONT: build123d.Pos(x, y - depth / 2, z) * build123d.Rotation(X=270),
+                BACK: build123d.Pos(x, y + depth / 2, z) * build123d.Rotation(X=90),
+                TOP: build123d.Pos(x, y, z + depth / 2) * build123d.Rotation(Y=180),
+                BOTTOM: build123d.Pos(x, y, z - depth / 2) * build123d.Rotation(Y=0),
+                LEFT: build123d.Pos(x - depth / 2, y, z) * build123d.Rotation(Y=90),
+                RIGHT: build123d.Pos(x + depth / 2, y, z) * build123d.Rotation(Y=270),
+            }[side]
+        feature = pos * feature
         return feature
 
     def _decode_nut(self, feature_spec: dict) -> str:
@@ -206,7 +211,7 @@ class PartEngineBuild123d(PartEngine):
         b2_cylinder = max(feature_spec["size"], feature_spec["bound2"] - feature_spec["size"])
         action_cylinder[feature_spec["axis1"]] = b1_cylinder
         action_cylinder[feature_spec["axis2"]] = b2_cylinder
-        feature_cylinder = self._decode_hole(action_cylinder)
+        feature_cylinder = self._decode_cylinder_feature(action_cylinder)
         return feature_cube - feature_cylinder
 
     def build(self, part) -> list:
@@ -245,12 +250,16 @@ class PartEngineBuild123d(PartEngine):
         """
 
         part = None
+        add_features = []
+        subtract_features = []
         for action in definition["features"]:
             match action["name"]:
                 case "cube":
                     feature = self._decode_cube(action)
                 case "hole":
-                    feature = self._decode_hole(action)
+                    feature = self._decode_cylinder_feature(action)
+                case "cylinder_feature":
+                    feature = self._decode_cylinder_feature(action)
                 case "sphere":
                     feature = self._decode_sphere(action)
                 case "nut":
@@ -266,15 +275,21 @@ class PartEngineBuild123d(PartEngine):
             feature = (
                 build123d.Plane.XY * feature
             )  # The position and direction in the JSON is all relevant to the XY Plane.
-            if part is None:
-                part = feature
-            elif action["type"] == "add":
-                part += feature
+            if action["type"] == "add":
+                add_features.append(feature)
             elif action["type"] == "cut":
-                part -= feature
+                subtract_features.append(feature)
             else:
                 msg = f"Unknown action type: {action['type']}"
                 raise ValueError(msg)
+
+        for feature in add_features:
+            if part is None:
+                part = feature
+            else:
+                part += feature
+        for feature in subtract_features:
+            part -= feature
 
         files = []
         build123d.export_stl(to_export=part, file_path=file_no_ext.with_suffix(".stl"))
