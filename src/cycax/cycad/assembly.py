@@ -2,20 +2,21 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import copy
 import json
 import logging
 import os
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from tkinter import NO
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
+from cycax.cycad.assembly_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.cycad_part import CycadPart
-from cycax.cycad.cycad_side import CycadSide
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
+from cycax.cycad.assembly_side import AssemblySideBack, AssemblySideBottom, AssemblySideFront, AssemblySideLeft, AssemblySideRight, AssemblySideTop
 
 
 class Assembly:
@@ -31,6 +32,14 @@ class Assembly:
         self.parts = {}
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
+        self.external_features = []
+        self.left = AssemblySideLeft(self)
+        self.right = AssemblySideRight(self)
+        self.top = AssemblySideTop(self)
+        self.bottom = AssemblySideBottom(self)
+        self.front = AssemblySideFront(self)
+        self.back = AssemblySideBack(self)
+        self.assemblies = []
 
     def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
         logging.info("Calling to the assembler")
@@ -185,7 +194,6 @@ class Assembly:
         if not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
-        print(self.parts)
         for item in self.parts.values():
             item.save(path)
 
@@ -202,27 +210,36 @@ class Assembly:
         Returns:
             Bounding box.
         """
-        min_x = 0
-        min_y = 0
-        min_z = 0
-        max_x = 0
-        max_y = 0
-        max_z = 0
+        x_min = None
+        x_max = None
+        y_min = None
+        y_max = None
+        z_min = None
+        z_max = None
         for part in self.parts.values():
-
-            min_x = min(part.position[0], min_x)
-            min_y = min(part.position[1], min_y)
-            min_z = min(part.position[2], min_z)
-
-            max_x = max(part.position[0]+part.x_size, max_x)
-            max_y = max(part.position[1]+part.y_size, max_y)
-            max_z = max(part.position[2]+part.z_size, max_z)
-
-        bounding_box = {LEFT: min_x, FRONT: min_y, BOTTOM: min_z, RIGHT: max_x, BACK: max_y, TOP: max_z}
+            x_min = self._min(x_min, part.x_min)
+            y_min = self._min(y_min, part.y_min)
+            z_min = self._min(z_min, part.z_min)
+            x_max = self._max(x_max, part.x_max)
+            y_max = self._max(y_max, part.y_max)
+            z_max = self._max(z_max, part.z_max)
+        bounding_box = {LEFT: x_min, FRONT: y_min, BOTTOM: z_min, RIGHT: x_max, BACK: y_max, TOP: z_max}
         return bounding_box
-    
+
+    def _min(self, current_value: float, new_value: float):
+        if current_value is None:
+            return new_value
+        else:
+            return min(current_value, new_value)
+
+    def _max(self, current_value: float, new_value: float):
+        if current_value is None:
+            return new_value
+        else:
+            return max(current_value, new_value)
+
     @property
-    def center(self) -> dict:
+    def center(self) -> tuple[float, float, float]:
         """
         Creates a bounding box that will give the plane of each side of the assembly.
 
@@ -233,14 +250,12 @@ class Assembly:
         center_y = 0
         center_z = 0
         for part in self.parts.values():
-
-
             center_x = min(part.center[0], center_x)
             center_y = min(part.center[1], center_y)
             center_z = min(part.center[2], center_z)
 
         return (center_x, center_y, center_z)
-    
+
     def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
         """Place parts in the assembly at the exact provided coordinates.
 
@@ -249,60 +264,47 @@ class Assembly:
             y: The value to which y needs to be moved to on the axis.
             z: The value to which z needs to be moved to on the axis.
         """
+        if x is not None:
+            x_move = x - self.bounding_box[LEFT]
+        if y is not None:
+            y_move = y - self.bounding_box[FRONT]
+        if z is not None:
+            z_move = z - self.bounding_box[BOTTOM]
+
         for part in self.parts.values():
-            print(part)
             if x is not None:
-                part.at(x=x + part.position[0])
+                part.at(x=x_move + part.position[0])
             if y is not None:
-                part.at(y=y + part.position[1])
+                part.at(y=y_move + part.position[1])
             if z is not None:
-                part.at(z=z + part.position[2])
+                part.at(z=z_move + part.position[2])
 
-    def merge(self, part1: CycadPart, part2: CycadPart):
-        """This method will be used to merge 2 parts together
-        which have identical sizes but different features.
-
-        Args:
-            part1: this part will receive the features present on part2.
-            part2: this part will receive the features present on part1.
-
-        Raises:
-            ValueError: if the sizes of the parts are not identical.
-        """
-        if part1.x_size == part2.x_size and part1.y_size == part2.y_size and part1.z_size == part2.z_size:
-            for item in part2.features:
-                if item not in part1.features:
-                    part1.features.append(item)
-            for item in part2.move_holes:
-                if item not in part1.move_holes:
-                    part1.move_holes.append(item)
-            part2.features = part1.features
-            part2.move_holes = part1.move_holes
-        else:
-            msg = f"merging {part1} and {part2} but they are not of the same size."
-            raise ValueError(msg)
-
-    def add(self, part: CycadPart, suggested_name: str | None = None) -> str:
+    def add(self, part, suggested_name: str | None = None, external_subract: bool = False):
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be edited.
 
         Args:
-            part: this in the part that will be added to the assembly.
+            part: If this is a part it will add it to the list of parts, else it will add it to the list of assemblies.
             suggested_name: A proposal for a part name, if a part with such a name exists then a name will be generated.
 
         Returns:
-            The name of the part.
+            The name of the part if a part gets returned.
         """
 
-        part.assembly = self
-        part._base_path = self._base_path
-        part_name = part.get_name(suggested_name)
-        if part_name in self.parts:
-            msg = f"Part with name/id {part_name} already in parts catalogue."
-            raise KeyError(msg)
-        self.parts[part_name] = part
-        return part_name
+        if isinstance(part, Assembly):
+            self.assemblies.append(part)
+        else:
+            part.assembly = self
+            part._base_path = self._base_path
+            part_name = part.get_name(suggested_name)
+            if part_name in self.parts:
+                msg = f"Part with name/id {part_name} already in parts catalogue."
+                raise KeyError(msg)
+            self.parts[part_name] = part
+            if external_subract:
+                self.external_features.append(part.external_features)
+            return part_name
 
     def get_part(self, name: str) -> CycadPart:
         """Get a part from the assembly based on part name.
@@ -354,175 +356,89 @@ class Assembly:
         dict_out["parts"] = list_out
         return dict_out
 
-    def rotate_freeze_top(self, part: CycadPart):
-        """This method will rotate the front and the left while holding the top where it currently is.
+    def rotate_freeze_top(self):
+        """
+        Rotate the front and the left while holding the top where it currently is. Of all the parts in an assembly.
+        """
+        back = self.bounding_box[BACK]
+        for part in self.parts.values():
+            x = part.position[0] + (part.x_max - part.x_min)/2
+            y = part.position[1]  + (part.y_max - part.y_min)/2
+            x, y = back - y, x
+            part.rotate_freeze_top()
+            part.position[0] = x - (part.x_max - part.x_min)/2
+            part.position[1] = y - (part.y_max - part.y_min)/2
+
+    def rotate_freeze_left(self):
+        """
+        Rotate the top and front while holding the left where it currently is. Of all the parts in an assembly.
+        """
+        top = self.bounding_box[TOP]
+        for part in self.parts.values():
+            y = part.position[1] + (part.y_max - part.y_min)/2
+            z = part.position[2]  + (part.z_max - part.z_min)/2
+            y, z = top - z, y
+            part.rotate_freeze_left()
+            part.position[1] = y - (part.y_max - part.y_min)/2
+            part.position[2] = z  - (part.z_max - part.z_min)/2
+
+    def rotate_freeze_front(self):
+        """
+        Rotate the left and top while holding the front where it currently is. Of all the parts in an assembly.
+        """
+        right = self.bounding_box[RIGHT]
+        for part in self.parts.values():
+            x = part.position[0] + (part.x_max - part.x_min)/2
+            z = part.position[2]  + (part.z_max - part.z_min)/2
+            x, z = z, right - x
+            part.rotate_freeze_front()
+            part.position[0] = x - (part.x_max - part.x_min)/2
+            part.position[2] = z  - (part.z_max - part.z_min)/2
+
+    def rotate(self, actions: str):
+        """Rotate the assembly several times.
+
+        Example: `Assembly.rotate("xxyzyy")` is the same as two `rotate_freeze_front`, `rotate_freeze_left`,
+        `rotate_freeze_top`, and two `rotate_freeze_left`.
+        Where rotate_freeze_<side> results in one 90degrees counter clock wise rotations on the side.
 
         Args:
-            part: This is the part that will be rotated.
-        """
-        part.rotation.append({"axis": "z", "angle": 90})
-        part.x_max, part.y_max = part.y_max, part.x_max
-        part.x_min, part.y_min = part.y_min, part.x_min
-        part.make_bounding_box()
+            actions: This is a string specifying rotations.
 
-    def rotate_freeze_left(self, part: CycadPart):
-        """This method will rotate the top and front while holding the left where it currently is.
-
-        Args:
-            part: This is the part that will be rotated.
-        """
-        part.rotation.append({"axis": "x", "angle": 90})
-        part.y_max, part.z_max = part.z_max, part.y_max
-        part.y_min, part.z_min = part.z_min, part.y_min
-        part.make_bounding_box()
-
-    def rotate_freeze_front(self, part: CycadPart):
-        """This method will rotate the left and top while holding the front where it currently is.
-
-        Args:
-            part: This is the part that will be rotated.
-        """
-        part.rotation.append({"axis": "y", "angle": 90})
-        part.x_max, part.z_max = part.z_max, part.x_max
-        part.x_min, part.z_min = part.z_min, part.x_min
-        part.make_bounding_box()
-
-    def level(self, partside1: CycadSide, partside2: CycadSide):
-        """
-        Alight the two sides onto the same plain.
-
-        Moves part1 so that its given side is on the same plain as the given
-        side of parts2. e.g. `level(part1.front part2.back)` will move part1
-        so that its front is on the same plain as the back of part2.
-
-        Args:
-            partside1: The CycadSide to be moved to match the plain of the other part.
-            partside2: The CycadSide used as reference when moving part1.
         Raises:
-            ValueError: When the side present in CycadSide does not match one of the expected sides.
+            ValueError: When the given actions contains a string that is non x, y, or z.
         """
-        part1 = partside1._parent
-        part2 = partside2._parent
-        part1side = partside1.name
-        part2side = partside2.name
-        part2.make_bounding_box()
-        part1.make_bounding_box()
-        to_here = part2.bounding_box[part2side]
+        for action in actions:
+            match action.lower():
+                case "x":
+                    self.rotate_freeze_left()
+                case "y":
+                    self.rotate_freeze_front()
+                case "z":
+                    self.rotate_freeze_top()
+                case _:
+                    msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
+                            {action} is not one of the permissable actions."""
+                    raise ValueError(msg)
 
-        if part1side == BOTTOM:
-            part1.at(z=to_here)
-        elif part1side == TOP:
-            z_size = part1.z_max - part1.z_min
-            part1.at(z=to_here - z_size)
-        elif part1side == LEFT:
-            part1.at(x=to_here)
-        elif part1side == RIGHT:
-            x_size = part1.x_max - part1.x_min
-            part1.at(x=to_here - x_size)
-        elif part1side == FRONT:
-            part1.at(y=to_here)
-        elif part1side == BACK:
-            y_size = part1.y_max - part1.y_min
-            part1.at(y=to_here - y_size)
+    def combine_all_assemblies(self, new_name: str | None = None, path: Path | None = None):
+        """
+        Combine all the assemblies into one Assembly.
+
+        Returns:
+            Combined Assembly formed from all the assemblies in the list of Assemblies.
+        """
+        total_parts = {}
+        for assembly in self.assemblies:
+            total_parts.update(assembly.parts)
+        total_parts.update(self.parts)
+        if new_name:
+            assembly_out = Assembly(name=new_name)
         else:
-            msg = f"Side: {part1side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-            raise ValueError(msg)
-
-        part1.make_bounding_box()
-
-    def _final_place(self, part: CycadPart):
-        """
-        It is used to move the move_holes to their final location before they are subtracted from
-        the other part.
-        """
-        for feature in part.move_holes:
-            temp_feature = copy.deepcopy(feature)
-            rotation = [part.x_size, part.y_size, part.z_size]
-            for rot in part.rotation:
-                if rot["axis"] == "x":
-                    rotation = temp_feature.swap_yz(rot=1, rotmax=rotation)
-                elif rot["axis"] == "y":
-                    rotation = temp_feature.swap_xz(rot=1, rotmax=rotation)
-                elif rot["axis"] == "z":
-                    rotation = temp_feature.swap_xy(rot=1, rotmax=rotation)
-            if part.position[0] != 0:
-                temp_feature.move(x=part.position[0])
-            if part.position[1] != 0:
-                temp_feature.move(y=part.position[1])
-            if part.position[2] != 0:
-                temp_feature.move(z=part.position[2])
-            yield temp_feature
-
-    def subtract(self, partside1: CycadSide, part2: CycadPart):
-        """
-        This method adds the features of part2 to the part1 on the side where they touch.
-        This method will be used for moving around conn-cube and harddive screw holes.
-
-        Args:
-            partside1: The part side that will receive the features.
-            part2: The part that is used as the template when transferring features.
-
-        Raises:
-            ValueError: When the side present in CycadSide does not match one of the expected sides.
-        """
-        part1 = partside1._parent
-        side = partside1.name
-        part1.make_bounding_box()
-
-        for feature in self._final_place(part2):
-            if feature.name == "cube":
-                if side == TOP:
-                    if (feature.z - feature.z_size / 2) == part1.bounding_box[TOP]:
-                        feature.side = TOP
-                        part1.insert_feature(feature)
-                elif side == BOTTOM:
-                    if (feature.z + feature.z_size / 2) == part1.bounding_box[BOTTOM]:
-                        feature.side = BOTTOM
-                        part1.insert_feature(feature)
-                elif side == LEFT:
-                    if (feature.x + feature.x_size / 2) == part1.bounding_box[LEFT]:
-                        feature.side = LEFT
-                        part1.insert_feature(feature)
-                elif side == RIGHT:
-                    if (feature.x - feature.x_size / 2) == part1.bounding_box[RIGHT]:
-                        feature.side = RIGHT
-                        part1.insert_feature(feature)
-                elif side == FRONT:
-                    if (feature.y + feature.y_size / 2) == part1.bounding_box[FRONT]:
-                        feature.side = FRONT
-                        part1.insert_feature(feature)
-                elif side == BACK:
-                    if (feature.y - feature.y_size / 2) == part1.bounding_box[BACK]:
-                        feature.side = BACK
-                        part1.insert_feature(feature)
-                else:
-                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-                    raise ValueError(msg)
-            else:
-                if side == TOP:
-                    if feature.z == part1.bounding_box[TOP]:
-                        feature.side = TOP
-                        part1.insert_feature(feature)
-                elif side == BOTTOM:
-                    if feature.z == part1.bounding_box[BOTTOM]:
-                        feature.side = BOTTOM
-                        part1.insert_feature(feature)
-                elif side == LEFT:
-                    if feature.x == part1.bounding_box[LEFT]:
-                        feature.side = LEFT
-                        part1.insert_feature(feature)
-                elif side == RIGHT:
-                    if feature.x == part1.bounding_box[RIGHT]:
-                        feature.side = RIGHT
-                        part1.insert_feature(feature)
-                elif side == FRONT:
-                    if feature.y == part1.bounding_box[FRONT]:
-                        feature.side = FRONT
-                        part1.insert_feature(feature)
-                elif side == BACK:
-                    if feature.y == part1.bounding_box[BACK]:
-                        feature.side = BACK
-                        part1.insert_feature(feature)
-                else:
-                    msg = f"Side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK."
-                    raise ValueError(msg)
+            assembly_out = Assembly(name=self.name)
+        assembly_out.parts = total_parts
+        if path:
+            assembly_out._base_path = path
+        else:
+            assembly_out._base_path = self._base_path
+        return assembly_out
