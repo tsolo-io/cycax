@@ -280,6 +280,7 @@ class SphereCutOut(Feature):
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
 
+
 class SphereAdd(Feature):
     """
     Class for holding the data for sphere cut outs.

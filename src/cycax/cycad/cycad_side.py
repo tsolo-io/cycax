@@ -503,7 +503,6 @@ class LeftSide(CycadSide):
         """
         super().sphere_add(pos=pos, diameter=diameter, sink=sink)
         self._parent.x_min = self._parent.x_min - diameter + sink
-        
 
 
 class RightSide(CycadSide):

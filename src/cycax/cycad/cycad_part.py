@@ -17,7 +17,7 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut, SphereAdd
+from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereAdd, SphereCutOut
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
