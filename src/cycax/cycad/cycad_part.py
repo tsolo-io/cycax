@@ -244,8 +244,7 @@ class CycadPart(Location):
             z: Position of feature on Z-axis.
             side: The side of the part the hole will be made in.
             diameter: The diameter of the hole.
-            depth: The depth of the hole. If Null the hole is through the part.
-            external_subtract: This is to specify that the hole should only be cut into other surfaces and not itself.
+            height: The height of the cylinder.
         """
 
         cylinder = Cylinder(side=side, x=x, y=y, z=z, diameter=diameter, height=height)

@@ -262,7 +262,7 @@ class CycadSide:
             diameter=diameter,
         )
 
-    def add_sphere(
+    def sphere_add(
         self,
         pos: tuple[float, float],
         diameter: float,
@@ -275,6 +275,7 @@ class CycadSide:
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
+        sink = sink - diameter / 2
         _location_tuple = self._location_calc(pos=pos, sink=sink)
         self._parent.make_sphere_add(
             side=self.name,
@@ -487,6 +488,23 @@ class LeftSide(CycadSide):
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
         self._parent.x_min = self._parent.x_min - height + sink
 
+    def sphere_add(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the sphere.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        self._parent.x_min = self._parent.x_min - diameter + sink
+        
+
 
 class RightSide(CycadSide):
     name = RIGHT
@@ -534,6 +552,22 @@ class RightSide(CycadSide):
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
         self._parent.x_max = self._parent.x_max + height - sink
+
+    def sphere_add(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the sphere.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        self._parent.x_max = self._parent.x_max + diameter - sink
 
 
 class TopSide(CycadSide):
@@ -583,6 +617,22 @@ class TopSide(CycadSide):
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
         self._parent.z_max = self._parent.z_max + height - sink
 
+    def sphere_add(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the sphere.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        self._parent.z_max = self._parent.z_max + diameter - sink
+
 
 class BottomSide(CycadSide):
     name = BOTTOM
@@ -630,6 +680,22 @@ class BottomSide(CycadSide):
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
         self._parent.z_min = self._parent.z_min - height + sink
+
+    def sphere_add(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the sphere.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        self._parent.z_min = self._parent.z_min - diameter + sink
 
 
 class FrontSide(CycadSide):
@@ -679,6 +745,22 @@ class FrontSide(CycadSide):
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
         self._parent.y_min = self._parent.y_min - height + sink
 
+    def sphere_add(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the sphere.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        self._parent.y_min = self._parent.y_min - diameter + sink
+
 
 class BackSide(CycadSide):
     name = BACK
@@ -726,3 +808,19 @@ class BackSide(CycadSide):
         """
         super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
         self._parent.y_max = self._parent.y_max + height - sink
+
+    def sphere_add(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the sphere.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        self._parent.y_max = self._parent.y_max + diameter - sink
