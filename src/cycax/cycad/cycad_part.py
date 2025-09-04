@@ -17,7 +17,7 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
+from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut, SphereAdd
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -244,8 +244,7 @@ class CycadPart(Location):
             z: Position of feature on Z-axis.
             side: The side of the part the hole will be made in.
             diameter: The diameter of the hole.
-            depth: The depth of the hole. If Null the hole is through the part.
-            external_subtract: This is to specify that the hole should only be cut into other surfaces and not itself.
+            height: The height of the cylinder.
         """
 
         cylinder = Cylinder(side=side, x=x, y=y, z=z, diameter=diameter, height=height)
@@ -323,7 +322,7 @@ class CycadPart(Location):
         temp_nut = NutCutOut(side=side, x=x, y=y, z=z, nut_type=nut_type, depth=depth, vertical=vertical)
         self.features.append(temp_nut)
 
-    def make_sphere(self, side: str, x: float, y: float, z: float, diameter: float):
+    def make_sphere_cut_out(self, side: str, x: float, y: float, z: float, diameter: float):
         """This method will insert a sphere into a CycadPart.
 
         Args:
@@ -334,6 +333,19 @@ class CycadPart(Location):
             diameter: The Diameter of the sphere.
         """
         temp_sphere = SphereCutOut(side=side, x=x, y=y, z=z, diameter=diameter)
+        self.features.append(temp_sphere)
+
+    def make_sphere_add(self, side: str, x: float, y: float, z: float, diameter: float):
+        """This method will all a sphere onto a part so half of it sticks out.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the hole will be made in.
+            diameter: The Diameter of the sphere.
+        """
+        temp_sphere = SphereAdd(side=side, x=x, y=y, z=z, diameter=diameter)
         self.features.append(temp_sphere)
 
     def make_rectangle(

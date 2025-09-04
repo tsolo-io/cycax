@@ -479,6 +479,8 @@ class EngineFreecad:
             if feature["type"] == "add":
                 if feature["name"] == "cylinder_feature":
                     solid = solid.fuse(self.hole(feature))
+                elif feature["name"] == "sphere":
+                    solid = solid.fuse(self.sphere(feature))
                 else:
                     logging.error("Adding not yet supported.")
             elif feature["type"] == "cut":

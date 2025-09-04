@@ -18,6 +18,7 @@ def test_cube_add_cylinder(tmp_path: Path):
         side.cylinder(pos=(9, 9), diameter=6, height=8)
         side.hole(pos=(9, 9), diameter=2)
 
-    cube.save(tmp_path)
+    # cube.save(tmp_path)
+    cube.save("/home/helen/src/tsolo/test-slot")
     cube.render("preview3d")
     cube.build(PartEngineBuild123d())
