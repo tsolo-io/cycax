@@ -201,6 +201,7 @@ class PartEngineBuild123d(PartEngine):
         feature_cube = self._decode_cube(action_cube)
         action_cylinder = {
             "side": feature_spec["side"],
+            "type": "cut",
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
