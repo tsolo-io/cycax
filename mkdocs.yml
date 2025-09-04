@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-site_name: Tsolo Code Your CAD/CAM/CAE
+site_name: CyCAx - Code Your CAD/CAM/CAE
 
 theme:
     name: "material"

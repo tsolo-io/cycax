@@ -28,17 +28,21 @@ Add `"cycax @ git+https://github.com/tsolo-io/cycax"` to your `pyproject.toml` f
 
 ## Integrations
 
-CyCAx provides integration with the following CAD tools:
+CyCAx provides integration with the multiple CAD tools.
+Some of the integrations are through the [CyCAx Server](https://github.com/tsolo-io/cycax-server) and some direct.
+Direct integrations require the
 
-- [OpenSCAD](https://github.com/openscad/openscad) for parts and assemblies
-- [FreeCAD](https://github.com/FreeCAD/FreeCAD) for parts via [CyCAx Server](https://github.com/tsolo-io/cycax-server) and the [CyCAx FreeCAD Worker](https://github.com/tsolo-io/cycax-freecad-worker)
-- [Blender](https://blender.org) for parts and assemblies  via [CyCAx Server](https://github.com/tsolo-io/cycax-server) and the [CyCAx Blender Worker](https://github.com/tsolo-io/cycax-blender-worker)
+| Integration | Parts Direct | Assemblies Direct | CyCAx Server Parts | CyCAx Server Assemblies |
+| :------- | :------: | :-------: | :-------: | :-------: |
+| [OpenSCAD](https://github.com/openscad/openscad) | Yes | Yes | No | No |
+| [FreeCAD](https://github.com/FreeCAD/FreeCAD) | Yes | No | [Yes](https://github.com/tsolo-io/cycax-freecad-worker) | No |
+| [Blender](https://blender.org) | No | No | No | [Yes](https://github.com/tsolo-io/cycax-blender-worker) |
+| [build123d](https://github.com/build123d/build123d) | Yes | Yes | No | No |
 
 ## Future
 
 Add support for more CAD tools.
-Example of this would be to add [build123d](https://github.com/build123d/build123d) as a 3D modeling library.
-And [Matplotlib](https://matplotlib.org) as a 2D visualization library.
+Example of this would be to add [Matplotlib](https://matplotlib.org) as a 2D visualization library.
 
 The integration in CAM tools for slicing for 3D printing and creation of g-code for CNC milling are also an objective.
 
