@@ -171,3 +171,4 @@ docs/site/
 #__about__.py
 #src/cycax/__about__.py
 DEADJOE
+*.swp

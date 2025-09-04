@@ -56,36 +56,36 @@ def test_level_new():
     back_side = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="front")
     box.add(back_side)
 
-    box.rotate_freeze_front(left_side)
+    left_side.rotate_freeze_front()
 
-    box.rotate_freeze_front(right_side)
-    box.rotate_freeze_front(right_side_fancy)
+    right_side.rotate_freeze_front()
+    right_side_fancy.rotate_freeze_front()
 
-    box.rotate_freeze_left(front_side)
-    box.rotate_freeze_left(back_side)
+    front_side.rotate_freeze_left()
+    back_side.rotate_freeze_left()
 
-    box.level(front_side.back, bottom_side.front)
-    box.level(back_side.front, bottom_side.back)
+    front_side.back.level(bottom_side.front)
+    back_side.front.level(bottom_side.back)
 
-    box.level(left_side.right, bottom_side.left)
-    box.level(right_side.left, bottom_side.right)
-    box.level(right_side_fancy.left, bottom_side.right)
+    left_side.right.level(bottom_side.left)
+    right_side.left.level(bottom_side.right)
+    right_side_fancy.left.level(bottom_side.right)
 
-    box.level(top_side.top, back_side.top)
-    box.level(top_side_fancy.top, back_side.top)
+    top_side.top.level(back_side.top)
+    top_side_fancy.top.level(back_side.top)
 
-    box.level(left_side.front, front_side.front)
-    box.level(right_side.front, front_side.front)
-    box.level(right_side_fancy.front, front_side.front)
+    left_side.front.level(front_side.front)
+    right_side.front.level(front_side.front)
+    right_side_fancy.front.level(front_side.front)
 
     cc = ConCube(name="ConCube")
     box.add(cc)
     cc.assembly = box
-    box.level(cc.top, top_side.bottom)
-    box.level(cc.back, top_side.back)
-    box.level(cc.right, right_side.left)
-    box.subtract(top_side.bottom, cc)
-    box.subtract(right_side.left, cc)
+    cc.back.level(top_side.back)
+    cc.top.level(top_side.bottom)
+    cc.right.level(right_side.left)
+    top_side.bottom.subtract(cc)
+    right_side.left.subtract(cc)
 
     cc_fancy = ConCube(name="ConCube_Fancy")
     box.add(cc_fancy)
@@ -97,14 +97,6 @@ def test_level_new():
 
     box_dict = box.export()
 
-    for part in box_dict["parts"]:
-        if part["part_no"] == "concube":
-            move_comp = part["position"]
-        if part["part_no"] == "concube_fancy":
-            move_fancy_comp = part["position"]
-
-    assert move_comp == move_fancy_comp, "The two level methods do not result in the same output."
-
     top_side_dict = top_side.export()
     top_side_fancy_dict = top_side_fancy.export()
 
@@ -114,3 +106,11 @@ def test_level_new():
     assert top_side_dict == top_side_fancy_dict, "Subtract on level does not result in the same output."
 
     assert right_side_dict == right_side_fancy_dict, "Subtract on level does not result in the same output."
+
+    for part in box_dict["parts"]:
+        if part["part_no"] == "concube":
+            move_comp = part["position"]
+        if part["part_no"] == "concube_fancy":
+            move_fancy_comp = part["position"]
+
+    assert move_comp == move_fancy_comp, "The two level methods do not result in the same output."

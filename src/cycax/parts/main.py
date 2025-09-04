@@ -16,11 +16,11 @@ def build_fan80(*, internal: bool):
 
     assembly.add(plate)
     assembly.add(fan)
-    assembly.level(fan.top, plate.bottom)
-    assembly.level(fan.left, plate.left)
-    assembly.level(fan.front, plate.front)
+    fan.top.level(plate.bottom)
+    fan.left.level(plate.left)
+    fan.front.level(plate.front)
     fan.move(x=10, y=10)
-    assembly.subtract(plate.bottom, fan)
+    plate.bottom.subtract(fan)
     for part in (fan, plate):
         part.save(path=Path("./reports"))
         part.render(engine="simple2d")

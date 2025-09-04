@@ -48,6 +48,9 @@ examples:
 	hatch run python3 ./src/examples/thlob_example.py
 	hatch run python3 ./src/examples/gear_factory.py
 
+example/assemblies:
+	hatch run python3 ./src/examples/assemblies.py
+
 example/gear:
 	hatch run python3 ./src/examples/gear_factory.py
 
@@ -59,3 +62,6 @@ example/vents:
 
 example/thlob:
 	hatch run python3 ./src/examples/thlob_example.py
+
+example/flange:
+	hatch run python3 ./src/examples/flange.py
