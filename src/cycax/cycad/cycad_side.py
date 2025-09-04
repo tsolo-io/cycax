@@ -213,7 +213,7 @@ class CycadSide:
         pos: tuple[float, float],
         length: float,
         width: float,
-        depth: float | None = None,
+        depth: float,
         sink: float = 0,
         *,
         center: bool = False,
@@ -228,13 +228,12 @@ class CycadSide:
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
         """
-        _depth = self._depth_check(depth)
         if center is True:
             _location_tuple = self._location_calc(pos=pos, sink=sink, length=0.0, width=0.0)
         else:
             _location_tuple = self._location_calc(pos=pos, sink=sink, length=length, width=width)
 
-        _box_dimensions = self._box_size_calc(width=width, length=length, depth=_depth)
+        _box_dimensions = self._box_size_calc(width=width, length=length, depth=depth)
         self._parent.make_rectangle_add(
             side=self.name,
             x=_location_tuple[0],
@@ -542,6 +541,29 @@ class LeftSide(CycadSide):
         super().sphere_add(pos=pos, diameter=diameter, sink=sink)
         self._parent.x_min = self._parent.x_min - diameter + sink
 
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float,
+        sink: float = 0,
+        *,
+        center: bool = False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        self._parent.x_min = self._parent.x_min - depth + sink
+
 
 class RightSide(CycadSide):
     name = RIGHT
@@ -605,6 +627,29 @@ class RightSide(CycadSide):
         """
         super().sphere_add(pos=pos, diameter=diameter, sink=sink)
         self._parent.x_max = self._parent.x_max + diameter - sink
+
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float,
+        sink: float = 0,
+        *,
+        center: bool = False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        self._parent.x_max = self._parent.x_max + depth - sink
 
 
 class TopSide(CycadSide):
@@ -670,6 +715,29 @@ class TopSide(CycadSide):
         super().sphere_add(pos=pos, diameter=diameter, sink=sink)
         self._parent.z_max = self._parent.z_max + diameter - sink
 
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float,
+        sink: float = 0,
+        *,
+        center: bool = False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        self._parent.z_max = self._parent.z_max + depth - sink
+
 
 class BottomSide(CycadSide):
     name = BOTTOM
@@ -733,6 +801,29 @@ class BottomSide(CycadSide):
         """
         super().sphere_add(pos=pos, diameter=diameter, sink=sink)
         self._parent.z_min = self._parent.z_min - diameter + sink
+
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float,
+        sink: float = 0,
+        *,
+        center: bool = False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        self._parent.z_min = self._parent.z_min - depth + sink
 
 
 class FrontSide(CycadSide):
@@ -798,6 +889,29 @@ class FrontSide(CycadSide):
         super().sphere_add(pos=pos, diameter=diameter, sink=sink)
         self._parent.y_min = self._parent.y_min - diameter + sink
 
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float,
+        sink: float = 0,
+        *,
+        center: bool = False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        self._parent.y_min = self._parent.y_min - depth + sink
+
 
 class BackSide(CycadSide):
     name = BACK
@@ -861,3 +975,26 @@ class BackSide(CycadSide):
         """
         super().sphere_add(pos=pos, diameter=diameter, sink=sink)
         self._parent.y_max = self._parent.y_max + diameter - sink
+
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float,
+        sink: float = 0,
+        *,
+        center: bool = False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        self._parent.y_max = self._parent.y_max + depth - sink

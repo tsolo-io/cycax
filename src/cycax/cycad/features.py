@@ -4,7 +4,7 @@
 
 import typing
 
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, Location
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 
 
 class Feature(Location):
@@ -192,7 +192,7 @@ class RectangleCutOut(Feature):
             rot = rot - 1
 
         return rotmax
-    
+
 
 class RectangleAddOn(RectangleCutOut):
     """This class can be used for cutting a hole that is not round but rather of the defined parameters.
