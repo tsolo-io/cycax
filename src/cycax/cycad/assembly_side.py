@@ -125,36 +125,42 @@ class AssemblySide:
             else:
                 msg = f"{assembly1_side} not in {SIDES}."
                 raise ValueError(msg)
-    
+
+
 class AssemblySideLeft(AssemblySide):
     name = LEFT
 
     def _rotate(self):
         self._parent.rotate_freeze_left()
 
+
 class AssemblySideRight(AssemblySide):
     name = RIGHT
 
     def _rotate(self):
         self._parent.rotate_freeze_left()
- 
+
+
 class AssemblySideTop(AssemblySide):
     name = TOP
 
     def _rotate(self):
         self._parent.rotate_freeze_top()
 
+
 class AssemblySideBottom(AssemblySide):
     name = BOTTOM
 
     def _rotate(self):
         self._parent.rotate_freeze_top()
-  
+
+
 class AssemblySideFront(AssemblySide):
     name = FRONT
 
     def _rotate(self):
         self._parent.rotate_freeze_front()
+
 
 class AssemblySideBack(AssemblySide):
     name = BACK
