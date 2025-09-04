@@ -21,7 +21,12 @@ class CycadSide:
         return "Side: " + self.name
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,
+        width: float = 0.0,
+        original_surface=False,
     ) -> tuple[float, float, float]:
         """Location is calculated for the (x, y) plain using two values and a side.
 
@@ -115,6 +120,8 @@ class CycadSide:
         diameter: float,
         height: float,
         sink: float = 0.0,
+        *,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -123,7 +130,7 @@ class CycadSide:
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        _location_tuple = self._location_calc(pos=pos, sink=sink)
+        _location_tuple = self._location_calc(pos=pos, sink=sink, original_surface=original_surface)
         self._parent.make_cylinder(
             x=_location_tuple[0],
             y=_location_tuple[1],
@@ -217,6 +224,7 @@ class CycadSide:
         sink: float = 0,
         *,
         center: bool = False,
+        original_surface=False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -229,9 +237,13 @@ class CycadSide:
             center: The box can be specified from the center of the box.
         """
         if center is True:
-            _location_tuple = self._location_calc(pos=pos, sink=sink, length=0.0, width=0.0)
+            _location_tuple = self._location_calc(
+                pos=pos, sink=sink, length=0.0, width=0.0, original_surface=original_surface
+            )
         else:
-            _location_tuple = self._location_calc(pos=pos, sink=sink, length=length, width=width)
+            _location_tuple = self._location_calc(
+                pos=pos, sink=sink, length=length, width=width, original_surface=original_surface
+            )
 
         _box_dimensions = self._box_size_calc(width=width, length=length, depth=depth)
         self._parent.make_rectangle_add(
@@ -304,6 +316,7 @@ class CycadSide:
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -313,7 +326,7 @@ class CycadSide:
             sink: How far into or out of the plastic the sphere should be extruded.
         """
         sink = sink - diameter / 2
-        _location_tuple = self._location_calc(pos=pos, sink=sink)
+        _location_tuple = self._location_calc(pos=pos, sink=sink, original_surface=original_surface)
         self._parent.make_sphere_add(
             side=self.name,
             x=_location_tuple[0],
@@ -487,8 +500,12 @@ class LeftSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
-        temp_x = self._parent.x_min + sink
+        if original_surface:
+            temp_x = self._parent.x + sink
+        else:
+            temp_x = self._parent.x_min + sink
         temp_y = self._parent.y_size - pos[0] - length
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
@@ -514,6 +531,7 @@ class LeftSide(CycadSide):
         diameter: float,
         height: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -522,7 +540,7 @@ class LeftSide(CycadSide):
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink, original_surface=original_surface)
         self._parent.x_min = self._parent.x_min - height + sink
 
     def sphere_add(
@@ -530,6 +548,7 @@ class LeftSide(CycadSide):
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -538,7 +557,7 @@ class LeftSide(CycadSide):
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
-        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink, original_surface=original_surface)
         self._parent.x_min = self._parent.x_min - diameter + sink
 
     def box_add(
@@ -550,6 +569,7 @@ class LeftSide(CycadSide):
         sink: float = 0,
         *,
         center: bool = False,
+        original_surface=False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -561,7 +581,15 @@ class LeftSide(CycadSide):
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
         """
-        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        super().box_add(
+            pos=pos,
+            length=length,
+            width=width,
+            depth=depth,
+            sink=sink,
+            center=center,
+            original_surface=original_surface,
+        )
         self._parent.x_min = self._parent.x_min - depth + sink
 
 
@@ -574,8 +602,12 @@ class RightSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
-        temp_x = self._parent.x_max - sink
+        if original_surface:
+            temp_x = self._parent.x + self._parent.x_size - sink
+        else:
+            temp_x = self._parent.x_max - sink
         temp_y = pos[0]
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
@@ -601,6 +633,7 @@ class RightSide(CycadSide):
         diameter: float,
         height: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -609,7 +642,7 @@ class RightSide(CycadSide):
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink, original_surface=original_surface)
         self._parent.x_max = self._parent.x_max + height - sink
 
     def sphere_add(
@@ -617,6 +650,7 @@ class RightSide(CycadSide):
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -625,7 +659,7 @@ class RightSide(CycadSide):
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
-        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink, original_surface=original_surface)
         self._parent.x_max = self._parent.x_max + diameter - sink
 
     def box_add(
@@ -637,6 +671,7 @@ class RightSide(CycadSide):
         sink: float = 0,
         *,
         center: bool = False,
+        original_surface=False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -648,7 +683,15 @@ class RightSide(CycadSide):
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
         """
-        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        super().box_add(
+            pos=pos,
+            length=length,
+            width=width,
+            depth=depth,
+            sink=sink,
+            center=center,
+            original_surface=original_surface,
+        )
         self._parent.x_max = self._parent.x_max + depth - sink
 
 
@@ -661,10 +704,14 @@ class TopSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 1.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = pos[1]
-        temp_z = self._parent.z_max - sink
+        if original_surface:
+            temp_z = self._parent.z + self._parent.z_size - sink
+        else:
+            temp_z = self._parent.z_max - sink
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
@@ -688,6 +735,7 @@ class TopSide(CycadSide):
         diameter: float,
         height: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -696,7 +744,7 @@ class TopSide(CycadSide):
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink, original_surface=original_surface)
         self._parent.z_max = self._parent.z_max + height - sink
 
     def sphere_add(
@@ -704,6 +752,7 @@ class TopSide(CycadSide):
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -712,7 +761,7 @@ class TopSide(CycadSide):
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
-        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink, original_surface=original_surface)
         self._parent.z_max = self._parent.z_max + diameter - sink
 
     def box_add(
@@ -724,6 +773,7 @@ class TopSide(CycadSide):
         sink: float = 0,
         *,
         center: bool = False,
+        original_surface=False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -735,7 +785,15 @@ class TopSide(CycadSide):
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
         """
-        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        super().box_add(
+            pos=pos,
+            length=length,
+            width=width,
+            depth=depth,
+            sink=sink,
+            center=center,
+            original_surface=original_surface,
+        )
         self._parent.z_max = self._parent.z_max + depth - sink
 
 
@@ -748,10 +806,14 @@ class BottomSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_size - pos[1] - width
-        temp_z = self._parent.z_min + sink
+        if original_surface:
+            temp_z = self._parent.z + sink
+        else:
+            temp_z = self._parent.z_min + sink
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
@@ -775,6 +837,7 @@ class BottomSide(CycadSide):
         diameter: float,
         height: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -783,7 +846,7 @@ class BottomSide(CycadSide):
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink, original_surface=original_surface)
         self._parent.z_min = self._parent.z_min - height + sink
 
     def sphere_add(
@@ -791,6 +854,7 @@ class BottomSide(CycadSide):
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -799,7 +863,7 @@ class BottomSide(CycadSide):
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
-        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink, original_surface=original_surface)
         self._parent.z_min = self._parent.z_min - diameter + sink
 
     def box_add(
@@ -811,6 +875,7 @@ class BottomSide(CycadSide):
         sink: float = 0,
         *,
         center: bool = False,
+        original_surface=False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -822,7 +887,15 @@ class BottomSide(CycadSide):
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
         """
-        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        super().box_add(
+            pos=pos,
+            length=length,
+            width=width,
+            depth=depth,
+            sink=sink,
+            center=center,
+            original_surface=original_surface,
+        )
         self._parent.z_min = self._parent.z_min - depth + sink
 
 
@@ -835,9 +908,13 @@ class FrontSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
-        temp_y = self._parent.y_min + sink
+        if original_surface:
+            temp_y = self._parent.y + sink
+        else:
+            temp_y = self._parent.y_min + sink
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
@@ -862,6 +939,7 @@ class FrontSide(CycadSide):
         diameter: float,
         height: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -870,7 +948,7 @@ class FrontSide(CycadSide):
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink, original_surface=original_surface)
         self._parent.y_min = self._parent.y_min - height + sink
 
     def sphere_add(
@@ -878,6 +956,7 @@ class FrontSide(CycadSide):
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -886,7 +965,7 @@ class FrontSide(CycadSide):
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
-        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink, original_surface=original_surface)
         self._parent.y_min = self._parent.y_min - diameter + sink
 
     def box_add(
@@ -898,6 +977,7 @@ class FrontSide(CycadSide):
         sink: float = 0,
         *,
         center: bool = False,
+        original_surface=False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -909,7 +989,15 @@ class FrontSide(CycadSide):
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
         """
-        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        super().box_add(
+            pos=pos,
+            length=length,
+            width=width,
+            depth=depth,
+            sink=sink,
+            center=center,
+            original_surface=original_surface,
+        )
         self._parent.y_min = self._parent.y_min - depth + sink
 
 
@@ -922,9 +1010,13 @@ class BackSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_size - pos[0] - length
-        temp_y = self._parent.y_max - sink
+        if original_surface:
+            temp_y = self._parent.y + self._parent.y_size - sink
+        else:
+            temp_y = self._parent.y_max - sink
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
@@ -949,6 +1041,7 @@ class BackSide(CycadSide):
         diameter: float,
         height: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -957,7 +1050,7 @@ class BackSide(CycadSide):
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
+        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink, original_surface=original_surface)
         self._parent.y_max = self._parent.y_max + height - sink
 
     def sphere_add(
@@ -965,6 +1058,7 @@ class BackSide(CycadSide):
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
+        original_surface=False,
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -973,7 +1067,7 @@ class BackSide(CycadSide):
             diameter: The diameter of the sphere.
             sink: How far into or out of the plastic the sphere should be extruded.
         """
-        super().sphere_add(pos=pos, diameter=diameter, sink=sink)
+        super().sphere_add(pos=pos, diameter=diameter, sink=sink, original_surface=original_surface)
         self._parent.y_max = self._parent.y_max + diameter - sink
 
     def box_add(
@@ -985,6 +1079,7 @@ class BackSide(CycadSide):
         sink: float = 0,
         *,
         center: bool = False,
+        original_surface=False,
     ):
         """This box will insert a rectangle shape cut out into the object.
 
@@ -996,5 +1091,13 @@ class BackSide(CycadSide):
             sink: The box can be sunk bellow the surface of the specified side to make a pocket.
             center: The box can be specified from the center of the box.
         """
-        super().box_add(pos=pos, length=length, width=width, depth=depth, sink=sink, center=center)
+        super().box_add(
+            pos=pos,
+            length=length,
+            width=width,
+            depth=depth,
+            sink=sink,
+            center=center,
+            original_surface=original_surface,
+        )
         self._parent.y_max = self._parent.y_max + depth - sink

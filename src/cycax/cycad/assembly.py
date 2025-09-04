@@ -8,7 +8,6 @@ import os
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from tkinter import NO
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.assembly_side import (

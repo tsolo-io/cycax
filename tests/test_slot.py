@@ -2,6 +2,21 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+#####
+# I found that this example breaks slots sporadically in FreeCAD.
+# It could be that there is a bug in our code but also potentially in FreeCAD.
+# It is a very advanced example.
+#####
+#####
+# for side in (cube.top, cube.left, cube.back, cube.bottom, cube.right, cube.front):
+#     side.slot(pos=(2, 2), width=1, length=2, horizontal=False)
+#     side.slot(pos=(5, 2), width=1, length=2, horizontal=False)
+#     side.slot(pos=(8, 2), width=1, length=2, horizontal=False)
+#     side.slot(pos=(2, 8), width=1, length=2, horizontal=False)
+#     side.slot(pos=(5, 8), width=1, length=2, horizontal=False)
+#     side.slot(pos=(8, 8), width=1, length=2, horizontal=False)
+#####
+
 from itertools import product
 
 import pytest
