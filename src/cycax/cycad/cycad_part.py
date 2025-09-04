@@ -17,7 +17,7 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereAdd, SphereCutOut
+from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleAddOn, RectangleCutOut, SphereCutOut, SphereAdd
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -392,6 +392,43 @@ class CycadPart(Location):
             self.external_features.append(temp_rect)
         else:
             self.features.append(temp_rect)
+
+    def make_rectangle_add(
+        self,
+        side: str,
+        x: float,
+        y: float,
+        z: float,
+        x_size: float,
+        y_size: float,
+        z_size: float,
+        *,
+        center=False,
+    ):
+        """This method will add a block on to the CycadPart.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the block will be added onto.
+            x_size : The size of x of rectangle.
+            y_size : The size of y of rectangle.
+            z_size : The size of z of rectangle.
+            center : This can be overridden if you would like object centered at origin.
+        """
+
+        temp_rect = RectangleAddOn(
+            side=side,
+            x=x,
+            y=y,
+            z=z,
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            center=center,
+        )
+        self.features.append(temp_rect)
 
     def make_bounding_box(self):
         """This bounding box will be used to help keep track of and update the bounds.

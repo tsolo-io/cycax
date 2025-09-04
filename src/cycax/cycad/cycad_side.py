@@ -208,6 +208,44 @@ class CycadSide:
             calculate=calculate,
         )
 
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float | None = None,
+        sink: float = 0,
+        *,
+        center: bool = False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        _depth = self._depth_check(depth)
+        if center is True:
+            _location_tuple = self._location_calc(pos=pos, sink=sink, length=0.0, width=0.0)
+        else:
+            _location_tuple = self._location_calc(pos=pos, sink=sink, length=length, width=width)
+
+        _box_dimensions = self._box_size_calc(width=width, length=length, depth=_depth)
+        self._parent.make_rectangle_add(
+            side=self.name,
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
+            x_size=_box_dimensions[0],
+            y_size=_box_dimensions[1],
+            z_size=_box_dimensions[2],
+            center=center,
+        )
+
     def nut(
         self,
         pos: tuple[float, float],
