@@ -61,6 +61,7 @@ def stl_compare(file1: Path, file2: Path) -> bool:
             return False
     return True
 
+
 def json_compare_models(file1: Path, file2: Path):
     """Compare two JSON files for equality.
 

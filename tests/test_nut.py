@@ -4,12 +4,13 @@
 
 from pathlib import Path
 
+import pytest
+
 from cycax.cycad import Print3D
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
-from tests.shared import hex_code_check
-from tests.shared import stl_compare, stl_compare_models
-import pytest
+from tests.shared import hex_code_check, stl_compare, stl_compare_models
+
 
 def nutty_cube(tmp_path: Path):
     cube = Print3D(x_size=11, y_size=11, z_size=11, part_no="testing_nut")

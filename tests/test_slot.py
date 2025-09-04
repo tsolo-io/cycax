@@ -5,6 +5,7 @@
 from itertools import product
 
 import pytest
+
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import Cuboid, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
