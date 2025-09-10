@@ -259,7 +259,7 @@ class Assembly:
             center_x = min(part.center[0], center_x)
             center_y = min(part.center[1], center_y)
             center_z = min(part.center[2], center_z)
-        coordinate = namedtuple("Point", ["x", "y", "z"])
+        coordinate = namedtuple("Coordinate", ["x", "y", "z"])
         return coordinate(x=center_x, y=center_y, z=center_z)
 
     def move(self, x: float | None = None, y: float | None = None, z: float | None = None):
@@ -533,8 +533,9 @@ class Assembly:
             Combined Assembly formed from all the assemblies in the list of Assemblies.
         """
         total_parts = {}
-        for assembly in self.assemblies:
-            total_parts.update(assembly.parts)
+        for n, assembly in enumerate(self.assemblies):
+            for part_name, part in assembly.parts.items():
+                total_parts[f"assembly_{n}_{part_name}"] = part
         total_parts.update(self.parts)
         if new_name:
             assembly_out = Assembly(name=new_name)
