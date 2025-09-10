@@ -5,7 +5,7 @@
 import json
 import logging
 import os
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -259,30 +259,68 @@ class Assembly:
             center_x = min(part.center[0], center_x)
             center_y = min(part.center[1], center_y)
             center_z = min(part.center[2], center_z)
+        coordinate = namedtuple("Point", ["x", "y", "z"])
+        return coordinate(x=center_x, y=center_y, z=center_z)
 
-        return (center_x, center_y, center_z)
+    def move(self, x: float | None = None, y: float | None = None, z: float | None = None):
+        """This method will be used for moving the assembly.
 
-    def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
+        Args:
+            x: the amount the assembly should be moved by along the x axis.
+            y: the amount the assembly should be moved by along the y axis.
+            z: the amount the assembly should be moved by along the z axis
+        """
+
+        for part in self.parts.values():
+            part.move(x=x, y=y, z=z)
+
+    def at(
+        self,
+        min_x: float | None = None,
+        min_y: float | None = None,
+        min_z: float | None = None,
+        center_x: float | None = None,
+        center_y: float | None = None,
+        center_z: float | None = None,
+    ):
         """Place parts in the assembly at the exact provided coordinates.
 
         Args:
-            x: The value to which x needs to be moved to on the axis.
-            y: The value to which y needs to be moved to on the axis.
-            z: The value to which z needs to be moved to on the axis.
+            min_x: New position of the assemblies closest point to the origin on the x-axis.
+            min_y: New position of the assemblies closest point to the origin on the y-axis.
+            min_z: New position of the assemblies closest point to the origin on the z-axis.
+            center_x: New position of the assemblies center on the x-axis.
+            center_y: New position of the assemblies center on the y-axis.
+            center_z: New position of the assemblies center on the z-axis.
         """
-        if x is not None:
-            x_move = x - self.bounding_box[LEFT]
-        if y is not None:
-            y_move = y - self.bounding_box[FRONT]
-        if z is not None:
-            z_move = z - self.bounding_box[BOTTOM]
+        if min_x and center_x:
+            raise ValueError("Cannot specify both min_x and center_x")
+        if min_y and center_y:
+            raise ValueError("Cannot specify both min_y and center_y")
+        if min_z and center_z:
+            raise ValueError("Cannot specify both min_z and center_z")
+
+        x_move, y_move, z_move = None, None, None
+
+        if min_x is not None:
+            x_move = min_x - self.bounding_box[LEFT]
+        if min_y is not None:
+            y_move = min_y - self.bounding_box[FRONT]
+        if min_z is not None:
+            z_move = min_z - self.bounding_box[BOTTOM]
+        if center_x is not None:
+            x_move = center_x - self.bounding_box[LEFT] / 2
+        if center_y is not None:
+            y_move = center_y - self.bounding_box[FRONT] / 2
+        if center_z is not None:
+            z_move = center_z - self.bounding_box[BOTTOM] / 2
 
         for part in self.parts.values():
-            if x is not None:
+            if x_move is not None:
                 part.at(x=x_move + part.position[0])
-            if y is not None:
+            if y_move is not None:
                 part.at(y=y_move + part.position[1])
-            if z is not None:
+            if z_move is not None:
                 part.at(z=z_move + part.position[2])
 
     def add(self, part, suggested_name: str | None = None, *, external_subtract: bool = False):

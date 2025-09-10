@@ -68,20 +68,20 @@ class AssemblySide:
         to_here = assembly2_bounding_box[assembly2_side]
 
         if assembly1_side == BOTTOM:
-            assembly1.at(z=to_here)
+            assembly1.at(min_z=to_here)
         elif assembly1_side == TOP:
             z_size = assembly1_bounding_box[TOP] - assembly1_bounding_box[BOTTOM]
-            assembly1.at(z=to_here - z_size)
+            assembly1.at(min_z=to_here - z_size)
         elif assembly1_side == LEFT:
-            assembly1.at(x=to_here)
+            assembly1.at(min_x=to_here)
         elif assembly1_side == RIGHT:
             x_size = assembly1_bounding_box[RIGHT] - assembly1_bounding_box[LEFT]
-            assembly1.at(x=to_here - x_size)
+            assembly1.at(min_x=to_here - x_size)
         elif assembly1_side == FRONT:
-            assembly1.at(y=to_here)
+            assembly1.at(min_y=to_here)
         elif assembly1_side == BACK:
             y_size = assembly1_bounding_box[BACK] - assembly1_bounding_box[FRONT]
-            assembly1.at(y=to_here - y_size)
+            assembly1.at(min_y=to_here - y_size)
         else:
             msg = f"Side: {assembly1_side} is not one of {SIDES}."
             raise ValueError(msg)
