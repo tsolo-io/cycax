@@ -3,19 +3,66 @@
 # SPDX-License-Identifier: Apache-2.0
 
 site_name: CyCAx - Code Your CAD/CAM/CAE
+site_description: Python package for working with CAD models by integrating with existing open-source CAD tools
+site_url: https://docs.cycax.io
+repo_url: https://github.com/tsolo-io/cycax
+repo_name: tsolo-io/cycax
+edit_uri: edit/main/docs/content/
+strict: false
 
 theme:
-    name: "material"
+  name: "material"
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Getting Started: getting-started.md
+  - User Guide:
+      - Parts: parts.md
+      - Assemblies: assemblies.md
+      - Integrations: integrations.md
+      - Examples: examples.md
+  - Advanced:
+      - CyCAD Example: cycad_example.md
+  - API Reference: api/index.md
 
 plugins:
-- mkdocstrings:
-    default_handler: python
-    handlers:
-      python:
-        paths:
-          - src
-        options:
-          show_submodules: true
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            show_submodules: true
+            docstring_style: google
+            show_source: false
+            members_order: source
+            show_signature_annotations: true
 
 docs_dir: docs/content
 site_dir: docs/site
@@ -29,3 +76,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
