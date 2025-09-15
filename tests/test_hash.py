@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2025 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
-
 from pathlib import Path
+
+import pytest
 
 from cycax.cycad import Print3D
 from tests.shared import hex_code_check
@@ -17,6 +18,7 @@ def hash_cube(tmp_path: Path):
         cube.render("preview3d")
 
 
+@pytest.mark.ci_exclude
 def test_hash(tmp_path: Path):
     # This test will check that the hash functionality is working as it should.
 

@@ -20,7 +20,7 @@ test-all: ## Run all the tests
 	hatch run test
 
 test-ci:
-	hatch run cov
+	hatch run testing:ci
 
 format:  ## Format the code
 	hatch run lint:fmt

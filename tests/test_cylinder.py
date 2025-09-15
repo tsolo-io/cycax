@@ -4,6 +4,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from cycax.cycad import Cylinder
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
@@ -24,5 +26,6 @@ def sphere_cube(tmp_path: Path):
     stl_compare_models(build123d_stl, stl)
 
 
+@pytest.mark.ci_exclude
 def test_sphere(tmp_path: Path):
     sphere_cube(tmp_path)

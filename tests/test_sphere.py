@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2025 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
-
 from pathlib import Path
+
+import pytest
 
 from cycax.cycad import Print3D
 from tests.shared import stl_compare
@@ -19,6 +20,7 @@ def sphere_cube(tmp_path: Path):
     cube.render("preview3d")
 
 
+@pytest.mark.ci_exclude
 def test_sphere(tmp_path: Path):
     sphere_cube(tmp_path)
 

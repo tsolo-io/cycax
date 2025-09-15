@@ -6,6 +6,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from cycax.cycad import Print3D, SheetMetal
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, SIDES, TOP
 from tests.shared import hex_code_check
@@ -44,6 +46,7 @@ def complex_box(tmp_path: Path):
     cube.render("preview3d")
 
 
+@pytest.mark.ci_exclude
 def test_side(tmp_path: Path):
     # This test will check that the sides are all identical when the same action is performed on each side.
 
