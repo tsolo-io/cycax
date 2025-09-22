@@ -50,7 +50,7 @@ class CubeWithHoles(Print3D):
     
     def definition(self):
         """Define the part features."""
-        # Add a hole through the front face
+        # Add a 10mm deep hole to front face
         self.front.hole(
             pos=(15, 10),      # Center of the face
             diameter=5,        # 5mm diameter
@@ -62,8 +62,7 @@ class CubeWithHoles(Print3D):
             for y in [10, 20]:
                 self.top.hole(
                     pos=(x, y),
-                    diameter=3,
-                    external_subtract=True  # Goes all the way through
+                    diameter=3
                 )
 
 # Create and render
@@ -99,8 +98,10 @@ class Bracket(Print3D):
     
     def definition(self):
         # Add mounting holes
-        self.bottom.hole(pos=(10, 10), diameter=4, external_subtract=True)
-        self.bottom.hole(pos=(10, 40), diameter=4, external_subtract=True)
+        self.bottom.hole(pos=(10, 10), diameter=4.0)
+        self.bottom.hole(pos=(10, 10), diameter=4.2, external_subtract=True)
+        self.bottom.hole(pos=(10, 40), diameter=4.0)
+        self.bottom.hole(pos=(10, 40), diameter=4.2, external_subtract=True)
 
 # Create the assembly
 assembly = Assembly("simple_assembly")
@@ -119,13 +120,15 @@ assembly.add(bracket_right, "bracket_right")
 bracket_left.level(
     bottom=base.top,    # Bracket sits on top of base
     left=base.left,     # Align to left edge
-    front=base.front    # Align to front edge
+    front=base.front,   # Align to front edge
+    subtract=True       # Subtract the parts features, marked as external_subtract, from the leveled part
 )
 
 bracket_right.level(
     bottom=base.top,    # Bracket sits on top of base
     right=base.right,   # Align to right edge
-    front=base.front    # Align to front edge
+    front=base.front,   # Align to front edge
+    subtract=True       # Subtract the parts features, marked as external_subtract, from the leveled part
 )
 
 # Save and render
@@ -184,13 +187,10 @@ class PartWithFeatures(Print3D):
         self.front.hole(pos=(20, 10), diameter=8, depth=5)
         
         # Top side features
-        self.top.hole(pos=(20, 15), diameter=4, external_subtract=True)
+        self.top.hole(pos=(20, 15), diameter=4)  # Through the top out the bottom
         
         # Left side features
         self.left.hole(pos=(15, 10), diameter=6, depth=8)
-        
-        # Add chamfers or rounds to edges
-        # (This depends on the CAD engine capabilities)
 ```
 
 ## Positioning and Alignment
@@ -239,7 +239,7 @@ class EnclosureBottom(Print3D):
     
     def definition(self):
         # Hollow out the inside
-        self.top.hole(
+        self.top.box(
             pos=(40, 30),  # Center
             width=70,      # Inner width
             height=50,     # Inner height
@@ -247,11 +247,15 @@ class EnclosureBottom(Print3D):
         )
         
         # Mounting holes in corners
-        for x in [10, 70]:
-            for y in [10, 50]:
+        for x in (10, 70):
+            for y in (10, 50):
                 self.bottom.hole(
                     pos=(x, y),
-                    diameter=3,
+                    diameter=3.0
+                )
+                self.bottom.hole(
+                    pos=(x, y),
+                    diameter=3.2,
                     external_subtract=True
                 )
 
@@ -313,6 +317,7 @@ class ParametricBracket(Print3D):
         hole_spacing = self.length / 3
         for i in range(3):
             x = hole_spacing * (i + 0.5)
+            self.top.hole(pos=(x, self.width/2), diameter=4)
             self.top.hole(pos=(x, self.width/2), diameter=4, external_subtract=True)
 ```
 
@@ -321,6 +326,7 @@ class ParametricBracket(Print3D):
 def create_mounting_holes(part, positions, diameter=4):
     """Add mounting holes to any part."""
     for pos in positions:
+        part.bottom.hole(pos=pos, diameter=diameter)
         part.bottom.hole(pos=pos, diameter=diameter, external_subtract=True)
 
 # Use with any part
