@@ -13,21 +13,7 @@ This guide will walk you through creating your first CyCAx project step by step.
 Let's start by creating a simple 3D printable part:
 
 ```python
-from cycax.cycad import Print3D
-
-class SimpleCube(Print3D):
-    def __init__(self):
-        super().__init__(
-            part_no="simple_cube",
-            x_size=20,  # 20mm width
-            y_size=20,  # 20mm depth  
-            z_size=20   # 20mm height
-        )
-
-# Create and render the part
-cube = SimpleCube()
-cube.save()
-cube.render()
+--8<-- "src/examples/simple_cube.py"
 ```
 
 This creates a 20x20x20mm cube optimized for 3D printing and generates the necessary files.
@@ -47,7 +33,7 @@ class CubeWithHoles(Print3D):
             y_size=30,
             z_size=20
         )
-    
+
     def definition(self):
         """Define the part features."""
         # Add a 10mm deep hole to front face
@@ -56,7 +42,7 @@ class CubeWithHoles(Print3D):
             diameter=5,        # 5mm diameter
             depth=10           # 10mm deep
         )
-        
+
         # Add holes through the top face
         for x in [10, 20]:
             for y in [10, 20]:
@@ -95,7 +81,7 @@ class Bracket(Print3D):
             y_size=50,
             z_size=30
         )
-    
+
     def definition(self):
         # Add mounting holes
         self.bottom.hole(pos=(10, 10), diameter=4.0)
@@ -121,6 +107,9 @@ bracket_left.level(
     bottom=base.top,    # Bracket sits on top of base
     left=base.left,     # Align to left edge
     front=base.front,   # Align to front edge
+)
+bracket_left.level(
+    bottom=base.top,    # Bracket sits on top of base
     subtract=True       # Subtract the parts features, marked as external_subtract, from the leveled part
 )
 
@@ -128,6 +117,9 @@ bracket_right.level(
     bottom=base.top,    # Bracket sits on top of base
     right=base.right,   # Align to right edge
     front=base.front,   # Align to front edge
+)
+bracket_right.level(
+    bottom=base.top,    # Bracket sits on top of base
     subtract=True       # Subtract the parts features, marked as external_subtract, from the leveled part
 )
 
@@ -151,7 +143,7 @@ class PrintedPart(Print3D):
         super().__init__(part_no="printed_part", x_size=30, y_size=20, z_size=15)
 ```
 
-### SheetMetal  
+### SheetMetal
 For flat parts made from sheet material (laser cutting, CNC):
 
 ```python
@@ -181,14 +173,14 @@ Every part has six sides that you can add features to:
 class PartWithFeatures(Print3D):
     def __init__(self):
         super().__init__(part_no="featured_part", x_size=40, y_size=30, z_size=20)
-    
+
     def definition(self):
         # Front side features
         self.front.hole(pos=(20, 10), diameter=8, depth=5)
-        
+
         # Top side features
         self.top.hole(pos=(20, 15), diameter=4)  # Through the top out the bottom
-        
+
         # Left side features
         self.left.hole(pos=(15, 10), diameter=6, depth=8)
 ```
@@ -233,10 +225,10 @@ class EnclosureBottom(Print3D):
         super().__init__(
             part_no="enclosure_bottom",
             x_size=80,
-            y_size=60, 
+            y_size=60,
             z_size=15
         )
-    
+
     def definition(self):
         # Hollow out the inside
         self.top.box(
@@ -245,7 +237,7 @@ class EnclosureBottom(Print3D):
             height=50,     # Inner height
             depth=10       # Hollow depth
         )
-        
+
         # Mounting holes in corners
         for x in (10, 70):
             for y in (10, 50):
@@ -311,7 +303,7 @@ class ParametricBracket(Print3D):
         self.length = length
         self.width = width
         self.thickness = thickness
-    
+
     def definition(self):
         # Features based on parameters
         hole_spacing = self.length / 3
