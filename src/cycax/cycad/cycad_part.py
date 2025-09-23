@@ -24,8 +24,7 @@ from cycax.cycad.features import (
     NutCutOut,
     RectangleAddOn,
     RectangleCutOut,
-    SphereAdd,
-    SphereCutOut,
+    Sphere,
 )
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
@@ -341,7 +340,7 @@ class CycadPart(Location):
             side: The side of the part the hole will be made in.
             diameter: The Diameter of the sphere.
         """
-        temp_sphere = SphereCutOut(side=side, x=x, y=y, z=z, diameter=diameter)
+        temp_sphere = Sphere(side=side, x=x, y=y, z=z, diameter=diameter, cut=True)
         self.features.append(temp_sphere)
 
     def make_sphere_add(self, side: str, x: float, y: float, z: float, diameter: float):
@@ -354,7 +353,7 @@ class CycadPart(Location):
             side: The side of the part the hole will be made in.
             diameter: The Diameter of the sphere.
         """
-        temp_sphere = SphereAdd(side=side, x=x, y=y, z=z, diameter=diameter)
+        temp_sphere = Sphere(side=side, x=x, y=y, z=z, diameter=diameter, cut=False)
         self.features.append(temp_sphere)
 
     def make_rectangle(

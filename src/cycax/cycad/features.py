@@ -320,7 +320,7 @@ class NutCutOut(Feature):
         self.vertical = vertical
 
 
-class SphereCutOut(Feature):
+class Sphere(Feature):
     """
     Class for holding the data for sphere cut outs.
 
@@ -336,31 +336,11 @@ class SphereCutOut(Feature):
         diameter: diameter of the sphere.
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, diameter: float):
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, cut: bool):
         self.name = "sphere"
-        self.type = "cut"
-        Location.__init__(self, x, y, z, side)
-        self.diameter = diameter
-
-
-class SphereAdd(Feature):
-    """
-    Class for holding the data for sphere cut outs.
-
-    This class will initialize a Sphere Cut Out at the desired location.
-
-    Args:
-        x: The location of x along the x axis.
-        y: The location of y along the y axis.
-        z: The location of z along the z axis.
-        side: The side of the odject that this location refers to.
-            This will be used to specify from which side a feature should be inserted into another object.
-            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
-        diameter: diameter of the sphere.
-    """
-
-    def __init__(self, side: str, x: float, y: float, z: float, diameter: float):
-        self.name = "sphere"
-        self.type = "add"
+        if cut:
+            self.type = "cut"
+        else:
+            self.type = "add"
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
