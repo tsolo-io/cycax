@@ -5,7 +5,7 @@
 import json
 import logging
 import os
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -246,10 +246,10 @@ class Assembly:
     @property
     def center(self) -> tuple[float, float, float]:
         """
-        Creates a bounding box that will give the plane of each side of the assembly.
+        return the center of the assembly.
 
         Returns:
-            Bounding box.
+            The coordinates of the center of the assembly.
         """
         center_x = 0
         center_y = 0
@@ -258,33 +258,71 @@ class Assembly:
             center_x = min(part.center[0], center_x)
             center_y = min(part.center[1], center_y)
             center_z = min(part.center[2], center_z)
+        coordinate = namedtuple("Coordinate", ["x", "y", "z"])
+        return coordinate(x=center_x, y=center_y, z=center_z)
 
-        return (center_x, center_y, center_z)
+    def move(self, x: float | None = None, y: float | None = None, z: float | None = None):
+        """This method will be used for moving the assembly.
 
-    def at(self, x: float | None = None, y: float | None = None, z: float | None = None):
+        Args:
+            x: the amount the assembly should be moved by along the x axis.
+            y: the amount the assembly should be moved by along the y axis.
+            z: the amount the assembly should be moved by along the z axis
+        """
+
+        for part in self.parts.values():
+            part.move(x=x, y=y, z=z)
+
+    def at(
+        self,
+        min_x: float | None = None,
+        min_y: float | None = None,
+        min_z: float | None = None,
+        center_x: float | None = None,
+        center_y: float | None = None,
+        center_z: float | None = None,
+    ):
         """Place parts in the assembly at the exact provided coordinates.
 
         Args:
-            x: The value to which x needs to be moved to on the axis.
-            y: The value to which y needs to be moved to on the axis.
-            z: The value to which z needs to be moved to on the axis.
+            min_x: New position of the assemblies closest point to the origin on the x-axis.
+            min_y: New position of the assemblies closest point to the origin on the y-axis.
+            min_z: New position of the assemblies closest point to the origin on the z-axis.
+            center_x: New position of the assemblies center on the x-axis.
+            center_y: New position of the assemblies center on the y-axis.
+            center_z: New position of the assemblies center on the z-axis.
         """
-        if x is not None:
-            x_move = x - self.bounding_box[LEFT]
-        if y is not None:
-            y_move = y - self.bounding_box[FRONT]
-        if z is not None:
-            z_move = z - self.bounding_box[BOTTOM]
+        if min_x and center_x:
+            raise ValueError("Cannot specify both min_x and center_x")
+        if min_y and center_y:
+            raise ValueError("Cannot specify both min_y and center_y")
+        if min_z and center_z:
+            raise ValueError("Cannot specify both min_z and center_z")
+
+        x_move, y_move, z_move = None, None, None
+
+        if min_x is not None:
+            x_move = min_x - self.bounding_box[LEFT]
+        if min_y is not None:
+            y_move = min_y - self.bounding_box[FRONT]
+        if min_z is not None:
+            z_move = min_z - self.bounding_box[BOTTOM]
+        if center_x is not None:
+            x_move = center_x - self.bounding_box[LEFT] / 2
+        if center_y is not None:
+            y_move = center_y - self.bounding_box[FRONT] / 2
+        if center_z is not None:
+            z_move = center_z - self.bounding_box[BOTTOM] / 2
 
         for part in self.parts.values():
-            if x is not None:
+            if x_move is not None:
                 part.at(x=x_move + part.position[0])
-            if y is not None:
+            if y_move is not None:
                 part.at(y=y_move + part.position[1])
-            if z is not None:
+            if z_move is not None:
                 part.at(z=z_move + part.position[2])
 
-    def add(self, part, suggested_name: str | None = None, external_subract: bool = False):
+    def add(self, part, suggested_name: str | None = None, *, external_subtract: bool = False):
         """This adds a part into the assembly.
 
         Once the part has been added to the assembler it can no longer be edited.
@@ -307,9 +345,69 @@ class Assembly:
                 msg = f"Part with name/id {part_name} already in parts catalogue."
                 raise KeyError(msg)
             self.parts[part_name] = part
-            if external_subract:
+            if external_subtract:
                 self.external_features.append(part.external_features)
             return part_name
+
+    def level(
+        self,
+        *,
+        left: AssemblySide | None = None,
+        right: AssemblySide | None = None,
+        front: AssemblySide | None = None,
+        back: AssemblySide | None = None,
+        top: AssemblySide | None = None,
+        bottom: AssemblySide | None = None,
+    ):
+        """
+        A shorthand level method for assembly.
+
+        This method can only be used if the Assembly was added to an Assembly.
+        The method is to replace multiple calls to assembly.level and assembly.subtract for a part.
+
+        Args:
+            left: Side to lign the left side up with.
+            right: Side to lign the right side up with
+            front: Side to lign the front up with.
+            back: Side to lign the back up with.
+            top: Side to lign the top up with.
+            bottom: Side to lign the bottom up with
+
+        Raises:
+            ValueError: When both left and right side is give.
+            ValueError: When both front and back side is give.
+            ValueError: When both top and bottom side is give.
+            ValueError: When the part is not part of an assembly.
+            ValueError: When leveling with the same part twice and subtracting.
+        """
+        level_with = {}
+        if left is not None:
+            if right is not None:
+                msg = "Cannot level left and right at the same time."
+                raise ValueError(msg)
+            level_with["left"] = left
+        elif right is not None:
+            level_with["right"] = right
+
+        if top is not None:
+            if bottom is not None:
+                msg = "Cannot level top and bottom at the same time."
+                raise ValueError(msg)
+            level_with["top"] = top
+        elif bottom is not None:
+            level_with["bottom"] = bottom
+
+        if front is not None:
+            if back is not None:
+                msg = "Cannot level front and back at the same time."
+                raise ValueError(msg)
+            level_with["front"] = front
+        elif back is not None:
+            level_with["back"] = back
+
+        for name, var in level_with.items():
+            assembly_side = getattr(self, name)
+            assembly_side.level(var)
 
     def get_part(self, name: str) -> CycadPart:
         """Get a part from the assembly based on part name.
@@ -434,8 +532,9 @@ class Assembly:
             Combined Assembly formed from all the assemblies in the list of Assemblies.
         """
         total_parts = {}
-        for assembly in self.assemblies:
-            total_parts.update(assembly.parts)
+        for n, assembly in enumerate(self.assemblies):
+            for part_name, part in assembly.parts.items():
+                total_parts[f"assembly_{n}_{part_name}"] = part
         total_parts.update(self.parts)
         if new_name:
             assembly_out = Assembly(name=new_name)

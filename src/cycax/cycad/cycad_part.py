@@ -8,6 +8,7 @@ import copy
 import json
 import logging
 import warnings
+from collections import namedtuple
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -394,7 +395,7 @@ class CycadPart(Location):
             z_size=z_size,
             center=center,
         )
-        if calculate:
+        if calculate or external_subtract:
             temp_rect.__calc__()
         if external_subtract:
             self.external_features.append(temp_rect)
@@ -568,12 +569,13 @@ class CycadPart(Location):
         return self._base_path / self.part_no
 
     @property
-    def center(self) -> list:
+    def center(self) -> tuple[float, float, float]:
         """Return the center of a part."""
         centered_x = self.position[0] + self.x_max / 2
         centered_y = self.position[1] + self.y_max / 2
         centered_z = self.position[2] + self.z_max / 2
-        return [centered_x, centered_y, centered_z]
+        coordinate = namedtuple("Coordinate", ["x", "y", "z"])
+        return coordinate(x=centered_x, y=centered_y, z=centered_z)
 
     def save(self, path: Path | str | None = None):
         """

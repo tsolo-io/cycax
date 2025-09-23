@@ -135,7 +135,7 @@ class PartEngineBuild123d(PartEngine):
 
         rot = 0 if feature_spec["vertical"] else 90
         hex2d = build123d.RegularPolygon(radius=feature_spec["diameter"] / 2, side_count=6, rotation=rot)
-        feature = build123d.extrude(hex2d, amount=feature_spec["thickness"])
+        feature = build123d.extrude(hex2d, amount=feature_spec["depth"])
         if feature_spec["side"] == FRONT:
             pos = build123d.Pos(feature_spec["x"], feature_spec["y"], feature_spec["z"])
             feature = pos * build123d.Rotation(X=270) * feature
@@ -201,6 +201,7 @@ class PartEngineBuild123d(PartEngine):
         feature_cube = self._decode_cube(action_cube)
         action_cylinder = {
             "side": feature_spec["side"],
+            "type": "cut",
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
