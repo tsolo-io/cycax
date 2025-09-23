@@ -38,7 +38,7 @@ class EnclosureBottom(Print3D):
         interior_depth = self.depth - (2 * self.wall_thickness)
         
         self.top.box(
-            pos=(self.width/2, self.depth/2),
+            pos=(self.wall_thickness, self.wall_thickness),
             width=interior_width,
             height=interior_depth,
             depth=self.height - self.wall_thickness

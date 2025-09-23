@@ -240,7 +240,7 @@ class EnclosureBottom(Print3D):
     def definition(self):
         # Hollow out the inside
         self.top.box(
-            pos=(40, 30),  # Center
+            pos=(5, 5),
             width=70,      # Inner width
             height=50,     # Inner height
             depth=10       # Hollow depth
