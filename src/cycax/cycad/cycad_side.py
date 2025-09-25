@@ -21,7 +21,12 @@ class CycadSide:
         return "Side: " + self.name
 
     def _location_calc(
-        self, pos: tuple[float, float], sink: float = 0.0, length: float = 0.0, width: float = 0.0
+        self,
+        pos: tuple[float, float],
+        sink: float = 0.0,
+        length: float = 0.0,
+        width: float = 0.0,
+        original_surface=False,
     ) -> tuple[float, float, float]:
         """Location is calculated for the (x, y) plain using two values and a side.
 
@@ -34,6 +39,13 @@ class CycadSide:
         """
         logging.debug("Call _location_calc(pos=%s, sink=%s, length=%s, width=%s)", pos, sink, length, width)
         msg = f"_location_calc is Not implemented on {self.name}"
+        raise ValueError(msg)
+
+    def _redefine_surface(self, add: float, sink: float = 0.0):
+        """
+        Moves the min or max on the object to where it is after and add.
+        """
+        msg = f"_redefine_surface is Not implemented on {self.name}"
         raise ValueError(msg)
 
     def _depth_check(self, val: float | None = None) -> float:  # noqa: ARG002 Unused argument
@@ -115,6 +127,8 @@ class CycadSide:
         diameter: float,
         height: float,
         sink: float = 0.0,
+        *,
+        original_surface=False,
     ):
         """This will put a cylinder of the relevant details onto the side.
 
@@ -123,7 +137,7 @@ class CycadSide:
             diameter: The diameter of the hole.
             height: How tall to make the cylinder.
         """
-        _location_tuple = self._location_calc(pos=pos, sink=sink)
+        _location_tuple = self._location_calc(pos=pos, sink=sink, original_surface=original_surface)
         self._parent.make_cylinder(
             x=_location_tuple[0],
             y=_location_tuple[1],
@@ -132,6 +146,7 @@ class CycadSide:
             diameter=diameter,
             height=height,
         )
+        self._redefine_surface(add=height, sink=sink)
 
     def hole(
         self,
@@ -208,6 +223,49 @@ class CycadSide:
             calculate=calculate,
         )
 
+    def box_add(
+        self,
+        pos: tuple[float, float],
+        length: float,
+        width: float,
+        depth: float,
+        sink: float = 0,
+        *,
+        center: bool = False,
+        original_surface=False,
+    ):
+        """This box will insert a rectangle shape cut out into the object.
+
+        Args:
+            pos: The (x, y) coordinates of the box.
+            length: The length of the box as viewed from the specified side.
+            width: The width of the box as viewed from the specified side.
+            depth: The depth of the box, if not specified will drill all the way through the box.
+            sink: The box can be sunk bellow the surface of the specified side to make a pocket.
+            center: The box can be specified from the center of the box.
+        """
+        if center is True:
+            _location_tuple = self._location_calc(
+                pos=pos, sink=sink, length=0.0, width=0.0, original_surface=original_surface
+            )
+        else:
+            _location_tuple = self._location_calc(
+                pos=pos, sink=sink, length=length, width=width, original_surface=original_surface
+            )
+
+        _box_dimensions = self._box_size_calc(width=width, length=length, depth=depth)
+        self._parent.make_rectangle_add(
+            side=self.name,
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
+            x_size=_box_dimensions[0],
+            y_size=_box_dimensions[1],
+            z_size=_box_dimensions[2],
+            center=center,
+        )
+        self._redefine_surface(add=depth, sink=sink)
+
     def nut(
         self,
         pos: tuple[float, float],
@@ -261,6 +319,31 @@ class CycadSide:
             z=_location_tuple[2],
             diameter=diameter,
         )
+
+    def sphere_add(
+        self,
+        pos: tuple[float, float],
+        diameter: float,
+        sink: float = 0.0,
+        original_surface=False,
+    ):
+        """
+        This method allows a sphere to be added onto a specified side.
+        Args:
+            pos: The (x,y) coordinates of the  cut out.
+            diameter: The diameter of the sphere.
+            sink: How far into or out of the plastic the sphere should be extruded.
+        """
+        sink = sink - diameter / 2
+        _location_tuple = self._location_calc(pos=pos, sink=sink, original_surface=original_surface)
+        self._parent.make_sphere_add(
+            side=self.name,
+            x=_location_tuple[0],
+            y=_location_tuple[1],
+            z=_location_tuple[2],
+            diameter=diameter,
+        )
+        self._redefine_surface(add=diameter, sink=sink)
 
     def slot(
         self,
@@ -427,8 +510,12 @@ class LeftSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
-        temp_x = self._parent.x_min + sink
+        if original_surface:
+            temp_x = self._parent.x + sink
+        else:
+            temp_x = self._parent.x_min + sink
         temp_y = self._parent.y_size - pos[0] - length
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
@@ -448,22 +535,11 @@ class LeftSide(CycadSide):
     def _rotate(self):
         self._parent.rotate_freeze_left()
 
-    def cylinder(
-        self,
-        pos: tuple[float, float],
-        diameter: float,
-        height: float,
-        sink: float = 0.0,
-    ):
-        """This will put a cylinder of the relevant details onto the side.
-
-        Args:
-            pos: This is a tuple that contains the (x, y) coordinates of the object.
-            diameter: The diameter of the hole.
-            height: How tall to make the cylinder.
+    def _redefine_surface(self, add: float, sink: float = 0.0):
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.x_min = self._parent.x_min - height + sink
+        Moves the min or max on the object to where it is after and add.
+        """
+        self._parent.x_min = self._parent.x_min - add + sink
 
 
 class RightSide(CycadSide):
@@ -475,8 +551,12 @@ class RightSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
-        temp_x = self._parent.x_max - sink
+        if original_surface:
+            temp_x = self._parent.x + self._parent.x_size - sink
+        else:
+            temp_x = self._parent.x_max - sink
         temp_y = pos[0]
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
@@ -496,22 +576,11 @@ class RightSide(CycadSide):
     def _rotate(self):
         self._parent.rotate_freeze_left()
 
-    def cylinder(
-        self,
-        pos: tuple[float, float],
-        diameter: float,
-        height: float,
-        sink: float = 0.0,
-    ):
-        """This will put a cylinder of the relevant details onto the side.
-
-        Args:
-            pos: This is a tuple that contains the (x, y) coordinates of the object.
-            diameter: The diameter of the hole.
-            height: How tall to make the cylinder.
+    def _redefine_surface(self, add: float, sink: float = 0.0):
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.x_max = self._parent.x_max + height - sink
+        Moves the min or max on the object to where it is after and add.
+        """
+        self._parent.x_max = self._parent.x_max + add - sink
 
 
 class TopSide(CycadSide):
@@ -523,10 +592,14 @@ class TopSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 1.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = pos[1]
-        temp_z = self._parent.z_max - sink
+        if original_surface:
+            temp_z = self._parent.z + self._parent.z_size - sink
+        else:
+            temp_z = self._parent.z_max - sink
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
@@ -544,22 +617,11 @@ class TopSide(CycadSide):
     def _rotate(self):
         self._parent.rotate_freeze_top()
 
-    def cylinder(
-        self,
-        pos: tuple[float, float],
-        diameter: float,
-        height: float,
-        sink: float = 0.0,
-    ):
-        """This will put a cylinder of the relevant details onto the side.
-
-        Args:
-            pos: This is a tuple that contains the (x, y) coordinates of the object.
-            diameter: The diameter of the hole.
-            height: How tall to make the cylinder.
+    def _redefine_surface(self, add: float, sink: float = 0.0):
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.z_max = self._parent.z_max + height - sink
+        Moves the min or max on the object to where it is after and add.
+        """
+        self._parent.z_max = self._parent.z_max + add - sink
 
 
 class BottomSide(CycadSide):
@@ -571,10 +633,14 @@ class BottomSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_size - pos[1] - width
-        temp_z = self._parent.z_min + sink
+        if original_surface:
+            temp_z = self._parent.z + sink
+        else:
+            temp_z = self._parent.z_min + sink
         return temp_x, temp_y, temp_z
 
     def _depth_check(self, val: float) -> float:
@@ -592,22 +658,11 @@ class BottomSide(CycadSide):
     def _rotate(self):
         self._parent.rotate_freeze_top()
 
-    def cylinder(
-        self,
-        pos: tuple[float, float],
-        diameter: float,
-        height: float,
-        sink: float = 0.0,
-    ):
-        """This will put a cylinder of the relevant details onto the side.
-
-        Args:
-            pos: This is a tuple that contains the (x, y) coordinates of the object.
-            diameter: The diameter of the hole.
-            height: How tall to make the cylinder.
+    def _redefine_surface(self, add: float, sink: float = 0.0):
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.z_min = self._parent.z_min - height + sink
+        Moves the min or max on the object to where it is after and add.
+        """
+        self._parent.z_min = self._parent.z_min - add + sink
 
 
 class FrontSide(CycadSide):
@@ -619,9 +674,13 @@ class FrontSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
-        temp_y = self._parent.y_min + sink
+        if original_surface:
+            temp_y = self._parent.y + sink
+        else:
+            temp_y = self._parent.y_min + sink
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
@@ -640,22 +699,11 @@ class FrontSide(CycadSide):
     def _rotate(self):
         self._parent.rotate_freeze_front()
 
-    def cylinder(
-        self,
-        pos: tuple[float, float],
-        diameter: float,
-        height: float,
-        sink: float = 0.0,
-    ):
-        """This will put a cylinder of the relevant details onto the side.
-
-        Args:
-            pos: This is a tuple that contains the (x, y) coordinates of the object.
-            diameter: The diameter of the hole.
-            height: How tall to make the cylinder.
+    def _redefine_surface(self, add: float, sink: float = 0.0):
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.y_min = self._parent.y_min - height + sink
+        Moves the min or max on the object to where it is after and add.
+        """
+        self._parent.y_min = self._parent.y_min - add + sink
 
 
 class BackSide(CycadSide):
@@ -667,9 +715,13 @@ class BackSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,
         width: float = 0.0,  # noqa: ARG002 Unused argument
+        original_surface: bool = False,
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_size - pos[0] - length
-        temp_y = self._parent.y_max - sink
+        if original_surface:
+            temp_y = self._parent.y + self._parent.y_size - sink
+        else:
+            temp_y = self._parent.y_max - sink
         temp_z = pos[1]
         return temp_x, temp_y, temp_z
 
@@ -688,19 +740,8 @@ class BackSide(CycadSide):
     def _rotate(self):
         self._parent.rotate_freeze_front()
 
-    def cylinder(
-        self,
-        pos: tuple[float, float],
-        diameter: float,
-        height: float,
-        sink: float = 0.0,
-    ):
-        """This will put a cylinder of the relevant details onto the side.
-
-        Args:
-            pos: This is a tuple that contains the (x, y) coordinates of the object.
-            diameter: The diameter of the hole.
-            height: How tall to make the cylinder.
+    def _redefine_surface(self, add: float, sink: float = 0.0):
         """
-        super().cylinder(pos=pos, diameter=diameter, height=height, sink=sink)
-        self._parent.y_max = self._parent.y_max + height - sink
+        Moves the min or max on the object to where it is after and add.
+        """
+        self._parent.y_max = self._parent.y_max + add - sink

@@ -4,7 +4,7 @@
 
 import typing
 
-from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, Location
+from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 
 
 class Feature(Location):
@@ -194,6 +194,68 @@ class RectangleCutOut(Feature):
         return rotmax
 
 
+class RectangleAddOn(RectangleCutOut):
+    """This class can be used for cutting a hole that is not round but rather of the defined parameters.
+
+    This class is a hole that is not round.
+    The location refers to its bottom left hand corner.
+
+    This class will initialize a Rectangle Cut Out at the desired location.
+
+    Args:
+        x: The location of x along the x axis.
+        y: The location of y along the y axis.
+        z: The location of z along the z axis.
+        side: The side of the odject that this location refers to.
+            This will be used to specify from which side a feature should be inserted into another object.
+            This will be one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+        x_size: x_size of the rectangle.
+        y_size: y_size of the rectangle.
+        z_size: z_size of the rectangle.
+        center: This can be over ridden to instead specify the rectangle's location from its center.
+    """
+
+    def __init__(
+        self,
+        side: str,
+        x: float = 0,
+        y: float = 0,
+        z: float = 0,
+        x_size: float = 0,
+        z_size: float = 0,
+        y_size: float = 2,
+        *,
+        center: bool = False,
+    ):
+        Location.__init__(self, x, y, z, side)
+        self.x_size = x_size
+        self.y_size = y_size
+        self.z_size = z_size
+        self.center = center
+        self.name = "cube"
+        self.type = "add"
+        self.__calc__()
+
+    def __calc__(self):
+        if self.side in (BACK, RIGHT, TOP):
+            self.x += self.x_size / 2
+            self.y += self.y_size / 2
+            self.z += self.z_size / 2
+        elif self.side == FRONT:
+            self.x += self.x_size / 2
+            self.y -= self.y_size / 2
+            self.z += self.z_size / 2
+        elif self.side == LEFT:
+            self.x -= self.x_size / 2
+            self.y += self.y_size / 2
+            self.z += self.z_size / 2
+        else:  # side = BOTTOM
+            self.x += self.x_size / 2
+            self.y += self.y_size / 2
+            self.z -= self.z_size / 2
+        self.center = True
+
+
 class NutCutOut(Feature):
     """
     Class for holding the data for nut cut outs.
@@ -258,7 +320,7 @@ class NutCutOut(Feature):
         self.vertical = vertical
 
 
-class SphereCutOut(Feature):
+class Sphere(Feature):
     """
     Class for holding the data for sphere cut outs.
 
@@ -274,8 +336,11 @@ class SphereCutOut(Feature):
         diameter: diameter of the sphere.
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, diameter: float):
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, cut: bool):
         self.name = "sphere"
-        self.type = "cut"
+        if cut:
+            self.type = "cut"
+        else:
+            self.type = "add"
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
