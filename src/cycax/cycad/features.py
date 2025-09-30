@@ -365,6 +365,7 @@ class SphereAdd(Feature):
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
 
+
 class Bending(Feature):
     def __init__(self, x, y, z, side):
         super().__init__(x, y, z, side)

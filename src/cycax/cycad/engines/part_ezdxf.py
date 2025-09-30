@@ -1,11 +1,12 @@
-import ezdxf
-
 from pathlib import Path
+
+import ezdxf
 
 OUTLINE = "Outline"
 CIRCLES = "Circles"
 BENDS = "Bends"
 LAYERS = (OUTLINE, CIRCLES, BENDS)
+
 
 class PartEzdxfEngine:
     """
@@ -20,7 +21,7 @@ class PartEzdxfEngine:
 
     def __calc__(self):
         self.doc = ezdxf.new(setup=True)  # setup required line types
-        self.doc.layers.add(name=OUTLINE, color=7, linetype="SOLID") 
+        self.doc.layers.add(name=OUTLINE, color=7, linetype="SOLID")
         self.doc.layers.add(name=CIRCLES, color=3, linetype="SOLID")
         self.doc.layers.add(name=BENDS, color=1, linetype="DASHED")
         self.msp = self.doc.modelspace()
@@ -32,14 +33,13 @@ class PartEzdxfEngine:
         file_name = self.path / f"{self.name}.dxf"
         self.doc.saveas(file_name)
 
-
     def line(self, start: tuple, end: tuple, layer: str):
         """
         Draw a line in the desired layer.
 
         Args:
             start: (x, y) Where to start the line from.
-            end: (x, y) Where to end the line. 
+            end: (x, y) Where to end the line.
             layer: Layer to draw the line at.
 
         Raises:
@@ -58,7 +58,7 @@ class PartEzdxfEngine:
             location: (x, y) location of center of circle.
             radius: Radius of the circle.
             layer: Layer to draw the circle at.
-        
+
         Raises:
             ValueError: Layer provided is not one of the defined layers.
         """
@@ -66,8 +66,6 @@ class PartEzdxfEngine:
             msg = f"{layer=} not one of the defined {LAYERS=}."
             raise ValueError(msg)
         self.msp.add_circle(location, radius=radius, dxfattribs={"layer": layer})
-
-
 
 
 # doc = ezdxf.new(setup=True)  # setup required line types

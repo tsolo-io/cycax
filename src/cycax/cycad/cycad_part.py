@@ -18,6 +18,7 @@ from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.features import (
+    Bending,
     Cylinder,
     Feature,
     Holes,
@@ -436,6 +437,89 @@ class CycadPart(Location):
             y_size=y_size,
             z_size=z_size,
             center=center,
+        )
+        self.features.append(temp_rect)
+
+    def make_bend(
+        self,
+        side: str,
+        height: float,
+        internal: bool,
+        degress: float = 90.0,
+    ):
+        """This method will add a block on to the CycadPart.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the block will be added onto.
+            x_size : The size of x of rectangle.
+            y_size : The size of y of rectangle.
+            z_size : The size of z of rectangle.
+            center : This can be overridden if you would like object centered at origin.
+        """
+
+        if side == LEFT:
+            y = self.y
+            z = self.z_max
+            x_size = self.z_size
+            y_size = self.y_size
+            if internal:
+                x = self.x
+                z_size = height - self.z_size
+            else:
+                x = self.x - self.z_size
+                z_size = height
+
+        elif side == RIGHT:
+            y = self.y
+            z = self.z_max
+            x_size = self.z_size
+            y_size = self.y_size
+            if internal:
+                x = self.x_max - self.z_size
+                z_size = height - self.z_size
+            else:
+                x = self.x_max
+                z_size = height
+
+        elif side == FRONT:
+            x = self.x
+            z = self.z_max
+            x_size = self.x_size
+            y_size = self.z_size
+            if internal:
+                y = self.y
+                z_size = height - self.z_size
+            else:
+                y = self.y - self.z_size
+                z_size = height
+
+        elif side == BACK:
+            x = self.x
+            z = self.z_max
+            x_size = self.x_size
+            y_size = self.z_size
+            if internal:
+                y = self.y_max - self.z_size
+                z_size = height - self.z_size
+            else:
+                y = self.y_max
+                z_size = height
+        else:
+            msg = f"{side=} not in (LEFT, RIGHT, FRONT, BACK). bend can only be applied to these sides"
+            raise ValueError(msg)
+
+        temp_rect = RectangleAddOn(
+            side=side,
+            x=x,
+            y=y,
+            z=z,
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            center=False,
         )
         self.features.append(temp_rect)
 
