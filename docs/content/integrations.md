@@ -13,7 +13,7 @@ CyCAx supports multiple CAD tools through two integration approaches: **Direct**
 | CAD Tool | Parts (Direct) | Assemblies (Direct) | Parts (Server) | Assemblies (Server) |
 |----------|----------------|---------------------|----------------|-------------------|
 | [OpenSCAD](https://openscad.org) | ✅ | ✅ | ❌ | ❌ |
-| [build123d](https://github.com/build123d/build123d) | ✅ | ✅ | ❌ | ❌ |
+| [build123d](https://github.com/gumyr/build123d) | ✅ | ✅ | ❌ | ❌ |
 | [FreeCAD](https://freecad.org) | ✅ | ❌ | ✅ | ❌ |
 | [Blender](https://blender.org) | ❌ | ❌ | ❌ | ✅ |
 

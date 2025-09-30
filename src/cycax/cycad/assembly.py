@@ -11,7 +11,6 @@ from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.assembly_side import (
-    AssemblySide,
     AssemblySideBack,
     AssemblySideBottom,
     AssemblySideFront,

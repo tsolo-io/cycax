@@ -18,7 +18,15 @@ from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
-from cycax.cycad.features import Cylinder, Feature, Holes, NutCutOut, RectangleCutOut, SphereCutOut
+from cycax.cycad.features import (
+    Cylinder,
+    Feature,
+    Holes,
+    NutCutOut,
+    RectangleAddOn,
+    RectangleCutOut,
+    Sphere,
+)
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
 
@@ -245,8 +253,7 @@ class CycadPart(Location):
             z: Position of feature on Z-axis.
             side: The side of the part the hole will be made in.
             diameter: The diameter of the hole.
-            depth: The depth of the hole. If Null the hole is through the part.
-            external_subtract: This is to specify that the hole should only be cut into other surfaces and not itself.
+            height: The height of the cylinder.
         """
 
         cylinder = Cylinder(side=side, x=x, y=y, z=z, diameter=diameter, height=height)
@@ -324,7 +331,7 @@ class CycadPart(Location):
         temp_nut = NutCutOut(side=side, x=x, y=y, z=z, nut_type=nut_type, depth=depth, vertical=vertical)
         self.features.append(temp_nut)
 
-    def make_sphere(self, side: str, x: float, y: float, z: float, diameter: float):
+    def make_sphere_cut_out(self, side: str, x: float, y: float, z: float, diameter: float):
         """This method will insert a sphere into a CycadPart.
 
         Args:
@@ -334,7 +341,20 @@ class CycadPart(Location):
             side: The side of the part the hole will be made in.
             diameter: The Diameter of the sphere.
         """
-        temp_sphere = SphereCutOut(side=side, x=x, y=y, z=z, diameter=diameter)
+        temp_sphere = Sphere(side=side, x=x, y=y, z=z, diameter=diameter, cut=True)
+        self.features.append(temp_sphere)
+
+    def make_sphere_add(self, side: str, x: float, y: float, z: float, diameter: float):
+        """This method will all a sphere onto a part so half of it sticks out.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the hole will be made in.
+            diameter: The Diameter of the sphere.
+        """
+        temp_sphere = Sphere(side=side, x=x, y=y, z=z, diameter=diameter, cut=False)
         self.features.append(temp_sphere)
 
     def make_rectangle(
@@ -381,6 +401,43 @@ class CycadPart(Location):
             self.external_features.append(temp_rect)
         else:
             self.features.append(temp_rect)
+
+    def make_rectangle_add(
+        self,
+        side: str,
+        x: float,
+        y: float,
+        z: float,
+        x_size: float,
+        y_size: float,
+        z_size: float,
+        *,
+        center=False,
+    ):
+        """This method will add a block on to the CycadPart.
+
+        Args:
+            x: Position of feature on X-axis.
+            y: Position of feature on Y-axis.
+            z: Position of feature on Z-axis.
+            side: The side of the part the block will be added onto.
+            x_size : The size of x of rectangle.
+            y_size : The size of y of rectangle.
+            z_size : The size of z of rectangle.
+            center : This can be overridden if you would like object centered at origin.
+        """
+
+        temp_rect = RectangleAddOn(
+            side=side,
+            x=x,
+            y=y,
+            z=z,
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            center=center,
+        )
+        self.features.append(temp_rect)
 
     def make_bounding_box(self):
         """This bounding box will be used to help keep track of and update the bounds.

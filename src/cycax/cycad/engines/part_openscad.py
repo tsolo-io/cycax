@@ -119,21 +119,21 @@ class PartEngineOpenSCAD(PartEngine):
             features: This is the dictionary that contains the detail of where the cube must be places and its details.
         """
 
-        angles = [0, 0, 0]
+        move = [0, 0, 0]
         if center is False:
             if features["side"] is not None:
-                angles = features["side"]
-                angles = {
+                move = features["side"]
+                move = {
                     TOP: [0, 0, -features["z_size"]],
                     BACK: [0, -features["y_size"], 0],
                     BOTTOM: [0, 0, 0],
                     FRONT: [0, 0, 0],
                     LEFT: [0, 0, 0],
                     RIGHT: [-features["x_size"], 0, 0],
-                }[angles]
+                }[move]
 
         output = "translate([{x}, {y}, {z}])".format(
-            x=angles[0] + features["x"], y=angles[1] + features["y"], z=angles[2] + features["z"]
+            x=move[0] + features["x"], y=move[1] + features["y"], z=move[2] + features["z"]
         )
 
         return output

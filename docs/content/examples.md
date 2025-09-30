@@ -37,8 +37,8 @@ class EnclosureBottom(Print3D):
         interior_width = self.width - (2 * self.wall_thickness)
         interior_depth = self.depth - (2 * self.wall_thickness)
         
-        self.top.hole(
-            pos=(self.width/2, self.depth/2),
+        self.top.box(
+            pos=(self.wall_thickness, self.wall_thickness),
             width=interior_width,
             height=interior_depth,
             depth=self.height - self.wall_thickness
@@ -56,8 +56,7 @@ class EnclosureBottom(Print3D):
         for pos in positions:
             self.bottom.hole(
                 pos=pos,
-                diameter=3,
-                external_subtract=True
+                diameter=3
             )
 
 class EnclosureTop(Print3D):
@@ -79,7 +78,11 @@ class EnclosureTop(Print3D):
             for y in range(15, self.depth - 10, 8):
                 self.top.hole(
                     pos=(x, y),
-                    diameter=2,
+                    diameter=3.2
+                )
+                self.top.hole(
+                    pos=(x, y),
+                    diameter=3.0,
                     external_subtract=True
                 )
 
@@ -139,10 +142,13 @@ class MountingBracket(Print3D):
             self.front.hole(
                 pos=(x, self.height * 0.7),
                 diameter=self.hole_diameter,
-                external_subtract=True
             )
         
         # Add horizontal mounting holes
+        self.bottom.hole(
+            pos=(self.length/2, self.thickness/2),
+            diameter=self.hole_diameter
+        )
         self.bottom.hole(
             pos=(self.length/2, self.thickness/2),
             diameter=self.hole_diameter,
@@ -249,7 +255,6 @@ class Gear(Print3D):
         self.top.hole(
             pos=(self.outer_diameter/2, self.outer_diameter/2),
             diameter=self.bore_diameter,
-            external_subtract=True
         )
         
         # Add keyway if bore is large enough
@@ -257,11 +262,10 @@ class Gear(Print3D):
             keyway_width = self.bore_diameter * 0.25
             keyway_length = self.bore_diameter * 0.8
             
-            self.top.hole(
+            self.top.box(
                 pos=(self.outer_diameter/2, self.outer_diameter/2),
                 width=keyway_width,
                 height=keyway_length,
-                external_subtract=True
             )
 
 class GearTrain(Assembly):
@@ -340,7 +344,7 @@ class StorageBox(Print3D):
         interior_depth = self.depth - (2 * self.wall_thickness)
         interior_height = self.height - self.wall_thickness
         
-        self.top.hole(
+        self.top.box(
             pos=(self.width/2, self.depth/2),
             width=interior_width,
             height=interior_depth,
@@ -371,7 +375,7 @@ class StorageBox(Print3D):
             )
         
         # Add finger pull cutout
-        self.front.hole(
+        self.front.box(
             pos=(self.width/2, self.height - 10),
             width=40,
             height=8,
@@ -379,7 +383,7 @@ class StorageBox(Print3D):
         )
         
         # Add label area (recessed)
-        self.front.hole(
+        self.front.box(
             pos=(self.width/2, self.height/3),
             width=60,
             height=20,
@@ -551,7 +555,7 @@ class RPiEnclosure(Print3D):
     
     def definition(self):
         # Interior hollow
-        self.top.hole(
+        self.top.box(
             pos=(50, 35.5),
             width=90,
             height=61,
@@ -570,21 +574,21 @@ class RPiEnclosure(Print3D):
         
         # Port cutouts
         # USB-C power (left side)
-        self.left.hole(pos=(10, 12), width=12, height=6, external_subtract=True)
+        self.left.box(pos=(10, 12), width=12, height=6)
         
         # HDMI ports (right side)
-        self.right.hole(pos=(15, 12), width=16, height=8, external_subtract=True)
-        self.right.hole(pos=(35, 12), width=16, height=8, external_subtract=True)
+        self.right.box(pos=(15, 12), width=16, height=8)
+        self.right.box(pos=(35, 12), width=16, height=8)
         
         # USB-A ports (right side)
-        self.right.hole(pos=(55, 12), width=15, height=7, external_subtract=True)
-        self.right.hole(pos=(55, 4), width=15, height=7, external_subtract=True)
+        self.right.box(pos=(55, 12), width=15, height=7)
+        self.right.box(pos=(55, 4), width=15, height=7)
         
         # GPIO access (top)
-        self.top.hole(pos=(25, 64), width=52, height=6, external_subtract=True)
+        self.top.box(pos=(25, 64), width=52, height=6)
         
         # SD card slot (front)
-        self.front.hole(pos=(85, 8), width=18, height=3, external_subtract=True)
+        self.front.box(pos=(85, 8), width=18, height=3)
 
 class RPiEnclosureTop(Print3D):
     """Top cover with ventilation."""

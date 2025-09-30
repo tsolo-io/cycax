@@ -14,9 +14,11 @@ from cycax.cycad.location import TOP
 
 
 class PartEngineFreeCAD(PartEngine):
-    def build(self, part) -> dict:  # noqa: ARG002 Unused argument
-        # self._base_path = part._base_path
-        # self.name = part.part_no
+    def build(self, part) -> dict:
+        if self.name is None:
+            self.name = part.part_no
+        if self._base_path is None:
+            self.set_path(path=part._base_path)
         fcstd_file = self._base_path / self.name / f"{self.name}.FCStd"
         if check_source_hash(self._json_file, fcstd_file):
             app_bin = self.get_appimage("FreeCAD")
