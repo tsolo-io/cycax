@@ -344,3 +344,12 @@ class Sphere(Feature):
             self.type = "add"
         Location.__init__(self, x, y, z, side)
         self.diameter = diameter
+
+
+class Bending(Feature):
+    def __init__(self, x, y, z, side):
+        super().__init__(x, y, z, side)
+        self.name = "bend"
+        self.angle = 90
+
+        ###When you add a bend you need to grow the size of the sheet metal.
