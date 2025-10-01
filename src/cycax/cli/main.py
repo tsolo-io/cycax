@@ -45,7 +45,7 @@ def run_function(file_path: Path, function_name: str | None = None) -> Path:
         if function_name is None:
             logging.error("No function found in file %s, looked for %s", file_path, FUNCTION_NAMES)
             raise typer.Exit(code=1)
-        elif not hasattr(module, "assemble"):
+        elif not hasattr(module, function_name):
             logging.error("Error finding function %s in file %s", function_name, file_path)
             raise typer.Exit(code=1)
 
