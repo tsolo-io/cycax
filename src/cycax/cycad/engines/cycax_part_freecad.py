@@ -534,9 +534,9 @@ class EngineFreecad:
 
 json_file = os.getenv("CYCAX_JSON")
 out_dir = os.getenv("CYCAX_CWD")
-files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
+files_to_produce = os.getenv("CYCAX_OUT_FORMATS", 'STL')
 
-logging.error(f"Json file {json_file} out dir = {out_dir}")
+logging.error("Json file %s out dir = %s", json_file, out_dir)
 engine = EngineFreecad(Path(out_dir))
 
 engine.build(Path(json_file), files_to_produce.replace(" ", ""))
