@@ -75,7 +75,7 @@ class CycadPart(Location):
         self.back = BackSide(self)
 
         self._base_path = None
-        self.part_no = part_no.strip().replace("-", "_").lower()
+        self.part_no = part_no.strip().replace("-", "_").lower().replace(" ", "_")
         self.x_size = x_size
         self.y_size = y_size
         self.z_size = z_size
@@ -577,7 +577,7 @@ class CycadPart(Location):
         coordinate = namedtuple("Coordinate", ["x", "y", "z"])
         return coordinate(x=centered_x, y=centered_y, z=centered_z)
 
-    def save(self, path: Path | str | None = None):
+    def save(self, path: Path | str | None = None) -> Path:
         """
         Save the part specification to a JSON file.
 
@@ -593,14 +593,16 @@ class CycadPart(Location):
                 path = self._base_path
         else:
             path = Path(path)
-            if not path.exists():
-                path.mkdir(parents=False, exist_ok=True)
         self._base_path = path
+        path.mkdir(parents=False, exist_ok=True)
 
-        dir_name = self.path
+        dir_name = self.path  # Using the path property to ensure it exists
         dir_name.mkdir(exist_ok=True)
         file_path = dir_name / f"{self.part_no}.json"
+        file_path = file_path.expanduser().resolve().absolute()
         file_path.write_text(json.dumps(self.export()))
+        logging.info("Saved part '%s' to %s", self.part_no, file_path)
+        return file_path
 
     def export(self) -> dict:
         """
