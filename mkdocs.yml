@@ -36,18 +36,19 @@ theme:
     - content.code.copy
     - content.code.annotate
 
-nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Getting Started: getting-started.md
-  - User Guide:
-      - Parts: parts.md
-      - Assemblies: assemblies.md
-      - Integrations: integrations.md
-      - Examples: examples.md
-  - Advanced:
-      - CyCAD Example: cycad_example.md
-  - API Reference: api/index.md
+# commented for now: The structure is good but I like the dynamic structure, so need to play with file names and paths.
+# nav:
+#   - Home: index.md
+#   - Installation: installation.md
+#   - Getting Started: getting-started.md
+#   - User Guide:
+#       - Parts: parts.md
+#       - Assemblies: assemblies.md
+#       - Integrations: integrations.md
+#       - Examples: examples.md
+#   - Advanced:
+#       - CyCAD Example: cycad_example.md
+#   - API Reference: api/index.md
 
 plugins:
   - search

@@ -5,6 +5,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from cycax.cycad import Assembly, SheetMetal
 
 # Test some of the file operations.
@@ -40,6 +42,7 @@ def test_save(tmp_path):
         check_json_file(part_expected_path, f"part_test{i}")
 
 
+@pytest.mark.ci_exclude
 def test_render_assembly_openscad(tmp_path):
     """Test render on assembly and parts."""
 
@@ -63,6 +66,7 @@ def test_render_assembly_openscad(tmp_path):
         check_files(part_expected_path, part_name_slug, ["json", "scad", "stl"])
 
 
+@pytest.mark.ci_exclude
 def test_render_part_freecad(tmp_path):
     """Test render a part with FreeCAD."""
 

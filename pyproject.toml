@@ -53,16 +53,6 @@ path = "src/cycax/__about__.py"
 [tool.hatch.envs.default]
 dependencies = []
 
-[tool.hatch.envs.default.scripts]
-test-not-slow = "pytest -m \"not slow\" --exitfirst {args:tests}"
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest -m \"not ci_exclude\" --junitxml=reports/tests.xml {args:tests}"
-cov-report = [
-    "- coverage combine",
-    "coverage report",
-    "coverage xml -o reports/coverage.xml",
-]
-cov = ["test-cov", "cov-report"]
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.10", "3.11", "3.12", "3.13"]
@@ -170,3 +160,34 @@ markers = [
     "ci_exclude: marks tests as not to run on CI (deselect with '-m \"not ci_exclude\"')",
     "serial",
 ]
+
+[tool.hatch.envs.testing]
+extra-dependencies = [
+    "coverage[toml]>=6.5",
+    "pytest>=8.3.4",
+    "pytest-bdd>=7.2.0",
+    "pytest-mock>=3.14.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov",
+    "pytest-md-report"
+]
+installer = "uv"
+
+[tool.hatch.envs.testing.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+test-not-slow = "pytest -m \"not slow\" --exitfirst {args:tests}"
+test-ci = "coverage run -m pytest -m \"not ci_exclude\" --junitxml=reports/tests.xml {args:tests} --cov=cycax --cov-report=markdown:docs/content/coverage_report.md --md-report --md-report-verbose=1 --md-report-output=docs/content/detailed_report.md"
+cov-report = [
+    "- coverage combine",
+    "coverage report",
+    "coverage xml -o reports/coverage.xml",
+]
+cov = ["test-cov", "cov-report"]
+ci = ["test-ci", "cov-report"]
+
+# Editor helper
+[tool.pyright]
+executionEnvironments = [{ root = "." }]
+venvPath = ".hatch"
+venv = "lint"

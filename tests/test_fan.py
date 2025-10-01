@@ -4,6 +4,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import SheetMetal
 from cycax.parts.fan import Fan
@@ -27,6 +29,7 @@ def fans(tmp_path: Path):
     face.render("preview3d")
 
 
+@pytest.mark.ci_exclude
 def test_fans(tmp_path: Path):
     # This test checks that the fan is being produced as it should.
 

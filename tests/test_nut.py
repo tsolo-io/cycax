@@ -4,6 +4,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from cycax.cycad import Print3D
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
@@ -27,6 +29,7 @@ def nutty_cube(tmp_path: Path):
     stl_compare_models(build123d_stl, stl)
 
 
+@pytest.mark.ci_exclude
 def test_nut(tmp_path: Path):
     # This test will check that the nut is still being produced as it should.
 

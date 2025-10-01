@@ -90,6 +90,7 @@ def assemble(side: str, *, horizontal: bool) -> Assembly:
     return assembly
 
 
+@pytest.mark.ci_exclude
 @pytest.mark.slow
 def test_slots(tmp_path):
     """Test slots.

@@ -149,7 +149,7 @@ class PartWithFeatures(Print3D):
 
         # Top side features
         self.top.hole(pos=(20, 15), diameter=4)  # Through the top out the bottom
-
+        
         # Left side features
         self.left.hole(pos=(15, 10), diameter=6, depth=8)
 ```
