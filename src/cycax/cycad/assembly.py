@@ -11,6 +11,7 @@ from pathlib import Path
 
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.assembly_side import (
+    AssemblySide,
     AssemblySideBack,
     AssemblySideBottom,
     AssemblySideFront,
@@ -184,8 +185,8 @@ class Assembly:
                 engine.add(action)
             engine.build()
 
-    def save(self, path: Path | str | None = None):
-        """Save the assembly and added part to JSON files.
+    def save(self, path: Path | str | None = None) -> list[Path]:
+        """Save the assembly and parts to JSON files.
 
         Args:
             path: The location where the assembly is stored.
@@ -194,18 +195,24 @@ class Assembly:
 
         if path is None:
             path = self._base_path
+        self._base_path = path
         path = Path(path)
         path.mkdir(parents=False, exist_ok=True)
         if not path.exists():
             msg = f"The directory {path} does not exists."
             raise FileNotFoundError(msg)
+        # Save the parts
         for item in self.parts.values():
             item.save(path)
 
-        self._base_path = path
+        # Save the assembly
         data = self.export()
         data_filename = path / f"{self.name}.json"
+        data_filename = data_filename.expanduser().resolve().absolute()
         data_filename.write_text(json.dumps(data))
+        logging.info("Saved assembly '%s' to %s", self.name, data_filename)
+
+        return data_filename
 
     @property
     def bounding_box(self) -> dict:
@@ -293,11 +300,14 @@ class Assembly:
             center_z: New position of the assemblies center on the z-axis.
         """
         if min_x and center_x:
-            raise ValueError("Cannot specify both min_x and center_x")
+            msg = "Cannot specify both min_x and center_x"
+            raise ValueError(msg)
         if min_y and center_y:
-            raise ValueError("Cannot specify both min_y and center_y")
+            msg = "Cannot specify both min_y and center_y"
+            raise ValueError(msg)
         if min_z and center_z:
-            raise ValueError("Cannot specify both min_z and center_z")
+            msg = "Cannot specify both min_z and center_z"
+            raise ValueError(msg)
 
         x_move, y_move, z_move = None, None, None
 

@@ -34,13 +34,22 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-    "httpx",
-    "tenacity",
-    "matplotlib",
+    "httpx==0.28.1",
+    "tenacity==9.1.2",
+    "matplotlib==3.10.6",
     "pytest",
-    "build123d",
-    "numpy-stl",
+    "build123d==0.9.1",
+    "numpy-stl==3.2.0",
+    "xxhash==3.5.0",
+    "rich==14.1.0",
+    "typer==0.19.2",
+    "pydantic==2.11.9",
+    "pydantic-settings==2.11.0",
+    "nats-py==2.11.0",
 ]
+
+[project.scripts]
+cycax = "cycax.cli.main:app"
 
 [project.urls]
 Documentation = "https://github.com/tsolo-dev/cycax#readme"
@@ -60,8 +69,8 @@ python = ["3.10", "3.11", "3.12", "3.13"]
 [tool.hatch.envs.docs]
 dependencies = [
     "mkdocs==1.6.1",
-    "mkdocs-material==9.6.14",
-    "mkdocstrings[python]==0.29.1",
+    "mkdocs-material==9.6.21",
+    "mkdocstrings[python]==0.30.1",
 ]
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build --clean --strict"
@@ -69,7 +78,7 @@ serve = "mkdocs serve --dev-addr localhost:8003"
 
 [tool.hatch.envs.lint]
 detached = true
-dependencies = ["mypy==1.16.1", "ruff==0.12.0", "typos==1.33.1"]
+dependencies = ["mypy==1.18.2", "ruff==0.13.2", "typos==1.37.0"]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/cycax tests}"
 style = ["ruff check --fix {args:.}"]
