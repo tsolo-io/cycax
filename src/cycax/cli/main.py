@@ -7,6 +7,8 @@ import logging
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Annotated, Any
+import xxhash
+from collections import defaultdict
 
 import typer
 from rich.logging import RichHandler
@@ -94,12 +96,29 @@ def compile_cmd(
         raise ValueError(msg)
     run_compile(filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"])
 
+def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
+    _json_file = json_file.expanduser().resolve().absolute()
+    if not _json_file.exists():
+        logging.error("The file %s does not exist.", _json_file)
+        raise typer.Exit(code=1)
+
+    data = json.loads(_json_file.read_text())
+    data_hash = xxhash.xxh64(json.dumps(data)).hexdigest()
+    if data_hash not in build_order:
+        build_order[data_hash] = {'index': level, 'hash': xxhash.xxh64(json.dumps(data)).hexdigest(), 'path': _json_file}
+        for part in data.get('parts', []):
+            _part_json = _json_file.parent / part['part_no'] / f"{part['part_no']}.json"
+            add_to_build_order(_part_json, build_order, level - 1)
+    else:
+        build_order[data_hash]['index'] -= 1
 
 @app.command()
-def build(
+def send(
     filename: Annotated[str, typer.Argument(help="A Python file to run with the CyCAx Code")],
     build_dir: Annotated[str, typer.Option(help="The directory to save the build to")] = "./build",
+    part_engine: Annotated[str, typer.Option(help="The directory to save the build to")] = "./build",
 ):
+    """Send the compiled JSON files to the CyCAx server to be compiled into usable models."""
     json_files = []
     fields = cmd_input_scrubber(filename, build_dir)
     if fields["filename"].suffix == ".py":
@@ -114,13 +133,12 @@ def build(
         logging.error("The path %s is not a Python file, JSON file, or directory.", filename)
         raise typer.Exit(code=1)
 
+    build_order = defaultdict(dict)
     for json_file in json_files:
-        _json_file = json_file.expanduser().resolve().absolute()
-        if not _json_file.exists():
-            logging.error("The file %s does not exist.", _json_file)
-            raise typer.Exit(code=1)
-        logging.info("Building %s", _json_file)
-        # build_json(json_file, build_dir)
+        add_to_build_order(json_file, build_order)
+
+    for build in sorted(build_order.values(), key=lambda x: x['index']):
+        print(build)
 
 
 def conf_file_selector(cycax_config: str | None = None) -> Path:
