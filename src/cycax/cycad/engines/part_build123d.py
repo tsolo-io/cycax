@@ -215,6 +215,22 @@ class PartEngineBuild123d(PartEngine):
         feature_cylinder = self._decode_cylinder_feature(action_cylinder)
         return feature_cube - feature_cylinder
 
+    def import_build(self, data: dict) -> list[Path]:
+        """Create the output files for the part."""
+
+        self.name = name = data["name"]
+        files = []
+        files = self.jobs.get(name, [])
+        if not files:
+            logging.info("Building part %s", name)
+            file_no_ext = self._base_path / name / f"{name}"
+            files = self._build(data, file_no_ext)
+            self.jobs[name] = files
+            logging.info("For build %s created files %s", name, files)
+            assert files, f"{name=} {data=}"
+
+        return self.file_list(files=files, engine="Build123d", score=3)
+
     def build(self, part) -> list:
         """Create the output files for the part."""
 
@@ -253,7 +269,7 @@ class PartEngineBuild123d(PartEngine):
         part = None
         add_features = []
         subtract_features = []
-        for action in definition["features"]:
+        for action in definition.get("features", []):
             match action["name"]:
                 case "cube":
                     feature = self._decode_cube(action)
@@ -293,10 +309,11 @@ class PartEngineBuild123d(PartEngine):
             part -= feature
 
         files = []
-        build123d.export_stl(to_export=part, file_path=file_no_ext.with_suffix(".stl"))
-        files.append({"file": file_no_ext.with_suffix(".stl"), "type": "stl"})
-        build123d.export_gltf(to_export=part, file_path=file_no_ext.with_suffix(".gltf"))
-        files.append({"file": file_no_ext.with_suffix(".gltf"), "type": "gltf"})
-        build123d.export_step(to_export=part, file_path=file_no_ext.with_suffix(".step"))
-        files.append({"file": file_no_ext.with_suffix(".step"), "type": "step"})
+        if part:
+            build123d.export_stl(to_export=part, file_path=file_no_ext.with_suffix(".stl"))
+            files.append({"file": file_no_ext.with_suffix(".stl"), "type": "stl"})
+            build123d.export_gltf(to_export=part, file_path=file_no_ext.with_suffix(".gltf"))
+            files.append({"file": file_no_ext.with_suffix(".gltf"), "type": "gltf"})
+            build123d.export_step(to_export=part, file_path=file_no_ext.with_suffix(".step"))
+            files.append({"file": file_no_ext.with_suffix(".step"), "type": "step"})
         return files

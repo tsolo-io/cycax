@@ -1,22 +1,28 @@
 """A utility CLI for interfacing with CyCAx."""
 
+import asyncio
 import importlib
 import importlib.util
 import json
 import logging
+import time
+from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Annotated, Any
-import xxhash
-from collections import defaultdict
 
 import typer
+import xxhash
 from rich.logging import RichHandler
 
 from cycax.cli import (
     cmd_config,
 )
+from cycax.cli.client import AsyncCyCAxClient
 from cycax.cli.config import Settings
+from cycax.cycad.assembly import import_build
+from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
+from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
@@ -50,6 +56,8 @@ def run_function(file_path: Path, function_name: str | None = None) -> Path:
         elif not hasattr(module, function_name):
             logging.error("Error finding function %s in file %s", function_name, file_path)
             raise typer.Exit(code=1)
+        else:
+            logging.info("Found the function '%s()': Calling it.", function_name)
 
         function = getattr(module, function_name)
         result = function()
@@ -61,6 +69,7 @@ def run_function(file_path: Path, function_name: str | None = None) -> Path:
 
 def run_compile(filename: Path, function_name: str | None = None, build_dir: Path = Path("./build")):
     files = []
+    start_time = time.time()
     cycax_build = run_function(filename, function_name)
     if not isinstance(cycax_build, list):
         cycax_build = [cycax_build]
@@ -69,6 +78,8 @@ def run_compile(filename: Path, function_name: str | None = None, build_dir: Pat
         # TODO: Check the type
         build_file = build.save(build_dir)
         files.append(build_file)
+
+    logging.info("Created definition files in %.2fs", time.time() - start_time)
 
     return files
 
@@ -96,6 +107,7 @@ def compile_cmd(
         raise ValueError(msg)
     run_compile(filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"])
 
+
 def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
     _json_file = json_file.expanduser().resolve().absolute()
     if not _json_file.exists():
@@ -105,12 +117,48 @@ def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
     data = json.loads(_json_file.read_text())
     data_hash = xxhash.xxh64(json.dumps(data)).hexdigest()
     if data_hash not in build_order:
-        build_order[data_hash] = {'index': level, 'hash': xxhash.xxh64(json.dumps(data)).hexdigest(), 'path': _json_file}
-        for part in data.get('parts', []):
-            _part_json = _json_file.parent / part['part_no'] / f"{part['part_no']}.json"
-            add_to_build_order(_part_json, build_order, level - 1)
+        build_order[data_hash] = {
+            "index": level,
+            "hash": xxhash.xxh64(json.dumps(data)).hexdigest(),
+            "path": _json_file,
+        }
+        if "parts" in data:
+            for part in data["parts"]:
+                _part_json = _json_file.parent / part["part_no"] / f"{part['part_no']}.json"
+                add_to_build_order(_part_json, build_order, level - 1)
+        else:
+            # This is a part so increase the priority.
+            build_order[data_hash]["index"] -= 10
     else:
-        build_order[data_hash]['index'] -= 1
+        build_order[data_hash]["index"] -= 1
+
+
+@app.command()
+def build(
+    filename: Annotated[str, typer.Argument(help="A Python file to run with the CyCAx Code")],
+    build_dir: Annotated[str, typer.Option(help="The directory to save the build to")] = "./build",
+    part_engine: Annotated[str, typer.Option(help="The directory to save the build to")] = "./build",
+):
+    json_files = []
+    fields = cmd_input_scrubber(filename, build_dir)
+    if fields["filename"].suffix == ".py":
+        json_files = run_compile(
+            filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"]
+        )
+    elif fields["filename"].suffix == ".json":
+        json_files = [fields["filename"]]
+    elif fields["filename"].is_dir():
+        json_files = [Path(f) for f in fields["filename"].iterdir() if f.suffix == ".json"]
+    else:
+        logging.error("The path %s is not a Python file, JSON file, or directory.", filename)
+        raise typer.Exit(code=1)
+
+    for json_file in json_files:
+        data = json.loads(json_file.read_text())
+        assembly_engine = AssemblyBuild123d(data["name"])
+        part_engine = PartEngineBuild123d()
+        import_build(Path(build_dir), data, assembly_engine, [part_engine])
+
 
 @app.command()
 def send(
@@ -137,8 +185,12 @@ def send(
     for json_file in json_files:
         add_to_build_order(json_file, build_order)
 
-    for build in sorted(build_order.values(), key=lambda x: x['index']):
-        print(build)
+    client = AsyncCyCAxClient("nats://192.168.100.47:4222")
+
+    for build in sorted(build_order.values(), key=lambda x: x["index"]):
+        client.add_job(job_id=build["hash"], job_spec=json.loads(build["path"].read_text()), priority=build["index"])
+
+    asyncio.run(client.send())
 
 
 def conf_file_selector(cycax_config: str | None = None) -> Path:
@@ -158,7 +210,7 @@ def conf_file_selector(cycax_config: str | None = None) -> Path:
         conf_file = Path("~/.config/cycax/config.json").expanduser().resolve().absolute()
 
     if conf_file.exists():
-        logging.info("Using configuration file: %s", conf_file)
+        logging.info("Loading configuration file: %s", conf_file)
     else:
         logging.warning("Creating configuration file: %s", conf_file)
         conf_file.parent.mkdir(parents=True, exist_ok=True)

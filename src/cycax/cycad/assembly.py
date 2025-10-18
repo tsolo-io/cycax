@@ -556,3 +556,53 @@ class Assembly:
         else:
             assembly_out._base_path = self._base_path
         return assembly_out
+
+
+def import_build(
+    base_path: Path, data: dict, engine: AssemblyEngine | None = None, part_engines: list[PartEngine] | None = None
+):
+    """Create the parts defined in the assembly and assemble.
+
+    Args:
+        engine: Instance of AssemblyEngine to use.
+        part_engines: Instances of PartEngine to use on parts.
+    """
+
+    if engine is None:
+        logging.warning("No assembly engine specified. No assembly output.")
+    else:
+        engine.set_name(data.get("name"))
+        engine.set_path(base_path)
+
+    if part_engines is not None and "parts" in data:
+        unique_parts = {}
+        # Create the Parts.
+        for part in data["parts"]:
+            part_no = part.get("part_no")
+            if part_no not in unique_parts:
+                unique_parts[part_no] = part
+                for part_engine in part_engines:
+                    part_engine.create(part)
+            else:
+                logging.warning("The part %s is already processed", part_no)
+
+        # For asyncrounouse build environments, e.g. CyCAx Server and LinkLocation
+        # Creation on the Part in the Engine will start the build in the background.
+        # The build step is a collect/download step.
+        # Build the parts.
+        for part in unique_parts.values():
+            part_no = part.get("part_no")
+            for part_engine in part_engines:
+                part_engine.new(part_no, base_path)
+                part_engine.config["out_formats"] = [("png", "ALL"), ("STL",), ("DXF", TOP)]
+                part_json = base_path / part_no / f"{part_no}.json"
+                data = json.loads(part_json.read_text())
+                data_files = part_engine.import_build(data)
+                # part_files[part_no] = data_files
+    else:
+        logging.warning("No Part engines given. No Parts created.")
+
+    if engine is not None and "parts" in data:
+        for action in data["parts"]:
+            engine.add(action)
+        engine.build()

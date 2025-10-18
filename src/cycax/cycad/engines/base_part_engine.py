@@ -68,6 +68,10 @@ class PartEngine:
         msg = "The build method needs to be implemented for this engine."
         raise NotImplementedError(msg)
 
+    def import_build(self, data: dict):
+        msg = "The build method needs to be implemented for this engine."
+        raise NotImplementedError(msg)
+
     def file_list(self, files: list, engine: str, score: int) -> list:
         """Generate a list of artefacts/files."""
         model_files = []
