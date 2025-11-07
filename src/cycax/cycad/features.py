@@ -367,9 +367,16 @@ class SphereAdd(Feature):
 
 
 class Bending(Feature):
-    def __init__(self, x, y, z, side):
+    def __init__(self, x, y, z, side, bend_radius: float, k_factor: float, height: float, side_length: float, thickness: float, other_side_length = float, internal: bool = True):
         super().__init__(x, y, z, side)
         self.name = "bend"
         self.angle = 90
+        self.bend_radius = bend_radius
+        self.k_factor = k_factor
+        self.height = height
+        self.side_length = side_length
+        self.other_side_length = other_side_length
+        self.thickness = thickness
+        self.internal = internal
 
-        ###When you add a bend you need to grow the size of the sheet metal.
+    

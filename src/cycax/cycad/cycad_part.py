@@ -523,6 +523,7 @@ class CycadPart(Location):
         )
         self.features.append(temp_rect)
 
+
     def make_bounding_box(self):
         """This bounding box will be used to help keep track of and update the bounds.
         This method is used extensively in assembly to keep track of where the box "should" be after moving it around.
