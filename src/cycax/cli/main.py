@@ -4,16 +4,17 @@ import importlib
 import importlib.util
 import json
 import logging
+from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Annotated, Any
-import xxhash
-from collections import defaultdict
 
 import typer
+import xxhash
 from rich.logging import RichHandler
 
 from cycax.cli import (
+    cmd_build,
     cmd_config,
 )
 from cycax.cli.config import Settings
@@ -23,6 +24,7 @@ logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers
 
 app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]}, no_args_is_help=True)
 app.add_typer(cmd_config.app, name="config", help="Manage the CyCAx CLI config.")
+app.add_typer(cmd_build.app, name="build", help="Build parts and assemblies.")
 
 FUNCTION_NAMES = [
     "assemble",
@@ -96,6 +98,7 @@ def compile_cmd(
         raise ValueError(msg)
     run_compile(filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"])
 
+
 def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
     _json_file = json_file.expanduser().resolve().absolute()
     if not _json_file.exists():
@@ -105,12 +108,17 @@ def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
     data = json.loads(_json_file.read_text())
     data_hash = xxhash.xxh64(json.dumps(data)).hexdigest()
     if data_hash not in build_order:
-        build_order[data_hash] = {'index': level, 'hash': xxhash.xxh64(json.dumps(data)).hexdigest(), 'path': _json_file}
-        for part in data.get('parts', []):
-            _part_json = _json_file.parent / part['part_no'] / f"{part['part_no']}.json"
+        build_order[data_hash] = {
+            "index": level,
+            "hash": xxhash.xxh64(json.dumps(data)).hexdigest(),
+            "path": _json_file,
+        }
+        for part in data.get("parts", []):
+            _part_json = _json_file.parent / part["part_no"] / f"{part['part_no']}.json"
             add_to_build_order(_part_json, build_order, level - 1)
     else:
-        build_order[data_hash]['index'] -= 1
+        build_order[data_hash]["index"] -= 1
+
 
 @app.command()
 def send(
@@ -137,7 +145,7 @@ def send(
     for json_file in json_files:
         add_to_build_order(json_file, build_order)
 
-    for build in sorted(build_order.values(), key=lambda x: x['index']):
+    for build in sorted(build_order.values(), key=lambda x: x["index"]):
         print(build)
 
 
