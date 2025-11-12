@@ -23,7 +23,7 @@ class PartEngineFreeCAD(PartEngine):
         if check_source_hash(self._json_file, fcstd_file):
             app_bin = self.get_appimage("FreeCAD")
 
-            logging.error("Use freeCAD %s", app_bin)
+            logging.info("Use freeCAD %s", app_bin)
             freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
 
             out_formats_set = set()
