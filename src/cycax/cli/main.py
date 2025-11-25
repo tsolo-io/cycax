@@ -14,7 +14,7 @@ from cycax.cli import (
     cmd_config,
 )
 from cycax.cli.config import Settings
-from cycax.cli.run import cmd_input_scrubber, make_build_map
+from cycax.cli.run import cmd_input_scrubber, make_build_map, run_compile
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
