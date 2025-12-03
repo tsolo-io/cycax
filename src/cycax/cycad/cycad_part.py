@@ -63,6 +63,7 @@ class CycadPart(Location):
         z_size: float,
         polygon: str,
         colour: str = "orange",
+        hash: str = "",
         assembly: Assembly | None = None,
     ):
         super().__init__(x, y, z, side)
@@ -97,6 +98,7 @@ class CycadPart(Location):
         self._files = {}
         self.definition()
         self.assembly = assembly
+        self.hash = hash
         if assembly:
             assembly.add(self)
             # Assembly will set: part._base_path == assembly._base_path

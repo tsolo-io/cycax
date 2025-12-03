@@ -46,6 +46,7 @@ class Assembly:
         self.front = AssemblySideFront(self)
         self.back = AssemblySideBack(self)
         self.assemblies = []
+        self.hash: str = ""
 
     def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
         logging.info("Calling to the assembler")
@@ -462,6 +463,7 @@ class Assembly:
                 "rotate": item.rotation,
                 "rotmax": [item.x_size, item.y_size, item.z_size],
                 "colour": item.colour,
+                "hash": item.hash,
             }
             list_out.append(dict_part)
         dict_out = {}

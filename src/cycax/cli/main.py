@@ -14,7 +14,7 @@ from cycax.cli import (
     cmd_config,
 )
 from cycax.cli.config import Settings
-from cycax.cli.run import cmd_input_scrubber, make_build_map, run_compile
+from cycax.cli.run import CycaxCompiler, cmd_input_scrubber, make_build_map, run_compile
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
@@ -32,6 +32,22 @@ FUNCTION_NAMES = [
 ]  # TODO: Decide on these, maybe only support cycax_ prefixes.
 
 
+@app.command("compile2")
+def compile2_cmd(
+    ctx: typer.Context,
+    filename: Annotated[str, typer.Argument(help="A Python file to run with the CyCAx Code")],
+):
+    # fields = cmd_input_scrubber(filename, ctx.obj.config.build_directory)
+    # if fields["filename"].suffix != ".py":
+    # msg = f"File {fields['filename']} is not a Python file."
+    # raise ValueError(msg)
+    compiler = CycaxCompiler(root_build_dir=ctx.obj.config.build_directory, cache_dir=ctx.obj.config.cache_directory)
+    compiler.add_src(filename)
+    compiler.compile()
+    compiler.build()
+    print(compiler.parts)
+
+
 @app.command("compile")
 def compile_cmd(
     filename: Annotated[str, typer.Argument(help="A Python file to run with the CyCAx Code")],
@@ -41,7 +57,10 @@ def compile_cmd(
     if fields["filename"].suffix != ".py":
         msg = f"File {fields['filename']} is not a Python file."
         raise ValueError(msg)
-    run_compile(filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"])
+    files = run_compile(
+        filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"]
+    )
+    print(files)
 
 
 @app.command()
@@ -52,8 +71,8 @@ def send(
 ):
     """Send the compiled JSON files to the CyCAx server to be compiled into usable models."""
     build_order = make_build_map(filename, Path(build_dir))
-    for _build in sorted(build_order.values(), key=lambda x: x["index"]):
-        pass
+    for build in sorted(build_order.values(), key=lambda x: x["index"]):
+        logging.info(build)
 
 
 def conf_file_selector(cycax_config: str | None = None) -> Path:
@@ -70,7 +89,7 @@ def conf_file_selector(cycax_config: str | None = None) -> Path:
     if cycax_config:
         conf_file = Path(cycax_config).expanduser().resolve().absolute()
     else:
-        conf_file = Path("~/.config/cycax/config.json").expanduser().resolve().absolute()
+        conf_file = Path(".cycax_config.json").expanduser().resolve().absolute()
 
     if conf_file.exists():
         logging.info("Using configuration file: %s", conf_file)
