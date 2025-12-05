@@ -5,24 +5,15 @@ import importlib.util
 import logging
 import re
 import shutil
-from asyncio.unix_events import SelectorEventLoop
 from collections import defaultdict, namedtuple
 from collections.abc import Iterable
-from operator import attrgetter
 from pathlib import Path
-from types import SimpleNamespace
-from typing import Annotated, Any
+from typing import Any
 
 import orjson
 import typer
 import xxhash
-from rich.logging import RichHandler
 
-from cycax.cli import (
-    cmd_build,
-    cmd_config,
-)
-from cycax.cli.config import Settings
 from cycax.cycad import Assembly, CycadPart
 
 BuildTarget = namedtuple("BuildTarget", ["name", "path", "type", "obj"])
@@ -111,10 +102,10 @@ def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
         build_order[data_hash] = {
             "index": level,
             "hash": data_hash,
-            "path": _json_file,
+            "path": json_file,
         }
         for part in data.get("parts", []):
-            _part_json = _json_file.parent / part["part_no"] / f"{part['part_no']}.json"
+            _part_json = json_file.parent / part["part_no"] / f"{part['part_no']}.json"
             add_to_build_order(_part_json, build_order, level - 1)
     else:
         build_order[data_hash]["index"] -= 1
@@ -169,7 +160,8 @@ class CycaxCompiler:
     def path_join(self, base_path: Path, name: str) -> Path:
         """Join a path with a normalised name.
 
-        The name is normalised, slugified, by replacing all non-word characters with underscores and converting to lowercase.
+        The name is normalised, slugified, by replacing all non-word characters with underscores and
+        converting to lowercase.
 
         Args:
             base_path: The base path.
@@ -222,7 +214,8 @@ class CycaxCompiler:
             index: The index of the JSON file. Defaults to 1.
         """
         if not path.exists():
-            raise FileNotFoundError(f"File {path} does not exist")
+            msg = f"File {path} does not exist"
+            raise FileNotFoundError(msg)
         data = orjson.loads(path.read_text())
         _data = orjson.dumps(data).decode()
         _data_hash = xxhash.xxh64(_data).hexdigest()
@@ -275,7 +268,7 @@ class CycaxCompiler:
             elif isinstance(part, CycadPart):
                 self.save_part(part, _build_path, index=index + 4)
             else:
-                logging.error("The assembly build process returned an unexpected type: %s %s", type(build), build)
+                logging.error("The assembly build process returned an unexpected type: %s %s", type(part), part)
 
         self.save_json(_build_path, assembly.name, assembly.export(), index=index)
         self.parts[_build_path]["assembly"] = True
@@ -299,7 +292,7 @@ class CycaxCompiler:
                 else:
                     logging.error("The build process returned an unexpected type: %s %s", type(build), build)
 
-    def build_order(self) -> Iterable[dict]:
+    def build_order(self) -> Iterable[dict[str, Any]]:
         """Return parts in the order they should be built.
 
         The order is determined by the 'index' key in the part's metadata.
@@ -309,10 +302,9 @@ class CycaxCompiler:
         Returns:
             Parts in the order they should be built.
         """
-        for part in sorted(self.parts.values(), key=lambda part: part.get("index", 100), reverse=True):
-            yield part
+        yield from sorted(self.parts.values(), key=lambda part: part.get("index", 100), reverse=True)
 
-    def check_cache(self, hash: str) -> bool:
+    def check_cache(self, cache_id: str) -> bool:
         """Check if the cache exists for the given hash.
 
         Args:
@@ -321,7 +313,7 @@ class CycaxCompiler:
         Returns:
             True if the cache exists, False otherwise.
         """
-        return self.cache_path.joinpath(hash).exists()
+        return self.cache_path.joinpath(cache_id).exists()
 
     def from_cache(self, part: dict) -> bool:
         """Load a part from the cache.
@@ -332,9 +324,10 @@ class CycaxCompiler:
         Returns:
             True if the part was loaded from the cache, False otherwise.
         """
-        print(f"Loading {part['name']} from cache...")
         # Load the part from the cache here
         cache_path = self.cache_path.joinpath(part["hash"])
+        if not cache_path.exists():
+            return False
         loaded_from_cache = False
         for file in cache_path.iterdir():
             if file.suffix == ".json" or file.name.startswith("."):
@@ -349,7 +342,6 @@ class CycaxCompiler:
         Args:
             part: The part to save.
         """
-        print(f"Saving {part['name']} to cache...")
         # Save the part to the cache here
         cache_path = self.cache_path.joinpath(part["hash"])
         cache_path.mkdir(parents=True, exist_ok=True)
@@ -364,12 +356,11 @@ class CycaxCompiler:
         Args:
             part: The part to build.
         """
-        print(f"Building {part}...")
         # Build the part here
         _filename = part["path"] / f"{part['name']}.json"
         if "assembly" not in part:
-            print(part)
-            raise ValueError("Invalid part")
+            msg = "Invalid part"
+            raise ValueError(msg)
         if not part["assembly"]:
             from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 
@@ -385,17 +376,7 @@ class CycaxCompiler:
 
         # Loop through the build order and build the parts.
         for part in self.build_order():
-            # If there is no cache we have to build.
-            do_part_build = not self.check_cache(part["hash"])
-
-            # If there is a build flag we have to build. E.g. file changed.
-            do_part_build = do_part_build or part.get("build", False)
-
-            if not do_part_build:
-                # Dont have to build so we copy from cache
-                do_part_build = not self.from_cache(part)
-
-            if do_part_build:
+            if not self.from_cache(part):
                 self.build_part(part)
                 self.to_cache(part)
 

@@ -448,7 +448,7 @@ class EngineFreecad:
 
         return res
 
-    def build(self, in_name: Path, outformats: str):
+    def build(self, definition: dict, outformats: str):
         """
         This is the main working class for decoding the FreeCAD
 
@@ -456,8 +456,6 @@ class EngineFreecad:
             in_name: The path where the JSON is stored under.
             outformats: CSV containing views..
         """
-
-        definition = json.loads(in_name.read_text())
 
         name = definition["name"]
         cut_features = []
@@ -539,4 +537,5 @@ files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
 logging.info(f"Json file {json_file} out dir = {out_dir}")
 engine = EngineFreecad(Path(out_dir))
 
-engine.build(Path(json_file), files_to_produce.replace(" ", ""))
+definition = json.loads(Path(json_file).read_text())
+engine.build(definition, files_to_produce.replace(" ", ""))

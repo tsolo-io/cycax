@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import Field
 from pydantic_settings import (
     BaseSettings,
     JsonConfigSettingsSource,

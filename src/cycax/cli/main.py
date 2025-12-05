@@ -57,10 +57,7 @@ def compile_cmd(
     if fields["filename"].suffix != ".py":
         msg = f"File {fields['filename']} is not a Python file."
         raise ValueError(msg)
-    files = run_compile(
-        filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"]
-    )
-    print(files)
+    run_compile(filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"])
 
 
 @app.command()
