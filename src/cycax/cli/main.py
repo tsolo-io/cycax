@@ -45,7 +45,7 @@ def compile2_cmd(
     compiler.add_src(filename)
     compiler.compile()
     compiler.build()
-    print(compiler.parts)
+    # print(compiler.parts)
 
 
 @app.command("compile")
