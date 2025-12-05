@@ -145,7 +145,8 @@ class CycaxCompiler:
         src_py: A list of Python files used as the source of the build.
     """
 
-    def __init__(self, root_build_dir: Path, cache_dir: Path):
+    def __init__(self, root_build_dir: Path, cache_dir: Path, settings: dict):
+        self._settings = settings
         self.parts = defaultdict(dict)
         self.root_path = Path(root_build_dir).expanduser().resolve().absolute()
         if not self.root_path.exists():
@@ -362,11 +363,13 @@ class CycaxCompiler:
             msg = "Invalid part"
             raise ValueError(msg)
         if not part["assembly"]:
-            from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
+            from cycax.cycad.engines.part_freecad import PartEngineFreeCAD, bulk_build
 
             engine = PartEngineFreeCAD(name=part["name"], path=part["path"].parent)
             engine._json_file = _filename
             engine.build(None)
+
+            bulk_build()
 
     def build(self):
         """Build using the CyCAx JSON files into CAD models."""
@@ -375,10 +378,26 @@ class CycaxCompiler:
             self.load_json(json_file["filename"])
 
         # Loop through the build order and build the parts.
+        from cycax.cycad.engines.part_freecad import bulk_build
+
+        write_back_to_cache = []
+        freecad_list = []
         for part in self.build_order():
             if not self.from_cache(part):
-                self.build_part(part)
-                self.to_cache(part)
+                write_back_to_cache.append(part)
+                if not part["assembly"]:
+                    _filename = part["path"] / f"{part['name']}.json"
+                    freecad_list.append(str(_filename))
+                # self.build_part(part)
+                # self.to_cache(part)
+
+        if freecad_list:
+            bulk_build(
+                app_bin=self._settings["freecad_app"], path=self._settings["build_directory"], parts=freecad_list
+            )
+
+        for part in write_back_to_cache:
+            self.to_cache(part)
 
     def add_src(self, filename: str):
         """Add a source file to the build process.

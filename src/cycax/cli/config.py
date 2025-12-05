@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     cache_directory: Path = Field(
         Path("~/.cache/cycax").expanduser().resolve().absolute(), description="Where the artifacts are cached"
     )
+    freecad_app: Path | None = Field(None, description="The path of the FreeCAD binary")
 
     @classmethod
     def settings_customise_sources(

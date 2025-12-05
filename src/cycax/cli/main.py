@@ -41,7 +41,11 @@ def compile2_cmd(
     # if fields["filename"].suffix != ".py":
     # msg = f"File {fields['filename']} is not a Python file."
     # raise ValueError(msg)
-    compiler = CycaxCompiler(root_build_dir=ctx.obj.config.build_directory, cache_dir=ctx.obj.config.cache_directory)
+    compiler = CycaxCompiler(
+        root_build_dir=ctx.obj.config.build_directory,
+        cache_dir=ctx.obj.config.cache_directory,
+        settings=dict(ctx.obj.config),
+    )
     compiler.add_src(filename)
     compiler.compile()
     compiler.build()
