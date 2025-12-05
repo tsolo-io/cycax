@@ -15,7 +15,7 @@ from cycax.cli import (
     cmd_config,
 )
 from cycax.cli.config import Settings
-from cycax.cli.run import CycaxCompiler, cmd_input_scrubber, make_build_map, run_compile
+from cycax.cli.run import CycaxCompiler
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
@@ -25,24 +25,16 @@ app.add_typer(cmd_config.app, name="config", help="Manage the CyCAx CLI config."
 app.add_typer(cmd_build.app, name="build", help="Build parts and assemblies.")
 app.add_typer(cmd_cache.app, name="cache", help="Manage the CyCAx cache.")
 
-FUNCTION_NAMES = [
-    "assemble",
-    "parts",
-    "cycax_assemble",
-    "cycax_parts",
-    "cycax_part",
-]  # TODO: Decide on these, maybe only support cycax_ prefixes.
 
-
-@app.command("compile2")
-def compile2_cmd(
+@app.command("compile")
+def compile_cmd(
     ctx: typer.Context,
     filename: Annotated[str, typer.Argument(help="A Python file to run with the CyCAx Code")],
 ):
-    # fields = cmd_input_scrubber(filename, ctx.obj.config.build_directory)
-    # if fields["filename"].suffix != ".py":
-    # msg = f"File {fields['filename']} is not a Python file."
-    # raise ValueError(msg)
+    """Compile a Python file with the CyCAx Code.
+
+    Creates JSON files, no CAD models are created.
+    """
     compiler = CycaxCompiler(
         root_build_dir=ctx.obj.config.build_directory,
         cache_dir=ctx.obj.config.cache_directory,
@@ -50,32 +42,22 @@ def compile2_cmd(
     )
     compiler.add_src(filename)
     compiler.compile()
-    compiler.build()
-    # print(compiler.parts)
-
-
-@app.command("compile")
-def compile_cmd(
-    filename: Annotated[str, typer.Argument(help="A Python file to run with the CyCAx Code")],
-    build_dir: Annotated[str, typer.Option(help="The directory to save the build to")] = "./build",
-):
-    fields = cmd_input_scrubber(filename, build_dir)
-    if fields["filename"].suffix != ".py":
-        msg = f"File {fields['filename']} is not a Python file."
-        raise ValueError(msg)
-    run_compile(filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"])
 
 
 @app.command()
 def send(
+    ctx: typer.Context,
     filename: Annotated[str, typer.Argument(help="A Python file to run with the CyCAx Code")],
-    build_dir: Annotated[str, typer.Option(help="The directory to save the build to")] = "./build",
-    part_engine: Annotated[str, typer.Option(help="The directory to save the build to")] = "./build",
 ):
-    """Send the compiled JSON files to the CyCAx server to be compiled into usable models."""
-    build_order = make_build_map(filename, Path(build_dir))
-    for build in sorted(build_order.values(), key=lambda x: x["index"]):
-        logging.info(build)
+    """Send the compiled JSON files to the CyCAx server to be compiled into usable CAD models."""
+    compiler = CycaxCompiler(
+        root_build_dir=ctx.obj.config.build_directory,
+        cache_dir=ctx.obj.config.cache_directory,
+        settings=dict(ctx.obj.config),
+    )
+    compiler.add_src(filename)
+    compiler.compile()
+    # compile.send(ctx.obj.config.nats_dsn)
 
 
 def conf_file_selector(cycax_config: str | None = None) -> Path:

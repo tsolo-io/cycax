@@ -5,12 +5,48 @@ from typing import Annotated
 
 import typer
 
-from cycax.cli.run import make_build_map
+from cycax.cli.run import CycaxCompiler, make_build_map
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
-from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 
 app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]}, no_args_is_help=True)
+
+
+@app.command("freecad")
+def build_freecad(
+    ctx: typer.Context,
+    filename: Annotated[str, typer.Argument(help="A Python/JSON CyCAx code file or directory with CyCAx files.")],
+):
+    compiler = CycaxCompiler(
+        root_build_dir=ctx.obj.config.build_directory,
+        cache_dir=ctx.obj.config.cache_directory,
+        settings=dict(ctx.obj.config),
+    )
+    compiler.add_src(filename)
+    compiler.compile()
+
+    for json_file in compiler.src_json:
+        # If there are any JSON files that needs to be loaded, load them.
+        compiler.load_json(json_file["filename"])
+
+    # Loop through the build order and build the parts.
+    from cycax.cycad.engines.part_freecad import bulk_build  # noqa PLC0415 Import here to make CLI faster
+
+    write_back_to_cache = []
+    freecad_list = []
+    for part in compiler.build_order():
+        if not compiler.from_cache(part):
+            write_back_to_cache.append(part)
+            if not part["assembly"]:
+                freecad_list.append(str(part["definition_file"]))
+
+    if freecad_list:
+        bulk_build(
+            app_bin=compiler.settings["freecad_app"], path=compiler.settings["build_directory"], parts=freecad_list
+        )
+
+    for part in write_back_to_cache:
+        compiler.to_cache(part)
 
 
 def load_cycax_json(filename: str) -> dict:
@@ -20,23 +56,6 @@ def load_cycax_json(filename: str) -> dict:
         raise FileNotFoundError(msg)
     data = json.loads(_filename.read_text())
     return _filename, data
-
-
-@app.command("freecad")
-def build_freecad(
-    ctx: typer.Context,
-    filename: Annotated[str, typer.Argument(help="A JSON file with CyCAx Features")],
-):
-    logging.info("Listing objects")
-    build_order = make_build_map(filename)
-    for build in sorted(build_order.values(), key=lambda x: x["index"]):
-        _filename, data = load_cycax_json(build["path"])
-        if data.get("features"):
-            engine = PartEngineFreeCAD(name=data["name"], path=_filename.parent.parent)
-            engine._json_file = _filename
-            engine.build(None)
-        else:
-            logging.warning("No features found in JSON file")
 
 
 def build_part(engine, part_json_file: Path):
@@ -53,7 +72,6 @@ def build_part(engine, part_json_file: Path):
 
 @app.command("openscad")
 def build_openscad(
-    ctx: typer.Context,
     filename: Annotated[str, typer.Argument(help="A JSON file with CyCAx Features")],
 ):
     _filename, data = load_cycax_json(filename)

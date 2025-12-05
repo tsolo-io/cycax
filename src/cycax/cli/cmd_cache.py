@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging
 import shutil
 from pathlib import Path
@@ -14,7 +13,7 @@ app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]}, no_a
 
 
 def get_cache_list(
-    cache_path: Path, reverse: bool = False, ctime: bool = False, atime: bool = False
+    cache_path: Path, *, reverse: bool = False, ctime: bool = False, atime: bool = False
 ) -> list[dict[str, int]]:
     cache_store = []
     cache_size = get_all_subdirectory_stats(cache_path)
@@ -44,6 +43,7 @@ def get_cache_list(
 @app.command("list")
 def cache_list(
     ctx: typer.Context,
+    *,
     reverse: Annotated[bool, typer.Option(help="Change the sort order")] = False,
     ctime: Annotated[bool, typer.Option(help="Sort by creation time")] = False,
     atime: Annotated[bool, typer.Option(help="Sort by access time")] = False,
@@ -76,6 +76,7 @@ def cache_open(
 @app.command("remove")
 def cache_remove(
     ctx: typer.Context,
+    *,
     cache_id: Annotated[str, typer.Argument(help="ID of the cache to remove")],
     oldest: Annotated[bool, typer.Option(help="Remove the oldest cache entry")] = False,
     largest: Annotated[bool, typer.Option(help="Remove the largest cache entry")] = False,

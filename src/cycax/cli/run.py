@@ -146,7 +146,7 @@ class CycaxCompiler:
     """
 
     def __init__(self, root_build_dir: Path, cache_dir: Path, settings: dict):
-        self._settings = settings
+        self.settings = settings
         self.parts = defaultdict(dict)
         self.root_path = Path(root_build_dir).expanduser().resolve().absolute()
         if not self.root_path.exists():
@@ -187,6 +187,7 @@ class CycaxCompiler:
         _data = orjson.dumps(data).decode()
         _data_hash = xxhash.xxh64(_data).hexdigest()
         self.parts[path]["path"] = path
+        self.parts[path]["definition_file"] = json_file_path
         self.parts[path]["name"] = name
         self.parts[path]["hash"] = _data_hash
         self.parts[path]["index"] = min(self.parts[path].get("index", 100), index)
@@ -220,7 +221,8 @@ class CycaxCompiler:
         data = orjson.loads(path.read_text())
         _data = orjson.dumps(data).decode()
         _data_hash = xxhash.xxh64(_data).hexdigest()
-        self.parts[path]["path"] = path
+        self.parts[path]["path"] = path.parent
+        self.parts[path]["definition_file"] = path
         self.parts[path]["name"] = data["name"]
         self.parts[path]["hash"] = _data_hash
         self.parts[path]["build"] = True
@@ -337,7 +339,7 @@ class CycaxCompiler:
             loaded_from_cache = True
         return loaded_from_cache
 
-    def to_cache(self, part: dict):
+    def to_cache(self, part: dict[str, Any]):
         """Save a part to the cache.
 
         Args:
@@ -392,9 +394,7 @@ class CycaxCompiler:
                 # self.to_cache(part)
 
         if freecad_list:
-            bulk_build(
-                app_bin=self._settings["freecad_app"], path=self._settings["build_directory"], parts=freecad_list
-            )
+            bulk_build(app_bin=self.settings["freecad_app"], path=self.settings["build_directory"], parts=freecad_list)
 
         for part in write_back_to_cache:
             self.to_cache(part)
