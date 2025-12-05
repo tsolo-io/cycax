@@ -11,6 +11,7 @@ from rich.logging import RichHandler
 
 from cycax.cli import (
     cmd_build,
+    cmd_cache,
     cmd_config,
 )
 from cycax.cli.config import Settings
@@ -22,6 +23,7 @@ logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers
 app = typer.Typer(context_settings={"help_option_names": ["-h", "--help"]}, no_args_is_help=True)
 app.add_typer(cmd_config.app, name="config", help="Manage the CyCAx CLI config.")
 app.add_typer(cmd_build.app, name="build", help="Build parts and assemblies.")
+app.add_typer(cmd_cache.app, name="cache", help="Manage the CyCAx cache.")
 
 FUNCTION_NAMES = [
     "assemble",
