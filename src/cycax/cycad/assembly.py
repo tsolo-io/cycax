@@ -9,6 +9,7 @@ from collections import defaultdict, namedtuple
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
+from cycax.cycad.assembly_freecad import AssemblyFreeCAD
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.assembly_side import (
     AssemblySide,
@@ -52,9 +53,11 @@ class Assembly:
         logging.info("Calling to the assembler")
         if engine.lower() == "openscad":
             assembler = AssemblyOpenSCAD(self.name, config=engine_config)
+        elif engine.lower() == "freecad":
+            assembler = AssemblyFreeCAD(self.name, config=engine_config)
         else:
-            msg = f"""Engine {engine} is not one of the recognized engines for assebling parts.
-                Choose one of OpenSCAD (default) or Blender."""
+            msg = f"""Engine {engine} is not one of the recognized engines for assembling parts.
+                Choose one of OpenSCAD (default), FreeCAD, or Blender."""
             raise ValueError(msg)
         return assembler
 
@@ -186,7 +189,7 @@ class Assembly:
                 engine.add(action)
             engine.build()
 
-    def save(self, path: Path | str | None = None) -> list[Path]:
+    def save(self, path: Path | str | None = None) -> Path:
         """Save the assembly and parts to JSON files.
 
         Args:
