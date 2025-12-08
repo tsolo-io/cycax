@@ -72,47 +72,21 @@ class EngineFreecadAssembly:
         Returns:
             The imported object in FreeCAD.
         """
-        # Try to find STEP file first (preferred), then STL
-        step_file = base_path / part_no / f"{part_no}-freecad.step"
-        stl_file = base_path / part_no / f"{part_no}-freecad.stl"
 
-        obj = FreeCAD.ActiveDocument.addObject("Part::Feature", part_no)
+        for made_by in ("freecad", "build123d", "openscad", None):
+            for ext in ("step", "stl"):
+                if made_by is None:
+                    _file = base_path / part_no / f"{part_no}.{ext}"
+                else:
+                    _file = base_path / part_no / f"{part_no}-{made_by}.{ext}"
+                if _file.exists():
+                    obj = FreeCAD.ActiveDocument.addObject("Part::Feature", part_no)
+                    obj.Shape = Part.read(str(_file))
+                    logging.info(f"Imported {ext.upper()} made by {made_by} file: {_file}")
+                    return obj
 
-        if step_file.exists():
-            obj.Shape = Part.read(str(step_file))
-            logging.info(f"Imported STEP file: {step_file}")
-        elif stl_file.exists():
-            obj.Shape = Part.read(str(stl_file))
-            logging.info(f"Imported STL file: {stl_file}")
-        else:
-            logging.warning(f"No STEP or STL file found for part: {part_no}")
-            return None
-        return obj
-
-    def _apply_rotation(self, rotate_list: list) -> Rotation:
-        """Apply rotation transformations based on the rotate list.
-
-        Args:
-            rotate_list: List of rotation operations.
-
-        Returns:
-            FreeCAD Rotation object.
-        """
-        rotation = Rotation(Vector(1, 0, 0), 0)
-
-        for item in rotate_list:
-            # TODO: Use angle from file.
-            axis = item["axis"].lower()
-            if axis == "x":
-                rotation = rotation * Rotation(Vector(1, 0, 0), 90)
-            elif axis == "y":
-                rotation = rotation * Rotation(Vector(0, 1, 0), 90)
-            elif axis == "z":
-                rotation = rotation * Rotation(Vector(0, 0, 1), 90)
-            else:
-                logging.error(f"Invalid rotation axis: {axis}")
-
-        return rotation
+        logging.error(f"No STEP or STL file found for part: {part_no}")
+        return None
 
     def _set_color(self, obj, colour: str):
         """Set the color of an object.
@@ -166,9 +140,7 @@ class EngineFreecadAssembly:
         match side.upper().strip():
             case "TOP":
                 active_doc.activeView().viewTop()
-            case "BACK":
-                active_doc.activeView().viewRear()
-            case "REAR":
+            case "BACK" | "REAR":
                 active_doc.activeView().viewRear()
             case "BOTTOM":
                 active_doc.activeView().viewBottom()
@@ -264,21 +236,9 @@ class EngineFreecadAssembly:
             print(part_data, obj)
 
             if obj:
-                # Find the imported object(s) - FreeCAD may create multiple objects
-                # imported_objs = [obj for obj in doc.Objects if part_no.lower() in obj.Label.lower()]
-                # print("Import OBJS", imported_objs)
-
-                # Apply rotation
-                # rotation = self._apply_rotation(rotate_list)
-                # final_position = Vector(*position)
-
                 for rotation_spec in rotate_list:
-                    axis = rotation_spec["axis"]
-                    angle = rotation_spec["angle"]
-                    rotation = Rotation(axis_vector(axis), angle)
+                    rotation = Rotation(axis_vector(rotation_spec["axis"]), rotation_spec["angle"])
                     obj.Placement.Rotation = rotation * obj.Placement.Rotation
-                    print(rotation_spec)
-                # obj.Placement = App.Placement(final_position, rotation)
 
                 bounding_box = obj.Shape.BoundBox
                 mx = position[0] - bounding_box.XMin
@@ -295,7 +255,7 @@ class EngineFreecadAssembly:
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
         # Save the assembly
-        self.filepath = self._base_path / f"{self.name}-assembly"
+        self.filepath = self._base_path / f"{self.name}-freecad"
         doc.saveCopy(f"{self.filepath}.FCStd")
 
         # Generate output formats

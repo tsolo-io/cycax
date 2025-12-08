@@ -25,31 +25,6 @@ class Engine:
             config: Optional configuration dictionary for the engine.
         """
         self.config = dict(config or {})
-        self.name = ""
-        self._base_path = Path(".")
-
-    def set_name(self, name: str):
-        """Set the name of the engine.
-
-        Args:
-            name: Name to set for the engine.
-        """
-        self.name = name
-
-    def set_path(self, path: Path | str):
-        """Set the base path for the engine.
-
-        Args:
-            path: Base path to set for the engine.
-        """
-        self._base_path = Path(path)
-
-    def new(self, name: str, path: Path):
-        self.name = name
-        self.set_path(path)
-
-    def create(self, *args, **kwargs):
-        pass
 
     def is_part(self, data: dict) -> bool:
         """Determine if JSON data represents a part.
