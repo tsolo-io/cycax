@@ -54,7 +54,7 @@ def cache_list(
     Sort order can be reversed by using the --reverse option.
     """
     cache_path = ctx.obj.config.cache_directory
-    cache_stat_list = get_cache_list(cache_path, reverse, ctime, atime)
+    cache_stat_list = get_cache_list(cache_path, reverse=reverse, ctime=ctime, atime=atime)
     print_table(ctx, cache_stat_list, "Cache Summary")
 
 
