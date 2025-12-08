@@ -31,19 +31,29 @@ def build_freecad(
 
     # Loop through the build order and build the parts.
     from cycax.cycad.engines.part_freecad import bulk_build  # noqa PLC0415 Import here to make CLI faster
+    from cycax.cycad.engines.engine_freecad import EngineFreeCAD
 
     write_back_to_cache = []
-    freecad_list = []
+    freecad_part_list = []
+    freecad_assembly_list = []
     for part in compiler.build_order():
         if not compiler.from_cache(part):
-            write_back_to_cache.append(part)
-            if not part["assembly"]:
-                freecad_list.append(str(part["definition_file"]))
+            if part["assembly"]:
+                freecad_assembly_list.append(str(part["definition_file"]))
+            else:
+                write_back_to_cache.append(part)
+                freecad_part_list.append(str(part["definition_file"]))
 
-    if freecad_list:
+    if freecad_part_list:
         bulk_build(
-            app_bin=compiler.settings["freecad_app"], path=compiler.settings["build_directory"], parts=freecad_list
+            app_bin=compiler.settings["freecad_app"], path=compiler.settings["build_directory"], parts=freecad_part_list
         )
+    if freecad_assembly_list:
+        #     bulk_build(
+        #         app_bin=compiler.settings["freecad_app"], path=compiler.settings["build_directory"], parts=freecad_assembly_list, assembly=True
+        #     )
+        engine = EngineFreeCAD()
+        engine.build_bulk(freecad_assembly_list)
 
     for part in write_back_to_cache:
         compiler.to_cache(part)
