@@ -6,11 +6,41 @@ import logging
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
+from typing import Any
+
+import orjson
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.utils import check_source_hash
 from cycax.cycad.location import TOP
+
+
+def bulk_build(app_bin: Path, path: Path, parts: list[dict[str, Any]]):
+    logging.info("Use freeCAD %s", app_bin)
+    freecad_py = Path(__file__).resolve().parent / "cycax_part_freecad.py"
+    environment = dict(os.environ)
+    environment["CYCAX_MODE"] = "BULK"
+    environment["CYCAX_CWD"] = path
+    environment["CYCAX_OUT_FORMATS"] = "STL,PNG"
+    with tempfile.NamedTemporaryFile(delete_on_close=False) as fp:
+        fp.write(orjson.dumps(parts))
+        fp.close()
+        environment["CYCAX_JSON"] = fp.name
+        result = subprocess.run(
+            [app_bin, freecad_py],
+            capture_output=True,
+            text=True,
+            env=environment,
+            shell=False,
+            check=False,
+        )
+
+    if result.stdout:
+        logging.info("FreeCAD: %s", result.stdout)
+    if result.stderr:
+        logging.error("FreeCAD: %s", result.stderr)
 
 
 class PartEngineFreeCAD(PartEngine):
@@ -23,7 +53,7 @@ class PartEngineFreeCAD(PartEngine):
         if check_source_hash(self._json_file, fcstd_file):
             app_bin = self.get_appimage("FreeCAD")
 
-            logging.error("Use freeCAD %s", app_bin)
+            logging.info("Use freeCAD %s", app_bin)
             freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
 
             out_formats_set = set()
@@ -38,6 +68,7 @@ class PartEngineFreeCAD(PartEngine):
                     "CYCAX_JSON": self._json_file,
                     "CYCAX_CWD": self._base_path,
                     "CYCAX_OUT_FORMATS": ",".join(out_formats_set),
+                    "CYCAX_MODE": "SINGLE",
                 }
             )
             result = subprocess.run(

@@ -27,7 +27,7 @@ import Part
 from FreeCAD import Rotation, Vector  # noqa
 from PySide import QtGui
 
-logging.error("Open FreeCAD")
+logging.info("Open FreeCAD")
 
 LEFT = "LEFT"
 RIGHT = "RIGHT"
@@ -331,6 +331,8 @@ class EngineFreecad:
             if obj.ViewObject.Visibility:
                 filename = f"{self.filepath}.stl"
                 obj.Shape.exportStl(filename)
+                filename = f"{self.filepath}.step"
+                obj.Shape.exportStep(filename)
 
     def _beveled_edge_cube(self, length: float, depth: float, side: str, move: dict):
         """
@@ -448,7 +450,7 @@ class EngineFreecad:
 
         return res
 
-    def build(self, in_name: Path, outformats: str):
+    def build(self, definition: dict, outformats: str):
         """
         This is the main working class for decoding the FreeCAD
 
@@ -456,8 +458,6 @@ class EngineFreecad:
             in_name: The path where the JSON is stored under.
             outformats: CSV containing views..
         """
-
-        definition = json.loads(in_name.read_text())
 
         name = definition["name"]
         cut_features = []
@@ -511,7 +511,7 @@ class EngineFreecad:
         FreeCADGui.activeDocument().activeView().viewTop()
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        self.filepath = self._base_path / name / name
+        self.filepath = self._base_path / name / f"{name}-freecad"
         doc.saveCopy(f"{self.filepath}.FCStd")
         for out_choice in outformats.lower().split(","):
             ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)
@@ -529,14 +529,24 @@ class EngineFreecad:
                     msg = f"file_type: {out_format} is not one of PNG, DXF or STL."
                     raise ValueError(msg)
         App.closeDocument(name)
-        QtGui.QApplication.quit()
 
 
-json_file = os.getenv("CYCAX_JSON")
-out_dir = os.getenv("CYCAX_CWD")
-files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
+try:
+    json_file = os.getenv("CYCAX_JSON")
+    cycax_mode = os.getenv("CYCAX_MODE")
+    out_dir = os.getenv("CYCAX_CWD")
+    files_to_produce = os.getenv("CYCAX_OUT_FORMATS")
+    engine = EngineFreecad(Path(out_dir))
 
-logging.error(f"Json file {json_file} out dir = {out_dir}")
-engine = EngineFreecad(Path(out_dir))
-
-engine.build(Path(json_file), files_to_produce.replace(" ", ""))
+    definition = json.loads(Path(json_file).read_text())
+    if cycax_mode == "BULK":
+        for part in definition:
+            json_file = Path(part)
+            part_definition = json.loads(json_file.read_text())
+            engine._base_path = json_file.parent.parent
+            engine.build(part_definition, files_to_produce.replace(" ", ""))
+    else:
+        logging.info(f"Json file {json_file} out dir = {out_dir}")
+        engine.build(definition, files_to_produce.replace(" ", ""))
+finally:
+    QtGui.QApplication.quit()

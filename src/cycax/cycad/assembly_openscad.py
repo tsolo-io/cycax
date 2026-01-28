@@ -28,7 +28,8 @@ class AssemblyOpenSCAD(AssemblyEngine):
         Args:
             part: The name of the part to be imported.
         """
-        stl_file = Path(part) / f"{part}.stl"
+        stl_file = self._base_path / part / f"{part}.stl"
+        stl_file = stl_file.expanduser().absolute()
         if not stl_file.exists():
             logging.warning("Referencing a file that does not exists. File name %s", stl_file)
         return f'import("{stl_file}");'

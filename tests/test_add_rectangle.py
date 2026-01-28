@@ -2,10 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from itertools import combinations
 from pathlib import Path
-
-import pytest
 
 from cycax.cycad import Print3D
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d

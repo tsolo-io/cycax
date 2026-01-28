@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import (
     BaseSettings,
     JsonConfigSettingsSource,
@@ -9,8 +10,13 @@ from pydantic_settings import (
 
 
 class Settings(BaseSettings):
-    cycax_config: Path = Path("~/.config/cycax/config.json")
+    cycax_config: Path = Path(".cycax_config.json")
     model_config = SettingsConfigDict(validate_assignment=True, extra="ignore")
+    build_directory: Path = Field(Path.cwd() / "build", description="Where the build artifacts are stored")
+    cache_directory: Path = Field(
+        Path("~/.cache/cycax").expanduser().resolve().absolute(), description="Where the artifacts are cached"
+    )
+    freecad_app: Path | None = Field(None, description="The path of the FreeCAD binary")
 
     @classmethod
     def settings_customise_sources(
