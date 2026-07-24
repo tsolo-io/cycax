@@ -75,11 +75,6 @@ def build_with_freecad():
         # Build - artifacts placed in same directory as JSON files
         artifacts = engine.build(json_files)
 
-        for _artifact in artifacts:
-            pass
-    else:
-        pass
-
 
 if __name__ == "__main__":
     # Build with OpenSCAD
