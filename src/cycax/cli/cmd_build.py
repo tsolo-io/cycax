@@ -49,9 +49,6 @@ def build_freecad(
             app_bin=compiler.settings["freecad_app"], path=compiler.settings["build_directory"], parts=freecad_part_list
         )
     if freecad_assembly_list:
-        #     bulk_build(
-        #         app_bin=compiler.settings["freecad_app"], path=compiler.settings["build_directory"], parts=freecad_assembly_list, assembly=True
-        #     )
         engine = EngineFreeCAD()
         engine.build_bulk(freecad_assembly_list)
 
