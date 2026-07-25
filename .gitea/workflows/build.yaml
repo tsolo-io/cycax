@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Tsolo.io
+# SPDX-FileCopyrightText: 2026 Kuat.io
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -31,15 +31,15 @@ jobs:
           echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_ENV
       - name: Get packaged versions
         run: |
-          PACKAGED_VERSIONS=$(pip index versions cycax --pre --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Tsolo/pypi/simple/ | tr -d '\n')
+          PACKAGED_VERSIONS=$(pip index versions cycax --pre --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Kuat/pypi/simple/ | tr -d '\n')
           echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS"
           echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS" >> $GITHUB_ENV
       - name: Publish Python package
         env:
-          HATCH_INDEX_REPO: "https://${{ vars.REGISTRYHOST }}/api/packages/Tsolo/pypi"
+          HATCH_INDEX_REPO: "https://${{ vars.REGISTRYHOST }}/api/packages/Kuat/pypi"
           HATCH_INDEX_USER: "${{ vars.REGISTRYUSER }}"
           HATCH_INDEX_AUTH: "${{ secrets.REGISTRYPASSWORD }}"
         run: |
           hatch --verbose publish
-          pip index versions cycax --pre --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Tsolo/pypi/simple/
+          pip index versions cycax --pre --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Kuat/pypi/simple/
         if: ${{ !contains(env.PACKAGED_VERSIONS, env.LOCAL_VERSION) }}
