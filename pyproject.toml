@@ -69,9 +69,6 @@ python = ["3.10", "3.11", "3.12", "3.13"]
 
 [tool.hatch.envs.docs]
 dependencies = ["zensical", "mkdocstrings-python"]
-[tool.hatch.envs.docs.scripts]
-build = "mkdocs build --clean --strict"
-serve = "mkdocs serve --dev-addr localhost:8003"
 
 [tool.hatch.envs.lint]
 detached = true
