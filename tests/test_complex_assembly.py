@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
