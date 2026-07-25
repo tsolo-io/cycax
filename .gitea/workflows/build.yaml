@@ -24,10 +24,16 @@ jobs:
         run: hatch run testing:ci
       - name: Package with Python
         run: make build
-      - name: get local version
-        run: echo "LOCAL_VERSION=$(hatch version)" >> $GITHUB_ENV
-      - name: get packaged versions
-        run: echo "PACKAGED_VERSIONS=\"$(pip index versions cycax --index-url https://gitea.tu.tsolo.net/api/packages/tsolo/pypi/simple | tr -d '\n')\"" >> $GITHUB_ENV
+      - name: Get local version
+        run: |
+          LOCAL_VERSION=$(hatch version)
+          echo "LOCAL_VERSION=$LOCAL_VERSION"
+          echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_ENV
+      - name: Get packaged versions
+        run: |
+          PACKAGED_VERSIONS=$(pip index versions cycax --index-url https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi/simple | tr -d '\n')
+          echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS"
+          echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS" >> $GITHUB_ENV
       - name: Publish Python package
         env:
           HATCH_INDEX_REPO: "https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi"
@@ -35,5 +41,5 @@ jobs:
           HATCH_INDEX_AUTH: "${{ secrets.REGISTRYPASSWORD }}"
         run: |
           hatch --verbose publish
-          pip index versions cycax --index-url https://gitea.tu.tsolo.net/api/packages/tsolo/pypi/simple
+          pip index versions cycax --index-url https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi/simple
         if: ${{ !contains(env.PACKAGED_VERSIONS, env.LOCAL_VERSION) }}
