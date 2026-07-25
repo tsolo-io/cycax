@@ -31,15 +31,15 @@ jobs:
           echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_ENV
       - name: Get packaged versions
         run: |
-          PACKAGED_VERSIONS=$(pip index versions cycax --index-url https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi/simple | tr -d '\n')
+          PACKAGED_VERSIONS=$(pip index versions cycax --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Tsolo/pypi/simple | tr -d '\n')
           echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS"
           echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS" >> $GITHUB_ENV
       - name: Publish Python package
         env:
-          HATCH_INDEX_REPO: "https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi"
+          HATCH_INDEX_REPO: "https://${{ vars.REGISTRYHOST }}/api/packages/Tsolo/pypi"
           HATCH_INDEX_USER: "${{ vars.REGISTRYUSER }}"
           HATCH_INDEX_AUTH: "${{ secrets.REGISTRYPASSWORD }}"
         run: |
           hatch --verbose publish
-          pip index versions cycax --index-url https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi/simple
+          pip index versions cycax --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Tsolo/pypi/simple
         if: ${{ !contains(env.PACKAGED_VERSIONS, env.LOCAL_VERSION) }}
