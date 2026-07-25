@@ -7,8 +7,6 @@ import os
 import subprocess
 from pathlib import Path
 
-import orjson
-
 from cycax.cycad.engines.base_engine import Engine
 from cycax.cycad.location import TOP
 
