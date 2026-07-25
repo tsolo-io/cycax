@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout repository code
         uses: https://gitea.com/actions/checkout@v4
+      - name: Install packages
+        run: |
+          apt-get update
+          apt-get install libgl-dev
       - name: Run tests
         run: hatch run testing:ci
       - name: Package with Python

@@ -216,7 +216,7 @@ def build_test_case(*, tmp_path, slow: bool):
     (
         assembly,
         side_left,
-        side_right,
+        _side_right,
         side_top,
         side_bottom,
         side_front,
@@ -244,7 +244,7 @@ def build_test_case(*, tmp_path, slow: bool):
         (
             assembly,
             side_left,
-            side_right,
+            _side_right,
             side_top,
             side_bottom,
             side_front,
