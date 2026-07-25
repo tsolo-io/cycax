@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository code
         uses: https://gitea.com/actions/checkout@v4
       - name: Run tests
-        run: make test 
+        run: hatch run testing:ci
       - name: Package with Python
         run: make build
       - name: get local version
