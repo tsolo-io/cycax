@@ -7,7 +7,6 @@ from pathlib import Path
 
 from cycax.cycad.engines.base_engine import Engine
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
-from cycax.cycad.location import TOP
 
 
 class EngineOpenSCAD(Engine):

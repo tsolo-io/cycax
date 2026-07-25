@@ -73,7 +73,7 @@ def build_with_freecad():
 
     if json_files:
         # Build - artifacts placed in same directory as JSON files
-        artifacts = engine.build(json_files)
+        engine.build(json_files)
 
 
 if __name__ == "__main__":

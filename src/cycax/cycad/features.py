@@ -336,7 +336,7 @@ class Sphere(Feature):
         diameter: diameter of the sphere.
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, cut: bool):
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, *, cut: bool):
         self.name = "sphere"
         if cut:
             self.type = "cut"
