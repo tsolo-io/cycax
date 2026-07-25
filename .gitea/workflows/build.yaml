@@ -29,7 +29,11 @@ jobs:
       - name: get packaged versions
         run: echo "PACKAGED_VERSIONS=\"$(pip index versions cycax --index-url https://gitea.tu.tsolo.net/api/packages/tsolo/pypi/simple | tr -d '\n')\"" >> $GITHUB_ENV
       - name: Publish Python package
+        env:
+          HATCH_INDEX_REPO: "https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi"
+          HATCH_INDEX_USER: "${{ vars.REGISTRYUSER }}"
+          HATCH_INDEX_AUTH: "${{ secrets.REGISTRYPASSWORD }}"
         run: |
-          hatch --verbose publish -r https://${{ vars.REGISTRYHOST }}/api/packages/tsolo/pypi -u ${{ vars.REGISTRYUSER }} -a ${{ secrets.REGISTRYPASSWORD }}
+          hatch --verbose publish
           pip index versions cycax --index-url https://gitea.tu.tsolo.net/api/packages/tsolo/pypi/simple
         if: ${{ !contains(env.PACKAGED_VERSIONS, env.LOCAL_VERSION) }}
