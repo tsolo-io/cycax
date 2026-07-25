@@ -19,7 +19,7 @@ jobs:
       - name: Install packages
         run: |
           apt-get update
-          apt-get install libgl-dev
+          apt-get install -y libgl-dev
       - name: Run tests
         run: hatch run testing:ci
       - name: Package with Python
