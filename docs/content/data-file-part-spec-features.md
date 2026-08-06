@@ -19,7 +19,8 @@ only the fields it adds on top of these.
 **Fields:**
 
 - **name**: Identifier for the feature.
-- **type**: The kind of feature, e.g. `cuboid`, `cylinder`, `sphere`, `nut_cutout`,
+- **type**: The kind of feature, e.g. `cuboid`, `cylinder`, `sphere`, `cone`,
+  `regular_polygon`, `nut_cutout` (superseded by `regular_polygon` in the new format),
   `beveled_edge`, `sketch`, `bend`. Determines which additional fields apply.
 - **action**: `add`, `subtract`, or `bend`.
 - **side**: The reference side of the part the feature is applied to. One of `left`, `right`,
@@ -96,6 +97,10 @@ Implemented today by the `NutCutOut` class (always `action: subtract`, currently
   omitted.
 - **vertical**: Boolean. If `false`, the nut sits with its flat side down. Default `true`.
 
+In the new format, `nut_cutout` is superseded by the general [Regular
+Polygon](#regular-polygon) feature — a hex nut cutout is just a 6-sided regular polygon sized
+to the nut.
+
 ### Beveled Edge
 
 Rounds or chamfers an edge of the part, rather than adding/subtracting a shape at a position.
@@ -127,6 +132,28 @@ A conical feature. Useful for e.g. countersunk holes or tapered pegs.
 - **top_diameter**: Diameter at the top of the cone, in millimetres. `0` produces a point (a
   true cone); a nonzero value produces a frustum.
 - **z_size**: Height of the cone, in millimetres (reuses the [common field](#common-fields)).
+
+### Regular Polygon
+
+A constrained regular polygon (all sides and angles equal), extruded to a height. Replaces
+[Nut Cutout](#nut-cutout) in the new format — e.g. a hex nut cutout is `sides: 6` with
+`diameter` set to the nut's circumscribed-circle size.
+
+**Fields:**
+
+- **sides**: Number of sides, an integer `> 2`.
+- **diameter**: Diameter of the polygon's circumscribed circle (the circle passing through
+  every vertex), in millimetres — chosen over a side-length field so the size is independent
+  of `sides`.
+- **z_size**: Height to extrude the polygon along its local Z axis, in millimetres (reuses the
+  [common field](#common-fields)).
+- **x**/**y**/**z**: The center of the polygon (reuses the [common fields](#common-fields));
+  `center` is implicitly `true` for this shape.
+
+`x_size`/`y_size` are not used. Before `rotate` is applied, the polygon has a fixed starting
+orientation on its local XY plane: one vertex sits at the polygon's minimum-`y` point (pointing
+in the `-y` direction). This gives every regular polygon a consistent, repeatable shape prior
+to rotation, regardless of `sides`.
 
 ### Sketch
 
