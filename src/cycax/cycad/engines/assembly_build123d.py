@@ -26,7 +26,7 @@ class AssemblyBuild123d(AssemblyEngine):
 
     def add(self, part_operation: dict):
         """Add a part to the assembly."""
-        name = part_operation["part_no"]
+        name = part_operation["name"]
         part = None
         # Import Step files of Parts
         ext = "step"  # Only work with step files. STL import create a face only, we need a solid.
@@ -61,14 +61,15 @@ class AssemblyBuild123d(AssemblyEngine):
         colour = part_operation.get("colour")
         if colour:
             try:
-                part.color = build123d.Color(colour)
+                part.color = build123d.Color(*colour)
             except ValueError:
                 logging.warning("Using an incompatible color %s", colour)
         # Position the part - final transformation
-        cpart = build123d.Pos(*part_operation["position"]) * part
-        cpart.name = part_operation["part_no"]
+        position = (part_operation["x"], part_operation["y"], part_operation["z"])
+        cpart = build123d.Pos(*position) * part
+        cpart.name = part_operation["name"]
         # Last thing we do is set the label. Sometimes the label changed to COMPOUND if we do a transformation.
-        cpart.label = part_operation["part_no"]
+        cpart.label = part_operation["name"]
         self._children.append(cpart)
 
     def build(self, path: Path | None = None):

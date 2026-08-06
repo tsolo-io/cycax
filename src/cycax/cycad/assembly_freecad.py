@@ -31,11 +31,11 @@ class AssemblyFreeCAD(AssemblyEngine):
 
         Args:
             part_operation: Dictionary containing part information:
-                - part_no: Part identifier
-                - position: [x, y, z] position
+                - name: Part identifier
+                - x, y, z: Position
                 - rotate: List of rotation operations
-                - rotmax: [x_size, y_size, z_size] dimensions
-                - colour: Part color
+                - x_size, y_size, z_size: Dimensions
+                - colour: `[r, g, b]` part colour
                 - hash: Part hash
         """
         self._parts.append(part_operation)

@@ -85,7 +85,7 @@ class EngineOpenSCAD(Engine):
 
         # Build each part first
         for part_data in data["parts"]:
-            part_no = part_data["part_no"]
+            part_no = part_data["name"]
             part_json = base_path / part_no / f"{part_no}.json"
 
             if part_json.exists():

@@ -93,7 +93,7 @@ def build_openscad(
         engine.set_path(_filename.parent)
         engine._json_file = _filename
         for part in data["parts"]:
-            _part_filename = _filename.parent / part["part_no"] / f"{part['part_no']}.json"
+            _part_filename = _filename.parent / part["name"] / f"{part['name']}.json"
             build_part(PartEngineOpenSCAD, _part_filename)
             engine.add(part)
         engine.build(_filename.parent)

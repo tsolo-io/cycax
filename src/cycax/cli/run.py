@@ -109,7 +109,7 @@ def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
             "path": json_file,
         }
         for part in data.get("parts", []):
-            _part_json = json_file.parent / part["part_no"] / f"{part['part_no']}.json"
+            _part_json = json_file.parent / part["name"] / f"{part['name']}.json"
             add_to_build_order(_part_json, build_order, level - 1)
     else:
         build_order[data_hash]["index"] -= 1
@@ -244,7 +244,7 @@ class CycaxCompiler:
         if "parts" in data:
             self.parts[path]["assembly"] = True
             for part in data["parts"]:
-                name = part["part_no"]
+                name = part["name"]
                 _path = path.parent / name / f"{name}.json"
                 self.load_json(_path, index=index + 4)
 
