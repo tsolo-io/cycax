@@ -37,8 +37,12 @@ def get_cache_list(
             "name": guess_name_cache_directory_name(path),
             "path": path,
             "size": format_size(size),
-            "Created": datetime.datetime.fromtimestamp(cache["ctime"]).strftime("%Y-%m-%d %H:%M:%S"),
-            "Last Accessed": datetime.datetime.fromtimestamp(cache["atime"]).strftime("%Y-%m-%d %H:%M:%S"),
+            "Created": datetime.datetime.fromtimestamp(cache["ctime"], tz=datetime.timezone.utc)
+            .astimezone()
+            .strftime("%Y-%m-%d %H:%M:%S"),
+            "Last Accessed": datetime.datetime.fromtimestamp(cache["atime"], tz=datetime.timezone.utc)
+            .astimezone()
+            .strftime("%Y-%m-%d %H:%M:%S"),
         }
         cache_store.append(_cache)
     return cache_store
@@ -84,13 +88,13 @@ def cache_remove(
     cache_id: Annotated[str, typer.Argument(help="ID of the cache to remove")],
     oldest: Annotated[bool, typer.Option(help="Remove the oldest cache entry")] = False,
     largest: Annotated[bool, typer.Option(help="Remove the largest cache entry")] = False,
-    all: Annotated[bool, typer.Option(help="Remove all cache entries")] = False,
+    all_entries: Annotated[bool, typer.Option("--all", help="Remove all cache entries")] = False,
 ):
     """Remove a cached build of a part.
 
     Removing the cache will force a rebuild on the next run for a matching cache ID.
     """
-    if all:
+    if all_entries:
         cache_stat_list = get_cache_list(ctx.obj.config.cache_directory)
         for cache in cache_stat_list:
             cache_path = ctx.obj.config.cache_directory / cache["id"]
