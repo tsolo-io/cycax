@@ -362,7 +362,7 @@ class EngineFreecad:
         return cube
 
     def _rhombus(self, depth: float, length: float, move: dict, side: str):
-        """This method will cut a rhombus with 90 degree andgles.
+        """This method will cut a rhombus with 90 degree angles.
 
         Args:
             depth: this is the depth of the rhombus.

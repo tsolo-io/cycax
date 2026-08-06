@@ -81,7 +81,7 @@ class EngineOpenSCAD(Engine):
             return []
 
         # Import here to avoid circular dependencies
-        from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
+        from cycax.cycad.assembly_openscad import AssemblyOpenSCAD  # noqa: PLC0415
 
         # Build each part first
         for part_data in data["parts"]:

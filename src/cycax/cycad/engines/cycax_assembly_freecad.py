@@ -21,7 +21,6 @@ from pathlib import Path
 import FreeCAD
 import FreeCAD as App
 import FreeCADGui
-import Import
 import importDXF
 import importSVG
 import Part

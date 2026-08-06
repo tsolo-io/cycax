@@ -369,7 +369,10 @@ class CycaxCompiler:
             msg = "Invalid part"
             raise ValueError(msg)
         if not part["assembly"]:
-            from cycax.cycad.engines.part_freecad import PartEngineFreeCAD, bulk_build
+            from cycax.cycad.engines.part_freecad import (  # noqa PLC0415 Import here to make CLI faster
+                PartEngineFreeCAD,
+                bulk_build,
+            )
 
             engine = PartEngineFreeCAD(name=part["name"], path=part["path"].parent)
             engine._json_file = _filename
@@ -384,7 +387,7 @@ class CycaxCompiler:
             self.load_json(json_file["filename"])
 
         # Loop through the build order and build the parts.
-        from cycax.cycad.engines.part_freecad import bulk_build
+        from cycax.cycad.engines.part_freecad import bulk_build  # noqa PLC0415 Import here to make CLI faster
 
         write_back_to_cache = []
         freecad_list = []

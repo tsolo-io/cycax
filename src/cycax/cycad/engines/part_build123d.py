@@ -177,7 +177,9 @@ class PartEngineBuild123d(PartEngine):
 
         Example:
         feature_spec = {
-            'name': 'beveled_edge', 'type': 'cut', 'edge_type': 'round',
+            'name': 'beveled_edge',
+            'type': 'cut',
+            'edge_type': 'round',
             'axis1': 'y', 'bound1': 0.0,
             'axis2': 'x', 'bound2': 0.0,
             'size': 3, 'side': 'BOTTOM', 'depth': 2

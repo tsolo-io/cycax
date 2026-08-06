@@ -26,7 +26,7 @@ class CycadSide:
         sink: float = 0.0,
         length: float = 0.0,
         width: float = 0.0,
-        original_surface=False,
+        original_surface=False,  # noqa: FBT002, ARG002 Boolean default positional argument, unused argument
     ) -> tuple[float, float, float]:
         """Location is calculated for the (x, y) plain using two values and a side.
 
@@ -41,7 +41,7 @@ class CycadSide:
         msg = f"_location_calc is Not implemented on {self.name}"
         raise ValueError(msg)
 
-    def _redefine_surface(self, add: float, sink: float = 0.0):
+    def _redefine_surface(self, add: float, sink: float = 0.0):  # noqa: ARG002 Unused argument
         """
         Moves the min or max on the object to where it is after and add.
         """
@@ -325,7 +325,7 @@ class CycadSide:
         pos: tuple[float, float],
         diameter: float,
         sink: float = 0.0,
-        original_surface=False,
+        original_surface=False,  # noqa: FBT002 Boolean default positional argument
     ):
         """
         This method allows a sphere to be added onto a specified side.
@@ -510,7 +510,7 @@ class LeftSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,
         width: float = 0.0,  # noqa: ARG002 Unused argument
-        original_surface: bool = False,
+        original_surface: bool = False,  # noqa: FBT001, FBT002 Boolean positional argument
     ) -> tuple[float, float, float]:
         if original_surface:
             temp_x = self._parent.x + sink
@@ -551,7 +551,7 @@ class RightSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,  # noqa: ARG002 Unused argument
-        original_surface: bool = False,
+        original_surface: bool = False,  # noqa: FBT001, FBT002 Boolean positional argument
     ) -> tuple[float, float, float]:
         if original_surface:
             temp_x = self._parent.x + self._parent.x_size - sink
@@ -592,7 +592,7 @@ class TopSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 1.0,  # noqa: ARG002 Unused argument
-        original_surface: bool = False,
+        original_surface: bool = False,  # noqa: FBT001, FBT002 Boolean positional argument
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = pos[1]
@@ -633,7 +633,7 @@ class BottomSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,
-        original_surface: bool = False,
+        original_surface: bool = False,  # noqa: FBT001, FBT002 Boolean positional argument
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         temp_y = self._parent.y_size - pos[1] - width
@@ -674,7 +674,7 @@ class FrontSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,  # noqa: ARG002 Unused argument
         width: float = 0.0,  # noqa: ARG002 Unused argument
-        original_surface: bool = False,
+        original_surface: bool = False,  # noqa: FBT001, FBT002 Boolean positional argument
     ) -> tuple[float, float, float]:
         temp_x = pos[0]
         if original_surface:
@@ -715,7 +715,7 @@ class BackSide(CycadSide):
         sink: float = 0.0,
         length: float = 0.0,
         width: float = 0.0,  # noqa: ARG002 Unused argument
-        original_surface: bool = False,
+        original_surface: bool = False,  # noqa: FBT001, FBT002 Boolean positional argument
     ) -> tuple[float, float, float]:
         temp_x = self._parent.x_size - pos[0] - length
         if original_surface:
