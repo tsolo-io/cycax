@@ -63,7 +63,7 @@ class CycadPart(Location):
         z_size: float,
         polygon: str,
         colour: str = "orange",
-        hash: str = "",
+        hash: str = "",  # noqa: A002 Shadows builtin, kept for backwards compatibility
         assembly: Assembly | None = None,
     ):
         super().__init__(x, y, z, side)
@@ -174,7 +174,7 @@ class CycadPart(Location):
         msg = "The adding of counterdrill to a side has not been implemented."
         raise NotImplementedError(msg)
 
-    def test_mesh_hole(self, x: float, y: float, z: float, diameter: float, depth: float):
+    def test_mesh_hole(self, x: float, y: float, z: float, diameter: float, depth: float):  # noqa: ARG002 Unused argument
         if (
             x - diameter / 2 < self.x_min
             or x + diameter / 2 > self.x_max
@@ -185,7 +185,16 @@ class CycadPart(Location):
             warnings.warn("This hole may break the mesh of the CycadPart.", stacklevel=2)
 
     def test_mesh_rectangle_cutout(
-        self, type: str, x: float, y: float, z: float, x_size: float, y_size: float, z_size: float, *, centered: bool
+        self,
+        type: str,  # noqa: A002, ARG002 Shadows builtin, unused argument
+        x: float,
+        y: float,
+        z: float,
+        x_size: float,
+        y_size: float,
+        z_size: float,
+        *,
+        centered: bool,
     ):
         if centered:
             if (
