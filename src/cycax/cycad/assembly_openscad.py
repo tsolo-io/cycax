@@ -103,21 +103,21 @@ class AssemblyOpenSCAD(AssemblyEngine):
         output = output + rotout
         return output
 
-    def _colour(self, colour: str) -> str:
+    def _colour(self, colour: list) -> str:
         """Set the part colour.
 
         Args:
-            colour: Colour which the part will become.
+            colour: `[r, g, b]` (or `[r, g, b, a]`) colour which the part will become.
         """
-        return f'color("{colour}")'
+        return f"color({colour})"
 
     def add(self, part_operation: dict):
         """Add the part to the assembly."""
-        self._scad_ops.append(
-            self._move(part_operation["rotmax"], part_operation["position"], part_operation["rotate"])
-        )
+        rotmax = [part_operation["x_size"], part_operation["y_size"], part_operation["z_size"]]
+        position = [part_operation["x"], part_operation["y"], part_operation["z"]]
+        self._scad_ops.append(self._move(rotmax, position, part_operation["rotate"]))
         self._scad_ops.append(self._colour(part_operation["colour"]))
-        self._scad_ops.append(self._fetch_part(part_operation["part_no"]))
+        self._scad_ops.append(self._fetch_part(part_operation["name"]))
 
     def build(self, path: Path | None = None):
         """Create the assembly of the parts added."""

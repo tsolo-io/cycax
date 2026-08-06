@@ -168,11 +168,15 @@ def test_engine_build_mixed_list():
             "name": "test_assembly",
             "parts": [
                 {
-                    "part_no": "test_part",
-                    "position": [0, 0, 0],
+                    "name": "test_part",
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
                     "rotate": [],
-                    "rotmax": [10, 10, 10],
-                    "colour": "orange",
+                    "x_size": 10,
+                    "y_size": 10,
+                    "z_size": 10,
+                    "colour": [1.0, 0.5, 0.0],
                     "hash": "",
                 }
             ],

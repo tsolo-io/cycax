@@ -18,13 +18,13 @@ class AssemblyServer(AssemblyEngine, CycaxServerClient):
 
     def add(self, part_operation: dict):
         """Add the part to the assembly."""
-        part_no = part_operation["part_no"]
+        part_no = part_operation["name"]
         if part_no not in self.config["job_ids"]:
             logging.info("Assembly add(%s)", part_no)
-            part_job_id_path = self._base_path / part_operation["part_no"] / ".jobid"
+            part_job_id_path = self._base_path / part_operation["name"] / ".jobid"
             if part_job_id_path.exists():
                 job_id = json.loads(part_job_id_path.read_text()).get("jobid")
-                self.config["job_ids"][part_operation["part_no"]] = job_id
+                self.config["job_ids"][part_operation["name"]] = job_id
 
     def build(self, path: Path | None = None):
         """Create the assembly of the parts added."""
@@ -37,6 +37,6 @@ class AssemblyServer(AssemblyEngine, CycaxServerClient):
         # Enrich the Assembly Specfile with the JobID's of the parts.
         for part_seq in range(len(assembly_spec["parts"])):
             part = assembly_spec["parts"][part_seq]
-            part["jobid"] = self.config["job_ids"][part["part_no"]]
+            part["jobid"] = self.config["job_ids"][part["name"]]
         jobid = self.create(assembly_spec)
         self.download_artifacts(jobid, self.name, self._base_path.parent, overwrite=True)

@@ -157,7 +157,7 @@ def get_cycax_json_hash(filename: Path) -> str:
         features.append(json.dumps(feature))
     parts = []
     for part in data.get("parts", []):
-        part["part_no"] = ""
+        part["name"] = ""
         parts.append(json.dumps(part))
     new_data = data
     features.sort()
