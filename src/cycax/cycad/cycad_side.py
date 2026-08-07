@@ -312,7 +312,7 @@ class CycadSide:
             sink: How far into or out of the plastic the sphere should be extruded.
         """
         _location_tuple = self._location_calc(pos=pos, sink=sink)
-        self._parent.make_sphere(
+        self._parent.make_sphere_cut_out(
             side=self.name,
             x=_location_tuple[0],
             y=_location_tuple[1],
