@@ -78,6 +78,10 @@ A spherical feature. Implemented by the `Sphere` class (`type: "sphere"`, `actio
 
 ### Nut Cutout
 
+!!! info
+
+    To be replaced by the general [Regular Polygon](#regular-polygon) feature.
+
 A cutout shaped to hold a hex nut, so it can be embedded in a (typically 3D-printed) part.
 Implemented by the `NutCutOut` class (`type: "nut_cutout"`, always `action: subtract`, `name:
 "nut"`).
