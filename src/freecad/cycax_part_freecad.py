@@ -92,11 +92,11 @@ class EngineFreecad:
         return Part.makeSphere(radius, pos)
 
     def _calc_hex(self, depth: float, diameter: float):
-        """This method will be used to find out where the points of the hexigon are located and then drawing a hexigon.
+        """This method will be used to find out where the points of the hexagon are located and then drawing a hexagon.
 
         Args:
-            depth: this is the depth of the hexigon.
-            diameter: this is the diameter of the hexigon.
+            depth: this is the depth of the hexagon.
+            diameter: this is the diameter of the hexagon.
         """
 
         radius = diameter / 2
@@ -119,13 +119,13 @@ class EngineFreecad:
         return face
 
     def cut_nut(self, feature: dict):
-        """This method will take the 2D hexigon and convert it to a 3D shape and place it where it needs to go.
+        """This method will take the 2D hexagon and convert it to a 3D shape and place it where it needs to go.
         Args:
-            feature: this is a dict containing the necessary details of the hexigon like its size and location.
+            feature: this is a dict containing the necessary details of the hexagon like its size and location.
         """
 
-        hexigon = self._calc_hex(depth=0, diameter=feature["diameter"])
-        nut = hexigon.extrude(App.Vector(0, 0, feature["depth"]))
+        hexagon = self._calc_hex(depth=0, diameter=feature["diameter"])
+        nut = hexagon.extrude(App.Vector(0, 0, feature["depth"]))
 
         side = feature["side"]
         x = feature["x"]

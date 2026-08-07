@@ -189,7 +189,7 @@ def test_level_subtract_side():
                 assert len(features) == 5
                 features_set = set()
                 for feature in features:
-                    if feature["type"] == "cut":
+                    if feature["action"] == "subtract":
                         features_set.add(json.dumps(feature, sort_keys=True))
                         assert feature["side"] in (TOP, BOTTOM)
                         assert feature["x"] in pos_vals

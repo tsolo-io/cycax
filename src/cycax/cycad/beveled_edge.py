@@ -44,7 +44,8 @@ class BeveledEdge:
         """
         dict_edge = {}
         dict_edge["name"] = "beveled_edge"
-        dict_edge["type"] = "cut"
         for key, value in vars(self).items():
             dict_edge[key] = value
+        dict_edge["type"] = "beveled_edge"
+        dict_edge["action"] = "subtract"
         return dict_edge

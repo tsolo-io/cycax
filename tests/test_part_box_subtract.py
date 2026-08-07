@@ -94,7 +94,7 @@ def test_subtract_side(tmp_path):
         base = assembly.get_part("base_1").export()
         compare = {}
         for feature in base["features"]:
-            if feature["type"] == "cut":
+            if feature["action"] == "subtract":
                 if feature["name"] == "hole":
                     name = f"{feature['name']}{feature['diameter']}"
                 else:
