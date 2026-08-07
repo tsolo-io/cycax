@@ -21,7 +21,6 @@ from pathlib import Path
 import FreeCAD
 import FreeCAD as App
 import FreeCADGui
-import Import
 import importDXF
 import importSVG
 import Part
@@ -89,29 +88,15 @@ class EngineFreecadAssembly:
         logging.error(f"No STEP or STL file found for part: {part_no}")
         return None
 
-    def _set_color(self, obj, colour: str):
+    def _set_color(self, obj, colour: list):
         """Set the color of an object.
 
         Args:
             obj: FreeCAD object.
-            colour: Color name (e.g., "orange", "blue").
+            colour: `[r, g, b]` (or `[r, g, b, a]`) colour, each component 0.0-1.0.
         """
-        color_map = {
-            "orange": (1.0, 0.5, 0.0),
-            "blue": (0.0, 0.0, 1.0),
-            "red": (1.0, 0.0, 0.0),
-            "green": (0.0, 1.0, 0.0),
-            "yellow": (1.0, 1.0, 0.0),
-            "purple": (0.5, 0.0, 0.5),
-            "white": (1.0, 1.0, 1.0),
-            "black": (0.0, 0.0, 0.0),
-            "gray": (0.5, 0.5, 0.5),
-            "grey": (0.5, 0.5, 0.5),
-        }
-
-        rgb = color_map.get(colour.lower(), (1.0, 0.5, 0.0))  # Default to orange
         if hasattr(obj, "ViewObject") and obj.ViewObject:
-            obj.ViewObject.ShapeColor = rgb
+            obj.ViewObject.ShapeColor = tuple(colour[:3])
 
     def render_to_png(self, view: str | None = None):
         """Used to create a png of the desired view.
@@ -227,11 +212,10 @@ class EngineFreecadAssembly:
 
         # Import and position each part
         for part_data in definition["parts"]:
-            part_no = part_data["part_no"]
-            position = part_data["position"]
+            part_no = part_data["name"]
+            position = [part_data["x"], part_data["y"], part_data["z"]]
             rotate_list = part_data["rotate"]
-            part_data["rotmax"]
-            colour = part_data.get("colour", "orange")
+            colour = part_data.get("colour", [1.0, 0.5, 0.0])
             # Import the part
             obj = self._import_part(part_no, self._base_path)
 

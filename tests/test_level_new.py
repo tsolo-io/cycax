@@ -108,9 +108,9 @@ def test_level_new():
     assert right_side_dict == right_side_fancy_dict, "Subtract on level does not result in the same output."
 
     for part in box_dict["parts"]:
-        if part["part_no"] == "concube":
-            move_comp = part["position"]
-        if part["part_no"] == "concube_fancy":
-            move_fancy_comp = part["position"]
+        if part["name"] == "concube":
+            move_comp = (part["x"], part["y"], part["z"])
+        if part["name"] == "concube_fancy":
+            move_fancy_comp = (part["x"], part["y"], part["z"])
 
     assert move_comp == move_fancy_comp, "The two level methods do not result in the same output."

@@ -4,7 +4,7 @@
 
 from cycax.cycad.assembly import Assembly  # noqa: F401
 from cycax.cycad.assembly_freecad import AssemblyFreeCAD  # noqa: F401
-from cycax.cycad.assembly_side import (
+from cycax.cycad.assembly_side import (  # noqa: F401
     AssemblySideBack,
     AssemblySideBottom,
     AssemblySideFront,

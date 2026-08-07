@@ -20,6 +20,7 @@ from cycax.cycad.assembly_side import (
     AssemblySideRight,
     AssemblySideTop,
 )
+from cycax.cycad.colour import to_rgb
 from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
@@ -455,17 +456,25 @@ class Assembly:
     def export(self) -> dict:
         """This creates a dict of the assembly, used to make the JSON.
 
+        Nested assemblies (`self.assemblies`) are flattened into a single flat list of parts
+        before export - an assembly of assemblies is never represented as such in the JSON.
+
         Returns:
             This is the dict that will be used to form a JSON decoded in assembly.
         """
+        flattened = self.combine_all_assemblies() if self.assemblies else self
         list_out = []
-        for item in self.parts.values():
+        for item in flattened.parts.values():
             dict_part = {
-                "part_no": item.part_no,
-                "position": item.position,
+                "name": item.part_no,
+                "x": item.position[0],
+                "y": item.position[1],
+                "z": item.position[2],
+                "x_size": item.x_size,
+                "y_size": item.y_size,
+                "z_size": item.z_size,
                 "rotate": item.rotation,
-                "rotmax": [item.x_size, item.y_size, item.z_size],
-                "colour": item.colour,
+                "colour": to_rgb(item.colour),
                 "hash": item.hash,
             }
             list_out.append(dict_part)
@@ -548,7 +557,8 @@ class Assembly:
         """
         total_parts = {}
         for n, assembly in enumerate(self.assemblies):
-            for part_name, part in assembly.parts.items():
+            flattened = assembly.combine_all_assemblies()
+            for part_name, part in flattened.parts.items():
                 total_parts[f"assembly_{n}_{part_name}"] = part
         total_parts.update(self.parts)
         if new_name:

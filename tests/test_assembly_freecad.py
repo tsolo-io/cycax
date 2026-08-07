@@ -22,17 +22,21 @@ def test_freecad_assembly_add_parts():
     assembly_engine = AssemblyFreeCAD("test_assembly")
 
     part_operation = {
-        "part_no": "test_part",
-        "position": [0, 0, 0],
+        "name": "test_part",
+        "x": 0,
+        "y": 0,
+        "z": 0,
         "rotate": [],
-        "rotmax": [10, 10, 10],
-        "colour": "orange",
+        "x_size": 10,
+        "y_size": 10,
+        "z_size": 10,
+        "colour": [1.0, 0.5, 0.0],
         "hash": "test_hash",
     }
 
     assembly_engine.add(part_operation)
     assert len(assembly_engine._parts) == 1
-    assert assembly_engine._parts[0]["part_no"] == "test_part"
+    assert assembly_engine._parts[0]["name"] == "test_part"
 
 
 def test_assembly_get_freecad_assembler():
@@ -59,8 +63,8 @@ def test_assembly_export_for_freecad():
 
     assert data["name"] == "box_assembly"
     assert len(data["parts"]) == 2
-    assert data["parts"][0]["part_no"] == "bottom"
-    assert data["parts"][1]["part_no"] == "front"
+    assert data["parts"][0]["name"] == "bottom"
+    assert data["parts"][1]["name"] == "front"
 
 
 @pytest.mark.ci_exclude
@@ -72,11 +76,15 @@ def test_freecad_assembly_build_without_freecad():
         assembly_engine._base_path = tmppath
 
         part_operation = {
-            "part_no": "test_part",
-            "position": [0, 0, 0],
+            "name": "test_part",
+            "x": 0,
+            "y": 0,
+            "z": 0,
             "rotate": [],
-            "rotmax": [10, 10, 10],
-            "colour": "orange",
+            "x_size": 10,
+            "y_size": 10,
+            "z_size": 10,
+            "colour": [1.0, 0.5, 0.0],
             "hash": "test_hash",
         }
 

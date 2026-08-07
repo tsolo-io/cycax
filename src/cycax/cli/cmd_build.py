@@ -9,7 +9,7 @@ from typing import Annotated
 
 import typer
 
-from cycax.cli.run import CycaxCompiler, make_build_map
+from cycax.cli.run import CycaxCompiler
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 
@@ -35,7 +35,7 @@ def build_freecad(
 
     # Loop through the build order and build the parts.
     from cycax.cycad.engines.part_freecad import bulk_build  # noqa PLC0415 Import here to make CLI faster
-    from cycax.cycad.engines.engine_freecad import EngineFreeCAD
+    from cycax.cycad.engines.engine_freecad import EngineFreeCAD  # noqa PLC0415 Import here to make CLI faster
 
     write_back_to_cache = []
     freecad_part_list = []
@@ -93,7 +93,7 @@ def build_openscad(
         engine.set_path(_filename.parent)
         engine._json_file = _filename
         for part in data["parts"]:
-            _part_filename = _filename.parent / part["part_no"] / f"{part['part_no']}.json"
+            _part_filename = _filename.parent / part["name"] / f"{part['name']}.json"
             build_part(PartEngineOpenSCAD, _part_filename)
             engine.add(part)
         engine.build(_filename.parent)

@@ -107,5 +107,5 @@ def assemble() -> Assembly:
 
 if __name__ == "__main__":
     box = assemble()
-    box.save("/home/helen/src/tsolo/test-slot")
+    box.save("./build/assemblies")
     box.build(engine=AssemblyBuild123d(box.name), part_engines=[PartEngineBuild123d()])

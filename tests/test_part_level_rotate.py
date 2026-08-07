@@ -48,4 +48,6 @@ def test_move_level():
     mypart1.bottom.level(mypart2.top)
 
     assembly_def = assembly.export()
-    assert assembly_def["parts"][0]["position"] == assembly_def["parts"][2]["position"]
+    part0 = assembly_def["parts"][0]
+    part2 = assembly_def["parts"][2]
+    assert (part0["x"], part0["y"], part0["z"]) == (part2["x"], part2["y"], part2["z"])
