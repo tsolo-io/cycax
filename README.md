@@ -35,7 +35,7 @@ Direct integrations require the
 | Integration | Parts Direct | Assemblies Direct | CyCAx Server Parts | CyCAx Server Assemblies |
 | :------- | :------: | :-------: | :-------: | :-------: |
 | [OpenSCAD](https://github.com/openscad/openscad) | Yes | Yes | No | No |
-| [FreeCAD](https://github.com/FreeCAD/FreeCAD) | Yes | No | [Yes](https://github.com/tsolo-io/cycax-freecad-worker) | No |
+| [FreeCAD](https://github.com/FreeCAD/FreeCAD) | Yes | Yes | [Yes](https://github.com/tsolo-io/cycax-freecad-worker) | No |
 | [Blender](https://blender.org) | No | No | No | [Yes](https://github.com/tsolo-io/cycax-blender-worker) |
 | [build123d](https://github.com/build123d/build123d) | Yes | Yes | No | No |
 
