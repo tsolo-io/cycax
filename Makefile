@@ -9,10 +9,10 @@ build:  ## Build a test version of CyCAx
 	hatch build
 
 test: ## Run unit tests
-	hatch run test-not-slow
+	hatch run testing:test-not-slow
 
 test-all: ## Run all the tests
-	hatch run test
+	hatch run testing:test
 
 test-ci:
 	hatch run testing:ci

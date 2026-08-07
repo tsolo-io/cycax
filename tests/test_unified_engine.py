@@ -185,7 +185,7 @@ def test_engine_build_mixed_list():
         assembly_json.write_text(json.dumps(assembly_data))
 
         # Build both
-        artifacts = engine.build([part_json, assembly_json])
+        artifacts = engine.build_bulk([part_json, assembly_json])
 
         # Should have generated some artifacts
         assert isinstance(artifacts, list)
