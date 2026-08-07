@@ -636,12 +636,12 @@ class CycadPart(Location):
                 "type": SHAPE_TYPE_MAP[self.initial_polygon],
                 "action": "add",
                 "side": self.side,
-                "x": self.x,
-                "y": self.y,
-                "z": self.z,
-                "x_size": self.x_size,
-                "y_size": self.y_size,
-                "z_size": self.z_size,
+                "x": float(self.x),
+                "y": float(self.y),
+                "z": float(self.z),
+                "x_size": float(self.x_size),
+                "y_size": float(self.y_size),
+                "z_size": float(self.z_size),
                 "center": False,
             }
         ]

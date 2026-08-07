@@ -467,12 +467,12 @@ class Assembly:
         for item in flattened.parts.values():
             dict_part = {
                 "name": item.part_no,
-                "x": item.position[0],
-                "y": item.position[1],
-                "z": item.position[2],
-                "x_size": item.x_size,
-                "y_size": item.y_size,
-                "z_size": item.z_size,
+                "x": float(item.position[0]),
+                "y": float(item.position[1]),
+                "z": float(item.position[2]),
+                "x_size": float(item.x_size),
+                "y_size": float(item.y_size),
+                "z_size": float(item.z_size),
                 "rotate": item.rotation,
                 "colour": to_rgb(item.colour),
                 "hash": item.hash,
