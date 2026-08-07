@@ -118,13 +118,24 @@ A part JSON file describes an individual part as a base shape plus a list of fea
   },
   "features": [
     {
-      "name": "front_pocket",
+     "name": "base",
+     "type": "cuboid",
+     "action": "add",
+     "x": 0.0,
+     "y": 0.0,
+     "z": 0.0,
+     "x_size": 200.0,
+     "y_size": 100.0,
+     "z_size": 2.0
+    },
+    {
+      "name": "top_pocket",
       "type": "cuboid",
       "action": "subtract",
-      "side": "front",
+      "side": "top",
       "x": 10.0,
       "y": 10.0,
-      "z": 0.0,
+      "z": -1.0,
       "x_size": 20.0,
       "y_size": 20.0,
       "z_size": 5.0,
@@ -209,14 +220,13 @@ A feature's fields are applied in this order:
 4. **Action** — `add`, `subtract`, or another feature-specific action combines the positioned
    geometry with the part.
 
-### Sketch and Pad Features
+### Sketch Features
 
 Instead of a primitive `x_size`/`y_size`/`z_size` box, a feature's geometry can be defined by
 drawing a 2D profile and extruding ("padding") it into a solid:
 
-- `sketch`: Array of 2D points (`{"x": ..., "y": ...}`, in millimetres) describing a closed
-  polygon on the feature's local XY plane.
-- `pad`: Float, millimetres. Extrudes the sketch along the local Z axis to produce a solid.
+- `sketch`: Array of 2D objects (`{"type": "circle", "x": ..., "y": ..., "diameter": ...}` or `{"type": "rectangle", "x": ..., "y": ..., "x_size": ..., "y_size": ...}`) on the feature's local XY plane. Objects are combined in order, so later objects can subtract from earlier ones.
+- `z_size`: Float, millimetres. A.k.a Pad. Extrudes the sketch along the local Z axis to produce a solid.
 
 The resulting solid is then rotated (`rotate`), positioned (`x`/`y`/`z`/`center`/`side`), and
 combined with the part (`action`) exactly like a primitive feature — see [Order of
@@ -229,10 +239,9 @@ Operations](#order-of-operations).
   "action": "subtract",
   "side": "top",
   "sketch": [
-    {"x": 0.0, "y": 0.0},
-    {"x": 20.0, "y": 0.0},
-    {"x": 20.0, "y": 8.0},
-    {"x": 0.0, "y": 8.0}
+    {"type": "circle", "x": 100.0, "y": 25.0, "diameter": 50.0, "action": "add"},
+    {"type": "rectangle", "x": 0.0, "y": 20.0, "x_size": 80.0, "y_size": 10.0, "action": "add"},
+    {"type": "circle", "x": 100.0, "y": 25.0, "diameter": 10.0, "action": "subtract"},
   ],
   "pad": 12.0,
   "rotate": [
@@ -245,7 +254,7 @@ Operations](#order-of-operations).
 }
 ```
 
-`sketch`/`pad` are proposed names, not yet confirmed — see [Open Questions](#open-questions).
+`sketch` is a proposed names, not yet confirmed — see [Open Questions](#open-questions).
 
 ### Bending
 
