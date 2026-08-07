@@ -367,7 +367,20 @@ class SphereAdd(Feature):
 
 
 class Bending(Feature):
-    def __init__(self, x, y, z, side, bend_radius: float, k_factor: float, height: float, side_length: float, thickness: float, other_side_length = float, internal: bool = True):
+    def __init__(
+        self,
+        x,
+        y,
+        z,
+        side,
+        bend_radius: float,
+        k_factor: float,
+        height: float,
+        side_length: float,
+        thickness: float,
+        other_side_length=float,
+        internal: bool = True,
+    ):
         super().__init__(x, y, z, side)
         self.name = "bend"
         self.angle = 90
@@ -378,5 +391,3 @@ class Bending(Feature):
         self.other_side_length = other_side_length
         self.thickness = thickness
         self.internal = internal
-
-    
