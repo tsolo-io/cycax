@@ -136,12 +136,12 @@ class EngineFreeCAD(Engine):
         # Collect generated files
         part_dir = json_path.parent
         files = [
-            {"file": part_dir / f"{name}-freecad.stl"},
+            {"file": part_dir / f"{name}.stl"},
             {"file": part_dir / f"{name}-perspectiveAll.png"},
             {"file": part_dir / f"{name}-perspective.dxf", "side": TOP},
             {"file": part_dir / f"{name}-perspectiveTop.png", "side": TOP},
-            {"file": part_dir / f"{name}-freecad.FCStd", "description": "FreeCAD primary source file."},
-            {"file": part_dir / f"{name}-freecad.step"},
+            {"file": part_dir / f"{name}.FCStd", "description": "FreeCAD primary source file."},
+            {"file": part_dir / f"{name}.step"},
         ]
 
         return self.file_list(files, self.engine_name, score=5)
