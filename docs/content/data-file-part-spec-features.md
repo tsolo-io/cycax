@@ -85,6 +85,10 @@ currently serialized as `name: "sphere"`).
 
 ### Nut Cutout
 
+!!! info
+
+    To be replaced by the general [Regular Polygon](#regular-polygon) feature.
+
 A cutout shaped to hold a hex nut, so it can be embedded in a (typically 3D-printed) part.
 Implemented today by the `NutCutOut` class (always `action: subtract`, currently serialized as
 `name: "nut"`).
@@ -104,7 +108,7 @@ to the nut.
 ### Beveled Edge
 
 Rounds or chamfers an edge of the part, rather than adding/subtracting a shape at a position.
-Implemented today by the `BeveledEdge` class (always `action: subtract`, currently serialized
+Implemented by the `BeveledEdge` class (always `action: subtract`, currently serialized
 as `name: "beveled_edge"`), created via `CycadPart.beveled_edge()` rather than authored
 directly like the other features above.
 
