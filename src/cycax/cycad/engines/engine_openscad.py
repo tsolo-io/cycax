@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Tsolo.io
+# SPDX-FileCopyrightText: 2025, 2026 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,7 +7,6 @@ from pathlib import Path
 
 from cycax.cycad.engines.base_engine import Engine
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
-from cycax.cycad.location import TOP
 
 
 class EngineOpenSCAD(Engine):

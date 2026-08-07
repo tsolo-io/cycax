@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Tsolo.io
+# SPDX-FileCopyrightText: 2025, 2026 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -47,7 +47,8 @@ def axis_vector(axis: str) -> Vector:
     elif _axis == "z":
         return Vector(0, 0, 1)
     else:
-        raise ValueError(f"Invalid axis: {_axis}")
+        msg = f"Invalid axis: {_axis}"
+        raise ValueError(msg)
 
 
 class EngineFreecadAssembly:
@@ -233,7 +234,6 @@ class EngineFreecadAssembly:
             colour = part_data.get("colour", "orange")
             # Import the part
             obj = self._import_part(part_no, self._base_path)
-            print(part_data, obj)
 
             if obj:
                 for rotation_spec in rotate_list:

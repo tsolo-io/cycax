@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Tsolo.io
+# SPDX-FileCopyrightText: 2025, 2026 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -6,8 +6,6 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-
-import orjson
 
 from cycax.cycad.engines.base_engine import Engine
 from cycax.cycad.location import TOP

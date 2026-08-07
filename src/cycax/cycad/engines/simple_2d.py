@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Tsolo.io
+# SPDX-FileCopyrightText: 2025, 2026 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -154,7 +154,7 @@ class Simple2D(PartEngine):
         in_name = self._json_file
         with open(in_name) as f:
             data = json.load(f)
-        fig, ax = plt.subplots()
+        _fig, ax = plt.subplots()
         for feature in data["features"]:
             if feature["type"] == "add":
                 self.bounding_box(feature)

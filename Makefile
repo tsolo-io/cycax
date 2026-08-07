@@ -1,14 +1,9 @@
-# SPDX-FileCopyrightText: 2025 Tsolo.io
+# SPDX-FileCopyrightText: 2025, 2026 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.ONESHELL: # Run all the commands in the same shell
-.PHONY: docs examples
-.DEFAULT_GOAL := help
-
-help:
-	@echo "Help"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+.PHONY: docs examples build
+-include .tidy/*.mk
 
 build:  ## Build a test version of CyCAx
 	hatch build
@@ -27,15 +22,6 @@ format:  ## Format the code
 
 spelling:  ## Show spelling mistakes in the code
 	hatch run lint:spell
-
-docs:  ## Create documentation
-	hatch run docs:build
-
-docs-serve:  ## Run a server for documentation
-	hatch run docs:serve
-
-docs-open:  ## Open the documentation
-	xdg-open ./docs/site/index.html
 
 parts:
 	hatch run python ./src/cycax/parts/main.py

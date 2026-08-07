@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from pathlib import Path
 
 from pydantic import Field

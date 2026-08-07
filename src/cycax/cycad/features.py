@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Tsolo.io
+# SPDX-FileCopyrightText: 2025, 2026 Tsolo.io
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -336,7 +336,7 @@ class Sphere(Feature):
         diameter: diameter of the sphere.
     """
 
-    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, cut: bool):
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, *, cut: bool):
         self.name = "sphere"
         if cut:
             self.type = "cut"
