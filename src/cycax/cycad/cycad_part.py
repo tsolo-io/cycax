@@ -19,6 +19,7 @@ from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.features import (
+    SHAPE_TYPE_MAP,
     Cylinder,
     Feature,
     Holes,
@@ -632,7 +633,8 @@ class CycadPart(Location):
         dict_out["features"] = [
             {
                 "name": self.initial_polygon,
-                "type": "add",
+                "type": SHAPE_TYPE_MAP[self.initial_polygon],
+                "action": "add",
                 "side": self.side,
                 "x": self.x,
                 "y": self.y,
@@ -772,7 +774,7 @@ class CycadPart(Location):
     def get_name(self, default: str | None = None):
         """Return the part name, if the part has not been named generate a name.
 
-        The part name (or ID) is distict from the part_no or part number.
+        The part name (or ID) is distinct from the part_no or part number.
         Each instance of the part has a unique name, but is still the same type of part as the
         parts with the same part number.
         Parts could override this method to define a specialised part numbering scheme.
@@ -903,8 +905,8 @@ class CycadPart(Location):
                 case "z":
                     self.rotate_freeze_top()
                 case _:
-                    msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
-                            {action} is not one of the permissable actions."""
+                    msg = f"""The actions permissible by rotate are 'x', 'y' or 'z'.
+                            {action} is not one of the permissible actions."""
                     raise ValueError(msg)
 
     def rotate_freeze_top(self):

@@ -6,6 +6,21 @@ import typing
 
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 
+# Maps the internal shape label (historically stored in `name`) to the data-file-spec `type`
+# value, and the internal add/cut action (historically stored in `type`) to the spec `action`
+# value. See docs/content/data-file-part-spec-features.md.
+SHAPE_TYPE_MAP: dict[str, str] = {
+    "hole": "cylinder",
+    "cylinder_feature": "cylinder",
+    "cylinder": "cylinder",
+    "cube": "cuboid",
+    "nut": "nut_cutout",
+    "sphere": "sphere",
+    "beveled_edge": "beveled_edge",
+    "external": "external",
+}
+ACTION_MAP: dict[str, str] = {"cut": "subtract", "add": "add"}
+
 
 class Feature(Location):
     """The Parent class of all features,"""
@@ -31,6 +46,9 @@ class Feature(Location):
             if not key.startswith("_"):
                 # Save all the public variables of the feature.
                 feature_dict[key] = value
+
+        feature_dict["action"] = ACTION_MAP[self.type]
+        feature_dict["type"] = SHAPE_TYPE_MAP[self.name]
 
         return feature_dict
 

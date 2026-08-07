@@ -544,8 +544,8 @@ class Assembly:
                 case "z":
                     self.rotate_freeze_top()
                 case _:
-                    msg = f"""The actions permissable by rotate are 'x', 'y' or 'z'.
-                            {action} is not one of the permissable actions."""
+                    msg = f"""The actions permissible by rotate are 'x', 'y' or 'z'.
+                            {action} is not one of the permissible actions."""
                     raise ValueError(msg)
 
     def combine_all_assemblies(self, new_name: str | None = None, path: Path | None = None):

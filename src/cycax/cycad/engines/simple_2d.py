@@ -53,10 +53,10 @@ class Simple2D(PartEngine):
             feature: this is a dict that contains the details of the drawing
 
         """
-        action = feature.get("type")
+        action = feature.get("action")
         if action == "add":
             return {"color": "gray", "edgecolor": "gray", "alpha": 0.6}
-        elif action == "cut":
+        elif action == "subtract":
             return {"color": "red", "edgecolor": "red", "alpha": 0.4}
         elif action == "outline":
             return {"color": None, "edgecolor": "green", "alpha": 1, "fill": False}
@@ -143,10 +143,10 @@ class Simple2D(PartEngine):
             ax: this is the axes onto which the object will be drawn.
             feature: this is the dictionary of the object that is being plotted.
         """
-        feature_type = feature["name"]
-        if feature_type == "cube":
+        feature_type = feature["type"]
+        if feature_type == "cuboid":
             self._box(ax, feature)
-        elif feature_type == "hole":
+        elif feature_type == "cylinder" and feature["action"] == "subtract":
             self._hole(ax, feature)
 
     def build(self):
@@ -156,7 +156,7 @@ class Simple2D(PartEngine):
             data = json.load(f)
         _fig, ax = plt.subplots()
         for feature in data["features"]:
-            if feature["type"] == "add":
+            if feature["action"] == "add":
                 self.bounding_box(feature)
             self.figure_feature(ax, feature)
         ax.set_title(self.name)

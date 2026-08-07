@@ -290,29 +290,26 @@ class PartEngineOpenSCAD(PartEngine):
         output = []
         dif = 0
         for action in data["features"]:
-            if action["type"] == "cut":
+            if action["action"] == "subtract":
                 dif = dif + 1
                 output.insert(0, self._decode_cut())
 
-            if action["name"] == "beveled_edge":
+            if action["type"] == "beveled_edge":
                 output.append(self.decode_beveled_edge(action))
 
-            elif action["name"] == "cube":
+            elif action["type"] == "cuboid":
                 output.append(self._decode_cube(action))
 
-            elif action["name"] == "external":
+            elif action["type"] == "external":
                 output.append(self._decode_external(self.name))
 
-            elif action["name"] == "hole":
-                output.append(self._decode_cylinder(action, cut=True))
+            elif action["type"] == "cylinder":
+                output.append(self._decode_cylinder(action, cut=(action["action"] == "subtract")))
 
-            elif action["name"] == "cylinder_feature":
-                output.append(self._decode_cylinder(action, cut=False))
-
-            elif action["name"] == "nut":
+            elif action["type"] == "nut_cutout":
                 output.append(self._decode_nut(action))
 
-            elif action["name"] == "sphere":
+            elif action["type"] == "sphere":
                 output.append(self._decode_sphere(action))
 
         i = 0

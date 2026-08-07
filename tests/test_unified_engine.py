@@ -15,7 +15,7 @@ def test_engine_is_part():
     """Test that Engine can identify part JSON data."""
     engine = Engine()
 
-    part_data = {"name": "test_part", "features": [{"type": "add", "name": "cube"}]}
+    part_data = {"name": "test_part", "features": [{"type": "cuboid", "action": "add", "name": "cube"}]}
     assert engine.is_part(part_data)
     assert not engine.is_assembly(part_data)
 
@@ -147,7 +147,8 @@ def test_engine_build_mixed_list():
             "features": [
                 {
                     "name": "cube",
-                    "type": "add",
+                    "type": "cuboid",
+                    "action": "add",
                     "side": "BOTTOM",
                     "x": 0.0,
                     "y": 0.0,
