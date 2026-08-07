@@ -35,13 +35,6 @@ only the fields it adds on top of these.
 - **rotate** (optional): Tilts the feature's own geometry before it is positioned and combined
   with the part. A list of `{axis, angle}` entries, `angle` in degrees. Default: no rotation.
 
-> The current implementation (`src/cycax/cycad/features.py`, `beveled_edge.py`) does not yet
-> use this `type`/`action` split — today the shape name is stored under `name` (`cube`,
-> `cylinder_feature`, `hole`, `sphere`, `nut`, `beveled_edge`) and the add/subtract distinction
-> is stored under `type` (`"add"` / `"cut"`). The sections below describe each shape using the
-> field names it will need once the engines are updated to this spec, and note the current
-> code's field names where they differ.
-
 ## Existing Features
 
 These shapes are implemented today, as `Feature` subclasses in
@@ -49,8 +42,8 @@ These shapes are implemented today, as `Feature` subclasses in
 
 ### Cuboid
 
-A rectangular box feature. Implemented today by `RectangleCutOut` (`action: subtract`) and
-`RectangleAddOn` (`action: add`) — both currently serialize `name: "cube"`.
+A rectangular box feature. Implemented by `RectangleCutOut` (`action: subtract`) and
+`RectangleAddOn` (`action: add`) — both serialize as `type: "cuboid"`, `name: "cube"`.
 
 **Fields:**
 
@@ -59,10 +52,10 @@ No additional fields.
 
 ### Cylinder
 
-A cylindrical feature. Implemented today by two classes that this spec unifies into one shape
-distinguished by `action`: `Cylinder` (`action: add`, currently serialized as `name:
-"cylinder_feature"`) and `Holes` (`action: subtract`, currently serialized as `name: "hole"`).
-A hole (e.g. for a screw or dowel) is simply a cylinder with `action: subtract`.
+A cylindrical feature. Implemented by two classes, both serialized as `type: "cylinder"` and
+distinguished only by `action`: `Cylinder` (`action: add`, `name: "cylinder_feature"`) and
+`Holes` (`action: subtract`, `name: "hole"`). A hole (e.g. for a screw or dowel) is simply a
+cylinder with `action: subtract`.
 
 **Fields:**
 
@@ -72,8 +65,8 @@ A hole (e.g. for a screw or dowel) is simply a cylinder with `action: subtract`.
 
 ### Sphere
 
-A spherical feature. Implemented today by the `Sphere` class (`action: add` or `subtract`,
-currently serialized as `name: "sphere"`).
+A spherical feature. Implemented by the `Sphere` class (`type: "sphere"`, `action: add` or
+`subtract`, `name: "sphere"`).
 
 **Fields:**
 
@@ -90,8 +83,8 @@ currently serialized as `name: "sphere"`).
     To be replaced by the general [Regular Polygon](#regular-polygon) feature.
 
 A cutout shaped to hold a hex nut, so it can be embedded in a (typically 3D-printed) part.
-Implemented today by the `NutCutOut` class (always `action: subtract`, currently serialized as
-`name: "nut"`).
+Implemented by the `NutCutOut` class (`type: "nut_cutout"`, always `action: subtract`, `name:
+"nut"`).
 
 **Fields:**
 
@@ -108,9 +101,9 @@ to the nut.
 ### Beveled Edge
 
 Rounds or chamfers an edge of the part, rather than adding/subtracting a shape at a position.
-Implemented by the `BeveledEdge` class (always `action: subtract`, currently serialized
-as `name: "beveled_edge"`), created via `CycadPart.beveled_edge()` rather than authored
-directly like the other features above.
+Implemented by the `BeveledEdge` class (`type: "beveled_edge"`, always `action: subtract`,
+`name: "beveled_edge"`), created via `CycadPart.beveled_edge()` rather than authored directly
+like the other features above.
 
 **Fields:**
 

@@ -88,7 +88,7 @@ class PartEngineBuild123d(PartEngine):
         z = feature_spec["z"]
         depth = feature_spec["depth"]
         side = feature_spec["side"]
-        if feature_spec["type"] == "cut":
+        if feature_spec["action"] == "subtract":
             pos = {
                 FRONT: build123d.Pos(x, y + depth / 2, z) * build123d.Rotation(X=270),
                 BACK: build123d.Pos(x, y - depth / 2, z) * build123d.Rotation(X=90),
@@ -116,7 +116,8 @@ class PartEngineBuild123d(PartEngine):
         Example feature_spec:
           {
             'name': 'nut',
-             'type': 'cut',
+             'type': 'nut_cutout',
+             'action': 'subtract',
              'x': 10,
              'y': 7,
              'z': 7,
@@ -178,7 +179,8 @@ class PartEngineBuild123d(PartEngine):
         Example:
         feature_spec = {
             'name': 'beveled_edge',
-            'type': 'cut',
+            'type': 'beveled_edge',
+            'action': 'subtract',
             'edge_type': 'round',
             'axis1': 'y', 'bound1': 0.0,
             'axis2': 'x', 'bound2': 0.0,
@@ -203,7 +205,7 @@ class PartEngineBuild123d(PartEngine):
         feature_cube = self._decode_cube(action_cube)
         action_cylinder = {
             "side": feature_spec["side"],
-            "type": "cut",
+            "action": "subtract",
             "x": 0.0,
             "y": 0.0,
             "z": 0.0,
@@ -256,34 +258,36 @@ class PartEngineBuild123d(PartEngine):
         add_features = []
         subtract_features = []
         for action in definition["features"]:
-            match action["name"]:
-                case "cube":
+            match action["type"]:
+                case "cuboid":
                     feature = self._decode_cube(action)
-                case "hole":
-                    feature = self._decode_cylinder_feature(action)
-                case "cylinder_feature":
-                    feature = self._decode_cylinder_feature(action)
+                case "cylinder":
+                    # Base-shape cylinders (x_size/z_size) and cylinder features/holes
+                    # (diameter/depth/side) share the "cylinder" type but need different
+                    # decoders.
+                    if "diameter" in action:
+                        feature = self._decode_cylinder_feature(action)
+                    else:
+                        feature = self._decode_cylinder(action)
                 case "sphere":
                     feature = self._decode_sphere(action)
-                case "nut":
+                case "nut_cutout":
                     feature = self._decode_nut(action)
                 case "beveled_edge":
                     feature = self._decode_beveled_edge(action)
-                case "cylinder":
-                    feature = self._decode_cylinder(action)
                 case _:
-                    msg = f"Unknown feature type: {action['name']}"
+                    msg = f"Unknown feature type: {action['type']}"
                     raise ValueError(msg)
 
             feature = (
                 build123d.Plane.XY * feature
             )  # The position and direction in the JSON is all relevant to the XY Plane.
-            if action["type"] == "add":
+            if action["action"] == "add":
                 add_features.append(feature)
-            elif action["type"] == "cut":
+            elif action["action"] == "subtract":
                 subtract_features.append(feature)
             else:
-                msg = f"Unknown action type: {action['type']}"
+                msg = f"Unknown action type: {action['action']}"
                 raise ValueError(msg)
 
         for feature in add_features:

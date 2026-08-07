@@ -43,6 +43,7 @@ def test_dynamic():
     for item in test_cube["features"]:
         assert "name" in item
         assert "type" in item
+        assert "action" in item
         assert "side" in item
 
         assert "x" in item

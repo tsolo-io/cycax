@@ -101,11 +101,11 @@ class EngineFreecad:
         return Part.makeSphere(radius, pos)
 
     def _calc_hex(self, depth: float, diameter: float):
-        """This method will be used to find out where the points of the hexigon are located and then drawing a hexigon.
+        """This method will be used to find out where the points of the hexagon are located and then drawing a hexagon.
 
         Args:
-            depth: this is the depth of the hexigon.
-            diameter: this is the diameter of the hexigon.
+            depth: this is the depth of the hexagon.
+            diameter: this is the diameter of the hexagon.
         """
 
         radius = diameter / 2
@@ -128,13 +128,13 @@ class EngineFreecad:
         return face
 
     def cut_nut(self, feature: dict):
-        """This method will take the 2D hexigon and convert it to a 3D shape and place it where it needs to go.
+        """This method will take the 2D hexagon and convert it to a 3D shape and place it where it needs to go.
         Args:
-            feature: this is a dict containing the necessary details of the hexigon like its size and location.
+            feature: this is a dict containing the necessary details of the hexagon like its size and location.
         """
 
-        hexigon = self._calc_hex(depth=0, diameter=feature["diameter"])
-        nut = hexigon.extrude(App.Vector(0, 0, feature["depth"]))
+        hexagon = self._calc_hex(depth=0, diameter=feature["diameter"])
+        nut = hexagon.extrude(App.Vector(0, 0, feature["depth"]))
 
         side = feature["side"]
         x = feature["x"]
@@ -216,7 +216,7 @@ class EngineFreecad:
             x = feature["x"]
             y = feature["y"]
             z = feature["z"]
-            cut = feature["type"] == "cut"
+            cut = feature["action"] == "subtract"
         else:
             cyl = Part.makeCylinder(radius, depth, pos_vec)
             x = move["x"]
@@ -465,37 +465,37 @@ class EngineFreecad:
             App.closeDocument(name)
         doc = App.newDocument(name)
         feature = definition["features"][0]
-        if feature["type"] != "add":
+        if feature["action"] != "add":
             msg = "First feature must be added."
             raise ValueError(msg)
-        if feature["name"] == "cube":
+        if feature["type"] == "cuboid":
             solid = self.cube(feature)
-        elif feature["name"] == "sphere":
+        elif feature["type"] == "sphere":
             solid = self.sphere(feature)
-        elif feature["name"] == "cylinder":
+        elif feature["type"] == "cylinder":
             solid = self.cylinder(feature)
 
         for feature in definition["features"][1:]:
-            if feature["type"] == "add":
-                if feature["name"] == "cylinder_feature":
+            if feature["action"] == "add":
+                if feature["type"] == "cylinder":
                     solid = solid.fuse(self.hole(feature))
-                elif feature["name"] == "sphere":
+                elif feature["type"] == "sphere":
                     solid = solid.fuse(self.sphere(feature))
-                elif feature["name"] == "cube":
+                elif feature["type"] == "cuboid":
                     solid = solid.fuse(self.cube(feature))
                 else:
                     logging.error("Adding not yet supported.")
-            elif feature["type"] == "cut":
-                if feature["name"] == "hole":
+            elif feature["action"] == "subtract":
+                if feature["type"] == "cylinder":
                     cut_features.append(self.hole(feature))
-                elif feature["name"] == "beveled_edge":
+                elif feature["type"] == "beveled_edge":
                     solid = self.decode_beveled_edge(feature, solid)
-                elif feature["name"] == "cube":
+                elif feature["type"] == "cuboid":
                     cut_features.append(self.cube(feature))
-                elif feature["name"] == "sphere":
+                elif feature["type"] == "sphere":
                     solid = solid.cut(self.sphere(feature))
                     # This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
-                elif feature["name"] == "nut":
+                elif feature["type"] == "nut_cutout":
                     cut_features.append(self.cut_nut(feature))
         if len(cut_features) > 1:
             s1 = cut_features.pop()
