@@ -343,6 +343,15 @@ class CycadPart(Location):
         temp_nut = NutCutOut(side=side, x=x, y=y, z=z, nut_type=nut_type, depth=depth, vertical=vertical)
         self.features.append(temp_nut)
 
+    def make_bend(self, feature: Feature):
+        """Append a sheet-metal bend/flange feature (see `cycax.cycad.bend`).
+
+        Args:
+            feature: The `Bend`, `FlangeCornerRound`, `FlatRectangleCut`, or
+                `FlatPolygonCut` feature to add.
+        """
+        self.features.append(feature)
+
     def make_sphere_cut_out(self, side: str, x: float, y: float, z: float, diameter: float):
         """This method will insert a sphere into a CycadPart.
 

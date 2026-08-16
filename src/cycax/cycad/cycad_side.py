@@ -4,6 +4,7 @@
 
 import logging
 
+from cycax.cycad.bend import BendSide, root_bend_side
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
 from cycax.cycad.vents import Vent
 
@@ -382,6 +383,38 @@ class CycadSide:
             z_size=_box_dimensions[2],
             horizontal=horizontal,
             external_subtract=external_subtract,
+        )
+
+    def bend(
+        self,
+        angle: float,
+        height: float,
+        *,
+        direction: str | None = None,
+        radius: float | None = None,
+        k_factor: float | None = None,
+        gap1: float = 0.0,
+        gap2: float = 0.0,
+        corner_reference: str = "outer",
+        length_spec: str = "leg",
+        label: str | None = None,
+    ) -> BendSide:
+        """Bend this side into a flange. Only LEFT/RIGHT/FRONT/BACK support bending.
+
+        See `BendSide.bend` for the full argument reference. The returned `BendSide` can
+        be chained (`.far.bend(...)`) to nest a further bend off this flange.
+        """
+        return root_bend_side(self).bend(
+            angle,
+            height,
+            direction=direction,
+            radius=radius,
+            k_factor=k_factor,
+            gap1=gap1,
+            gap2=gap2,
+            corner_reference=corner_reference,
+            length_spec=length_spec,
+            label=label,
         )
 
     def subtract(self, part2):  # referencing CycadPart results in a circular import
