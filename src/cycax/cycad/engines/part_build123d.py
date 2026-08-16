@@ -343,18 +343,26 @@ class PartEngineBuild123d(PartEngine):
           shift this doesn't attempt.
         - The corner fillet radius is tied to `thickness` by `make_brake_formed` itself, not
           to the bend's own `radius` field (a build123d limitation, not a cycax one).
-        - For a chain with a genuine corner (bend-on-bend, not just a single flange),
-          `make_brake_formed`'s `side` parameter turned out to control *both* which way
-          `width` extends *and* which side of the turn gets the full corner fillet -- and
-          on a real 90-degree tip/lip chain, neither `Side.LEFT` nor `Side.RIGHT` gave both
-          at once (one had the right width direction but silently dropped the outer corner's
-          material; the other had the full corner but mirrored the width to the wrong side
-          of the fold line entirely, floating disconnected from the rest of the part).
-          Verified by volume, not just bounding box, since the dropped-material case still
-          "looked" plausible by bounding box alone. Rather than ship a rounded-looking but
-          silently-incomplete part, a chain that fails this check falls back to the
-          oriented-box render, chain by chain -- so today this mode mainly benefits
-          single-bend (non-nested) chains; see docs/content/sheetmetal-bend-design.md.
+        - For a chain with a genuine corner (bend-on-bend, not just a single flange), no
+          combination of `side` and wire direction found so far gives both the correct
+          width direction *and* the full corner fillet at once (one always drops the outer
+          corner's material; verified by volume, not just bounding box, since the
+          dropped-material case still "looked" plausible from its bounding box alone).
+          Rather than ship a rounded-looking but silently-incomplete part, a chain that
+          fails verification falls back to the oriented-box render, chain by chain -- so
+          today this mode mainly benefits single-bend (non-nested) chains; see
+          docs/content/sheetmetal-bend-design.md.
+
+        Even a single, un-nested flange isn't safe with just one `side` value, either:
+        `make_brake_formed`'s in-plane thickness-offset direction and its out-of-plane
+        width-sweep direction both derive from the same `side` choice (via an
+        internally-offset wire's auto-derived face normal), but aren't a matched pair --
+        confirmed on the tray's plain back wall, where one `side` gave the correct width
+        direction with the thickness offset on the *wrong* face (the whole wall shifted
+        inward by one thickness, silently -- same "looks plausible, isn't" trap as the
+        corner case), and the other gave the reverse. Building the wire in both point
+        orders as well as both `side` values (4 combinations total) recovers a correct
+        pairing for a plain flange; verified via `_thickness_ok` below, not assumed.
         """
         parts = []
         fallback_features = []
@@ -364,8 +372,6 @@ class PartEngineBuild123d(PartEngine):
             for bend in chain:
                 end = tuple(bend[c] + bend["v_dir"][i] * bend["height"] for i, c in enumerate("xyz"))
                 vertices.append(build123d.Vector(*end))
-            edges = [build123d.Edge.make_line(vertices[i], vertices[i + 1]) for i in range(len(vertices) - 1)]
-            wire = build123d.Wire(edges)
 
             thickness, width, u_dir = first["thickness"], first["width"], first["u_dir"]
             origin = (first["x"], first["y"], first["z"])
@@ -378,22 +384,54 @@ class PartEngineBuild123d(PartEngine):
                 support = tuple(maxs[i] if u_dir[i] >= 0 else mins[i] for i in range(3))
                 return sum((support[i] - origin[i]) * u_dir[i] for i in range(3))
 
-            candidates = []
-            for side in (build123d.Side.RIGHT, build123d.Side.LEFT):
-                try:
-                    candidates.append(build123d.make_brake_formed(thickness, width, wire, side=side))
-                except Exception as exc:
-                    logging.debug("make_brake_formed failed for side=%s: %s", side, exc)
-                    continue
+            def thickness_ok(candidate: build123d.Part, chain=chain, thickness=thickness, width=width) -> bool:
+                # Check *every* bend in the chain, not just the first -- confirmed
+                # necessary: on the tray's front+lip chain, the first bend (the plain
+                # wall) had exactly the right thickness while the second (the 180-degree
+                # return lip) came out a uniform ~75% of `thickness` throughout its own
+                # length -- consistent (not tapering), but still wrong, and invisible to a
+                # check that only ever probed the first segment.
+                #
+                # Material should be on the `-n_dir` side only (see
+                # `cycax.cycad.bend._grow_part_bounds`'s own convention), and should
+                # actually reach *close to* `thickness`, not just "some" -- a probe just
+                # inside the correct face isn't enough to catch a too-thin result, so this
+                # checks near the far (`0.85x`) and just past the expected (`1.15x`) faces.
+                for bend in chain:
+                    n_dir, u_dir, v_dir = bend["n_dir"], bend["u_dir"], bend["v_dir"]
+                    base = tuple(
+                        bend[c] + u_dir[i] * (width / 2) + v_dir[i] * (bend["height"] / 2) for i, c in enumerate("xyz")
+                    )
+                    near_pt = build123d.Vector(*(base[i] - n_dir[i] * thickness * 0.85 for i in range(3)))
+                    past_pt = build123d.Vector(*(base[i] - n_dir[i] * thickness * 1.15 for i in range(3)))
+                    if not candidate.is_inside(near_pt) or candidate.is_inside(past_pt):
+                        return False
+                return True
 
-            # A candidate is only trusted if it both extends in the right direction
-            # (matching u in [0, width], the flange's real extent from `origin`) *and* has
-            # (approximately) the expected amount of material -- either check alone missed
-            # a real, confirmed-bad case (see the docstring above).
+            candidates = []
+            for point_order in (vertices, list(reversed(vertices))):
+                edges = [
+                    build123d.Edge.make_line(point_order[i], point_order[i + 1]) for i in range(len(point_order) - 1)
+                ]
+                wire = build123d.Wire(edges)
+                for side in (build123d.Side.RIGHT, build123d.Side.LEFT):
+                    try:
+                        candidates.append(build123d.make_brake_formed(thickness, width, wire, side=side))
+                    except Exception as exc:
+                        logging.debug("make_brake_formed failed for side=%s: %s", side, exc)
+                        continue
+
+            # A candidate is only trusted if it extends in the right direction (matching u
+            # in [0, width], the flange's real extent from `origin`), has the material on
+            # the correct face (not shifted by a whole thickness), *and* has approximately
+            # the expected amount of material -- each check caught a real, confirmed-bad
+            # case the others missed (see the docstring above).
             sound = [
                 candidate
                 for candidate in candidates
-                if u_reach(candidate) >= width * 0.9 and candidate.volume >= expected_volume * 0.9
+                if u_reach(candidate) >= width * 0.9
+                and candidate.volume >= expected_volume * 0.9
+                and thickness_ok(candidate)
             ]
             if sound:
                 parts.append(max(sound, key=lambda candidate: candidate.volume))

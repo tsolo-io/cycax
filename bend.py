@@ -168,6 +168,11 @@ tray.save(path=tmp_path)
 engine = PartEngineBuild123d(name=tray.part_no, path=tmp_path)
 tray.build(engine)
 
+tmp_path = Path("/tmp/bend/b123-brake")
+tray.save(path=tmp_path)
+engine = PartEngineBuild123d(name=tray.part_no, path=tmp_path, config={"bend_style": "brake_formed"})
+tray.build(engine)
+
 tmp_path = Path("/tmp/bend/fc")
 tray.save(path=tmp_path)
 engine = PartEngineFreeCADBend(name=tray.part_no, path=tmp_path)

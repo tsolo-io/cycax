@@ -250,6 +250,11 @@ right_grip = right_grip.far.bend(angle=90, height=10.0)
 
 tmp_path = Path("/tmp/bend/b123")
 bracket.save(path=tmp_path)
+engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path)
+bracket.build(engine)
+
+tmp_path = Path("/tmp/bend/b123-brake")
+bracket.save(path=tmp_path)
 engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path, config={"bend_style": "brake_formed"})
 bracket.build(engine)
 
