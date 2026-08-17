@@ -18,3 +18,4 @@ from cycax.cycad.cuboid import Cuboid, Cylinder, Print3D, SheetMetal  # noqa: F4
 from cycax.cycad.cycad_part import CycadPart  # noqa: F401
 from cycax.cycad.cycad_side import BackSide, BottomSide, FrontSide, LeftSide, RightSide, TopSide  # noqa: F401
 from cycax.cycad.engines import Engine, EngineFreeCAD, EngineOpenSCAD  # noqa: F401
+from cycax.cycad.sheetmetal_bend import SheetMetalBend  # noqa: F401

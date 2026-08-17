@@ -85,6 +85,7 @@ extend-ignore-re = ["(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchec
 
 [tool.typos.default.extend-words]
 Pn = "Pn"
+Vertexes = "Vertexes"
 
 [tool.ruff]
 target-version = "py310"
@@ -147,6 +148,10 @@ ban-relative-imports = "all"
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+# Bend examples embed a verbatim engineering spec as a module-level string ahead of the
+# import -- long unwrapped prose lines and the import-after-string layout are intentional.
+"bend.py" = ["E501", "E402"]
+"bend2.py" = ["E501", "E402"]
 
 [tool.coverage.run]
 source_pkgs = ["cycax", "tests"]
