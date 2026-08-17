@@ -96,7 +96,7 @@ def test_subtract_side(tmp_path):
         for feature in base["features"]:
             if feature["action"] == "subtract":
                 if feature["name"] == "hole":
-                    name = f"{feature['name']}{feature['diameter']}"
+                    name = f"{feature['name']}{int(feature['diameter'])}"
                 else:
                     name = feature["name"]
                 compare[name] = feature

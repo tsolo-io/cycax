@@ -511,7 +511,7 @@ class EngineFreecad:
         FreeCADGui.activeDocument().activeView().viewTop()
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
-        self.filepath = self._base_path / name / f"{name}-freecad"
+        self.filepath = self._base_path / name / name
         doc.saveCopy(f"{self.filepath}.FCStd")
         for out_choice in outformats.lower().split(","):
             ftype, fview = out_choice.split(":") if ":" in out_choice else (out_choice, None)

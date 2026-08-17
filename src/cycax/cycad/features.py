@@ -47,6 +47,10 @@ class Feature(Location):
                 # Save all the public variables of the feature.
                 feature_dict[key] = value
 
+        for key in ("x", "y", "z", "x_size", "y_size", "z_size", "diameter"):
+            if key in feature_dict:
+                feature_dict[key] = float(feature_dict[key])
+
         feature_dict["action"] = ACTION_MAP[self.type]
         feature_dict["type"] = SHAPE_TYPE_MAP[self.name]
 

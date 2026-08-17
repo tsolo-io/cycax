@@ -87,7 +87,7 @@ class PartEngineFreeCAD(PartEngine):
                 logging.error("FreeCAD: %s", result.stderr)
 
         _files = [
-            {"file": self._base_path / self.name / f"{self.name}-FreeCAD.stl"},
+            {"file": self._base_path / self.name / f"{self.name}.stl"},
             {"file": self._base_path / self.name / f"{self.name}-perspectiveAll.png"},
             {"file": self._base_path / self.name / f"{self.name}-perspective.dxf", "side": TOP},
             {"file": self._base_path / self.name / f"{self.name}-perspectiveTop.png", "side": TOP},
