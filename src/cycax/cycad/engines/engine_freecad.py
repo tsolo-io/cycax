@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 from cycax.cycad.engines.base_engine import Engine
+from cycax.cycad.engines.utils import find_appimage
 from cycax.cycad.location import TOP
 
 
@@ -53,18 +54,16 @@ class EngineFreeCAD(Engine):
 
         # Search common locations for AppImage
         search_paths = [
-            Path("~/Applications").expanduser(),
             Path.home() / "Applications",
         ]
 
         if base_path:
             search_paths.append(base_path)
 
-        for search_path in search_paths:
-            if search_path.exists():
-                for appimg in search_path.glob("FreeCAD*.AppImage"):
-                    logging.info(f"Found FreeCAD AppImage: {appimg}")
-                    return appimg
+        appimg = find_appimage("FreeCAD", search_paths)
+        if appimg:
+            logging.info(f"Found FreeCAD AppImage: {appimg}")
+            return appimg
 
         msg = "FreeCAD binary not found. Please specify 'freecad_app' in config or install FreeCAD AppImage."
         raise FileNotFoundError(msg)

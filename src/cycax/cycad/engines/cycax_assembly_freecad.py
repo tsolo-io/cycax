@@ -25,7 +25,6 @@ import importDXF
 import importSVG
 import Part
 from FreeCAD import Rotation, Vector
-from PySide import QtGui
 
 logging.info("Open FreeCAD for Assembly")
 
@@ -106,7 +105,6 @@ class EngineFreecadAssembly:
         """
         active_doc = FreeCADGui.activeDocument()
         view = self.change_view(active_doc=active_doc, side=view, default="ALL")
-        FreeCADGui.SendMsgToActiveView("ViewFit")
 
         target_image_file = f"{self.filepath}-{view}.png"
         active_doc.activeView().fitAll()
@@ -152,7 +150,7 @@ class EngineFreecadAssembly:
         """
         view_doc = FreeCADGui.activeDocument()
         view = self.change_view(active_doc=view_doc, side=view, default="TOP")
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        view_doc.activeView().fitAll()
         __objs__ = [obj for obj in active_doc.Objects if obj.ViewObject.Visibility]
 
         importDXF.export(__objs__, str(f"{self.filepath}-{view}.dxf"))
@@ -166,7 +164,7 @@ class EngineFreecadAssembly:
         """
         view_doc = FreeCADGui.activeDocument()
         view = self.change_view(active_doc=view_doc, side=view, default="TOP")
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        view_doc.activeView().fitAll()
         __objs__ = [obj for obj in active_doc.Objects if obj.ViewObject.Visibility]
 
         importSVG.export(__objs__, str(f"{self.filepath}-{view}.svg"))
@@ -235,8 +233,9 @@ class EngineFreecadAssembly:
 
         # Recompute the document
         doc.recompute()
-        FreeCADGui.activeDocument().activeView().viewAxometric()
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        view = FreeCADGui.activeDocument().activeView()
+        view.viewAxometric()
+        view.fitAll()
 
         # Save the assembly
         self.filepath = self._base_path / f"{self.name}-freecad"
@@ -262,6 +261,7 @@ class EngineFreecadAssembly:
         App.closeDocument(self.name)
 
 
+exit_code = 1
 try:
     json_file = os.getenv("CYCAX_JSON")
     out_dir = os.getenv("CYCAX_CWD")
@@ -272,8 +272,12 @@ try:
     definition = json.loads(Path(json_file).read_text())
     logging.info(f"Assembly JSON file: {json_file}, output dir: {out_dir}")
     engine.build(definition, files_to_produce.replace(" ", ""))
-except Exception as error:
-    logging.exception(error)
-    raise error
+    exit_code = 0
+except Exception:
+    logging.exception("FreeCAD assembly build failed")
 finally:
-    QtGui.QApplication.quit()
+    # Not QtGui.QApplication.quit(): it reliably segfaults during Qt's widget teardown, and an
+    # unclean-looking exit triggers FreeCAD's crash-recovery prompt on the next launch. All
+    # output is on disk by now, so terminate immediately, keeping the exit code meaningful
+    # for the caller.
+    os._exit(exit_code)

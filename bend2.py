@@ -210,55 +210,61 @@ from cycax.cycad import SheetMetalBend
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad_bend import PartEngineFreeCADBend
 
-bracket = SheetMetalBend(
-    part_no="aluminium_bracket",
-    x_size=80.0,  # length -> front/back are the "long" 80 mm sides
-    y_size=50.0,  # width  -> left/right are the "short" 50 mm sides
-    z_size=3.0,  # sheet thickness
-    material={"name": "aluminium", "code": "5052-H32", "standard": "AISI"},
-    k_factor=0.42,
-    bend_radius=3.0,  # inside bend radius; every bend below uses this part-level default
-)
+def parts() -> list[SheetMetalBend]:
+    bracket = SheetMetalBend(
+        part_no="aluminium_bracket",
+        x_size=80.0,  # length -> front/back are the "long" 80 mm sides
+        y_size=50.0,  # width  -> left/right are the "short" 50 mm sides
+        z_size=3.0,  # sheet thickness
+        material={"name": "aluminium", "code": "5052-H32", "standard": "AISI"},
+        k_factor=0.42,
+        bend_radius=3.0,  # inside bend radius; every bend below uses this part-level default
+    )
 
-# Central shaft hole, through the base, centred on the 80x50 footprint.
-bracket.top.hole(pos=(40.0, 25.0), diameter=30.0)
+    # Central shaft hole, through the base, centred on the 80x50 footprint.
+    bracket.top.hole(pos=(40.0, 25.0), diameter=30.0)
 
-# --- Long sides (80 mm): downward flanges, narrower than their own base edge. ---
-# gap1=gap2=10.0 centres a 60 mm-wide flange on the 80 mm edge: (80 - 60) / 2 = 10 each end.
+    # --- Long sides (80 mm): downward flanges, narrower than their own base edge. ---
+    # gap1=gap2=10.0 centres a 60 mm-wide flange on the 80 mm edge: (80 - 60) / 2 = 10 each end.
 
-front_flange = bracket.front.bend(angle=90, height=60.0, direction="down", gap1=10.0, gap2=10.0)
-front_flange.round_corners(radius=6.0)
-front_flange.hole(pos=(30.0, 30.0), diameter=13.0)  # M12 clearance; centred, see module docstring
+    front_flange = bracket.front.bend(angle=90, height=60.0, direction="down", gap1=10.0, gap2=10.0)
+    front_flange.round_corners(radius=6.0)
+    front_flange.hole(pos=(30.0, 30.0), diameter=13.0)  # M12 clearance; centred, see module docstring
 
-back_flange = bracket.back.bend(angle=90, height=60.0, direction="down", gap1=10.0, gap2=10.0)
-back_flange.round_corners(radius=6.0)
-back_flange.hole(pos=(30.0, 30.0), diameter=13.0)
+    back_flange = bracket.back.bend(angle=90, height=60.0, direction="down", gap1=10.0, gap2=10.0)
+    back_flange.round_corners(radius=6.0)
+    back_flange.hole(pos=(30.0, 30.0), diameter=13.0)
 
-# --- Short sides (50 mm): a 3-stage curl that keeps curling the same way throughout, so
-# none of the three bends needs `direction` spelled out -- the "up" default carries the
-# whole grip profile: base -> 45deg/40mm -> 45deg/20mm -> 90deg/10mm. ---
+    # --- Short sides (50 mm): a 3-stage curl that keeps curling the same way throughout, so
+    # none of the three bends needs `direction` spelled out -- the "up" default carries the
+    # whole grip profile: base -> 45deg/40mm -> 45deg/20mm -> 90deg/10mm. ---
 
-left_grip = bracket.left.bend(angle=45, height=40.0)
-left_grip = left_grip.far.bend(angle=45, height=20.0)
-left_grip = left_grip.far.bend(angle=90, height=10.0)
+    left_grip = bracket.left.bend(angle=45, height=40.0)
+    left_grip = left_grip.far.bend(angle=45, height=20.0)
+    left_grip = left_grip.far.bend(angle=90, height=10.0)
 
-right_grip = bracket.right.bend(angle=45, height=40.0)
-right_grip = right_grip.far.bend(angle=45, height=20.0)
-right_grip = right_grip.far.bend(angle=90, height=10.0)
+    right_grip = bracket.right.bend(angle=45, height=40.0)
+    right_grip = right_grip.far.bend(angle=45, height=20.0)
+    right_grip = right_grip.far.bend(angle=90, height=10.0)
+    return [bracket]
 
 # bracket.save()
+if __name__ == "__main__":
+    bracket = part()[0]
+    tmp_path = Path("/tmp/bend/b123")
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    bracket.save(path=tmp_path)
+    engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path)
+    bracket.build(engine)
 
-tmp_path = Path("/tmp/bend/b123")
-bracket.save(path=tmp_path)
-engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path)
-bracket.build(engine)
+    tmp_path = Path("/tmp/bend/b123-brake")
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    bracket.save(path=tmp_path)
+    engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path, config={"bend_style": "brake_formed"})
+    bracket.build(engine)
 
-tmp_path = Path("/tmp/bend/b123-brake")
-bracket.save(path=tmp_path)
-engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path, config={"bend_style": "brake_formed"})
-bracket.build(engine)
-
-tmp_path = Path("/tmp/bend/fc")
-bracket.save(path=tmp_path)
-engine = PartEngineFreeCADBend(name=bracket.part_no, path=tmp_path)
-bracket.build(engine)
+    tmp_path = Path("/tmp/bend/fc")
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    bracket.save(path=tmp_path)
+    engine = PartEngineFreeCADBend(name=bracket.part_no, path=tmp_path)
+    bracket.build(engine)

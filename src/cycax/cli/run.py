@@ -188,7 +188,7 @@ class CycaxCompiler:
         """
         path.mkdir(parents=True, exist_ok=True)
         json_file_path = path / f"{name}.json"
-        _data = orjson.dumps(data).decode()
+        _data = orjson.dumps(data)
         _data_hash = xxhash.xxh64(_data).hexdigest()
         self.parts[path]["path"] = path
         self.parts[path]["definition_file"] = json_file_path
@@ -209,7 +209,7 @@ class CycaxCompiler:
         file_path.write_text(_data_hash)
         self.parts[path]["build"] = True
 
-        json_file_path.write_text(_data)
+        json_file_path.write_text(_data.decode())
         logging.info("Saved %s definition to %s with hash %s", name, json_file_path, _data_hash)
 
     def load_json(self, path: Path, index: int = 1):

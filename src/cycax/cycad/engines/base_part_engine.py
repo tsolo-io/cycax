@@ -5,6 +5,8 @@
 import logging
 from pathlib import Path
 
+from cycax.cycad.engines.utils import find_appimage
+
 
 class PartEngine:
     """Base Class for all PartEngines.
@@ -47,18 +49,12 @@ class PartEngine:
             raise FileNotFoundError(self._json_file)
 
     def get_appimage(self, name) -> Path | None:
-        paths = ["~/Applications", self._base_path]
-        appimage = None
-        for p in paths:
-            path = Path(p).expanduser()
-            if not path.exists():
-                # There is no such path.
-                logging.error("No path %s", path)
-                break
-            for appimg in path.glob(f"{name}*.AppImage"):
-                # Very simple implementation to get tests to pass on CI.
-                # TODO: Sort the Appimages and to get the latest.
-                appimage = appimg
+        search_paths = [Path("~/Applications")]
+        if self._base_path:
+            search_paths.append(self._base_path)
+        appimage = find_appimage(name, search_paths)
+        if appimage is None:
+            logging.error("No %s AppImage found in %s", name, search_paths)
         return appimage
 
     def create(self, part):
