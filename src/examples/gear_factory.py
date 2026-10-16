@@ -9,6 +9,7 @@ Note: It makes a gear like things for now.
 
 import math
 
+from cycax import cycax_part
 from cycax.cycad import Cylinder
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 
@@ -44,8 +45,13 @@ class Gear(Cylinder):
         self.top.hole(pos=(self.x_center, self.y_center), diameter=2 * radius - teath_diameter - 2, depth=0.5)
 
 
+@cycax_part
+def small_gear() -> Gear:
+    return Gear(diameter=10, teath=6)
+
+
 if __name__ == "__main__":
-    gear = Gear(diameter=10, teath=6)
+    gear = small_gear()
     gear.save("./build")
     cycax_server = PartEngineBuild123d()
     cycax_server.build(gear)

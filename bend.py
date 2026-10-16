@@ -120,63 +120,76 @@ The R6 corner radii on the outward-facing short-side flanges should be cut/form-
 """
 from pathlib import Path
 
+from cycax import cycax_part
 from cycax.cycad import SheetMetalBend
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad_bend import PartEngineFreeCADBend
 
-tray = SheetMetalBend(
-    part_no="aluminium_tray",
-    x_size=440.0,  # length -> front/back are the "long" 440 mm sides
-    y_size=89.0,  # width  -> left/right are the "short" 89 mm sides
-    z_size=2.0,  # sheet thickness
-    material={"name": "aluminium", "code": "5052-H32", "standard": "AISI"},
-    k_factor=0.42,
-    bend_radius=2.0,  # inside bend radius; every bend below uses this part-level default
-)
 
-# --- Long sides (440 mm): plain 200 mm vertical walls, except front gets a return lip. ---
+@cycax_part
+def aluminium_tray() -> SheetMetalBend:
+    tray = SheetMetalBend(
+        part_no="aluminium_tray",
+        x_size=440.0,  # length -> front/back are the "long" 440 mm sides
+        y_size=89.0,  # width  -> left/right are the "short" 89 mm sides
+        z_size=2.0,  # sheet thickness
+        material={"name": "aluminium", "code": "5052-H32", "standard": "AISI"},
+        k_factor=0.42,
+        bend_radius=2.0,  # inside bend radius; every bend below uses this part-level default
+    )
 
-back_wall = tray.back.bend(angle=90, height=200.0, direction="up")
+    # --- Long sides (440 mm): plain 200 mm vertical walls, except front gets a return lip. ---
 
-front_wall = tray.front.bend(angle=90, height=200.0, direction="up")
-front_lip = front_wall.far.bend(angle=90, height=10.0, direction="up")
-# .far == "the edge opposite the fold that created this flange" -- the common case for
-# continuing a chain. front_wall also still exposes .left/.right/.front/.back directly
-# (any edge, not just .far) for the rarer case of bending off one of a flange's side
-# edges instead -- not needed here, but part of the decided design (bending-design.md
-# open question #1: "any edge", not just the far one).
+    tray.back.bend(angle=90, height=200.0, direction="up")
 
-# --- Short sides (89 mm): 200 mm vertical walls, each with an outward-folded tip. ---
+    front_wall = tray.front.bend(angle=90, height=200.0, direction="up")
+    front_wall.far.bend(angle=90, height=10.0, direction="up")
+    # .far == "the edge opposite the fold that created this flange" -- the common case for
+    # continuing a chain. front_wall also still exposes .left/.right/.front/.back directly
+    # (any edge, not just .far) for the rarer case of bending off one of a flange's side
+    # edges instead -- not needed here, but part of the decided design (bending-design.md
+    # open question #1: "any edge", not just the far one).
 
-left_wall = tray.left.bend(angle=90, height=200.0, direction="up")
-left_tip = left_wall.far.bend(angle=90, height=30.0, direction="down")  # continues outward
+    # --- Short sides (89 mm): 200 mm vertical walls, each with an outward-folded tip. ---
 
-right_wall = tray.right.bend(angle=90, height=200.0, direction="up")
-right_tip = right_wall.far.bend(angle=90, height=30.0, direction="down")
+    left_wall = tray.left.bend(angle=90, height=200.0, direction="up")
+    left_tip = left_wall.far.bend(angle=90, height=30.0, direction="down")  # continues outward
 
-# The two outward tips get their outer plan-view corners rounded. Deliberately NOT
-# CycadPart.beveled_edge() -- Martin wants sheet-metal corner rounding kept as its own,
-# dedicated mechanism rather than reusing the generic edge-bevel primitive, even though
-# the two happen to cut similar-looking geometry. round_corners() below is that dedicated
-# call; it also marks left_tip/right_tip as terminal -- calling .bend() on either again
-# after this point should raise.
-left_tip.round_corners(radius=6.0)
-right_tip.round_corners(radius=6.0)
+    right_wall = tray.right.bend(angle=90, height=200.0, direction="up")
+    right_tip = right_wall.far.bend(angle=90, height=30.0, direction="down")
 
-tmp_path = Path("/tmp/bend/b123")
-tray.save(path=tmp_path)
-engine = PartEngineBuild123d(name=tray.part_no, path=tmp_path)
-tray.build(engine)
+    # The two outward tips get their outer plan-view corners rounded. Deliberately NOT
+    # CycadPart.beveled_edge() -- Martin wants sheet-metal corner rounding kept as its own,
+    # dedicated mechanism rather than reusing the generic edge-bevel primitive, even though
+    # the two happen to cut similar-looking geometry. round_corners() below is that dedicated
+    # call; it also marks left_tip/right_tip as terminal -- calling .bend() on either again
+    # after this point should raise.
+    left_tip.round_corners(radius=6.0)
+    right_tip.round_corners(radius=6.0)
+    return tray
 
-tmp_path = Path("/tmp/bend/b123-brake")
-tray.save(path=tmp_path)
-engine = PartEngineBuild123d(name=tray.part_no, path=tmp_path, config={"bend_style": "brake_formed"})
-tray.build(engine)
 
-tmp_path = Path("/tmp/bend/fc")
-tray.save(path=tmp_path)
-engine = PartEngineFreeCADBend(name=tray.part_no, path=tmp_path)
-tray.build(engine)
+if __name__ == "__main__":
+    tray = aluminium_tray()
+    tmp_path = Path("/tmp/bend/b123")  # noqa S108
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tray.save(path=tmp_path)
+    engine = PartEngineBuild123d(name=tray.part_no, path=tmp_path)
+    tray.build(engine)
+
+    tmp_path = Path("/tmp/bend/b123-brake")  # noqa S108
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tray.save(path=tmp_path)
+    engine = PartEngineBuild123d(name=tray.part_no, path=tmp_path, config={"bend_style": "brake_formed"})
+    tray.build(engine)
+
+    tmp_path = Path("/tmp/bend/fc")  # noqa S108
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    tray.save(path=tmp_path)
+    engine = PartEngineFreeCADBend(name=tray.part_no, path=tmp_path)
+    tray.build(engine)
+
+
 # --- Same tray, `with`-block style for the nested pair (both styles are meant to work) ---
 #
 # with tray.left.bend(angle=90, height=200.0, direction="up") as left_wall:

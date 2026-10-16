@@ -248,6 +248,53 @@ enclosure.render()
 print(f"Enclosure files saved to: ./enclosure_output/{enclosure.name}")
 ```
 
+## Compiling with the CLI
+
+Mark the parts and assemblies in a file as build targets with `@cycax_part` and `@cycax_assembly`,
+and the `cycax` CLI can find them without a script of your own:
+
+```python
+from cycax import Assembly, Print3D, cycax_assembly, cycax_part
+
+
+@cycax_part
+def bracket() -> Print3D:
+    part = Print3D(part_no="bracket", x_size=50, y_size=20, z_size=5)
+    part.top.hole(pos=(25, 10), diameter=4)
+    return part
+
+
+@cycax_part  # Classes work too, if they can be created without arguments.
+class Spacer(Print3D):
+    def __init__(self):
+        super().__init__(part_no="spacer", x_size=10, y_size=10, z_size=10)
+
+
+@cycax_assembly
+def mount() -> Assembly:
+    assembly = Assembly("mount")
+    assembly.add(bracket())  # Decorated functions and classes are still called as usual.
+    assembly.add(Spacer())
+    return assembly
+```
+
+```bash
+cycax list mount.py               # Show the targets in the file
+cycax compile mount.py            # Compile every target to JSON
+cycax compile mount.py:bracket    # Compile only the named target
+cycax compile my_project/         # Every .py and .json file in the directory
+cycax compile cycax_parts.powersupplies.meanwell  # A module path also works
+```
+
+- A target function returns one part or assembly, or a list of them. The `@cycax_part(name="...")`
+  form changes the name used to select it.
+- Only targets defined in the file itself are compiled. A part imported from another file is
+  built as part of the assembly that uses it.
+- A file can import its sibling modules, its directory is on the Python path while it is loaded.
+- Errors are not hidden. `cycax compile` prints the traceback and exits with a non-zero code.
+- Keep local build/render code under `if __name__ == "__main__":` so that loading the file for
+  the CLI does not run it.
+
 ## Next Steps
 
 Now that you understand the basics:

@@ -4,9 +4,11 @@
 
 from pathlib import Path
 
+from cycax import cycax_assembly
 from cycax.cycad import Assembly, SheetMetal
 
 
+@cycax_assembly
 def dial_a_box(length=100, width=50, height=20, thickness=2) -> Assembly:
     """Dial a box delivers custom boxes that is open at the top.
 

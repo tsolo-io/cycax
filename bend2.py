@@ -206,11 +206,14 @@ The finished component comprises:
 
 from pathlib import Path
 
+from cycax import cycax_part
 from cycax.cycad import SheetMetalBend
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 from cycax.cycad.engines.part_freecad_bend import PartEngineFreeCADBend
 
-def parts() -> list[SheetMetalBend]:
+
+@cycax_part
+def aluminium_bracket() -> SheetMetalBend:
     bracket = SheetMetalBend(
         part_no="aluminium_bracket",
         x_size=80.0,  # length -> front/back are the "long" 80 mm sides
@@ -246,24 +249,24 @@ def parts() -> list[SheetMetalBend]:
     right_grip = bracket.right.bend(angle=45, height=40.0)
     right_grip = right_grip.far.bend(angle=45, height=20.0)
     right_grip = right_grip.far.bend(angle=90, height=10.0)
-    return [bracket]
+    return bracket
 
-# bracket.save()
+
 if __name__ == "__main__":
-    bracket = part()[0]
-    tmp_path = Path("/tmp/bend/b123")
+    bracket = aluminium_bracket()
+    tmp_path = Path("/tmp/bend/b123")  # noqa S108
     tmp_path.mkdir(parents=True, exist_ok=True)
     bracket.save(path=tmp_path)
     engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path)
     bracket.build(engine)
 
-    tmp_path = Path("/tmp/bend/b123-brake")
+    tmp_path = Path("/tmp/bend/b123-brake")  # noqa S108
     tmp_path.mkdir(parents=True, exist_ok=True)
     bracket.save(path=tmp_path)
     engine = PartEngineBuild123d(name=bracket.part_no, path=tmp_path, config={"bend_style": "brake_formed"})
     bracket.build(engine)
 
-    tmp_path = Path("/tmp/bend/fc")
+    tmp_path = Path("/tmp/bend/fc")  # noqa S108
     tmp_path.mkdir(parents=True, exist_ok=True)
     bracket.save(path=tmp_path)
     engine = PartEngineFreeCADBend(name=bracket.part_no, path=tmp_path)

@@ -2,9 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from cycax import cycax_part
 from cycax.cycad import Print3D
 
 
+@cycax_part
 class SimpleCube(Print3D):
     def __init__(self):
         super().__init__(
@@ -15,7 +17,8 @@ class SimpleCube(Print3D):
         )
 
 
-# Create and render the part
-cube = SimpleCube()
-cube.save()
-cube.render()
+if __name__ == "__main__":
+    # Create and render the part
+    cube = SimpleCube()
+    cube.save()
+    cube.render()

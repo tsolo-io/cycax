@@ -4,12 +4,10 @@
 
 """Function to help run the model creation."""
 
-import importlib
-import importlib.util
 import logging
 import re
 import shutil
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
@@ -17,125 +15,10 @@ from typing import Any
 import orjson
 import typer
 import xxhash
+from rich.console import Console
 
 from cycax.cycad import Assembly, CycadPart
-
-BuildTarget = namedtuple("BuildTarget", ["name", "path", "type", "obj"])
-
-FUNCTION_NAMES = [
-    "assemble",
-    "parts",
-    "cycax_assemble",
-    "cycax_parts",
-    "cycax_part",
-]  # TODO: Decide on these, maybe only support cycax_ prefixes.
-
-
-def run_function(file_path: Path, function_name: str | None = None) -> Path | None:
-    try:
-        spec = importlib.util.spec_from_file_location("dynamic_module", file_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        if function_name is None:
-            for _function_name in FUNCTION_NAMES:
-                if hasattr(module, _function_name):
-                    function_name = _function_name
-                    break
-        if function_name is None:
-            logging.error("No function found in file %s, looked for %s", file_path, FUNCTION_NAMES)
-            return None
-        elif not hasattr(module, function_name):
-            logging.error("Error finding function %s in file %s", function_name, file_path)
-            return None
-
-        function = getattr(module, function_name)
-        result = function()
-        return result
-    except Exception as error:
-        logging.error("Error running function %s from file %s: %s", function_name, file_path, error)
-        return None
-
-
-def run_compile(filename: Path, function_name: str | None = None, build_dir: Path = Path("./build")):
-    files = []
-    cycax_build = run_function(filename, function_name)
-    if not isinstance(cycax_build, list):
-        cycax_build = [cycax_build]
-
-    for build in cycax_build:
-        # TODO: Check the type
-        build_file = build.save(build_dir)
-        xhash, _ = hash_from_path(build_file)
-        logging.info("Saved build file %s %s", xhash, build_file)
-        files.append(build_file)
-
-    return files
-
-
-def cmd_input_scrubber(filename: Path | str, build_dir: Path | str) -> dict[str, str | Path]:
-    if ":" in filename:
-        filename, function_name = filename.split(":", 1)
-    else:
-        function_name = None
-    _filename = Path(filename).expanduser().resolve().absolute()
-    if not _filename.exists():
-        msg = f"File {_filename} does not exist."
-        raise FileNotFoundError(msg)
-    build_path = Path(build_dir).expanduser().resolve().absolute()
-    if not build_path.exists():
-        logging.warning("Build directory must exists. Please create %s and run the command again.", build_path)
-        raise typer.Abort()
-    return {"filename": _filename, "build_dir": build_path, "function_name": function_name}
-
-
-def hash_from_path(json_file: Path) -> tuple[str, Any]:
-    _json_file = json_file.expanduser().resolve().absolute()
-    if not _json_file.exists():
-        logging.error("The file %s does not exist.", _json_file)
-        raise typer.Exit(code=1)
-
-    data = orjson.loads(_json_file.read_text())
-    data_hash = xxhash.xxh64(orjson.dumps(data)).hexdigest()
-    return data_hash, data
-
-
-def add_to_build_order(json_file: Path, build_order: dict, level: int = 100):
-    data_hash, data = hash_from_path(json_file)
-    if data_hash not in build_order:
-        build_order[data_hash] = {
-            "index": level,
-            "hash": data_hash,
-            "path": json_file,
-        }
-        for part in data.get("parts", []):
-            _part_json = json_file.parent / part["name"] / f"{part['name']}.json"
-            add_to_build_order(_part_json, build_order, level - 1)
-    else:
-        build_order[data_hash]["index"] -= 1
-
-
-def make_build_map(filename: Path | str, build_dir: Path | str | None = None) -> dict:
-    json_files = []
-    fields = cmd_input_scrubber(filename, build_dir)
-    if fields["filename"].suffix == ".py":
-        json_files = run_compile(
-            filename=fields["filename"], function_name=fields["function_name"], build_dir=fields["build_dir"]
-        )
-    elif fields["filename"].suffix == ".json":
-        json_files = [fields["filename"]]
-    elif fields["filename"].is_dir():
-        json_files = [Path(f) for f in fields["filename"].iterdir() if f.suffix == ".json"]
-    else:
-        logging.error("The path %s is not a Python file, JSON file, or directory.", filename)
-        raise typer.Exit(code=1)
-
-    build_order = defaultdict(dict)
-    for json_file in json_files:
-        add_to_build_order(json_file, build_order)
-
-    # TODO: For more complex cases we should consider making this a graph.
-    return dict(build_order)
+from cycax.targets import load_targets
 
 
 class CycaxCompiler:
@@ -146,7 +29,7 @@ class CycaxCompiler:
         root_path: The root path.
         cache_path: The cache path.
         src_json: A list of JSON files used as the source of the build.
-        src_py: A list of Python files used as the source of the build.
+        src_py: The Python sources (file or module paths) with CyCAx targets to build.
     """
 
     def __init__(self, root_build_dir: Path, cache_dir: Path, settings: dict):
@@ -160,7 +43,7 @@ class CycaxCompiler:
         if not self.cache_path.exists():
             self.cache_path.mkdir(parents=True, exist_ok=True)
         self.src_json: list[Path] = []
-        self.src_py: list[Path] = []
+        self.src_py: list[dict] = []
 
     def path_join(self, base_path: Path, name: str) -> Path:
         """Join a path with a normalised name.
@@ -201,15 +84,15 @@ class CycaxCompiler:
         if file_path.exists():
             old_hash = file_path.read_text()
 
-        if old_hash == _data_hash:
+        if old_hash == _data_hash and json_file_path.exists():
             self.parts[path]["build"] = False
             return
 
-        # Data changed.
+        # Data changed. Write the JSON before the hash, so an interrupted write is retried.
+        json_file_path.write_text(_data.decode())
         file_path.write_text(_data_hash)
         self.parts[path]["build"] = True
 
-        json_file_path.write_text(_data.decode())
         logging.info("Saved %s definition to %s with hash %s", name, json_file_path, _data_hash)
 
     def load_json(self, path: Path, index: int = 1):
@@ -283,21 +166,17 @@ class CycaxCompiler:
     def compile(self):
         """Compile the source files (Python) into a CyCAx JSON file."""
         # Do the CyCAx build for every discovered Python file.
-        for py_file in self.src_py:
-            cycax_build = run_function(py_file["filename"], py_file["function_name"])
-            if cycax_build is None:
-                continue
-            # The build function can return more than one build
-            if not isinstance(cycax_build, list):
-                cycax_build = [cycax_build]
-
-            for build in cycax_build:
-                if isinstance(build, Assembly):
-                    self.save_assembly(build, self.root_path)
-                elif isinstance(build, CycadPart):
-                    self.save_part(build, self.root_path)
-                else:
-                    logging.error("The build process returned an unexpected type: %s %s", type(build), build)
+        for src in self.src_py:
+            targets = load_targets(src["source"], src["target_name"])
+            if not targets:
+                logging.debug("No CyCAx targets in %s", src["source"])
+            for target in targets:
+                logging.info("Compiling %s %s from %s", target.kind, target.name, src["source"])
+                for build in target.make():
+                    if isinstance(build, Assembly):
+                        self.save_assembly(build, self.root_path)
+                    else:
+                        self.save_part(build, self.root_path)
 
     def build_order(self) -> Iterable[dict[str, Any]]:
         """Return parts in the order they should be built.
@@ -407,37 +286,51 @@ class CycaxCompiler:
             self.to_cache(part)
 
     def add_src(self, filename: str):
-        """Add a source file to the build process.
+        """Add a source to the build process.
 
         Args:
-            filename: The filename of the source file. Could contain reference to a function.
+            filename: A Python file, JSON file, directory or dotted Python module path. A Python
+                source can select one CyCAx target with a `:name` suffix, e.g. `bend2.py:bracket`.
         """
         if ":" in filename:
-            filename, function_name = filename.split(":", 1)
+            filename, target_name = filename.split(":", 1)
         else:
-            function_name = None
-        self.add_src_path(filename, function_name)
+            target_name = None
+        self.add_src_path(filename, target_name)
 
-    def add_src_path(self, filename: str, function_name: str | None = None):
-        """Add a source file to the build process.
+    def add_src_path(self, filename: str | Path, target_name: str | None = None):
+        """Add a source to the build process.
 
         Args:
-            filename: The filename of the source file.
-            function_name: The name of the function to be called from the source file.
+            filename: A Python file, JSON file, directory or dotted Python module path.
+            target_name: The name of the one CyCAx target to build from a Python source.
         """
         _filename = Path(filename).expanduser().resolve().absolute()
         if not _filename.exists():
+            if re.fullmatch(r"[A-Za-z_]\w*(\.[A-Za-z_]\w*)*", str(filename)):
+                # Not a path, so a module path like cycax_parts.powersupplies.meanwell.
+                self.src_py.append({"source": str(filename), "target_name": target_name})
+                return
             msg = f"File {_filename} does not exist."
             raise FileNotFoundError(msg)
 
         if _filename.suffix == ".py":
-            self.src_py.append({"filename": _filename, "function_name": function_name})
+            self.src_py.append({"source": _filename, "target_name": target_name})
         elif _filename.suffix == ".json":
             self.src_json.append({"filename": _filename})
         elif _filename.is_dir():
-            for file_path in _filename.iterdir():
+            for file_path in sorted(_filename.iterdir()):
                 if file_path.is_file() and file_path.suffix in (".py", ".json") and not file_path.name.startswith("_"):
                     self.add_src_path(file_path)
         else:
             logging.error("The path %s is not a Python file, JSON file, or directory.", filename)
             raise typer.Exit(code=1)
+
+
+def compile_or_exit(compiler: CycaxCompiler):
+    """Compile, on any error print the traceback and exit with a non-zero code."""
+    try:
+        compiler.compile()
+    except Exception:
+        Console(stderr=True).print_exception()
+        raise typer.Exit(code=1) from None

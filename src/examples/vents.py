@@ -4,10 +4,12 @@
 
 """Demonstration of vents."""
 
+from cycax import cycax_part
 from cycax.cycad import SheetMetal
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 
 
+@cycax_part
 class VentsExample(SheetMetal):
     """Define a part with vents."""
 
