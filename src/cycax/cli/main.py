@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from typing import Annotated
 
 import typer
+from rich.console import Console
 from rich.logging import RichHandler
 
 from cycax.cli import (
@@ -19,7 +20,8 @@ from cycax.cli import (
     cmd_config,
 )
 from cycax.cli.config import Settings
-from cycax.cli.run import CycaxCompiler
+from cycax.cli.run import CycaxCompiler, compile_or_exit
+from cycax.targets import load_targets
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
@@ -45,7 +47,22 @@ def compile_cmd(
         settings=dict(ctx.obj.config),
     )
     compiler.add_src(filename)
-    compiler.compile()
+    compile_or_exit(compiler)
+
+
+@app.command("list")
+def list_cmd(
+    filename: Annotated[str, typer.Argument(help="A Python file or module path with CyCAx targets")],
+):
+    """List the CyCAx parts and assemblies a Python file or module defines."""
+    source, _, target_name = filename.partition(":")
+    try:
+        targets = load_targets(source, target_name or None)
+    except Exception:
+        Console(stderr=True).print_exception()
+        raise typer.Exit(code=1) from None
+    for target in targets:
+        typer.echo(f"{target.kind:<9} {target.name}")
 
 
 @app.command()
@@ -60,7 +77,7 @@ def send(
         settings=dict(ctx.obj.config),
     )
     compiler.add_src(filename)
-    compiler.compile()
+    compile_or_exit(compiler)
     # compile.send(ctx.obj.config.nats_dsn)
 
 

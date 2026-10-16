@@ -4,6 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from cycax import cycax_assembly
 from cycax.cycad import Assembly, Cuboid, Print3D, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
@@ -80,19 +81,20 @@ class DriveStack(Assembly):
         dev2.level(left=bracket_l.right, subtract=True)
 
 
+@cycax_assembly
 def assemble() -> Assembly:
     base = Assembly("base")
     bottom = SheetMetal(x_size=200, y_size=200, z_size=2, part_no="bottom")
     base.add(bottom)
 
     box = Assembly("box")
-    box.add_assembly(base)
+    box.add(base)
 
     # Below will be moved to an assembly.
 
     drive_stack = DriveStack(name="DriveStack")
     drive_stack.definition()  # TODO: Assembly should call this automatically.
-    box.add_assembly(drive_stack)
+    box.add(drive_stack)
 
     # TODO: Change to: drive_stack.level(bottom=base.top, left=base.left, front=base.front)
     # drive_stack.bottom.level(base.top)

@@ -7,10 +7,12 @@
 import math
 from pathlib import Path
 
+from cycax import cycax_part
 from cycax.cycad import Cylinder
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
 
 
+@cycax_part
 class PipeFlange(Cylinder):
     """Pipe Flange is a cylinder with a flange."""
 

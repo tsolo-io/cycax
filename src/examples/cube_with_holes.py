@@ -2,9 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from cycax import cycax_part
 from cycax.cycad import Print3D
 
 
+@cycax_part
 class CubeWithHoles(Print3D):
     def __init__(self):
         super().__init__(part_no="cube_with_holes", x_size=30, y_size=30, z_size=20)
@@ -24,7 +26,8 @@ class CubeWithHoles(Print3D):
                 self.top.hole(pos=(x, y), diameter=3)
 
 
-# Create and render
-part = CubeWithHoles()
-part.save()
-part.render()
+if __name__ == "__main__":
+    # Create and render
+    part = CubeWithHoles()
+    part.save()
+    part.render()

@@ -4,6 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from cycax import cycax_assembly
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import Cuboid, Print3D, SheetMetal
 
@@ -48,7 +49,8 @@ class Blob(Print3D):
                 self.bottom.hole(pos=(x, y), diameter=2)
 
 
-def main():
+@cycax_assembly
+def thlob() -> Assembly:
     assembly = Assembly("Thlob")
     base_board = SheetMetal(part_no="BaseBoard", x_size=1100, y_size=100, z_size=15)
 
@@ -68,6 +70,11 @@ def main():
         assembly.add(blob)
 
     assembly.add(base_board)
+    return assembly
+
+
+def main():
+    assembly = thlob()
     assembly.save("./build/thlob")
     assembly.render()
 

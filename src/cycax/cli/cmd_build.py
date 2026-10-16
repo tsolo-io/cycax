@@ -9,7 +9,7 @@ from typing import Annotated
 
 import typer
 
-from cycax.cli.run import CycaxCompiler
+from cycax.cli.run import CycaxCompiler, compile_or_exit
 from cycax.cycad.assembly_openscad import AssemblyOpenSCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
 
@@ -27,7 +27,7 @@ def build_freecad(
         settings=dict(ctx.obj.config),
     )
     compiler.add_src(filename)
-    compiler.compile()
+    compile_or_exit(compiler)
 
     for json_file in compiler.src_json:
         # If there are any JSON files that needs to be loaded, load them.

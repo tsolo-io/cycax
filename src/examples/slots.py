@@ -4,6 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from cycax import cycax_assembly
 from cycax.cycad.assembly import Assembly
 from cycax.cycad.cuboid import Cuboid, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
@@ -40,7 +41,8 @@ class Cube(Cuboid):
         side.hole(pos=(self.x_size / 2, self.y_size / 2), diameter=diameter * 2, depth=5)  # Marker, should point down
 
 
-def main():
+@cycax_assembly
+def slots() -> Assembly:
     name = "slots"
     assembly = Assembly(name)
     base_board = SheetMetal(part_no="base", x_size=1300, y_size=700, z_size=15)
@@ -67,7 +69,12 @@ def main():
                 top_cube = cube
                 if subtract:
                     cube.level(bottom=base_board.top, subtract=True)
+    return assembly
 
+
+def main():
+    assembly = slots()
+    name = assembly.name
     assembly.save(f"./build/{name}")
     # assembly.render()
     assembly.build(engine=AssemblyBuild123d(name), part_engines=[PartEngineFreeCAD(), PartEngineBuild123d()])

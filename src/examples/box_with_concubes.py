@@ -4,6 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from cycax import cycax_assembly
 from cycax.cycad import Assembly, Print3D, SheetMetal
 from cycax.cycad.engines.assembly_build123d import AssemblyBuild123d
 from cycax.cycad.engines.part_build123d import PartEngineBuild123d
@@ -23,7 +24,8 @@ class CornerCube(Print3D):
             side.hole(pos=pos, diameter=3.2, external_subtract=True)  # Through everything
 
 
-def main():
+@cycax_assembly
+def box_with_concubes() -> Assembly:
     box = Assembly("box")
 
     bottom = SheetMetal(x_size=100, y_size=100, z_size=2, part_no="bottom")
@@ -79,7 +81,11 @@ def main():
     cc.rotate("xxzzz")
     cc.level(top=front.top)
     cc.level(back=back.front, right=right.left, subtract=True)
+    return box
 
+
+def main():
+    box = box_with_concubes()
     box.save("./build/box_with_concubes")
     box.build(engine=AssemblyBuild123d(box.name), part_engines=[PartEngineBuild123d()])
 
