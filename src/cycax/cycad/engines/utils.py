@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import hashlib
+import re
 from pathlib import Path
 
 
@@ -69,3 +70,28 @@ def check_source_hash(source_filepath: Path, target_filepath: Path) -> bool:
 
     store_file_hash(source_filepath, new_hash)
     return True
+
+
+def _version_key(path: Path) -> list[tuple[int, int | str]]:
+    """Sort key that orders embedded numbers numerically, so 26.3 > 1.10 > 1.9."""
+    return [(0, int(part)) if part.isdigit() else (1, part) for part in re.split(r"(\d+)", path.name) if part]
+
+
+def find_appimage(name: str, search_paths: list[Path]) -> Path | None:
+    """Find the newest `<name>*.AppImage` across all the search paths.
+
+    Args:
+        name: AppImage name prefix, e.g. "FreeCAD".
+        search_paths: Directories to look in. Missing directories are skipped.
+
+    Returns:
+        The AppImage with the highest version in its file name, or None if there is none.
+    """
+    found = []
+    for search_path in search_paths:
+        path = Path(search_path).expanduser()
+        if path.is_dir():
+            found.extend(path.glob(f"{name}*.AppImage"))
+    if not found:
+        return None
+    return max(found, key=_version_key)

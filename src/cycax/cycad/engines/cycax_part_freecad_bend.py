@@ -631,14 +631,16 @@ class EngineFreecadBend:
         k_factor = bend_features[0]["k_factor"] if bend_features else 0.44
         self._export_unfold(final_obj, base_feature["z_size"], k_factor, doc)
 
-        FreeCADGui.activeDocument().activeView().viewTop()
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        view = FreeCADGui.activeDocument().activeView()
+        view.viewTop()
+        view.fitAll()
         doc.saveCopy(f"{self.filepath}.FCStd")
         final_obj.Shape.exportStep(f"{self.filepath}.step")
 
         App.closeDocument(name)
 
 
+exit_code = 1
 try:
     json_file = os.getenv("CYCAX_JSON")
     out_dir = os.getenv("CYCAX_CWD")
@@ -649,10 +651,13 @@ try:
     definition = json.loads(Path(json_file).read_text())
     logging.info("SheetMetalBend json file %s out dir = %s", json_file, out_dir)
     engine.build(definition)
+    exit_code = 0
+except Exception:
+    logging.exception("FreeCAD SheetMetalBend build failed")
 finally:
     # QtGui.QApplication.quit() reliably segfaults here (Gui::PythonConsole teardown,
     # inside Qt's MDI/view-widget destruction) -- and an unclean-looking exit is what
     # triggers FreeCAD's crash-recovery prompt on the *next* launch. Everything this
     # process needs to produce is already written to disk by this point, so skip Qt's
     # graceful widget teardown entirely and terminate immediately instead.
-    os._exit(0)
+    os._exit(exit_code)

@@ -25,7 +25,6 @@ import importDXF
 import importSVG
 import Part
 from FreeCAD import Rotation, Vector  # noqa
-from PySide import QtGui
 
 logging.info("Open FreeCAD")
 
@@ -255,7 +254,6 @@ class EngineFreecad:
         """
         active_doc = FreeCADGui.activeDocument()
         view = self.change_view(active_doc=active_doc, side=view, default="ALL")
-        FreeCADGui.SendMsgToActiveView("ViewFit")
 
         target_image_file = f"{self.filepath}-{view}.png"
         active_doc.activeView().fitAll()
@@ -302,7 +300,7 @@ class EngineFreecad:
         """
         view_doc = FreeCADGui.activeDocument()
         view = self.change_view(active_doc=view_doc, side=view, default="TOP")
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        view_doc.activeView().fitAll()
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
 
@@ -316,7 +314,7 @@ class EngineFreecad:
         """
         view_doc = FreeCADGui.activeDocument()
         view = self.change_view(active_doc=view_doc, side=view, default="TOP")
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        view_doc.activeView().fitAll()
         __objs__ = []
         __objs__.append(active_doc.getObject("Shape"))
 
@@ -508,8 +506,9 @@ class EngineFreecad:
             result = solid
         Part.show(result)
         doc.recompute()
-        FreeCADGui.activeDocument().activeView().viewTop()
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        view = FreeCADGui.activeDocument().activeView()
+        view.viewTop()
+        view.fitAll()
 
         self.filepath = self._base_path / name / name
         doc.saveCopy(f"{self.filepath}.FCStd")
@@ -531,6 +530,7 @@ class EngineFreecad:
         App.closeDocument(name)
 
 
+exit_code = 1
 try:
     json_file = os.getenv("CYCAX_JSON")
     cycax_mode = os.getenv("CYCAX_MODE")
@@ -548,5 +548,12 @@ try:
     else:
         logging.info(f"Json file {json_file} out dir = {out_dir}")
         engine.build(definition, files_to_produce.replace(" ", ""))
+    exit_code = 0
+except Exception:
+    logging.exception("FreeCAD part build failed")
 finally:
-    QtGui.QApplication.quit()
+    # Not QtGui.QApplication.quit(): it reliably segfaults during Qt's widget teardown, and an
+    # unclean-looking exit triggers FreeCAD's crash-recovery prompt on the next launch. All
+    # output is on disk by now, so terminate immediately, keeping the exit code meaningful
+    # for the caller.
+    os._exit(exit_code)
