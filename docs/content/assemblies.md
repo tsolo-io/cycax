@@ -173,7 +173,7 @@ class ComplexAssembly(Assembly):
         ]
         
         for bracket, pos in zip(self.brackets, positions):
-            bracket.rotate("xz")  # Stand up
+            bracket.turn("xz")  # Stand up
             bracket.level(bottom=self.base.top, left=self.base.left, front=self.base.front)
             bracket.move(x=pos[0], y=pos[1])
     
@@ -199,7 +199,7 @@ Transform entire assemblies as units:
 
 ```python
 # Rotate the entire assembly
-assembly.rotate("z")  # Rotate 90° around Z axis
+assembly.turn("z")  # Rotate 90° around Z axis
 
 # Move the entire assembly
 assembly.move(x=100, y=50, z=20)
@@ -464,3 +464,19 @@ part = lazy.get_part("heavy_part")  # Now it's created
 ::: cycax.cycad.assembly
     options:
       show_submodules: true
+
+## Mates
+
+Mates join parts exactly through anchors (see Parts › Anchors), also after `rotate()`. They are
+solved in the order written: each mate moves ONE part (the first argument) onto an
+already-placed part (the second). A part that a mate placed, or used as a reference, is fixed.
+
+```python
+assembly.mate(lid.bottom, box.top)                     # faces touch, normals opposite
+assembly.mate(lid.bottom, box.top, offset=2)           # 2 mm gap
+assembly.align(pin.ref("axis"), plate.ref("m4"))       # coaxial; contact=True: points meet
+assembly.place(psu.ref("mount"), on=rack.ref("slot"))  # frame to frame (all 6 degrees)
+```
+
+`export()` checks every mate again; a later `move()`/`rotate()` of a mated part is an error. The
+mates are in the assembly spec (`mates`), for FreeCAD joints.

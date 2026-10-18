@@ -40,3 +40,14 @@ def test_find_appimage_picks_newest(tmp_path):
     assert find_appimage("FreeCAD", [tmp_path / "missing", apps]).name == "FreeCAD_1.10.0-Linux-x86_64.AppImage"
     assert find_appimage("FreeCAD", [apps, other]).name == "FreeCAD_26.3.0-Linux-x86_64-py311.AppImage"
     assert find_appimage("Blender", [apps, other]) is None
+
+
+def test_expected_freecad_files_follow_the_script_naming(tmp_path):
+    from cycax.cycad.engines.utils import expected_freecad_files
+
+    base = tmp_path / "plate" / "plate"
+    names = sorted(f["file"].name for f in expected_freecad_files(base, "STL,PNG,DXF:FRONT"))
+    assert names == ["plate-all.png", "plate-front.dxf", "plate.FCStd", "plate.step", "plate.stl"]
+    asm = tmp_path / "rack" / "rack-freecad"
+    names = sorted(f["file"].name for f in expected_freecad_files(asm, "png:top"))
+    assert names == ["rack-freecad-top.png", "rack-freecad.FCStd"]

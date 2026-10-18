@@ -187,7 +187,7 @@ def create_bracket_assembly(panel_width=200, panel_depth=150, bracket_height=40)
     assembly.add(right_bracket, "right_bracket")
     
     # Position brackets
-    left_bracket.rotate("xz")  # Rotate to vertical position
+    left_bracket.turn("xz")  # Rotate to vertical position
     left_bracket.level(
         bottom=base.top,
         left=base.left,
@@ -195,7 +195,7 @@ def create_bracket_assembly(panel_width=200, panel_depth=150, bracket_height=40)
     )
     left_bracket.move(x=10, y=20)  # 10mm from edge, 20mm from front
     
-    right_bracket.rotate("xz")
+    right_bracket.turn("xz")
     right_bracket.level(
         bottom=base.top,
         right=base.right,

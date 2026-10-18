@@ -78,7 +78,7 @@ class Build123dPart(Print3D):
         super().__init__(part_no="b123d_part", x_size=25, y_size=25, z_size=15)
 
 part = Build123dPart()
-part.render(engine="build123d")
+part.build(PartEngineBuild123d())  # build123d is not a render() option
 
 # For assemblies with custom engine configuration
 assembly = Assembly("build123d_assembly")
@@ -131,55 +131,16 @@ part.render(engine="freecad")
 
 ## Server-Based Integrations
 
-Server-based integrations use the [CyCAx Server](https://github.com/tsolo-io/cycax-server) for remote processing.
+Remote builds go through NATS: the CyCAx workers (`cycax-freecad-worker`,
+`cycax-blender-worker`) take tasks from NATS and put the results into the NATS object-store
+cache. `cycax-server` is optional (cache browser, clean-up, metrics). The old HTTP server
+engines (`PartEngineServer`, `AssemblyServer`) were removed.
 
-### Setting Up CyCAx Server
-
-**Prerequisites:**
-- Docker or direct installation of CyCAx Server
-- Network access to the server
-
-**Quick Docker Setup:**
-```bash
-# Pull and run CyCAx Server
-docker pull tsolo/cycax-server:latest
-docker run -d -p 8080:8080 tsolo/cycax-server:latest
-```
-
-**Configuration:**
-```python
-# Configure server endpoint
-import cycax
-cycax.config.server_url = "http://localhost:8080"  # Default
-```
-
-### FreeCAD Server Integration
-
-For advanced FreeCAD features and assembly support:
-
-**Usage:**
-```python
-from cycax.cycad import Assembly
-from cycax.cycad.engines.part_server import PartEngineServer
-
-# Parts via server
-assembly = Assembly("server_assembly")
-# Server automatically handles FreeCAD processing
-assembly.build(engine_config={"server_url": "http://localhost:8080"})
-```
-
-### Blender Server Integration
-
-For advanced visualization and assembly rendering:
-
-**Usage:**
-```python
-from cycax.cycad import Assembly
-
-assembly = Assembly("blender_assembly")
-# Render assembly visualization with Blender
-assembly.render(engine="blender_server")
-```
+- Run the stack locally: `make build && make start` in the CyCAx workspace
+  (`cycax-server/deployment/compose.yaml`).
+- Send one compiled part or assembly by hand: `cycax-send <worker_kind> <json_file>`
+  (in `cycax-server`).
+- The CLI: `cycax build --server` (see [The cycax command](cli.md)).
 
 ## Engine Selection Guide
 
@@ -251,7 +212,7 @@ precision_part = PrecisionPart()
 
 # Use different engines for different parts
 param_part.render(engine="openscad")      # Fast parametric
-precision_part.render(engine="build123d")  # High precision
+precision_part.build(PartEngineBuild123d())  # High precision (build123d)
 
 assembly.add(param_part, "param")
 assembly.add(precision_part, "precision")
@@ -285,13 +246,8 @@ sudo apt install freecad-python3
 # Or use AppImage version
 ```
 
-**Server connection issues:**
-```python
-# Test server connection
-import requests
-response = requests.get("http://localhost:8080/health")
-print(response.status_code)  # Should be 200
-```
+**Server connection issues:** the workers need a reachable NATS (`CYCAX_NATS_URL`, default
+`nats://127.0.0.1:4222`). Check that the `nats` service of the stack is running.
 
 ### Performance Tips
 

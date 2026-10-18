@@ -178,8 +178,11 @@ CyCAx supports multiple CAD engines. Choose based on your needs:
 # Render with different engines
 part.render()                    # Default (usually OpenSCAD)
 part.render(engine="openscad")   # Explicit OpenSCAD
-part.render(engine="build123d")  # build123d for modern Python CAD
 part.render(engine="freecad")    # FreeCAD for advanced features
+
+# build123d is not a render() option; use its engine directly:
+from cycax.cycad.engines.part_build123d import PartEngineBuild123d
+part.build(PartEngineBuild123d())
 ```
 
 ## Complete Example: Enclosure
@@ -278,22 +281,30 @@ def mount() -> Assembly:
     return assembly
 ```
 
+In a project (a folder with `cycax.toml`, made by `cycax init`), the CLI finds the targets
+in the `[project] sources` folders:
+
 ```bash
-cycax list mount.py               # Show the targets in the file
-cycax compile mount.py            # Compile every target to JSON
-cycax compile mount.py:bracket    # Compile only the named target
-cycax compile my_project/         # Every .py and .json file in the directory
-cycax compile cycax_parts.powersupplies.meanwell  # A module path also works
+cycax list                        # Show all targets in the project
+cycax build                       # Build every target (STEP by default)
+cycax build bracket --output stl  # Build one target; a unique part of the name also works
+cycax plan mount                  # Show the engines and the cache, with no build
+cycax open bracket                # Open the result
+cycax compile mount               # Write the JSON spec only
+cycax list mount.py               # Targets in a file outside the project (file.py:name also works)
 ```
 
 - A target function returns one part or assembly, or a list of them. The `@cycax_part(name="...")`
-  form changes the name used to select it.
-- Only targets defined in the file itself are compiled. A part imported from another file is
+  form changes the name used to select it. Target names must be unique in a project.
+- Only targets defined in the file itself are found. A part imported from another file is
   built as part of the assembly that uses it.
 - A file can import its sibling modules, its directory is on the Python path while it is loaded.
-- Errors are not hidden. `cycax compile` prints the traceback and exits with a non-zero code.
+- An error in a target shows your file and line, and the exit code is not zero. `--debug`
+  shows the full traceback.
 - Keep local build/render code under `if __name__ == "__main__":` so that loading the file for
   the CLI does not run it.
+
+All commands and settings: [The cycax command](cli.md).
 
 ## Next Steps
 

@@ -49,10 +49,10 @@ def make_plate_with_connect_cubes(side: str, name: str | None = None, *, holes: 
     bp_side = getattr(base_plate, side.lower())
     cc_side = bp_side.opposite.name.lower()
     if side in (LEFT, RIGHT):
-        base_plate.rotate("xz")
+        base_plate.turn("xz")
         ref_sides = [(FRONT, BACK), (TOP, BOTTOM)]
     elif side in (FRONT, BACK):
-        base_plate.rotate("x")
+        base_plate.turn("x")
         ref_sides = [(LEFT, RIGHT), (TOP, BOTTOM)]
     elif side in (TOP, BOTTOM):
         ref_sides = [(LEFT, RIGHT), (FRONT, BACK)]
@@ -93,24 +93,24 @@ def make_sides(name: str | None = None) -> Assembly:
         side_plate.top.hole(pos=(length / 2, length / 2), diameter=6, depth=1)
 
     bottom_plate = assembly.get_part(f"{name}_{BOTTOM.lower()}_1")
-    bottom_plate.rotate("xx")
+    bottom_plate.turn("xx")
     top_plate = assembly.get_part(f"{name}_{TOP.lower()}_1")
     for side_name in (FRONT, BACK, LEFT, RIGHT):
         side_plate = assembly.get_part(f"{name}_{side_name.lower()}_1")
-        side_plate.rotate("x")  # Make the sides stand up
+        side_plate.turn("x")  # Make the sides stand up
         if side_name in (FRONT, BACK):
             if side_name == FRONT:
                 side_plate.level(back=bottom_plate.front, left=bottom_plate.left, bottom=bottom_plate.top)
             else:
                 side_plate.level(front=bottom_plate.back, right=bottom_plate.right, bottom=bottom_plate.top)
-                side_plate.rotate("zz")
+                side_plate.turn("zz")
         elif side_name in (LEFT, RIGHT):
-            side_plate.rotate("zzz")  # Rotate the left and right sides
+            side_plate.turn("zzz")  # Rotate the left and right sides
             if side_name == LEFT:
                 side_plate.level(back=bottom_plate.back, right=bottom_plate.left, bottom=bottom_plate.top)
             else:
                 side_plate.level(back=bottom_plate.back, left=bottom_plate.right, bottom=bottom_plate.top)
-                side_plate.rotate("zz")
+                side_plate.turn("zz")
 
     top_plate.level(back=bottom_plate.back, left=bottom_plate.left, bottom=side_plate.top)
 

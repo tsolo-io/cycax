@@ -56,18 +56,18 @@ def make_plate_with_socket(side: str) -> Assembly:
     assembly.add(psocket)
 
     if side == BACK:
-        base.rotate("yz")
-        psocket.rotate("xx")
+        base.turn("yz")
+        psocket.turn("xx")
         psocket.level(front=base.back, top=base.top, left=base.left)
         psocket.move(z=-5, x=5)
         psocket.level(front=base.back, subtract=True)
     elif side == FRONT:
-        base.rotate("yz")
+        base.turn("yz")
         psocket.level(back=base.front, top=base.top, right=base.right)
         psocket.move(z=-5, x=-5)
         psocket.level(back=base.front, subtract=True)
     elif side == TOP:
-        psocket.rotate("xxxzz")
+        psocket.turn("xxxzz")
         psocket.level(bottom=base.top, front=base.front, right=base.right)
         psocket.move(y=5, x=-5)
         psocket.level(bottom=base.top, subtract=True)

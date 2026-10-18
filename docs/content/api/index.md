@@ -55,15 +55,6 @@ Complete API documentation for CyCAx modules and classes.
     options:
       show_submodules: true
 
-### Server Engines
-::: cycax.cycad.engines.part_server
-    options:
-      show_submodules: true
-
-::: cycax.cycad.engines.assembly_server
-    options:
-      show_submodules: true
-
 ## Utility Modules
 
 ### Location and Positioning

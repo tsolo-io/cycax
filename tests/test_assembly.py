@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from cycax.cycad import Assembly, SheetMetal
+from cycax.spec import spec_hash
 
 
 def test_part_names():
@@ -24,7 +25,7 @@ def test_part_names():
 
 
 def test_export_part_entry_shape():
-    """The exported per-part dict follows the new data-file-spec-new.md field names."""
+    """The exported assembly follows spec version 2 (docs/content/data-file-spec.md)."""
     assembly = Assembly("shape-test")
     part = SheetMetal(x_size=10, y_size=20, z_size=2, part_no="a_part")
     assembly.add(part)
@@ -32,21 +33,27 @@ def test_export_part_entry_shape():
     data = assembly.export()
 
     assert data == {
+        "spec_version": 2,
+        "kind": "assembly",
         "name": "shape_test",
         "parts": [
             {
                 "name": "a_part",
+                "instance": "a_part_1",
+                "hash": spec_hash(part.export()),
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
                 "x_size": 10,
                 "y_size": 20,
                 "z_size": 2,
+                "center": False,
                 "rotate": [],
-                "colour": [0.5, 0.5, 0.5],
-                "hash": "",
+                "transform": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+                "meta": {"colour": [0.5, 0.5, 0.5]},
             }
         ],
+        "meta": {},
     }
 
 

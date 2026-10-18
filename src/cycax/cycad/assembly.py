@@ -25,6 +25,7 @@ from cycax.cycad.cycad_part import CycadPart
 from cycax.cycad.engines.base_assembly_engine import AssemblyEngine
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
+from cycax.spec import SPEC_VERSION, spec_hash, validate_spec
 
 
 class Assembly:
@@ -41,6 +42,9 @@ class Assembly:
         self._base_path = Path(".")
         self._part_files = defaultdict(list)
         self.external_features = []
+        # Names of the parts added with `external_subtract=True`: their external features are
+        # cut into other parts by `assembly.<side>.subtract(this_assembly)`.
+        self.external_feature_parts: set[str] = set()
         self.left = AssemblySideLeft(self)
         self.right = AssemblySideRight(self)
         self.top = AssemblySideTop(self)
@@ -49,6 +53,57 @@ class Assembly:
         self.back = AssemblySideBack(self)
         self.assemblies = []
         self.hash: str = ""
+        self.mates = []  # solved in order (task cycax/38)
+        self._fixed: set[int] = set()  # id() of parts that a later mate may not move
+        self.definition()
+
+    def definition(self):
+        """Override in a subclass to add and place the parts (called by __init__), like
+        `CycadPart.definition()`."""
+
+    # -- mates (task cycax/38) ------------------------------------------------------------------
+    def _add_mate(self, mate):
+        moving, target = mate.moving.part, mate.target.part
+        if moving is target:
+            msg = "A mate needs two different parts."
+            raise ValueError(msg)
+        if id(moving) in self._fixed:
+            msg = (
+                f"{moving.part_no} is already placed by an earlier mate (or used as a reference); "
+                "mates are solved in order and do not move a fixed part. Mate the other part to it."
+            )
+            raise ValueError(msg)
+        mate.solve()
+        problems = mate.problems()
+        if problems:  # pragma: no cover - the solver should never leave this
+            msg = f"The {mate.kind} of {moving.part_no} could not be solved: {'; '.join(problems)}."
+            raise ValueError(msg)
+        self._fixed.update({id(moving), id(target)})
+        self.mates.append(mate)
+        return mate
+
+    def mate(self, moving, target, *, offset: float = 0.0):
+        """Put the face (anchor) `moving` on `target`: the normals opposite, `offset` mm apart.
+        `moving` moves (it turns about its anchor, then slides along the target's normal).
+        Example: `assembly.mate(lid.bottom, box.top)`."""
+        from cycax.cycad.mates import Mate, as_ref  # noqa: PLC0415
+
+        return self._add_mate(Mate("mate", as_ref(moving), as_ref(target), offset=offset))
+
+    def align(self, moving, target, *, contact: bool = False):
+        """Make two axes (hole anchors) one line; `contact=True` also joins their points.
+        Example: `assembly.align(pin.ref("axis"), plate.ref("m4"))`."""
+        from cycax.cycad.mates import Mate, as_ref  # noqa: PLC0415
+
+        return self._add_mate(Mate("align", as_ref(moving), as_ref(target), contact=contact))
+
+    def place(self, moving, *, on, flip: bool = True):
+        """Put the frame `moving` on the frame `on` (6 DOF): origins together, x directions
+        together, normals opposite (`flip=False`: the same).
+        Example: `assembly.place(psu.ref("mount"), on=rack.ref("slot"))`."""
+        from cycax.cycad.mates import Mate, as_ref  # noqa: PLC0415
+
+        return self._add_mate(Mate("place", as_ref(moving), as_ref(on), flip=flip))
 
     def _get_assembler(self, engine: str = "OpenSCAD", engine_config: dict | None = None) -> AssemblyEngine:
         logging.info("Calling to the assembler")
@@ -263,13 +318,11 @@ class Assembly:
         Returns:
             The coordinates of the center of the assembly.
         """
-        center_x = 0
-        center_y = 0
-        center_z = 0
-        for part in self.parts.values():
-            center_x = min(part.center[0], center_x)
-            center_y = min(part.center[1], center_y)
-            center_z = min(part.center[2], center_z)
+        # The centre of the bounding box of all the parts.
+        bbox = self.bounding_box
+        center_x = (bbox[LEFT] + bbox[RIGHT]) / 2
+        center_y = (bbox[FRONT] + bbox[BACK]) / 2
+        center_z = (bbox[BOTTOM] + bbox[TOP]) / 2
         coordinate = namedtuple("Coordinate", ["x", "y", "z"])
         return coordinate(x=center_x, y=center_y, z=center_z)
 
@@ -304,13 +357,13 @@ class Assembly:
             center_y: New position of the assemblies center on the y-axis.
             center_z: New position of the assemblies center on the z-axis.
         """
-        if min_x and center_x:
+        if min_x is not None and center_x is not None:
             msg = "Cannot specify both min_x and center_x"
             raise ValueError(msg)
-        if min_y and center_y:
+        if min_y is not None and center_y is not None:
             msg = "Cannot specify both min_y and center_y"
             raise ValueError(msg)
-        if min_z and center_z:
+        if min_z is not None and center_z is not None:
             msg = "Cannot specify both min_z and center_z"
             raise ValueError(msg)
 
@@ -322,12 +375,13 @@ class Assembly:
             y_move = min_y - self.bounding_box[FRONT]
         if min_z is not None:
             z_move = min_z - self.bounding_box[BOTTOM]
+        current_center = self.center
         if center_x is not None:
-            x_move = center_x - self.bounding_box[LEFT] / 2
+            x_move = center_x - current_center.x
         if center_y is not None:
-            y_move = center_y - self.bounding_box[FRONT] / 2
+            y_move = center_y - current_center.y
         if center_z is not None:
-            z_move = center_z - self.bounding_box[BOTTOM] / 2
+            z_move = center_z - current_center.z
 
         for part in self.parts.values():
             if x_move is not None:
@@ -362,6 +416,7 @@ class Assembly:
             self.parts[part_name] = part
             if external_subtract:
                 self.external_features.append(part.external_features)
+                self.external_feature_parts.add(part_name)
             return part_name
 
     def level(
@@ -464,23 +519,48 @@ class Assembly:
         """
         flattened = self.combine_all_assemblies() if self.assemblies else self
         list_out = []
-        for item in flattened.parts.values():
+        for instance, item in flattened.parts.items():
             dict_part = {
                 "name": item.part_no,
+                "instance": instance,
+                # The real content hash, so workers find the exact part (two parts can share a
+                # name but differ in size). An explicitly set `hash` wins.
+                "hash": item.hash or spec_hash(item.export()),
                 "x": float(item.position[0]),
                 "y": float(item.position[1]),
                 "z": float(item.position[2]),
                 "x_size": float(item.x_size),
                 "y_size": float(item.y_size),
                 "z_size": float(item.z_size),
+                "center": False,
                 "rotate": item.rotation,
-                "colour": to_rgb(item.colour),
-                "hash": item.hash,
+                "transform": item.placement_matrix(),
+                "meta": {"colour": to_rgb(item.colour)},  # not part of the hash
             }
+            material = getattr(item, "material", None)
+            if material is not None:  # the renderers' material look (blender/09)
+                dict_part["meta"]["material"] = material.to_meta()
             list_out.append(dict_part)
-        dict_out = {}
-        dict_out["name"] = self.name
-        dict_out["parts"] = list_out
+        dict_out = {"spec_version": SPEC_VERSION, "kind": "assembly", "name": self.name, "parts": list_out}
+        if self.mates:
+            instances = {id(item): instance for instance, item in flattened.parts.items()}
+            broken = [(m, m.problems()) for m in self.mates]
+            broken = [(m, p) for m, p in broken if p]
+            if broken:
+                mate, problems = broken[0]
+                msg = (
+                    f"The {mate.kind} of {mate.moving.part.part_no} on {mate.target.part.part_no} does not hold any "
+                    f"more ({'; '.join(problems)}): a later move() or rotate() changed a mated part."
+                )
+                raise ValueError(msg)
+            dict_out["mates"] = [m.to_spec(lambda part: instances.get(id(part), part.part_no)) for m in self.mates]
+        meta = {}
+        for key in ("description", "notes"):
+            value = getattr(self, key, None)
+            if value:
+                meta[key] = value
+        dict_out["meta"] = meta
+        validate_spec(dict_out)
         return dict_out
 
     def rotate_freeze_top(self):
@@ -522,10 +602,36 @@ class Assembly:
             part.position[0] = x - (part.x_max - part.x_min) / 2
             part.position[2] = z - (part.z_max - part.z_min) / 2
 
-    def rotate(self, actions: str):
-        """Rotate the assembly several times.
+    def rotate(self, actions: str | None = None, /, **angles: float):
+        """Rotate the whole assembly by any angle: `assembly.rotate(z=30)`.
 
-        Example: `Assembly.rotate("xxyzyy")` is the same as two `rotate_freeze_front`, `rotate_freeze_left`,
+        Degrees, counter-clockwise, about the centre of the assembly's bounding box, on the world
+        axes, in the order written. For quarter turns that keep the corner use `turn("xxz")`.
+        """
+        if actions is not None:
+            msg = f'rotate() takes degrees, e.g. rotate(z=90); use turn("{actions}") for quarter turns.'
+            raise TypeError(msg)
+        from cycax.cycad import placement  # noqa: PLC0415
+
+        for axis, degrees in angles.items():
+            if axis not in ("x", "y", "z"):
+                msg = f"rotate() takes x=, y= and z= (degrees), not {axis}=."
+                raise TypeError(msg)
+            parts = list(self.parts.values())
+            lo = [min(getattr(p, f"{a}_min") for p in parts) for a in "xyz"]
+            hi = [max(getattr(p, f"{a}_max") for p in parts) for a in "xyz"]
+            centre = [(a + b) / 2 for a, b in zip(lo, hi, strict=True)]
+            world = placement.about(centre, placement.rotation(axis, float(degrees)))
+            for part in parts:
+                part._apply_world(world)  # noqa: SLF001 - same package
+                part.rotation.append({"axis": axis, "angle": float(degrees)})
+                if float(degrees) % 90 != 0:
+                    part._only_quarter_turns = False  # noqa: SLF001
+
+    def turn(self, actions: str):
+        """Quarter turns of the whole assembly: `assembly.turn("xxz")`.
+
+        Example: `Assembly.turn("xxyzyy")` is the same as two `rotate_freeze_front`, `rotate_freeze_left`,
         `rotate_freeze_top`, and two `rotate_freeze_left`.
         Where rotate_freeze_<side> results in one 90degrees counter clock wise rotations on the side.
 

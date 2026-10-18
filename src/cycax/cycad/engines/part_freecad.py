@@ -13,8 +13,7 @@ from typing import Any
 import orjson
 
 from cycax.cycad.engines.base_part_engine import PartEngine
-from cycax.cycad.engines.utils import check_source_hash
-from cycax.cycad.location import TOP
+from cycax.cycad.engines.utils import check_source_hash, expected_freecad_files
 
 
 def bulk_build(app_bin: Path, path: Path, parts: list[dict[str, Any]]):
@@ -50,17 +49,16 @@ class PartEngineFreeCAD(PartEngine):
         if self._base_path is None:
             self.set_path(path=part._base_path)
         fcstd_file = self._base_path / self.name / f"{self.name}.FCStd"
+        out_formats_set = set()
+        for file_format in self.config.get("out_formats", []):
+            out_formats_set.add(":".join(file_format[:2]))
+        if not out_formats_set:
+            out_formats_set.add("STL")
         if check_source_hash(self._json_file, fcstd_file):
             app_bin = self.get_appimage("FreeCAD")
 
             logging.info("Use freeCAD %s", app_bin)
             freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad.py"
-
-            out_formats_set = set()
-            for file_format in self.config.get("out_formats", []):
-                out_formats_set.add(":".join(file_format[:2]))
-            if not out_formats_set:
-                out_formats_set.add("STL")
 
             environment = dict(os.environ)
             environment.update(
@@ -86,12 +84,6 @@ class PartEngineFreeCAD(PartEngine):
             if result.stderr:
                 logging.error("FreeCAD: %s", result.stderr)
 
-        _files = [
-            {"file": self._base_path / self.name / f"{self.name}.stl"},
-            {"file": self._base_path / self.name / f"{self.name}-perspectiveAll.png"},
-            {"file": self._base_path / self.name / f"{self.name}-perspective.dxf", "side": TOP},
-            {"file": self._base_path / self.name / f"{self.name}-perspectiveTop.png", "side": TOP},
-            {"file": self._base_path / self.name / f"{self.name}.FCStd", "description": "FreeCAD primary source file."},
-        ]
+        _files = expected_freecad_files(self._base_path / self.name / self.name, ",".join(sorted(out_formats_set)))
 
         return self.file_list(files=_files, engine="FreeCAD", score=5)

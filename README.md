@@ -24,7 +24,17 @@ It is designed to work with existing Opensource CAD tools and provide an interfa
 
 ## Installation
 
-Add `"cycax @ git+https://github.com/tsolo-io/cycax"` to your `pyproject.toml` file dependencies.
+Add `cycax` to the dependencies of your CAD project (`pyproject.toml`), then use the CLI with Hatch:
+
+```bash
+hatch run cycax init     # make cycax.toml and an example part
+hatch run cycax build    # build all parts and assemblies
+hatch run cycax open example_part
+```
+
+Install from the Tsolo Gitea package index, or from GitHub
+(`"cycax @ git+https://github.com/tsolo-io/cycax"`). See `docs/content/installation.md`
+and `docs/content/cli.md`.
 
 ## Integrations
 

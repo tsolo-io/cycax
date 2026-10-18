@@ -115,7 +115,17 @@ def test_dynamic():
     for cube in range(8):
         box.add(cubes[cube])
 
-    assert box.export() == {
+    exported = box.export()
+    # Spec V2 fields are checked here; the positions are then compared in the old layout.
+    assert (exported.pop("spec_version"), exported.pop("kind"), exported.pop("meta")) == (2, "assembly", {})
+    assert all(part["hash"] for part in exported["parts"])
+    for part in exported["parts"]:
+        part["hash"] = ""
+        assert part.pop("instance")
+        assert part.pop("center") is False
+        assert len(part.pop("transform")) == 4  # the placement matrix (cycax/32)
+        part["colour"] = part.pop("meta")["colour"]
+    assert exported == {
         "name": "box",
         "parts": [
             {

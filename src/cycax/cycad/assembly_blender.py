@@ -14,5 +14,5 @@ class AssemblyBlender(AssemblyEngine):
 
     def __init__(self, name: str) -> None:
         self.name = name
-        msg = "The functionality has been removed. Please use the AssemblyServer."
+        msg = "Local Blender assemblies were removed. Use the cycax-blender-worker (via NATS)."
         raise NotImplementedError(msg)

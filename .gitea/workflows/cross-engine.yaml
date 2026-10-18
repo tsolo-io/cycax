@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 Tsolo.io
+#
+# SPDX-License-Identifier: Apache-2.0
+
+---
+
+# Cross-engine part tests (task cycax/23): each part of the test set is built with every
+# engine and all pairs are compared (tests/test_cross_engine.py). Too slow for every push, so
+# it runs every night and by hand. build123d and OpenSCAD run in the job; FreeCAD runs on the
+# shared CyCAx server (set the repository variable CYCAX_SERVER_URL, e.g.
+# nats://cycax.example.lan:4222). The matrix is in the job log ("a vs b: same / DIFFERENT").
+
+name: Cross-engine
+run-name: Cross-engine part tests
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  cross-engine:
+    runs-on: "ubuntu-22.04"
+    container:
+      image: gitea.tu.tsolo.net/tsolo/ubuntu:22-ci
+    steps:
+      - name: Checkout repository code
+        uses: https://gitea.com/actions/checkout@v4
+      - name: Install packages
+        run: |
+          apt-get update
+          apt-get install -y libgl-dev openscad
+      - name: Cross-engine matrix
+        env:
+          CYCAX_TEST_SERVER_URL: ${{ vars.CYCAX_SERVER_URL }}
+        run: hatch run testing:cross-engine -rA

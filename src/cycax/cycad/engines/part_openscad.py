@@ -4,6 +4,7 @@
 
 import json
 import logging
+import math
 import subprocess
 from pathlib import Path
 
@@ -54,6 +55,12 @@ class PartEngineOpenSCAD(PartEngine):
             cut: This will change the direction that the cylinder is orientated in. either out of or into the part.
 
         """
+        if "diameter" not in lookup:
+            # The base shape of a cylinder part (x_size = diameter, z_size = height), as in the
+            # build123d and FreeCAD engines (found by the cross-engine tests, cycax/23).
+            radius = lookup["x_size"] / 2
+            x, y, z = lookup.get("x", 0.0) + radius, lookup.get("y", 0.0) + radius, lookup.get("z", 0.0)
+            return [f"translate([{x}, {y}, {z}])", f"cylinder(r={radius}, h={lookup['z_size']}, $fn=64);"]
         tempdiam = lookup["diameter"] / 2
         res = []
         res.append(self._translate(lookup))
@@ -94,12 +101,6 @@ class PartEngineOpenSCAD(PartEngine):
         res.append(f"sphere(r={radius}, $fn=64);")
 
         return res
-
-    def _decode_cut(self) -> str:
-        """
-        This method returns a simple OpenSCAD string neceseray to cut.
-        """
-        return "difference(){"
 
     def _translate(self, lookup: dict) -> str:
         """
@@ -228,8 +229,10 @@ class PartEngineOpenSCAD(PartEngine):
             )
 
         elif features["edge_type"] == "chamfer":
+            # Chamfer legs = size (martin, 2026-10-18): a square with side size * sqrt 2, turned
+            # 45 degrees, centred `size` from both faces, cuts each face `size` from the corner.
             cutter = self._beveled_edge_cube(
-                size=features["size"] * 2,
+                size=features["size"] * math.sqrt(2),
                 depth=features["depth"] * 2,
                 side=features["side"],
                 center=True,
@@ -287,35 +290,40 @@ class PartEngineOpenSCAD(PartEngine):
 
         data = json.loads(json_file.read_text())
 
-        output = []
-        dif = 0
+        # (Before cycax/23 every feature after the first cut was cut too, so a later add became a hole.)
+        steps = []
         for action in data["features"]:
-            if action["action"] == "subtract":
-                dif = dif + 1
-                output.insert(0, self._decode_cut())
-
             if action["type"] == "beveled_edge":
-                output.append(self.decode_beveled_edge(action))
-
+                decoded = self.decode_beveled_edge(action)
             elif action["type"] == "cuboid":
-                output.append(self._decode_cube(action))
-
+                decoded = self._decode_cube(action)
             elif action["type"] == "external":
-                output.append(self._decode_external(self.name))
-
+                decoded = self._decode_external(self.name)
             elif action["type"] == "cylinder":
-                output.append(self._decode_cylinder(action, cut=(action["action"] == "subtract")))
-
+                decoded = self._decode_cylinder(action, cut=(action["action"] == "subtract"))
             elif action["type"] == "nut_cutout":
-                output.append(self._decode_nut(action))
-
+                decoded = self._decode_nut(action)
             elif action["type"] == "sphere":
-                output.append(self._decode_sphere(action))
-
-        i = 0
-        while i < dif:
-            i = i + 1
-            output.append("}")
+                decoded = self._decode_sphere(action)
+            elif action["type"] == "cone":  # a countersink (cycax/36)
+                decoded = [
+                    self._translate(action),
+                    self._cut_rotate(action["side"]),
+                    f"cylinder(r1={action['diameter'] / 2}, r2={action['diameter2'] / 2}, "
+                    f"h={action['depth']}, $fn=64);",
+                ]
+            else:
+                msg = f"OpenSCAD does not support the feature type {action['type']!r}."
+                raise ValueError(msg)
+            steps.append(("cut" if action["action"] == "subtract" else "add", decoded))
+        # Features in FILE ORDER (martin, 2026-10-18): runs of adds are a union with the shape so
+        # far, runs of cuts a difference, nested in order. A later add fills an earlier hole.
+        output: list = []
+        for kind, decoded in steps:
+            if not output:
+                output = [decoded]
+                continue
+            output = ["union() {" if kind == "add" else "difference() {", *output, decoded, "}"]
 
         with scad_file.open("w+") as fh:
             for out in output:

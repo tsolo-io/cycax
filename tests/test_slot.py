@@ -81,9 +81,9 @@ def assemble(side: str, *, horizontal: bool) -> Assembly:
     rotation_str = {LEFT: "yyy", RIGHT: "y", FRONT: "yx", BACK: "xzyy", TOP: "zyy", BOTTOM: "z"}[side]
     cube = Cube(side=side, horizontal=horizontal)
     assembly.add(cube)
-    cube.rotate(rotation_str)
+    cube.turn(rotation_str)
     if not horizontal:
-        cube.rotate("z")
+        cube.turn("z")
     cube.level(bottom=base_board.top, front=base_board.front, left=base_board.left)
     cube.move(x=100, y=100)
     cube.level(bottom=base_board.top, subtract=True)

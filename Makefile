@@ -2,8 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: docs examples build
+.PHONY: docs examples build docs-examples
 -include .tidy/*.mk
+
+docs-examples:  ## Make the manual pages from examples/*.py (before `make docs`; a broken example fails here)
+	hatch run cycax --yes report examples/*.py --format markdown-manual --out docs/content/manual --no-png --local
 
 build:  ## Build a test version of CyCAx
 	hatch build

@@ -30,14 +30,15 @@ class SheetMetalBend(Cuboid):
         z_size: The size of z. Also used as the sheet thickness.
         part_no: The unique name that will be given to a type of parts.
         assembly: The assembly the part belongs to.
-        material: Material the part is made from, as `{"name", "code", "standard"}` (see
-            docs/content/data-file-spec-new.md#material). Defaults to a generic mild steel.
+        material: The material (`cycax.materials.Material`; an old `{"name", "code",
+            "standard"}` dict also works). Default: mild steel 1008. It goes into the spec meta
+            (not hashed) and gives the defaults of `k_factor` and `bend_radius`.
         k_factor: Default bend-allowance K-factor used by `bend()` when a bend doesn't
-            specify its own.
+            specify its own. Default: the K-factor of the material (mild steel: 0.44).
         bend_radius: Default inside bend radius used by `bend()` when a bend doesn't
             specify its own, and by every bend in the part (`sheetmetal-bend-design.md`
             deliberately doesn't support a per-bend radius override). Defaults to the
-            sheet thickness (`z_size`), a common rule-of-thumb minimum.
+            sheet thickness (`z_size`) times the material's `bend_radius_factor` (1.0).
     """
 
     def __init__(
@@ -47,11 +48,32 @@ class SheetMetalBend(Cuboid):
         y_size: float,
         z_size: float = 2.0,
         assembly: Assembly | None = None,
-        material: dict | None = None,
-        k_factor: float = 0.44,
+        material=None,
+        k_factor: float | None = None,
         bend_radius: float | None = None,
+        colour: str | None = None,
+        manufacture=None,
     ):
-        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="gray", assembly=assembly)
-        self.material = material if material is not None else {"name": "mild-steel", "code": "1008", "standard": "AISI"}
-        self.k_factor = k_factor
-        self.bend_radius = z_size if bend_radius is None else bend_radius
+        from cycax.materials import MILD_STEEL_1008, as_material  # noqa: PLC0415
+
+        material = as_material(material) or MILD_STEEL_1008
+        super().__init__(
+            part_no=part_no,
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            assembly=assembly,
+            material=material,
+            colour=colour,
+            manufacture=manufacture,
+        )
+        # Geometry (hashed): from the arguments, else the defaults of the material.
+        self.k_factor = k_factor if k_factor is not None else (material.k_factor or 0.44)
+        if bend_radius is None:
+            bend_radius = z_size * (material.bend_radius_factor or 1.0)
+        self.bend_radius = bend_radius
+
+    def default_manufacture(self):
+        from cycax.manufacture import LaserCutAndBend  # noqa: PLC0415
+
+        return LaserCutAndBend()

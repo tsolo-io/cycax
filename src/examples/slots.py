@@ -56,9 +56,9 @@ def slots() -> Assembly:
                 cube = Cube(side=side, horizontal=horizontal)
                 assembly.add(cube, f"cube-{side}-{horizontal}-{subtract}")
                 if subtract:
-                    cube.rotate(rotation_str)
+                    cube.turn(rotation_str)
                     if not horizontal:
-                        cube.rotate("z")
+                        cube.turn("z")
                 if horizontal and subtract:
                     cube.level(bottom=base_board.top, back=base_board.back, left=left_on)
                     cube.move(x=100)

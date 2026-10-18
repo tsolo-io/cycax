@@ -19,6 +19,7 @@ defined in the file, `cycax compile file.py:bracket` builds only the named one.
 
 import importlib
 import importlib.util
+import inspect
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -30,6 +31,13 @@ from cycax.cycad import Assembly, CycadPart
 TARGET_ATTRIBUTE = "__cycax_target__"
 
 
+def own_doc(obj) -> str:
+    """The docstring of a function or class itself: not the one a class inherits
+    (`inspect.getdoc` gives the base class's docstring, e.g. Print3D's)."""
+    doc = obj.__dict__.get("__doc__") if isinstance(obj, type) else obj.__doc__
+    return inspect.cleandoc(doc) if doc else ""
+
+
 @dataclass(frozen=True)
 class Target:
     """A CyCAx build target.
@@ -38,11 +46,21 @@ class Target:
         name: The name used to select the target, `file.py:<name>`.
         kind: Either "part" or "assembly".
         obj: The decorated function or class.
+        doc_view: The view for the manual picture ("top", "front", ...); None = 3D render.
+        engine: The engine for this target (docs/content/engine-selection.md rule 2); None = the
+            project default.
     """
 
     name: str
     kind: Literal["part", "assembly"]
     obj: Callable
+    doc_view: str | None = None
+    engine: str | None = None
+
+    @property
+    def description(self) -> str:
+        """The docstring of the target function or class (empty when there is none)."""
+        return own_doc(self.obj)
 
     def make(self) -> list:
         """Call the target and return the parts or assemblies it made.
@@ -63,12 +81,27 @@ class Target:
                     f"expected {expected.__name__} or a list of {expected.__name__}."
                 )
                 raise TypeError(msg)
+        # The docstring of the target is the description (spec meta, not hashed), unless the
+        # code set one itself.
+        description = own_doc(self.obj)
+        for item in results:
+            if description and not getattr(item, "description", None):
+                item.description = description
+            if self.doc_view and not getattr(item, "doc_view", None):
+                item.doc_view = self.doc_view
         return list(results)
 
 
-def _mark(kind: Literal["part", "assembly"], obj: Callable | None, name: str | None):
+def _mark(
+    kind: Literal["part", "assembly"],
+    obj: Callable | None,
+    name: str | None,
+    doc_view: str | None = None,
+    engine: str | None = None,
+):
     def decorator(_obj: Callable) -> Callable:
-        setattr(_obj, TARGET_ATTRIBUTE, Target(name=name or _obj.__name__, kind=kind, obj=_obj))
+        target = Target(name=name or _obj.__name__, kind=kind, obj=_obj, doc_view=doc_view, engine=engine)
+        setattr(_obj, TARGET_ATTRIBUTE, target)
         return _obj
 
     if obj is None:
@@ -77,14 +110,32 @@ def _mark(kind: Literal["part", "assembly"], obj: Callable | None, name: str | N
     return decorator(obj)
 
 
-def cycax_part(obj: Callable | None = None, *, name: str | None = None):
-    """Mark a function or class that makes a part as a CyCAx build target."""
-    return _mark("part", obj, name)
+def cycax_part(
+    obj: Callable | None = None, *, name: str | None = None, doc_view: str | None = None, engine: str | None = None
+):
+    """Mark a function or class that makes a part as a CyCAx build target.
+
+    Args:
+        obj: The decorated function or class.
+        name: The target name, default the function or class name.
+        doc_view: The view used for the manual picture ("top", "front", ...); default a 3D render.
+        engine: The engine for this target, e.g. "freecad"; default the project engine.
+    """
+    return _mark("part", obj, name, doc_view, engine)
 
 
-def cycax_assembly(obj: Callable | None = None, *, name: str | None = None):
-    """Mark a function or class that makes an assembly as a CyCAx build target."""
-    return _mark("assembly", obj, name)
+def cycax_assembly(
+    obj: Callable | None = None, *, name: str | None = None, doc_view: str | None = None, engine: str | None = None
+):
+    """Mark a function or class that makes an assembly as a CyCAx build target.
+
+    Args:
+        obj: The decorated function or class.
+        name: The target name, default the function or class name.
+        doc_view: The view used for the manual picture ("top", "front", ...); default a 3D render.
+        engine: The engine for this target, e.g. "blender"; default the project engine.
+    """
+    return _mark("assembly", obj, name, doc_view, engine)
 
 
 def collect_targets(module) -> dict[str, Target]:

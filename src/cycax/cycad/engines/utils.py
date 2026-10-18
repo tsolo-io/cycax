@@ -95,3 +95,30 @@ def find_appimage(name: str, search_paths: list[Path]) -> Path | None:
     if not found:
         return None
     return max(found, key=_version_key)
+
+
+# Default view for each image format, when the format string gives none (e.g. "PNG").
+DEFAULT_VIEWS = {"png": "all", "dxf": "top", "svg": "top"}
+
+
+def expected_freecad_files(base: Path, out_formats: str) -> list[dict]:
+    """The files the FreeCAD scripts write for `out_formats` (e.g. "STL,PNG,DXF:top").
+
+    The scripts name images `<base>-<view>.<ext>` with a lowercase view, STL also writes STEP,
+    and the FCStd is always written.
+
+    Args:
+        base: The output path without extension (`<part dir>/<name>`, or
+            `<assembly dir>/<name>-freecad` for assemblies).
+        out_formats: The comma-separated formats passed to the script.
+    """
+    files = [{"file": base.with_name(f"{base.name}.FCStd"), "description": "FreeCAD primary source file."}]
+    for out_choice in out_formats.lower().split(","):
+        ftype, _, view = out_choice.strip().partition(":")
+        if ftype == "stl":
+            files.append({"file": base.with_name(f"{base.name}.stl")})
+            files.append({"file": base.with_name(f"{base.name}.step")})
+        elif ftype in DEFAULT_VIEWS:
+            view = (view or DEFAULT_VIEWS[ftype]).strip()
+            files.append({"file": base.with_name(f"{base.name}-{view}.{ftype}"), "side": view.upper()})
+    return files
