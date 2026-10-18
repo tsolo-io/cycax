@@ -20,7 +20,8 @@ class Cylinder(CycadPart):
         diameter: float,
         height: float,
         assembly: Assembly | None = None,
-        colour: str = "pink",
+        colour: str | None = None,
+        material=None,
     ):
         self.x_center = diameter / 2
         self.y_center = diameter / 2
@@ -39,6 +40,8 @@ class Cylinder(CycadPart):
             assembly=assembly,
             colour=colour,
             polygon="cylinder",
+            material=material,
+            default_colour="pink",
         )  # initializes the cylinder to (0,0,0)
 
 
@@ -62,7 +65,10 @@ class Cuboid(CycadPart):
         y_size: float,
         z_size: float,
         assembly: Assembly | None = None,
-        colour: str = "pink",
+        colour: str | None = None,
+        material=None,
+        default_colour: str = "pink",
+        manufacture=None,
     ):
         super().__init__(
             x=0.0,
@@ -76,6 +82,9 @@ class Cuboid(CycadPart):
             assembly=assembly,
             colour=colour,
             polygon="cube",
+            material=material,
+            default_colour=default_colour,
+            manufacture=manufacture,
         )  # initializes the cuboid to (0,0,0)
 
 
@@ -92,9 +101,32 @@ class SheetMetal(Cuboid):
     """
 
     def __init__(
-        self, part_no: str, x_size: float, y_size: float, z_size: float = 2.0, assembly: Assembly | None = None
+        self,
+        part_no: str,
+        x_size: float,
+        y_size: float,
+        z_size: float = 2.0,
+        assembly: Assembly | None = None,
+        material=None,
+        colour: str | None = None,
+        manufacture=None,
     ):
-        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="gray", assembly=assembly)
+        super().__init__(
+            part_no=part_no,
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            assembly=assembly,
+            colour=colour,
+            material=material,
+            default_colour="gray",
+            manufacture=manufacture,
+        )
+
+    def default_manufacture(self):
+        from cycax.manufacture import LaserCut  # noqa: PLC0415
+
+        return LaserCut()
 
 
 class Print3D(Cuboid):
@@ -109,5 +141,30 @@ class Print3D(Cuboid):
         assembly: The assembly the part belongs to.
     """
 
-    def __init__(self, part_no: str, x_size: float, y_size: float, z_size: float, assembly: Assembly | None = None):
-        super().__init__(part_no=part_no, x_size=x_size, y_size=y_size, z_size=z_size, colour="red", assembly=assembly)
+    def __init__(
+        self,
+        part_no: str,
+        x_size: float,
+        y_size: float,
+        z_size: float,
+        assembly: Assembly | None = None,
+        material=None,
+        colour: str | None = None,
+        manufacture=None,
+    ):
+        super().__init__(
+            part_no=part_no,
+            x_size=x_size,
+            y_size=y_size,
+            z_size=z_size,
+            assembly=assembly,
+            colour=colour,
+            material=material,
+            default_colour="red",
+            manufacture=manufacture,
+        )
+
+    def default_manufacture(self):
+        from cycax.manufacture import FdmPrint  # noqa: PLC0415
+
+        return FdmPrint()

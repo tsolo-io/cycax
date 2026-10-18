@@ -44,9 +44,9 @@ class Fan(Cuboid):
             self.size / 2
         )  # I had to change this from self.center because it was conflicting with the center property.
 
+        # CycadPart.__init__ calls self.definition(); do not call it again (that duplicated
+        # every feature).
         super().__init__(part_no=part_no, x_size=size, y_size=size, z_size=thickness)
-
-        self.definition()
 
     def definition(self):
         """

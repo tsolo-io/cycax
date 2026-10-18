@@ -67,8 +67,8 @@ class DriveStack(Assembly):
         self.add(dev1, "device1")
         self.add(dev2, "device2")
 
-        bracket_l.rotate("xz")
-        bracket_r.rotate("xz")
+        bracket_l.turn("xz")
+        bracket_r.turn("xz")
 
         dev2.level(bottom=dev1.top, left=dev1.left, front=dev1.front)
         dev2.move(z=10)
@@ -99,7 +99,7 @@ def assemble() -> Assembly:
     # TODO: Change to: drive_stack.level(bottom=base.top, left=base.left, front=base.front)
     # drive_stack.bottom.level(base.top)
     # drive_stack.front.level(base.front)
-    drive_stack.left.rotate()
+    drive_stack.left.turn()
     drive_stack.left.level(base.left)
     drive_stack.bottom.level(base.top)
     drive_stack.back.level(base.back)

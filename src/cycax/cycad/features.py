@@ -23,6 +23,7 @@ SHAPE_TYPE_MAP: dict[str, str] = {
     "flat_rectangle_cut": "flat_rectangle_cut",
     "flat_polygon_cut": "flat_polygon_cut",
     "flange_hole_cut": "flange_hole_cut",
+    "countersink": "cone",
 }
 ACTION_MAP: dict[str, str] = {"cut": "subtract", "add": "add", "bend": "bend"}
 
@@ -320,6 +321,14 @@ class NutCutOut(Feature):
             "thickness": 5.2,
             "side_to_side": 10,
         },
+        # ISO 4032 hex nuts: e min (across corners), m max (thickness), s (across flats).
+        "M2ISO": {"diameter": 4.32, "thickness": 1.6, "side_to_side": 4},
+        "M2.5ISO": {"diameter": 5.45, "thickness": 2.0, "side_to_side": 5},
+        "M4ISO": {"diameter": 7.66, "thickness": 3.2, "side_to_side": 7},
+        "M5ISO": {"diameter": 8.79, "thickness": 4.7, "side_to_side": 8},
+        "M8ISO": {"diameter": 14.38, "thickness": 6.8, "side_to_side": 13},
+        "M10ISO": {"diameter": 17.77, "thickness": 8.4, "side_to_side": 16},
+        "M12ISO": {"diameter": 20.03, "thickness": 10.8, "side_to_side": 18},
     }
 
     def __init__(
@@ -680,3 +689,17 @@ class FlatPolygonCut(Feature):
         self.parent = parent
         self.name = "flat_polygon_cut"
         self.type = "cut"
+
+
+class Cone(Feature):
+    """A countersink: a cone cut into a side, `diameter` at the surface, `diameter2` at
+    `depth` below it (task cycax/36). Placed like a hole: x/y/z is the centre on the surface,
+    the cone goes into the part from `side`."""
+
+    def __init__(self, side: str, x: float, y: float, z: float, diameter: float, diameter2: float, depth: float):
+        super().__init__(side=side, x=x, y=y, z=z)
+        self.name = "countersink"  # spec type "cone" (SHAPE_TYPE_MAP)
+        self.type = "cut"  # spec action "subtract" (ACTION_MAP)
+        self.diameter = diameter
+        self.diameter2 = diameter2
+        self.depth = depth

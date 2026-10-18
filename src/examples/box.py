@@ -28,13 +28,13 @@ def dial_a_box(length=100, width=50, height=20, thickness=2) -> Assembly:
     box.add(bottomside, "bottom-side")
     box.add(frontside, "front-side")
     box.add(leftside, "left-side")
-    box.add(rightside, "back-side")
+    box.add(rightside, "right-side")
     box.add(backside, "back-side")
 
-    leftside.rotate("xz")
-    rightside.rotate("xz")
-    frontside.rotate("x")
-    backside.rotate("x")
+    leftside.turn("xz")
+    rightside.turn("xz")
+    frontside.turn("x")
+    backside.turn("x")
 
     bottomside.level(front=frontside.back, bottom=frontside.bottom, left=frontside.left)
     bottomside.move(x=2)

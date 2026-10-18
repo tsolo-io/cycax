@@ -213,16 +213,28 @@ large_box = ParametricEnclosure(150, 100, 80, 4)
 
 ### Rotation
 
-Rotate parts to different orientations:
+Quarter turns with `turn()`. Each letter is one 90° counter-clockwise turn about that axis. The
+part keeps its minimum corner:
 
 ```python
-# Rotate around different axes
-part.rotate("x")   # 90° around X axis
-part.rotate("y")   # 90° around Y axis  
-part.rotate("z")   # 90° around Z axis
-part.rotate("xy")  # 90° around X, then Y
-part.rotate("xyz") # 90° around X, Y, then Z
+part.turn("x")    # 90° about X
+part.turn("xz")   # 90° about X, then 90° about Z
+part.left.turn()  # 90° about the axis through the left side (X)
 ```
+
+Any angle with `rotate()`: degrees, counter-clockwise, about the centre of the part's bounding
+box, on the world axes, in the order written. Afterwards the bounding box is the box around the
+rotated part, and `level()` uses it:
+
+```python
+part.rotate(z=30)          # 30° about Z
+part.rotate(x=90, z=-15)   # 90° about X, then -15° about Z
+part.top.rotate(30)        # 30° about the axis through the top side (Z)
+assembly.rotate(z=45)      # the whole assembly, about its centre
+```
+
+`rotate("xz")` with letters is an error: use `turn("xz")`. A part with `subtract()` features
+can not yet be rotated by an angle that is not a multiple of 90°.
 
 ### Movement
 
@@ -403,3 +415,47 @@ class ValidatedBracket(Print3D):
 ::: cycax.cycad.cycad_part
     options:
       show_submodules: true
+
+
+## Feature examples
+
+Short examples, one page for each feature family, with code you can copy and a picture. CyCAx
+makes these pages from the files in `examples/` (`make docs-examples`):
+
+- [Holes](manual/holes/index.md): through holes, blind holes, hole patterns, holes in any side.
+- [Slots](manual/slots/index.md): horizontal and vertical slots, blind slots.
+- [Pockets and bosses](manual/boxes/index.md): `box` and `box_add`.
+
+## More features
+
+```python
+part.top.hole(pos=(20, 10), diameter=3.4, countersink=6.4)        # M3 flat-head screw (90°)
+part.top.pattern_linear("hole", start=(10, 10), count=5, step=(10, 0), diameter=3)
+part.top.pattern_circular("hole", centre=(30, 25), radius=10, count=6, diameter=2)
+part.front.rectangle(pos=(5, 1), width=10, height=2, depth=4, radius=0.5)  # any side
+part.top.polygon(pos=(8, 10), sides=6, diameter=4, depth=2)
+part.top.nut(pos=(15, 15), nut_type="M5ISO")                      # ISO 4032: M2 ... M12
+part.colour = "#ff8000"                                           # names, hex, or RGB
+```
+
+- Patterns repeat any side method (`"hole"`, `"nut"`, `"rectangle"`, ...) with the same
+  keyword arguments.
+- `rectangle()`/`polygon()` with no depth cut through.
+- Colours: names (`orange`, `silver`, `navy`, ...), hex (`#ff8000`, `#f80`), RGB 0-1 or 0-255.
+- An `Assembly` subclass can place its parts in `definition()`, like a part.
+
+## Anchors
+
+An anchor is an exact frame on a part (a point, an outward normal and an x direction) that
+turns and moves with the part. Use anchors to join parts after `rotate()`, where bounding boxes
+are not exact.
+
+```python
+part.top.hole(pos=(10, 10), diameter=4, name="m4")    # a hole anchor: entry point, axis out
+part.anchor("mount", pos=(0, 0, 0), normal=(0, 0, -1)) # a custom anchor (part coordinates)
+part.rotate(z=30)
+part.anchor("m4").origin     # world position after the rotation
+part.anchor("right").normal  # faces: top, bottom, left, right, front, back
+```
+
+Anchors are in the spec `meta` (they do not change the hash).

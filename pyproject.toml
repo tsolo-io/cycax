@@ -11,7 +11,7 @@ name = "cycax"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
-requires-python = ">=3.10.0, <3.14"
+requires-python = ">=3.10.0, <3.15"
 
 license = "Apache-2.0"
 keywords = ["CAD", "CyCAx"]
@@ -30,27 +30,27 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-    "httpx>=0.28.1",
-    "tenacity>=9.1.2",
-    "matplotlib>=3.10.6",
-    "pytest",
     "build123d>=0.9.1",
-    "numpy-stl>=3.2.0",
     "xxhash>=3.5.0",
     "rich>=14.2.0",
     "typer>=0.20.0",
     "pydantic>=2.11.9",
-    "pydantic-settings>=2.11.0",
     "nats-py>=2.11.0",
-    "orjson"
+    "orjson",
+    "platformdirs>=4.0",
+    "watchfiles>=0.24",
+    "textual>=1.0",  # cycax ui (imported only by that command)
+    "ezdxf>=1.3",
+    "tomli>=2.0; python_version < '3.11'",
 ]
 
 [project.scripts]
-cycax = "cycax.cli.main:app"
+cycax = "cycax.cli.main:run"
 
 [project.urls]
 Documentation = "https://github.com/tsolo-dev/cycax#readme"
@@ -170,11 +170,13 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "ci_exclude: marks tests as not to run on CI (deselect with '-m \"not ci_exclude\"')",
     "serial",
+    "cross_engine: builds each part with every engine and compares them (slow; nightly CI)",
 ]
 
 [tool.hatch.envs.testing]
 extra-dependencies = [
     "coverage[toml]>=6.5",
+    "numpy-stl>=3.2.0",
     "pytest>=8.3.4",
     "pytest-bdd>=7.2.0",
     "pytest-mock>=3.14.0",
@@ -188,7 +190,8 @@ installer = "uv"
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 test-not-slow = "pytest -m \"not slow\" --exitfirst {args:tests}"
-test-ci = "coverage run -m pytest -m \"not ci_exclude\" --junitxml=reports/tests.xml {args:tests} --cov=cycax --cov-report=markdown:docs/content/coverage_report.md --md-report --md-report-verbose=1 --md-report-output=docs/content/detailed_report.md"
+cross-engine = "pytest -m cross_engine -v {args:tests/test_cross_engine.py}"
+test-ci = "coverage run -m pytest -m \"not ci_exclude and not cross_engine\" --junitxml=reports/tests.xml {args:tests} --cov=cycax --cov-report=markdown:docs/content/coverage_report.md --md-report --md-report-verbose=1 --md-report-output=docs/content/detailed_report.md"
 cov-report = [
     "- coverage combine",
     "coverage report",

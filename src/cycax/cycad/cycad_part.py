@@ -12,12 +12,13 @@ from collections import namedtuple
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from cycax.cycad import placement
 from cycax.cycad.beveled_edge import BeveledEdge
+from cycax.cycad.colour import to_rgb
 from cycax.cycad.cycad_side import BackSide, BottomSide, CycadSide, FrontSide, LeftSide, RightSide, TopSide
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.part_freecad import PartEngineFreeCAD
 from cycax.cycad.engines.part_openscad import PartEngineOpenSCAD
-from cycax.cycad.engines.simple_2d import Simple2D
 from cycax.cycad.features import (
     SHAPE_TYPE_MAP,
     Cylinder,
@@ -30,6 +31,7 @@ from cycax.cycad.features import (
 )
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP, Location
 from cycax.cycad.slot import Slot
+from cycax.spec import SPEC_VERSION, validate_spec
 
 if TYPE_CHECKING:
     from cycax.cycad.assembly import Assembly
@@ -47,8 +49,10 @@ class CycadPart(Location):
         z_size: The size along the z axis.
         part_no : The unique name that will be given to a type of parts.
         polygon: currently only cube available.
-        colour: colour of the part.
+        colour: colour of the part (a name or RGB). None = the colour of the material, else
+            `default_colour`.
         assembly: The assembly this part is a component of.
+        material: The material (cycax.materials.Material); it goes into the spec meta.
 
     """
 
@@ -63,9 +67,12 @@ class CycadPart(Location):
         y_size: float,
         z_size: float,
         polygon: str,
-        colour: str = "orange",
+        colour: str | None = None,
         hash: str = "",  # noqa: A002 Shadows builtin, kept for backwards compatibility
         assembly: Assembly | None = None,
+        material=None,
+        default_colour: str = "orange",
+        manufacture=None,
     ):
         super().__init__(x, y, z, side)
         self._name: str = ""
@@ -92,11 +99,20 @@ class CycadPart(Location):
         self.bounding_box = {}
         self.position = [0.0, 0.0, 0.0]
         self.rotation = []
+        # Placement (task cycax/32): world = T(position) @ _matrix applied to the part's own
+        # coordinates. `_local_box` is the part's own box, taken at the first turn/rotate.
+        self._matrix = placement.identity()
+        self._anchors = {}  # custom and hole anchors (task cycax/37), in part coordinates
+        self._local_box = None
+        self._only_quarter_turns = True
         self.final_location = False
         self.initial_polygon = polygon
-        self.colour = colour
+        # The colour: set on the part, else the colour of the material, else the class default.
+        self._colour = colour
+        self._default_colour = default_colour
+        self.material = material
+        self.manufacture = manufacture
         self.labels: set[str] = set()
-        self._files = {}
         self.definition()
         self.assembly = assembly
         self.hash = hash
@@ -104,25 +120,49 @@ class CycadPart(Location):
             assembly.add(self)
             # Assembly will set: part._base_path == assembly._base_path
 
+    @property
+    def colour(self):
+        if self._colour is not None:
+            return self._colour
+        if self.material is not None:
+            return self.material.colour
+        return self._default_colour
+
+    @colour.setter
+    def colour(self, value):
+        self._colour = value
+
+    @property
+    def material(self):
+        """The material (cycax.materials.Material) or None."""
+        return self._material
+
+    @material.setter
+    def material(self, value):
+        from cycax.materials import as_material
+
+        self._material = as_material(value)
+
+    @property
+    def manufacture(self):
+        """How the part is made (cycax.manufacture), or the default of the part class."""
+        if self._manufacture is None:
+            self._manufacture = self.default_manufacture()
+        return self._manufacture
+
+    @manufacture.setter
+    def manufacture(self, value):
+        from cycax.manufacture import as_manufacture
+
+        self._manufacture = as_manufacture(value)
+
+    def default_manufacture(self):
+        """The manufacturing default of this part class (None: no information)."""
+        return None
+
     def definition(self):
         """This method will be ovedridden to do a calculation."""
         pass
-
-    def add_file(self, file_type: str, file_path: Path):
-        """
-        This method will use the 3D model provided in the path rather than the object drawn.
-
-        Args:
-            file_type: The file type.
-            file_path: The path to the file.
-        """
-        f_type = str(file_type).upper().strip()
-        self._files[f_type] = file_path
-        if not file_path.exists():
-            logging.warning("File does not exists. Its ok we carry on but its not good.")
-        self.colour = "purple"
-        self.name = "external"
-        self.x, self.y, self.z = self.x_size / 2, self.y_size / 2, self.z_size / 2
 
     def add_labels(self, label_names: str):
         """This method adds a label:
@@ -199,7 +239,7 @@ class CycadPart(Location):
     ):
         if centered:
             if (
-                x - x_size / 2 < self.x_size
+                x - x_size / 2 < self.x_min
                 or x + x_size / 2 > self.x_max
                 or y - y_size / 2 < self.y_min
                 or y + y_size / 2 > self.y_max
@@ -208,7 +248,7 @@ class CycadPart(Location):
             ):
                 warnings.warn("This rectangle cutout may break the mesh of the CycadPart.", stacklevel=2)
         elif (
-            x < self.x_size
+            x < self.x_min
             or x + x_size > self.x_max
             or y < self.y_min
             or y + y_size > self.y_max
@@ -510,22 +550,13 @@ class CycadPart(Location):
             y: The value to which y needs to be moved to on the axis.
             z: The value to which z needs to be moved to on the axis.
         """
-        x_size = self.x_max - self.x_min
-        y_size = self.y_max - self.y_min
-        z_size = self.z_max - self.z_min
-
-        if x is not None:
-            self.x_min = x
-            self.x_max = x + x_size
-            self.position[0] = x
-        if y is not None:
-            self.y_min = y
-            self.y_max = y + y_size
-            self.position[1] = y
-        if z is not None:
-            self.z_min = z
-            self.z_max = z + z_size
-            self.position[2] = z
+        # A move by the difference: the minimum corner of the bounding box goes to x, y, z. (The
+        # position is not always the minimum corner, e.g. after rotate() about the centre.)
+        self.move(
+            x=None if x is None else x - self.x_min,
+            y=None if y is None else y - self.y_min,
+            z=None if z is None else z - self.z_min,
+        )
 
     def insert_feature(self, feature: Feature):
         """This method will be used for inserting the hole into an object.
@@ -592,9 +623,10 @@ class CycadPart(Location):
     @property
     def center(self) -> tuple[float, float, float]:
         """Return the center of a part."""
-        centered_x = self.position[0] + self.x_max / 2
-        centered_y = self.position[1] + self.y_max / 2
-        centered_z = self.position[2] + self.z_max / 2
+        # x_min/x_max etc. are absolute coordinates.
+        centered_x = (self.x_min + self.x_max) / 2
+        centered_y = (self.y_min + self.y_max) / 2
+        centered_z = (self.z_min + self.z_max) / 2
         coordinate = namedtuple("Coordinate", ["x", "y", "z"])
         return coordinate(x=centered_x, y=centered_y, z=centered_z)
 
@@ -627,39 +659,65 @@ class CycadPart(Location):
 
     def export(self) -> dict:
         """
-        A static representation of the Part, suitable to be saved as JSON.
+        A static representation of the Part, suitable to be saved as JSON (spec version 2).
 
         The export contains:
+            spec_version, kind: 2 and "part".
             name: The part number.
-            features: A list of features. Each feature is a dictionary with a type and feature specific specifications.
+            features: A list of features. features[0] is the base shape. Each feature is a
+                dictionary with a type, an action and feature specific fields.
+            subtract: Features that are only cut into other parts.
+            meta: Information that is not part of the hash: description, notes, doc_view,
+                material and colour.
 
         Returns:
             Static representation of the part.
         """
 
-        dict_out = {}
-        dict_out["name"] = self.part_no
-        dict_out["features"] = [
-            {
-                "name": self.initial_polygon,
-                "type": SHAPE_TYPE_MAP[self.initial_polygon],
-                "action": "add",
-                "side": self.side,
-                "x": float(self.x),
-                "y": float(self.y),
-                "z": float(self.z),
-                "x_size": float(self.x_size),
-                "y_size": float(self.y_size),
-                "z_size": float(self.z_size),
-                "center": False,
-            }
-        ]
+        dict_out = {"spec_version": SPEC_VERSION, "kind": "part", "name": self.part_no}
+        base = getattr(self, "base_feature", None)
+        dict_out["features"] = (
+            [base()]
+            if base
+            else [
+                {
+                    "name": self.initial_polygon,
+                    "type": SHAPE_TYPE_MAP[self.initial_polygon],
+                    "action": "add",
+                    "side": self.side,
+                    "x": float(self.x),
+                    "y": float(self.y),
+                    "z": float(self.z),
+                    "x_size": float(self.x_size),
+                    "y_size": float(self.y_size),
+                    "z_size": float(self.z_size),
+                    "center": False,
+                }
+            ]
+        )
         for item in self.features:
             dict_out["features"].append(item.export())
         dict_out["subtract"] = []
         for item in self.external_features:
             dict_out["subtract"].append(item.export())
+        dict_out["meta"] = self.export_meta()
+        validate_spec(dict_out)
         return dict_out
+
+    def export_meta(self) -> dict:
+        """The `meta` object of the part spec: everything that does not change the shape."""
+        meta = {"colour": to_rgb(self.colour)}
+        for key in ("description", "notes", "doc_view"):
+            value = getattr(self, key, None)
+            if value:
+                meta[key] = value
+        if self.material is not None:
+            meta["material"] = self.material.to_meta()
+        if self.manufacture is not None:
+            meta["manufacture"] = self.manufacture.to_meta(self.material)
+        if self._anchors:  # custom and named-hole anchors (faces are implied by the base shape)
+            meta["anchors"] = {name: anchor.to_meta() for name, anchor in self._anchors.items()}
+        return meta
 
     def beveled_edge(self, edge_type: str, side1: str, side2: str, size: float):
         """This method will shape a edge of a CycadPart.
@@ -733,10 +791,7 @@ class CycadPart(Location):
         """
 
         _eng_lower = engine.lower()
-        if _eng_lower == "simple2d":
-            part_engine = Simple2D(name=self.part_no, path=self._base_path, config=engine_config)
-
-        elif _eng_lower == "openscad":
+        if _eng_lower == "openscad":
             if not engine_config:
                 engine_config = {"stl": True}
             part_engine = PartEngineOpenSCAD(name=self.part_no, path=self._base_path, config=engine_config)
@@ -751,7 +806,7 @@ class CycadPart(Location):
             part_engine = PartEngineFreeCAD(name=self.part_no, path=self._base_path, config=engine_config)
 
         else:
-            msg = f"engine: {engine} is not one of Simple2D, OpenSCAD, Preview3D or FreeCAD."
+            msg = f"engine: {engine} is not one of OpenSCAD, Preview3D or FreeCAD."
             raise ValueError(msg)
 
         return self.build(part_engine)
@@ -892,15 +947,15 @@ class CycadPart(Location):
                     raise ValueError(msg)
                 parts.append(part)
 
-    def rotate(self, actions: str):
-        """Rotate the part several times.
+    def turn(self, actions: str):
+        """Quarter turns: `part.turn("xxz")` is two quarter turns about x, then one about z.
 
-        Example: `CycadPart.rotate("xxyzyy")` is the same as two `rotate_freeze_front`, `rotate_freeze_left`,
-        `rotate_freeze_top`, and two `rotate_freeze_left`.
-        Where rotate_freeze_<side> results in one 90degrees counter clock wise rotations on the side.
+        Each letter is one 90 degree counter-clockwise turn about that axis. The part keeps its
+        minimum corner, so a turn does not move it away from the corner it is levelled to.
+        For any angle use `rotate(x=, y=, z=)`.
 
         Args:
-            actions: This is a string specifying rotations.
+            actions: Letters x, y and z.
 
         Raises:
             ValueError: When the given actions contains a string that is non x, y, or z.
@@ -914,42 +969,147 @@ class CycadPart(Location):
                 case "z":
                     self.rotate_freeze_top()
                 case _:
-                    msg = f"""The actions permissible by rotate are 'x', 'y' or 'z'.
+                    msg = f"""The actions permissible by turn are 'x', 'y' or 'z'.
                             {action} is not one of the permissible actions."""
                     raise ValueError(msg)
+
+    def rotate(self, actions: str | None = None, /, **angles: float):
+        """Rotate the part by any angle: `part.rotate(z=30)`, `part.rotate(x=90, z=-15)`.
+
+        Degrees, counter-clockwise (right-hand rule), about the CENTRE of the part's bounding
+        box, on the WORLD axes, in the order written. The bounding box afterwards is the box of
+        the 8 rotated corners; `level()` uses it.
+
+        Raises:
+            TypeError: For the old string form; use `turn("xxz")` for quarter turns.
+        """
+        if actions is not None:
+            msg = f'rotate() takes degrees, e.g. rotate(z=90); use turn("{actions}") for quarter turns.'
+            raise TypeError(msg)
+        for axis, degrees in angles.items():
+            if axis not in ("x", "y", "z"):
+                msg = f"rotate() takes x=, y= and z= (degrees), not {axis}=."
+                raise TypeError(msg)
+            centre = (
+                (self.x_min + self.x_max) / 2,
+                (self.y_min + self.y_max) / 2,
+                (self.z_min + self.z_max) / 2,
+            )
+            self._apply_world(placement.about(centre, placement.rotation(axis, float(degrees))))
+            self.rotation.append({"axis": axis, "angle": float(degrees)})
+            if float(degrees) % 90 != 0:
+                self._only_quarter_turns = False
+
+    def _take_local_box(self):
+        if self._local_box is None:
+            p = self.position
+            self._local_box = (
+                (self.x_min - p[0], self.y_min - p[1], self.z_min - p[2]),
+                (self.x_max - p[0], self.y_max - p[1], self.z_max - p[2]),
+            )
+
+    def _set_bounds_from_matrix(self):
+        lo, hi = placement.bounds(self.placement_matrix(), *self._local_box)
+        self.x_min, self.y_min, self.z_min = lo
+        self.x_max, self.y_max, self.z_max = hi
+        self.make_bounding_box()
+
+    def _apply_world(self, world: placement.Matrix):
+        """Apply a world transform to the part (position stays; the matrix takes the change)."""
+        self._take_local_box()
+        p = self.position
+        self._matrix = placement.multiply(
+            placement.translation(-p[0], -p[1], -p[2]),
+            placement.multiply(world, placement.multiply(placement.translation(*p), self._matrix)),
+        )
+        self._set_bounds_from_matrix()
+
+    def _quarter_turn(self, axis: str):
+        """One quarter turn about `axis` through the origin, then back to the minimum corner (0):
+        the same as the engines did with the old rotation list."""
+        self._take_local_box()
+        turned = placement.multiply(placement.rotation(axis, 90), self._matrix)
+        lo, _ = placement.bounds(turned, *self._local_box)
+        self._matrix = placement.multiply(placement.translation(*(-v for v in lo)), turned)
+
+    def anchors(self) -> dict:
+        """All anchors in PART coordinates: the six faces of the base shape, named holes and
+        custom anchors (cycax/37)."""
+        from cycax.cycad.anchors import face_anchors  # noqa: PLC0415
+
+        return {**face_anchors((self.x_size, self.y_size, self.z_size)), **self._anchors}
+
+    def ref(self, name: str):
+        """A reference to the anchor `name`, for mates: `assembly.align(a.ref("m4"), b.ref("bore"))`."""
+        from cycax.cycad.mates import AnchorRef  # noqa: PLC0415
+
+        self.anchor(name)  # an unknown name fails here, with the list of names
+        return AnchorRef(self, name)
+
+    def anchor(self, name: str, pos=None, normal=None, x_dir=None):
+        """The anchor `name` in WORLD coordinates (it turns and moves with the part).
+
+        With `pos`/`normal` (part coordinates) it first defines a custom anchor:
+        `part.anchor("mount", pos=(10, 5, 0), normal=(0, 0, -1), x_dir=(1, 0, 0))`.
+        """
+        from cycax.cycad.anchors import Anchor  # noqa: PLC0415
+
+        if pos is not None:
+            if normal is None:
+                msg = "A custom anchor needs a normal."
+                raise ValueError(msg)
+            self._anchors[name] = Anchor(name, tuple(pos), tuple(normal), tuple(x_dir or _any_perpendicular(normal)))
+        anchors = self.anchors()
+        if name not in anchors:
+            msg = f"{self.part_no} has no anchor {name!r}; it has: {', '.join(sorted(anchors))}."
+            raise KeyError(msg)
+        return anchors[name].transformed(self.placement_matrix())
+
+    def placement_matrix(self) -> placement.Matrix:
+        """The 4 x 4 transform from the part's own coordinates to the world (row-major)."""
+        return placement.multiply(placement.translation(*self.position), self._matrix)
 
     def rotate_freeze_top(self):
         """
         This method will rotate the front and the left while holding the top where it currently is.
         """
+        self._quarter_turn("z")
         self.rotation.append({"axis": "z", "angle": 90})
-        self.x_max, self.y_max = self.y_max, self.x_max
-        self.x_min, self.y_min = self.y_min, self.x_min
-        self.make_bounding_box()
+        # The box of the turned part, from the placement (the old min/max swap was wrong for a
+        # part that was moved before the turn).
+        self._set_bounds_from_matrix()
 
     def rotate_freeze_left(self):
         """
         This method will rotate the top and front while holding the left where it currently is.
         """
+        self._quarter_turn("x")
         self.rotation.append({"axis": "x", "angle": 90})
-        self.y_max, self.z_max = self.z_max, self.y_max
-        self.y_min, self.z_min = self.z_min, self.y_min
-        self.make_bounding_box()
+        # The box of the turned part, from the placement (the old min/max swap was wrong for a
+        # part that was moved before the turn).
+        self._set_bounds_from_matrix()
 
     def rotate_freeze_front(self):
         """
         This method will rotate the left and top while holding the front where it currently is.
         """
+        self._quarter_turn("y")
         self.rotation.append({"axis": "y", "angle": 90})
-        self.x_max, self.z_max = self.z_max, self.x_max
-        self.x_min, self.z_min = self.z_min, self.x_min
-        self.make_bounding_box()
+        # The box of the turned part, from the placement (the old min/max swap was wrong for a
+        # part that was moved before the turn).
+        self._set_bounds_from_matrix()
 
     def _final_place(self):
         """
         It is used to move the external_features to their final location before they are subtracted from
         the other part.
         """
+        if self.external_features and not self._only_quarter_turns:
+            msg = (
+                f"{self.part_no}: subtract() of a part rotated by an angle that is not a multiple of 90 "
+                "degrees is not supported yet."
+            )
+            raise NotImplementedError(msg)
         for feature in self.external_features:
             temp_feature = copy.deepcopy(feature)
             rotation = [self.x_size, self.y_size, self.z_size]
@@ -992,3 +1152,13 @@ class CycadPart(Location):
         else:
             msg = f"merging {self} and {part2} but they are not of the same size."
             raise ValueError(msg)
+
+
+def _any_perpendicular(normal) -> tuple[float, float, float]:
+    """An x direction for an anchor that has only a normal."""
+    nx, ny, nz = normal
+    candidate = (1.0, 0.0, 0.0) if abs(nx) < 0.9 else (0.0, 1.0, 0.0)  # noqa: PLR2004
+    dot = nx * candidate[0] + ny * candidate[1] + nz * candidate[2]
+    x = [c - dot * n for c, n in zip(candidate, normal, strict=True)]
+    length = sum(v * v for v in x) ** 0.5
+    return tuple(v / length for v in x)

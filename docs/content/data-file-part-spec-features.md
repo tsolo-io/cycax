@@ -7,9 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 # Part Feature Specification: V2
 
 A list of features and the fields they contain. See
-[`data-file-spec-new.md`](data-file-spec-new.md) for the overall Assembly/Part JSON structure,
-field units, and the [Order of Operations](data-file-spec-new.md#order-of-operations) that
-governs how these fields combine.
+[CyCAx Data File Specification](data-file-spec.md) for the overall Assembly/Part JSON structure
+(spec version 2), units and the hash rule.
 
 ## Common Fields
 
@@ -177,5 +176,5 @@ Bends can be nested in one another, so multiple bends can be applied to a single
 - **side**: Should always be **left**, **right**, **front**, or **back**.
 
 Remaining fields (fold line/axis, angle, radius, direction) are not yet designed — see
-[Bending](data-file-spec-new.md#bending) and [Open
-Questions](data-file-spec-new.md#open-questions).
+[the data file specification](data-file-spec.md) and the [V2 proposal (superseded)
+](data-file-spec-new.md).

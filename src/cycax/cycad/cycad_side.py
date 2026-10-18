@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+import math
 
 from cycax.cycad.bend import BendSide, root_bend_side
 from cycax.cycad.location import BACK, BOTTOM, FRONT, LEFT, RIGHT, TOP
@@ -65,7 +66,7 @@ class CycadSide:
         msg = "_rotate should be defined for each side."
         raise NotImplementedError(msg)
 
-    def rotate(self, angle: float = 90):
+    def turn(self, angle: float = 90):
         """Rotate the part by keeping the selected side on the same plain.
 
         Rotation is counter clock wise. Negative angles are converted to positive.
@@ -76,7 +77,7 @@ class CycadSide:
         """
         if angle % 90 != 0:
             # TODO: Think about which exception should be raised, maybe even a custom one.
-            msg = "Can only rotate in multiples of 90 degrees"
+            msg = "turn() takes multiples of 90 degrees; use rotate(angle) for any angle"
             raise ValueError(msg)
 
         while angle < 0:
@@ -85,6 +86,13 @@ class CycadSide:
 
         for _n in range(int(angle / 90)):
             self._rotate()
+
+    def rotate(self, angle: float):
+        """Rotate the part by any angle (degrees, counter-clockwise) about the axis through
+        this side: x for left/right, y for front/back, z for top/bottom. The centre is the
+        centre of the bounding box. For quarter turns that keep the corner use `turn(angle)`."""
+        axis = {"LEFT": "x", "RIGHT": "x", "TOP": "z", "BOTTOM": "z", "FRONT": "y", "BACK": "y"}[self.name]
+        self._parent.rotate(**{axis: float(angle)})
 
     @property
     def opposite(self):
@@ -149,6 +157,48 @@ class CycadSide:
         )
         self._redefine_surface(add=height, sink=sink)
 
+    def pocket(self, sketch, depth: float | None = None):
+        """Cut the profiles of a sketch into this side, `depth` deep (default: through).
+
+        The sketch points use the same coordinates as `pos` of `hole()` on this side.
+        """
+        from cycax.cycad.sketch import SketchFeature, side_frame  # noqa: PLC0415
+
+        origin, x_dir, y_dir, into = side_frame(self)
+        feature = SketchFeature(
+            sketch=sketch,
+            action="subtract",
+            operation="pad",
+            origin=origin,
+            x_dir=x_dir,
+            y_dir=y_dir,
+            normal=into,
+            depth=self._depth_check(depth),
+            side=self.name,
+        )
+        self._parent.features.append(feature)
+        return feature
+
+    def boss(self, sketch, height: float):
+        """Add the profiles of a sketch onto this side, `height` out of the face."""
+        from cycax.cycad.sketch import SketchFeature, side_frame  # noqa: PLC0415
+
+        origin, x_dir, y_dir, into = side_frame(self)
+        feature = SketchFeature(
+            sketch=sketch,
+            action="add",
+            operation="pad",
+            origin=origin,
+            x_dir=x_dir,
+            y_dir=y_dir,
+            normal=tuple(-v for v in into),
+            depth=height,
+            side=self.name,
+        )
+        self._parent.features.append(feature)
+        self._redefine_surface(add=height)
+        return feature
+
     def hole(
         self,
         pos: tuple[float, float],
@@ -157,6 +207,9 @@ class CycadSide:
         depth: float | None = None,
         *,
         external_subtract: bool = False,
+        countersink: float | None = None,
+        countersink_angle: float = 90.0,
+        name: str | None = None,
     ):
         """This will insert a hole given the relative details, into the correct side.
 
@@ -167,6 +220,11 @@ class CycadSide:
             sink: The hole can be sunk bellow the surface of the specified side to make a pocket.
             external_subtract: This is specified that the hole will only be transferred onto other surfaces.
                 When set to True the hole will not be drilled into the main object.
+            countersink: The diameter of a countersink at the surface (for a flat-head screw), or None.
+            countersink_angle: The included angle of the countersink in degrees (90 for ISO metric
+                flat-head screws).
+            name: Makes the hole an anchor (cycax/37): `part.anchor(name)` is its entry point on
+                the surface, with its axis pointing out of the part.
         """
         _depth = self._depth_check(depth)
         _location_tuple = self._location_calc(pos=pos, sink=sink)
@@ -179,6 +237,62 @@ class CycadSide:
             depth=_depth,
             external_subtract=external_subtract,
         )
+        if name:
+            from cycax.cycad.anchors import FACE_NORMALS, FACE_X, SIDE_ANCHOR, Anchor  # noqa: PLC0415
+
+            entry = self._location_calc(pos=pos, sink=0.0)
+            face = SIDE_ANCHOR[self.name]
+            self._parent._anchors[name] = Anchor(name, tuple(entry), FACE_NORMALS[face], FACE_X[face])  # noqa: SLF001
+        if countersink:
+            if countersink <= diameter:
+                msg = f"The countersink ({countersink} mm) must be wider than the hole ({diameter} mm)."
+                raise ValueError(msg)
+            from cycax.cycad.features import Cone  # noqa: PLC0415
+
+            cone_depth = (countersink - diameter) / 2 / math.tan(math.radians(countersink_angle) / 2)
+            self._parent.features.append(
+                Cone(
+                    side=self.name,
+                    x=_location_tuple[0],
+                    y=_location_tuple[1],
+                    z=_location_tuple[2],
+                    diameter=countersink,
+                    diameter2=diameter,
+                    depth=round(cone_depth, 9),
+                )
+            )
+
+    def pattern_linear(self, method: str, start: tuple[float, float], count: int, step: tuple[float, float], **kwargs):
+        """Repeat a feature in a row: `part.top.pattern_linear("hole", start=(10, 10), count=5,
+        step=(10, 0), diameter=3)` makes 5 holes 10 mm apart."""
+        feature = getattr(self, method)
+        for index in range(count):
+            feature(pos=(start[0] + index * step[0], start[1] + index * step[1]), **kwargs)
+
+    def pattern_circular(
+        self, method: str, centre: tuple[float, float], radius: float, count: int, start_angle: float = 0.0, **kwargs
+    ):
+        """Repeat a feature on a circle: `part.top.pattern_circular("hole", centre=(20, 20),
+        radius=15, count=6, diameter=3)` makes 6 holes on a 30 mm pitch circle."""
+        feature = getattr(self, method)
+        for index in range(count):
+            angle = math.radians(start_angle + 360.0 * index / count)
+            feature(pos=(centre[0] + radius * math.cos(angle), centre[1] + radius * math.sin(angle)), **kwargs)
+
+    def rectangle(
+        self, pos: tuple[float, float], width: float, height: float, depth: float | None = None, *, radius: float = 0.0
+    ):
+        """A rectangular cut-out (lower-left corner at `pos`), optionally with rounded corners;
+        no depth = through. The same on every side (a sketch pocket)."""
+        from cycax.cycad.sketch import Sketch  # noqa: PLC0415
+
+        return self.pocket(Sketch().rectangle(pos[0], pos[1], width, height, radius=radius), depth)
+
+    def polygon(self, pos: tuple[float, float], sides: int, diameter: float, depth: float | None = None, *, angle=0.0):
+        """A regular polygon cut-out around `pos`; no depth = through (a sketch pocket)."""
+        from cycax.cycad.sketch import Sketch  # noqa: PLC0415
+
+        return self.pocket(Sketch().polygon(pos[0], pos[1], sides=sides, diameter=diameter, angle=angle), depth)
 
     def box(
         self,

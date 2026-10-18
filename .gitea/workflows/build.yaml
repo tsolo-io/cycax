@@ -31,9 +31,10 @@ jobs:
           echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_ENV
       - name: Get packaged versions
         run: |
-          PACKAGED_VERSIONS=$(pip index versions cycax --pre --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Kuat/pypi/simple/ | tr -d '\n')
-          echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS"
-          echo "PACKAGED_VERSIONS="$PACKAGED_VERSIONS" >> $GITHUB_ENV
+          # pip fails when the package is not in the index yet: then nothing is packaged.
+          PACKAGED_VERSIONS=$(pip index versions cycax --pre --index-url https://${{ vars.REGISTRYHOST }}/api/packages/Kuat/pypi/simple/ 2>/dev/null | tr -d '\n' || true)
+          echo "PACKAGED_VERSIONS=$PACKAGED_VERSIONS"
+          echo "PACKAGED_VERSIONS=$PACKAGED_VERSIONS" >> $GITHUB_ENV
       - name: Publish Python package
         env:
           HATCH_INDEX_REPO: "https://${{ vars.REGISTRYHOST }}/api/packages/Kuat/pypi"

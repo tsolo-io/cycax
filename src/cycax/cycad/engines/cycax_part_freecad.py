@@ -37,6 +37,17 @@ BACK = "BACK"
 REAR = "BACK"
 
 
+# Into the part from each side (for countersinks).
+_INTO = {
+    "TOP": (0, 0, -1),
+    "BOTTOM": (0, 0, 1),
+    "FRONT": (0, 1, 0),
+    "BACK": (0, -1, 0),
+    "LEFT": (1, 0, 0),
+    "RIGHT": (-1, 0, 0),
+}
+
+
 class EngineFreecad:
     """This class will be used in FreeCAD to decode a JSON passed to it.
     The JSON will contain specific information of the object.
@@ -290,7 +301,9 @@ class EngineFreecad:
             case _:
                 msg = f"side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT BACK OR ALL."
                 raise ValueError(msg)
-        return side
+        # Lowercase, so file names are always `<name>-<view>.<ext>` (e.g. `-all.png`), the same
+        # rule `engine_freecad.expected_freecad_files` uses.
+        return side.lower()
 
     def render_to_dxf(self, active_doc: App.Document, view: str | None = None):
         """This method will be used for creating a dxf of the object currently in view.
@@ -404,7 +417,9 @@ class EngineFreecad:
             features: This is the dictionary that contains the details of the beveled edge.
         """
 
-        hypot = sqrt(features["size"] * 2 * features["size"] * 2 + features["size"] * 2 * features["size"] * 2) / 3
+        # Chamfer legs = size (martin, 2026-10-18): the rhombus (half-diagonal size * sqrt 2) has its
+        # centre this far from the edge, so its edge cuts each face `size` from the corner.
+        hypot = features["size"] * (1 + sqrt(2)) / 2
         move_cutter_cyl = {"x": 0.0, "y": 0.0, "z": 0.0}
         move_cutter_rhombus = {"x": 0.0, "y": 0.0, "z": 0.0}
         move_cube = {"x": 0.0, "y": 0.0, "z": 0.0}
@@ -473,8 +488,22 @@ class EngineFreecad:
         elif feature["type"] == "cylinder":
             solid = self.cylinder(feature)
 
+        # Features in FILE ORDER (martin, 2026-10-18): a later add fills an earlier hole. Runs of
+        # cuts are fused into one tool and cut at once (fast), before the next add.
+        cut_features = []
+
+        def flush(solid):
+            if len(cut_features) > 1:
+                first = cut_features.pop()
+                solid = solid.cut(first.multiFuse(cut_features))
+            elif cut_features:
+                solid = solid.cut(cut_features.pop())
+            cut_features.clear()
+            return solid
+
         for feature in definition["features"][1:]:
             if feature["action"] == "add":
+                solid = flush(solid)
                 if feature["type"] == "cylinder":
                     solid = solid.fuse(self.hole(feature))
                 elif feature["type"] == "sphere":
@@ -487,23 +516,25 @@ class EngineFreecad:
                 if feature["type"] == "cylinder":
                     cut_features.append(self.hole(feature))
                 elif feature["type"] == "beveled_edge":
-                    solid = self.decode_beveled_edge(feature, solid)
+                    solid = self.decode_beveled_edge(feature, flush(solid))
                 elif feature["type"] == "cuboid":
                     cut_features.append(self.cube(feature))
                 elif feature["type"] == "sphere":
-                    solid = solid.cut(self.sphere(feature))
-                    # This was necessary to avoid creating a shape that was too complicate for FreeCAD to follow.
+                    # Cut at once: this was necessary to avoid a shape too complex for FreeCAD.
+                    solid = flush(solid).cut(self.sphere(feature))
                 elif feature["type"] == "nut_cutout":
                     cut_features.append(self.cut_nut(feature))
-        if len(cut_features) > 1:
-            s1 = cut_features.pop()
-            fused = s1.multiFuse(cut_features)
-            result = solid.cut(fused)
-        elif len(cut_features) == 1:
-            s1 = cut_features.pop()
-            result = solid.cut(s1)
-        else:
-            result = solid
+                elif feature["type"] == "cone":  # a countersink (cycax/36), wide end at the surface
+                    cut_features.append(
+                        Part.makeCone(
+                            feature["diameter"] / 2,
+                            feature["diameter2"] / 2,
+                            feature["depth"],
+                            Vector(feature["x"], feature["y"], feature["z"]),
+                            Vector(*_INTO[feature["side"]]),
+                        )
+                    )
+        result = flush(solid)
         Part.show(result)
         doc.recompute()
         view = FreeCADGui.activeDocument().activeView()

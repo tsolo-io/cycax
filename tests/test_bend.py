@@ -11,7 +11,8 @@ from cycax.cycad import SheetMetalBend
 
 def test_sheetmetal_defaults():
     sheet = SheetMetalBend(part_no="s", x_size=100.0, y_size=50.0, z_size=2.0)
-    assert sheet.material == {"name": "mild-steel", "code": "1008", "standard": "AISI"}
+    # A Material object since cycax/24; the spec meta keeps the same keys (+ density).
+    assert sheet.material.to_meta() == {"name": "mild-steel", "code": "1008", "standard": "AISI", "density": 7.87}
     assert sheet.k_factor == 0.44
     assert sheet.bend_radius == 2.0  # defaults to thickness
 
@@ -21,7 +22,7 @@ def test_sheetmetal_overrides():
     sheet = SheetMetalBend(
         part_no="s", x_size=100.0, y_size=50.0, z_size=2.0, material=material, k_factor=0.42, bend_radius=3.0
     )
-    assert sheet.material == material
+    assert sheet.material.to_meta() == material | {"density": 2.68}
     assert sheet.k_factor == 0.42
     assert sheet.bend_radius == 3.0
 
@@ -126,12 +127,37 @@ def test_far_is_an_alias_for_self():
     assert wall.far is wall
 
 
-@pytest.mark.parametrize("edge", ["left", "right", "front", "back"])
-def test_bending_off_a_flange_side_edge_is_not_yet_implemented(edge):
+def _dot(a, b):
+    return sum(x * y for x, y in zip(a, b, strict=True))
+
+
+@pytest.mark.parametrize("edge", ["left", "right"])
+def test_bend_from_a_flange_side_edge(edge):
+    """Bends on bends from any edge (task cycax/33)."""
+    sheet = SheetMetalBend(part_no="s", x_size=100.0, y_size=50.0, z_size=2.0)
+    wall = sheet.front.bend(angle=90, height=20.0)  # stands up along the front: u=+x, v=+z, n=+y
+    tab = getattr(wall, edge).bend(angle=90, height=15.0)
+    bend = sheet.features[-1]
+    assert bend.parent == wall.bend_id  # a child of the wall
+    assert bend.width == 20.0  # the fold line is the wall's side edge (its height)
+    assert tuple(bend.u_dir) == (0.0, 0.0, 1.0)  # along the wall's v
+    # "up" folds towards the wall's face normal (+y, the side the base sheet's top faces), from
+    # the left or the right end of the wall.
+    assert tuple(bend.v_dir) == (0.0, 1.0, 0.0)
+    assert (bend.x, bend.y, bend.z) == ((0.0, 0.0, 2.0) if edge == "left" else (100.0, 0.0, 2.0))
+    # An orthonormal frame.
+    for a, b in ((bend.u_dir, bend.v_dir), (bend.u_dir, bend.n_dir), (bend.v_dir, bend.n_dir)):
+        assert abs(_dot(a, b)) < 1e-9
+    # The tab can be bent further and holed, at any angle.
+    tab.bend(angle=30, height=5.0).hole(pos=(5.0, 2.0), diameter=2.0)
+    assert sheet.export()["features"][-1]["name"] == "flange_hole_cut"
+
+
+def test_a_bare_side_has_no_side_edges():
     sheet = SheetMetalBend(part_no="s", x_size=100.0, y_size=50.0, z_size=2.0)
     wall = sheet.front.bend(angle=90, height=20.0)
-    with pytest.raises(NotImplementedError, match="not yet implemented"):
-        getattr(wall, edge)
+    with pytest.raises(AttributeError):
+        _ = wall.front
 
 
 def test_round_corners_marks_terminal_and_blocks_further_bend():
@@ -165,11 +191,14 @@ def test_hole_on_axis_aligned_flange():
     assert holes[0].thickness == 3.0  # defaults to sheet thickness
 
 
-def test_hole_on_non_axis_aligned_flange_raises():
+def test_hole_on_non_axis_aligned_flange():
+    """Flange cuts are in the flange's own frame, so any angle works (task cycax/33)."""
     sheet = SheetMetalBend(part_no="s", x_size=80.0, y_size=50.0, z_size=3.0)
     grip = sheet.left.bend(angle=45, height=40.0)
-    with pytest.raises(NotImplementedError, match="axis-aligned"):
-        grip.hole(pos=(5.0, 5.0), diameter=3.0)
+    grip.hole(pos=(5.0, 5.0), diameter=3.0)
+    hole = sheet.features[-1]
+    assert hole.name == "flange_hole_cut"
+    assert tuple(hole.n_dir) == tuple(grip.n_dir)
 
 
 def test_export_is_json_serialisable_and_carries_bend_metadata():

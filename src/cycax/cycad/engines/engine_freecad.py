@@ -8,8 +8,7 @@ import subprocess
 from pathlib import Path
 
 from cycax.cycad.engines.base_engine import Engine
-from cycax.cycad.engines.utils import find_appimage
-from cycax.cycad.location import TOP
+from cycax.cycad.engines.utils import expected_freecad_files, find_appimage
 
 
 class EngineFreeCAD(Engine):
@@ -133,15 +132,7 @@ class EngineFreeCAD(Engine):
             logging.error(f"FreeCAD build failed with return code: {result.returncode}")
 
         # Collect generated files
-        part_dir = json_path.parent
-        files = [
-            {"file": part_dir / f"{name}.stl"},
-            {"file": part_dir / f"{name}-perspectiveAll.png"},
-            {"file": part_dir / f"{name}-perspective.dxf", "side": TOP},
-            {"file": part_dir / f"{name}-perspectiveTop.png", "side": TOP},
-            {"file": part_dir / f"{name}.FCStd", "description": "FreeCAD primary source file."},
-            {"file": part_dir / f"{name}.step"},
-        ]
+        files = expected_freecad_files(json_path.parent / name, out_formats)
 
         return self.file_list(files, self.engine_name, score=5)
 
@@ -209,12 +200,6 @@ class EngineFreeCAD(Engine):
             logging.error(f"FreeCAD assembly build failed with return code: {result.returncode}")
 
         # Collect generated files
-        assembly_dir = json_path.parent
-        files = [
-            {"file": assembly_dir / f"{name}-assembly.stl"},
-            {"file": assembly_dir / f"{name}-assembly-ALL.png"},
-            {"file": assembly_dir / f"{name}-assembly.FCStd", "description": "FreeCAD assembly source file."},
-            {"file": assembly_dir / f"{name}-assembly.step"},
-        ]
+        files = expected_freecad_files(json_path.parent / f"{name}-freecad", out_formats)
 
         return self.file_list(files, self.engine_name, score=5)

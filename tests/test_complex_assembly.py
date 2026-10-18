@@ -31,7 +31,7 @@ def test_complex_assembly(tmp_path):
     assembly1.add(assembly2)
     # assembly2.at(x=50, y=50)
     assembly1.rotate_freeze_left()
-    assembly1.rotate("x")
+    assembly1.turn("x")
     assembly1.rotate_freeze_front()
     assembly1.rotate_freeze_top()
     assembly1.back.level(assembly2.back)

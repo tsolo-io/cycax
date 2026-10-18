@@ -24,7 +24,7 @@ class AssemblySide:
         msg = "_rotate should be defined for each side."
         raise NotImplementedError(msg)
 
-    def rotate(self, angle: float = 90):
+    def turn(self, angle: float = 90):
         """
         Rotate the assembly by keeping the selected side on the same plain.
 
@@ -35,7 +35,7 @@ class AssemblySide:
         """
         if angle % 90 != 0:
             # TODO: Think about which exception should be raised, maybe even a custom one.
-            msg = "Can only rotate in multiples of 90 degrees"
+            msg = "turn() takes multiples of 90 degrees; use rotate(angle) for any angle"
             raise ValueError(msg)
 
         while angle < 0:
@@ -44,6 +44,13 @@ class AssemblySide:
 
         for _n in range(int(angle / 90)):
             self._rotate()
+
+    def rotate(self, angle: float):
+        """Rotate the assembly by any angle (degrees, counter-clockwise) about the axis through
+        this side: x for left/right, y for front/back, z for top/bottom. The centre is the
+        centre of the bounding box. For quarter turns that keep the corner use `turn(angle)`."""
+        axis = {"LEFT": "x", "RIGHT": "x", "TOP": "z", "BOTTOM": "z", "FRONT": "y", "BACK": "y"}[self.name]
+        self._parent.rotate(**{axis: float(angle)})
 
     def level(self, assembly_side: str):
         """

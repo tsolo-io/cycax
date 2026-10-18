@@ -53,11 +53,11 @@ def test_new_rotate():
     assembly.add(mypart4)
 
     # Test that a part is rotated multiple times.
-    mypart1.rotate("xxxx")
+    mypart1.turn("xxxx")
     for _count in range(0, 4):
         mypart2.rotate_freeze_left()
 
-    mypart3.rotate("yXyyxZzxy")
+    mypart3.turn("yXyyxZzxy")
     mypart4.rotate_freeze_front()
     mypart4.rotate_freeze_left()
     mypart4.rotate_freeze_front()
@@ -74,7 +74,7 @@ def test_new_rotate():
     assert assembly_def["parts"][2]["rotate"] == assembly_def["parts"][3]["rotate"]
 
     with pytest.raises(ValueError):
-        mypart3.rotate("abc")
+        mypart3.turn("abc")
 
 
 def test_rotate_side():
@@ -94,9 +94,9 @@ def test_rotate_side():
 
     # Test that a part is rotated multiple times.
     for count in range(1, 4):
-        mypart2.left.rotate()
-        mypart3.front.rotate()
-        mypart4.top.rotate()
+        mypart2.left.turn()
+        mypart3.front.turn()
+        mypart4.top.turn()
         assembly_def = assembly.export()
         assert assembly_def["parts"][0]["rotate"] == []
         assert assembly_def["parts"][1]["rotate"] == [{"axis": "x", "angle": 90}] * count

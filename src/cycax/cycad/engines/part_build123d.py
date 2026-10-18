@@ -7,6 +7,10 @@ import logging
 import math
 from pathlib import Path
 
+# PEP 810 (Python 3.15+): load build123d only when it is first used. No effect on older
+# Pythons. build123d takes ~2.7 s to import, which commands that never build should not pay.
+__lazy_modules__ = ["build123d"]
+
 import build123d
 
 from cycax.cycad.engines.base_part_engine import PartEngine
@@ -36,6 +40,86 @@ class PartEngineBuild123d(PartEngine):
         # TODO: Support the different orientations
         feature = build123d.Pos(radius, radius, height / 2) * feature
         return feature
+
+    def _decode_import(self, feature_spec: dict):
+        """An imported model (task cycax/35), moved by its offset so its box starts at 0,0,0.
+        The file is in `self.input_dir` (local: copied by the tool; server: from the cache)."""
+        input_dir = Path(getattr(self, "input_dir", None) or ".")
+        path = input_dir / feature_spec["file"]
+        if not path.exists():
+            msg = f"The model file {feature_spec['file']} is not there ({input_dir})."
+            raise FileNotFoundError(msg)
+        if feature_spec["format"] == "step":
+            shape = build123d.import_step(path)
+        else:
+            shape = build123d.import_stl(path)
+        return build123d.Pos(*feature_spec["offset"]) * shape
+
+    def _decode_sketch(self, feature_spec: dict):
+        """A sketch feature (task cycax/34): the profiles as faces on the sketch plane, nested
+        profiles are holes (even-odd), then padded `depth` along `normal`, or revolved."""
+        plane = feature_spec["plane"]
+        origin = build123d.Vector(*plane["origin"])
+        x_dir = build123d.Vector(*plane["x_dir"])
+        y_dir = build123d.Vector(*plane["y_dir"])
+        sketch_normal = x_dir.cross(y_dir)
+
+        def point(u: float, v: float) -> build123d.Vector:
+            return origin + x_dir * u + y_dir * v
+
+        faces = []
+        for profile in feature_spec["profiles"]:
+            if "circle" in profile:
+                (cx, cy), radius = profile["circle"]["center"], profile["circle"]["radius"]
+                edge = build123d.Edge.make_circle(
+                    radius, build123d.Plane(origin=point(cx, cy), x_dir=x_dir, z_dir=sketch_normal)
+                )
+                faces.append(build123d.Face(build123d.Wire([edge])))
+                continue
+            edges = []
+            for segment in profile["segments"]:
+                if "line" in segment:
+                    x1, y1, x2, y2 = segment["line"]
+                    edges.append(build123d.Edge.make_line(point(x1, y1), point(x2, y2)))
+                else:
+                    arc = segment["arc"]
+                    (cx, cy), radius = arc["center"], arc["radius"]
+                    start, end = arc["start"], arc["end"]
+                    while end <= start:
+                        end += 360
+                    mid = (start + end) / 2
+                    pts = [
+                        point(cx + radius * math.cos(math.radians(a)), cy + radius * math.sin(math.radians(a)))
+                        for a in (start, mid, end)
+                    ]
+                    edges.append(build123d.Edge.make_three_point_arc(*pts))
+            faces.append(build123d.Face(build123d.Wire.combine(edges)[0]))
+
+        # Even-odd: a face inside an odd number of larger faces is a hole.
+        faces.sort(key=lambda face: face.area, reverse=True)
+        levels = []
+        for index, face in enumerate(faces):
+            centre = face.center()
+            levels.append(sum(1 for other in faces[:index] if other.is_inside(centre)))
+
+        def solid_of(face):
+            if feature_spec["operation"] == "revolve":
+                (a1, b1), (a2, b2) = feature_spec["revolve"]["axis"]
+                axis = build123d.Axis(point(a1, b1), point(a2, b2) - point(a1, b1))
+                return build123d.revolve(face, axis=axis, revolution_arc=feature_spec["revolve"].get("angle", 360))
+            direction = build123d.Vector(*plane["normal"])
+            return build123d.extrude(face, amount=feature_spec["depth"], dir=direction)
+
+        result = None
+        for level in sorted(set(levels)):
+            solids = [solid_of(face) for face, lv in zip(faces, levels, strict=True) if lv == level]
+            if result is None:
+                result = solids[0].fuse(*solids[1:]) if len(solids) > 1 else solids[0]
+            elif level % 2:
+                result = result.cut(*solids)
+            else:
+                result = result.fuse(*solids)
+        return result
 
     def _decode_cube(self, feature_spec: dict) -> build123d.objects_part.Box:
         """
@@ -75,7 +159,7 @@ class PartEngineBuild123d(PartEngine):
             )
         return feature
 
-    def _decode_cylinder_feature(self, feature_spec: dict) -> build123d.objects_part.Cylinder:
+    def _decode_cylinder_feature(self, feature_spec: dict, solid=None) -> build123d.objects_part.Cylinder:
         """
         This method will return the string that will have the scad for a hole.
 
@@ -83,7 +167,12 @@ class PartEngineBuild123d(PartEngine):
             feature_spec: This will be a dictionary containing the necessary information about the hole.
 
         """
-        feature = build123d.Cylinder(feature_spec["diameter"] / 2, height=feature_spec["depth"])
+        # `solid`: another prism along the same axis (the chamfer cutter); default a cylinder.
+        feature = (
+            solid
+            if solid is not None
+            else build123d.Cylinder(feature_spec["diameter"] / 2, height=feature_spec["depth"])
+        )
         x = feature_spec["x"]
         y = feature_spec["y"]
         z = feature_spec["z"]
@@ -486,6 +575,16 @@ class PartEngineBuild123d(PartEngine):
         b2_cylinder = max(feature_spec["size"], feature_spec["bound2"] - feature_spec["size"])
         action_cylinder[feature_spec["axis1"]] = b1_cylinder
         action_cylinder[feature_spec["axis2"]] = b2_cylinder
+        if feature_spec.get("edge_type") == "chamfer":
+            # Chamfer legs = size (martin, 2026-10-18): a square prism with side size * sqrt 2,
+            # turned 45 degrees about its axis, centred `size` from both faces: the corner cube
+            # minus it is the triangle with legs `size`. (Before, build123d always cut a round.)
+            side = feature_spec["size"] * math.sqrt(2)
+            keep = self._decode_cylinder_feature(
+                action_cylinder,
+                solid=build123d.Rotation(Z=45) * build123d.Box(side, side, feature_spec["depth"]),
+            )
+            return feature_cube - keep
         feature_cylinder = self._decode_cylinder_feature(action_cylinder)
         return feature_cube - feature_cylinder
 
@@ -516,23 +615,22 @@ class PartEngineBuild123d(PartEngine):
             if plane.z_dir == ref_plane.z_dir:
                 return plane
 
-    def _build(self, definition: dict, file_no_ext: Path) -> list[Path]:
-        """
-        This is the main working class for decoding the scad. It is necessary for it to be refactored.
+    def make_shape(self, definition: dict):
+        """Make the build123d shape of a part spec.
 
         Raises:
-            ValueError: if incorrect part_name is provided.
+            ValueError: if an unknown feature type or action is in the spec.
         """
 
         part = None
-        add_features = []
-        subtract_features = []
+        # (action, feature) in FILE ORDER (martin, 2026-10-18): a later add fills an earlier hole.
+        steps: list[tuple[str, object]] = []
         brake_formed = self.config.get("bend_style") == "brake_formed"
         fallback_bend_ids: set[str] = set()
         if brake_formed:
             bend_features = [f for f in definition["features"] if f["type"] == "bend"]
             chain_parts, fallback_features = self._decode_bend_chains_brake_formed(bend_features)
-            add_features.extend(chain_parts)
+            steps.extend(("add", chain_part) for chain_part in chain_parts)
             fallback_bend_ids = {f["id"] for f in fallback_features}
 
         for action in definition["features"]:
@@ -549,6 +647,16 @@ class PartEngineBuild123d(PartEngine):
                         feature = self._decode_cylinder(action)
                 case "sphere":
                     feature = self._decode_sphere(action)
+                case "cone":
+                    # A countersink (cycax/36): placed like a hole, wide end at the surface.
+                    feature = self._decode_cylinder_feature(
+                        action,
+                        solid=build123d.Cone(action["diameter"] / 2, action["diameter2"] / 2, action["depth"]),
+                    )
+                case "sketch":
+                    feature = self._decode_sketch(action)
+                case "import":
+                    feature = self._decode_import(action)
                 case "nut_cutout":
                     feature = self._decode_nut(action)
                 case "beveled_edge":
@@ -573,18 +681,29 @@ class PartEngineBuild123d(PartEngine):
                 build123d.Plane.XY * feature
             )  # The position and direction in the JSON is all relevant to the XY Plane.
             if action["action"] in ("add", "bend"):
-                add_features.append(feature)
+                steps.append(("add", feature))
             elif action["action"] == "subtract":
-                subtract_features.append(feature)
+                steps.append(("subtract", feature))
             else:
                 msg = f"Unknown action type: {action['action']}"
                 raise ValueError(msg)
 
-        for feature in add_features:
+        # Runs of the same action are one boolean with many tools (fast); the runs in file order.
+        index = 0
+        while index < len(steps):
+            action = steps[index][0]
+            run = []
+            while index < len(steps) and steps[index][0] == action:
+                run.append(steps[index][1])
+                index += 1
             if part is None:
-                part = feature
-            else:
-                part += feature
+                if action == "subtract":
+                    msg = "The first feature of a part must add material."
+                    raise ValueError(msg)
+                part, run = run[0], run[1:]
+                if not run:
+                    continue
+            part = part.fuse(*run) if action == "add" else part.cut(*run)
             if isinstance(part, build123d.ShapeList):
                 # A boolean union between shapes that only touch along an edge/line (not a
                 # face) -- common once a bend is at a non-90-degree angle -- can come back
@@ -592,16 +711,38 @@ class PartEngineBuild123d(PartEngine):
                 # valid, connected geometry; ShapeList just isn't itself an exportable OCCT
                 # shape (no .wrapped), so re-wrap it as a Compound, which is.
                 part = build123d.Compound(children=list(part))
-        for feature in subtract_features:
-            part -= feature
-            if isinstance(part, build123d.ShapeList):
-                part = build123d.Compound(children=list(part))
 
+        return part
+
+    def export_shape(
+        self, part, file_no_ext: Path, formats: list[str] | None = None, profile: str = "standard"
+    ) -> list[dict]:
+        """Export a shape. `formats` from stl, step, glb (None = stl, gltf, step as before)."""
+        from cycax.quality import PROFILE_SETTINGS  # noqa: PLC0415
+
+        tolerance = PROFILE_SETTINGS["stl_linear_deflection_mm"][profile]
+        angular = PROFILE_SETTINGS["stl_angular_deflection_rad"][profile]
         files = []
-        build123d.export_stl(to_export=part, file_path=file_no_ext.with_suffix(".stl"))
-        files.append({"file": file_no_ext.with_suffix(".stl"), "type": "stl"})
-        build123d.export_gltf(to_export=part, file_path=file_no_ext.with_suffix(".gltf"))
-        files.append({"file": file_no_ext.with_suffix(".gltf"), "type": "gltf"})
-        build123d.export_step(to_export=part, file_path=file_no_ext.with_suffix(".step"))
-        files.append({"file": file_no_ext.with_suffix(".step"), "type": "step"})
+        wanted = [f.lower() for f in formats] if formats else ["stl", "gltf", "step"]
+        if "stl" in wanted:
+            build123d.export_stl(
+                to_export=part,
+                file_path=file_no_ext.with_suffix(".stl"),
+                tolerance=tolerance,
+                angular_tolerance=angular,
+            )
+            files.append({"file": file_no_ext.with_suffix(".stl"), "type": "stl"})
+        if "gltf" in wanted:
+            build123d.export_gltf(to_export=part, file_path=file_no_ext.with_suffix(".gltf"))
+            files.append({"file": file_no_ext.with_suffix(".gltf"), "type": "gltf"})
+        if "glb" in wanted:
+            build123d.export_gltf(to_export=part, file_path=file_no_ext.with_suffix(".glb"), binary=True)
+            files.append({"file": file_no_ext.with_suffix(".glb"), "type": "glb"})
+        if "step" in wanted:
+            build123d.export_step(to_export=part, file_path=file_no_ext.with_suffix(".step"))
+            files.append({"file": file_no_ext.with_suffix(".step"), "type": "step"})
         return files
+
+    def _build(self, definition: dict, file_no_ext: Path) -> list[dict]:
+        """Make the part and export STL, glTF and STEP."""
+        return self.export_shape(self.make_shape(definition), file_no_ext)

@@ -116,7 +116,7 @@ class AssemblyOpenSCAD(AssemblyEngine):
         rotmax = [part_operation["x_size"], part_operation["y_size"], part_operation["z_size"]]
         position = [part_operation["x"], part_operation["y"], part_operation["z"]]
         self._scad_ops.append(self._move(rotmax, position, part_operation["rotate"]))
-        self._scad_ops.append(self._colour(part_operation["colour"]))
+        self._scad_ops.append(self._colour(part_operation.get("meta", {}).get("colour", [0.5, 0.5, 0.5])))
         self._scad_ops.append(self._fetch_part(part_operation["name"]))
 
     def build(self, path: Path | None = None):

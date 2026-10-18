@@ -139,7 +139,9 @@ class EngineFreecadAssembly:
             case _:
                 msg = f"side: {side} is not one of TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK OR ALL."
                 raise ValueError(msg)
-        return side
+        # Lowercase, so file names are always `<name>-<view>.<ext>` (e.g. `-all.png`), the same
+        # rule `engine_freecad.expected_freecad_files` uses.
+        return side.lower()
 
     def render_to_dxf(self, active_doc: App.Document, view: str | None = None):
         """This method will be used for creating a dxf of the object currently in view.
@@ -213,11 +215,16 @@ class EngineFreecadAssembly:
             part_no = part_data["name"]
             position = [part_data["x"], part_data["y"], part_data["z"]]
             rotate_list = part_data["rotate"]
-            colour = part_data.get("colour", [1.0, 0.5, 0.0])
+            colour = part_data.get("meta", {}).get("colour", [1.0, 0.5, 0.0])
             # Import the part
             obj = self._import_part(part_no, self._base_path)
 
-            if obj:
+            if obj and part_data.get("transform"):
+                # The placement matrix (task cycax/32).
+                flat = [value for row in part_data["transform"] for value in row]
+                obj.Placement = FreeCAD.Placement(FreeCAD.Matrix(*flat))
+                self._set_color(obj, colour)
+            elif obj:
                 for rotation_spec in rotate_list:
                     rotation = Rotation(axis_vector(rotation_spec["axis"]), rotation_spec["angle"])
                     obj.Placement.Rotation = rotation * obj.Placement.Rotation

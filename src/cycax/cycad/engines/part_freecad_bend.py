@@ -5,11 +5,48 @@
 import logging
 import os
 import subprocess
-import sys
 from pathlib import Path
 
 from cycax.cycad.engines.base_part_engine import PartEngine
 from cycax.cycad.engines.utils import check_source_hash
+
+# Feature types that only the FreeCAD bend engine (SheetMetal workbench) understands. A part
+# with any of these must be built by `run_freecad_bend`, not the generic FreeCAD engine, which
+# would ignore them silently.
+SHEET_METAL_FEATURE_TYPES = frozenset(
+    {"bend", "flange_hole_cut", "flat_rectangle_cut", "flat_polygon_cut", "flange_corner_round"}
+)
+
+
+def is_sheet_metal_bend(definition: dict) -> bool:
+    """True when a part spec needs the FreeCAD bend engine."""
+    return any(feature.get("type") in SHEET_METAL_FEATURE_TYPES for feature in definition.get("features", []))
+
+
+def run_freecad_bend(app_bin: Path, json_file: Path, base_path: Path) -> subprocess.CompletedProcess:
+    """Build one sheet-metal part with `cycax_part_freecad_bend.py` inside FreeCAD.
+
+    Args:
+        app_bin: The FreeCAD binary or AppImage.
+        json_file: The part JSON.
+        base_path: The folder that holds the part folder (outputs go to `<base_path>/<name>/`).
+    """
+    freecad_py = Path(__file__).resolve().parent / "cycax_part_freecad_bend.py"
+    environment = dict(os.environ)
+    environment.update({"CYCAX_JSON": str(json_file), "CYCAX_CWD": str(base_path)})
+    result = subprocess.run(
+        [str(app_bin), str(freecad_py)],
+        capture_output=True,
+        text=True,
+        env=environment,
+        shell=False,
+        check=False,
+    )
+    if result.stdout:
+        logging.info("FreeCADBend: %s", result.stdout)
+    if result.stderr:
+        logging.error("FreeCADBend: %s", result.stderr)
+    return result
 
 
 class PartEngineFreeCADBend(PartEngine):
@@ -32,28 +69,7 @@ class PartEngineFreeCADBend(PartEngine):
             app_bin = self.get_appimage("FreeCAD")
 
             logging.info("Use freeCAD %s", app_bin)
-            freecad_py = Path(sys.modules[self.__module__].__file__).parent / "cycax_part_freecad_bend.py"
-
-            environment = dict(os.environ)
-            environment.update(
-                {
-                    "CYCAX_JSON": self._json_file,
-                    "CYCAX_CWD": self._base_path,
-                }
-            )
-            result = subprocess.run(
-                [app_bin, freecad_py],
-                capture_output=True,
-                text=True,
-                env=environment,
-                shell=False,
-                check=False,
-            )
-
-            if result.stdout:
-                logging.info("FreeCADBend: %s", result.stdout)
-            if result.stderr:
-                logging.error("FreeCADBend: %s", result.stderr)
+            run_freecad_bend(app_bin, self._json_file, self._base_path)
 
         _files = [
             {"file": self._base_path / self.name / f"{self.name}.step", "description": "Folded (bent) solid."},

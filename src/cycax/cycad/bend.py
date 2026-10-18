@@ -6,13 +6,12 @@
 
 See docs/content/bending-design.md for the full design.
 
-Known limitation of this implementation, not yet lifted: only chaining off a flange's
-*far* edge (`BendSide.far`, opposite the fold that created it) is supported. Bending off
-one of a flange's own side edges (`.left`/`.right`/`.front`/`.back` on a `BendSide`) needs
-full 3D re-orientation tracking that isn't implemented yet -- those raise
-`NotImplementedError` rather than silently producing wrong geometry. Every bend chain's
-rotation axis (`u_dir`) is therefore fixed for its whole chain, which keeps the geometry
-to a single rotating (`v_dir`, `n_dir`) plane per chain -- see `_v_dir`/`_n_dir`.
+A flange can be bent from its far edge (`.far`, opposite the fold that made it) and from its
+two side edges (`.left`, `.right`; task cycax/33). Each flange has a local frame (origin +
+`u_dir` along the fold line, `v_dir` along the flange, `n_dir` the outward normal); a bend from
+a side edge starts a new chain whose fold line runs along the parent's `v_dir` and that folds
+towards the parent's normal (`up`). Within one chain the rotation axis (`u_dir`) is fixed, so
+the geometry stays in one rotating (`v_dir`, `n_dir`) plane per chain -- see `_v_dir`/`_n_dir`.
 """
 
 import math
@@ -99,17 +98,20 @@ def _clean(value: float) -> float:
     return round(value, _ROUND_DIGITS) + 0.0
 
 
-def _v_dir(flat_dir: tuple[float, float, float], angle_rad: float) -> tuple[float, float, float]:
-    """The direction a flange extends in, `angle_rad` (signed, "up" positive) from flat."""
+def _v_dir(flat_dir, angle_rad: float, up=None) -> tuple[float, float, float]:
+    """The direction a flange extends in, `angle_rad` (signed, "up" positive) from flat.
+    `up`: the outward normal of the face the chain starts on (Z for the base sheet)."""
+    up = up or _Z_HAT
     cos_a, sin_a = math.cos(angle_rad), math.sin(angle_rad)
-    x, y, z = (flat_dir[i] * cos_a + _Z_HAT[i] * sin_a for i in range(3))
+    x, y, z = (flat_dir[i] * cos_a + up[i] * sin_a for i in range(3))
     return (_clean(x), _clean(y), _clean(z))
 
 
-def _n_dir(flat_dir: tuple[float, float, float], angle_rad: float) -> tuple[float, float, float]:
+def _n_dir(flat_dir, angle_rad: float, up=None) -> tuple[float, float, float]:
     """The flange's outward face normal, `angle_rad` (signed, "up" positive) from flat."""
+    up = up or _Z_HAT
     cos_a, sin_a = math.cos(angle_rad), math.sin(angle_rad)
-    x, y, z = (-flat_dir[i] * sin_a + _Z_HAT[i] * cos_a for i in range(3))
+    x, y, z = (-flat_dir[i] * sin_a + up[i] * cos_a for i in range(3))
     return (_clean(x), _clean(y), _clean(z))
 
 
@@ -186,6 +188,7 @@ class BendSide:
         thickness: float,
         cumulative_angle: float,
         bend_id: str | None,
+        up: tuple[float, float, float] = _Z_HAT,
     ):
         self._part = part
         self.side = side
@@ -199,6 +202,9 @@ class BendSide:
         self.thickness = thickness
         self._cumulative_angle = cumulative_angle
         self.bend_id = bend_id  # id of the Bend feature that produced this flange, or None at the root.
+        # The outward normal of the face this chain starts on: Z for the base sheet, the parent
+        # flange's normal for a chain that starts on a flange's side edge (task cycax/33).
+        self._up = up
         self._terminal = False
 
     def __enter__(self) -> "BendSide":
@@ -212,29 +218,51 @@ class BendSide:
         """The edge opposite this flange's own fold line -- the common case for chaining."""
         return self
 
-    def _unsupported_side(self, name: str):
-        msg = (
-            f"Bending off a flange's own {name} edge is not yet implemented -- only "
-            "chaining off the far edge (`.far`) is currently supported. See the module "
-            "docstring in cycax.cycad.bend."
+    def _side_edge(self, name: str, sign: float) -> "BendSide":
+        """A new chain on one of this flange's side edges (task cycax/33, "any edge").
+
+        The fold line runs along this flange's `v_dir` (its length); the new flange goes out
+        along -u (left) or +u (right) and folds "up" towards this flange's outward normal.
+        """
+        if self.height <= 0:
+            msg = f"A bare side has no {name} edge to bend from; bend it first, then use .{name}."
+            raise ValueError(msg)
+        origin = self.origin if sign < 0 else _offset(self.origin, (self.u_dir, self.width))
+        flat_dir = tuple(_clean(sign * c) for c in self.u_dir)
+        return BendSide(
+            self._part,
+            side=self.side,
+            origin=origin,
+            u_dir=self.v_dir,
+            v_dir=flat_dir,
+            n_dir=self.n_dir,
+            flat_dir=flat_dir,
+            width=self.height,
+            height=0.0,
+            thickness=self.thickness,
+            cumulative_angle=0.0,
+            bend_id=self.bend_id,
+            up=self.n_dir,
         )
-        raise NotImplementedError(msg)
 
     @property
-    def left(self):
-        self._unsupported_side("left")
+    def left(self) -> "BendSide":
+        """This flange's edge at u = 0 (its fold line's start), to bend from."""
+        return self._side_edge("left", -1.0)
 
     @property
-    def right(self):
-        self._unsupported_side("right")
+    def right(self) -> "BendSide":
+        """This flange's edge at u = width, to bend from."""
+        return self._side_edge("right", 1.0)
 
     @property
     def front(self):
-        self._unsupported_side("front")
+        msg = "A flange has a far edge (.far) and two side edges (.left, .right); front/back are not defined."
+        raise AttributeError(msg)
 
     @property
     def back(self):
-        self._unsupported_side("back")
+        return self.front
 
     def _next_bend_id(self) -> str:
         self._part._bend_counter = getattr(self._part, "_bend_counter", 0) + 1
@@ -280,8 +308,8 @@ class BendSide:
         signed_angle = angle if direction == "up" else -angle
         new_cumulative = self._cumulative_angle + signed_angle
         angle_rad = math.radians(new_cumulative)
-        new_v_dir = _v_dir(self._flat_dir, angle_rad)
-        new_n_dir = _n_dir(self._flat_dir, angle_rad)
+        new_v_dir = _v_dir(self._flat_dir, angle_rad, self._up)
+        new_n_dir = _n_dir(self._flat_dir, angle_rad, self._up)
 
         new_width = self.width - gap1 - gap2
         if new_width <= 0:
@@ -337,6 +365,7 @@ class BendSide:
             thickness=self.thickness,
             cumulative_angle=new_cumulative,
             bend_id=bend_id,
+            up=self._up,
         )
 
     def round_corners(self, radius: float) -> "BendSide":
@@ -381,7 +410,12 @@ class BendSide:
         """
         depth = self.thickness if depth is None else depth
         centre = _offset(self.origin, (self.u_dir, pos[0]), (self.v_dir, pos[1]))
-        side = _side_for_normal(self.n_dir)
+        # The engines place the hole from its own frame (u/v/n); `side` is informational, so a
+        # face at any angle works (task cycax/33).
+        try:
+            side = _side_for_normal(self.n_dir)
+        except NotImplementedError:
+            side = self.side
         feature = FlangeHoleCut(
             side=side,
             x=centre[0],
